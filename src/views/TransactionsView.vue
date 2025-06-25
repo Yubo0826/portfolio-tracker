@@ -1,48 +1,46 @@
 <script setup>
 import { ref } from 'vue';
-import { request } from '../api.js';
+import api from '../api.js';
+
+import Button from 'primevue/button';
 
 const visible = ref(false);
 
-request('http://localhost:3000/api/tiingo/vt?date=2024-08-26')
-.then(response => {
-    console.log('Response:', response);
-})
-.catch(error => {
-    console.error('Error:', error);
-});
+// request('http://localhost:3000/api/tiingo/vt?date=2024-08-26')
+// .then(response => {
+//     console.log('Response:', response);
+// })
+// .catch(error => {
+//     console.error('Error:', error);
+// });
 
-const selectedProducts = ref(null);
-const products = ref([
-    { id: 1, code: 'P001', name: 'Product 1', category: 'Category 1', quantity: 10 },
-    { id: 2, code: 'P002', name: 'Product 2', category: 'Category 2', quantity: 20 },
-    { id: 3, code: 'P003', name: 'Product 3', category: 'Category 3', quantity: 30 }
-]);
+// const selectedProducts = ref(null);
+// const products = ref([
+//     { id: 1, code: 'P001', name: 'Product 1', category: 'Category 1', quantity: 10 },
+//     { id: 2, code: 'P002', name: 'Product 2', category: 'Category 2', quantity: 20 },
+//     { id: 3, code: 'P003', name: 'Product 3', category: 'Category 3', quantity: 30 }
+// ]);
 
-import Button from 'primevue/button';
 
 
 
 // 添加交易紀錄
 const addTransaction = () => {
     console.log('Adding transaction...');
-    visible.value = false; 
-    request('http://localhost:3000/api/transactions','', {
-        method: 'POST',
-        body: JSON.stringify({
-            symbol: 'AAPL',
-            shares: 10,
-            transactionDate: '2024-08-26',
-            transactionType: 'buy',
-            price: 150.00
-        }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
+    const data = {
+        userId: 'google-oauth2|yubo0826',
+        symbol: 'AAPL',
+        shares: 10,
+        transactionType: 'buy',
+        transactionDate: '2024-08-26',
+        price: 150.00
+    };
+    
+    api.post('http://localhost:3000/api/transactions', data)
     .then(response => {
-        console.log('Transaction added:', response);
-        // 在這裡可以更新產品列表或其他狀態
+        console.log('Transaction added:', response.data);
+        visible.value = false; 
+        // 可以在這裡更新 products 或其他狀態
     })
     .catch(error => {
         console.error('Error adding transaction:', error);

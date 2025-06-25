@@ -1,6 +1,4 @@
-// api.js
-
-export const request = async (url, method = 'GET', data = null, headers = {}) => {
+const request = async (url, method = 'GET', data = null, headers = {}) => {
     const config = {
       method,
       headers: {
@@ -29,4 +27,14 @@ export const request = async (url, method = 'GET', data = null, headers = {}) =>
       throw error;
     }
   };
+
+const api = {
+    get: (url, headers) => request(url, 'GET', null, headers),
+    post: (url, data, headers) => request(url, 'POST', data, headers),
+    put: (url, data, headers) => request(url, 'PUT', data, headers),
+    delete: (url, headers) => request(url, 'DELETE', null, headers)
+  };
+
+export default api;
+
   
