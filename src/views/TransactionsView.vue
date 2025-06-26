@@ -3,6 +3,9 @@ import { ref } from 'vue';
 import api from '../api.js';
 
 import Button from 'primevue/button';
+import Select from 'primevue/select';
+import AutoComplete from 'primevue/autocomplete';
+
 
 const visible = ref(false);
 
@@ -21,8 +24,16 @@ const visible = ref(false);
 //     { id: 3, code: 'P003', name: 'Product 3', category: 'Category 3', quantity: 30 }
 // ]);
 
+const operationType = ref([
+    { name: 'Buy', code: 'buy' },
+    { name: 'Sell', code: 'sell' }
+]);
 
-
+const newSymbol = ref('');
+const newShare = ref(0);
+const newDate = ref(null);
+const newPrice = ref('');
+const selectedOperation = ref('buy');
 
 // 添加交易紀錄
 const addTransaction = () => {
@@ -57,20 +68,24 @@ const addTransaction = () => {
             <Dialog v-model:visible="visible" modal header="Add transaction" :style="{ width: '25rem' }">
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
                 <div class="flex items-center gap-4 mb-4">
-                    <label for="username" class="font-semibold w-24">Symbol</label>
-                    <InputText id="username" class="flex-auto" autocomplete="off" />
+                    <label for="symbol" class="font-semibold w-24">Symbol</label>
+                    <InputText v-model="newSymbol" id="symbol" class="flex-auto" autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="shares" class="font-semibold w-24">Shares</label>
-                    <InputNumber id="shares" class="flex-auto" showButtons autocomplete="off" />
+                    <InputNumber v-model="newShare" id="shares" class="flex-auto" showButtons autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="date" class="font-semibold w-24">Date</label>
-                    <DatePicker />
+                    <DatePicker v-model="newDate" />
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="price" class="font-semibold w-24">Price</label>
+                    <InputText v-model="newPrice" id="price" class="flex-auto" autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
-                    <label for="price" class="font-semibold w-24">price</label>
-                    <InputText id="price" class="flex-auto" autocomplete="off" />
+                    <label for="operation" class="font-semibold w-24">Operation</label>
+                    <Select v-model="selectedOperation" :options="operationType" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
