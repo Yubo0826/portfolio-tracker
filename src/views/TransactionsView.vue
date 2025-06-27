@@ -29,7 +29,30 @@ const operationType = ref([
     { name: 'Sell', code: 'sell' }
 ]);
 
-const newSymbol = ref('');
+
+
+
+
+// auto complete symbol search
+import debounce from 'lodash/debounce';
+const selectedSymbol = ref(null);
+const filteredSymbols = ref([]);
+
+const search = async (event) => {
+    if (!event.query.trim().length) return;
+    try {
+        const searchSymbols = await request('http://localhost:3000/api/tiingo/symbols?query=' + event.query);
+        filteredSymbols.value = [...searchSymbols];
+    }
+    catch (error) {
+        console.error('Error fetching symbols:', error);
+        filteredSymbols.value = [];
+    }
+    
+}
+
+const debouncedSearch = debounce(search, 300);
+
 const newShare = ref(0);
 const newDate = ref(null);
 const newPrice = ref('');
@@ -69,6 +92,7 @@ const addTransaction = () => {
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">Symbol</label>
+                    <AutoComplete v-model="selectedSymbol" optionLabel="name" :suggestions="filteredSymbols" @complete="debouncedSearch" />
                     <InputText v-model="newSymbol" id="symbol" class="flex-auto" autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
