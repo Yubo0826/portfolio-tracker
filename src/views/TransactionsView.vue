@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import api from '../api.js';
 
 import Button from 'primevue/button';
@@ -9,54 +9,58 @@ import AutoComplete from 'primevue/autocomplete';
 
 const visible = ref(false);
 
-// request('http://localhost:3000/api/tiingo/vt?date=2024-08-26')
-// .then(response => {
-//     console.log('Response:', response);
-// })
-// .catch(error => {
-//     console.error('Error:', error);
-// });
-
-// const selectedProducts = ref(null);
-// const products = ref([
-//     { id: 1, code: 'P001', name: 'Product 1', category: 'Category 1', quantity: 10 },
-//     { id: 2, code: 'P002', name: 'Product 2', category: 'Category 2', quantity: 20 },
-//     { id: 3, code: 'P003', name: 'Product 3', category: 'Category 3', quantity: 30 }
-// ]);
-
 const operationType = ref([
     { name: 'Buy', code: 'buy' },
     { name: 'Sell', code: 'sell' }
 ]);
 
 
-
-
-
-// auto complete symbol search
+// Auto complete symbol search
 import debounce from 'lodash/debounce';
 const selectedSymbol = ref(null);
 const filteredSymbols = ref([]);
 
 const search = async (event) => {
+    console.log('Searching for symbols:', event.query);
     if (!event.query.trim().length) return;
-    try {
-        const searchSymbols = await request('http://localhost:3000/api/tiingo/symbols?query=' + event.query);
-        filteredSymbols.value = [...searchSymbols];
-    }
-    catch (error) {
+    api.get('http://localhost:3000/api/search/symbols?query=' + event.query)
+    .then(data => {
+        console.log('Search results:', data);
+        filteredSymbols.value = data;
+    })
+    .catch(error => {
         console.error('Error fetching symbols:', error);
         filteredSymbols.value = [];
-    }
+    });
     
 }
 
 const debouncedSearch = debounce(search, 300);
 
+// Callback after selete item
+const onItemSelect = async (event) => {
+    console.log('Selected symbol:', event.value);
+    const symbol = event.value.ticker
+    const date = newDate.value || new Date().toISOString().split('T')[0]; // 使用選擇的日期或當前日期
+    if (symbol) {
+        api.get(`http://localhost:3000/api/search/price/${symbol}?date=${date}`)
+        .then(data => {
+            console.log('Search results:', data);
+            filteredSymbols.value = data;
+        })
+        .catch(error => {
+            console.error('Error fetching symbols:', error);
+            filteredSymbols.value = [];
+        });
+    }
+};
+
 const newShare = ref(0);
 const newDate = ref(null);
-const newPrice = ref('');
 const selectedOperation = ref('buy');
+const newPrice = computed(() => {
+    
+});
 
 // 添加交易紀錄
 const addTransaction = () => {
@@ -92,8 +96,13 @@ const addTransaction = () => {
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">Symbol</label>
-                    <AutoComplete v-model="selectedSymbol" optionLabel="name" :suggestions="filteredSymbols" @complete="debouncedSearch" />
-                    <InputText v-model="newSymbol" id="symbol" class="flex-auto" autocomplete="off" />
+                    <AutoComplete 
+                        v-model="selectedSymbol" 
+                        optionLabel="ticker" 
+                        :suggestions="filteredSymbols" 
+                        @complete="debouncedSearch" 
+                        @item-select="onItemSelect"
+                        :delay="600" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="shares" class="font-semibold w-24">Shares</label>
