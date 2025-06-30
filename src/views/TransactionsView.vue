@@ -13,10 +13,24 @@ const auth = useAuthStore()
 
 const visible = ref(false);
 
+const assets = ref([]);
+
 watch(() => auth.user, (newUser) => {
   if (newUser) {
     api.get('http://localhost:3000/api/transactions?uid=' + newUser.uid)
-      .then(data => console.log('Search results:', data))
+      .then(data => {
+        console.log('Search results:', data);
+        assets.value = data.map(item => ({
+          id: item.id,
+          symbol: item.symbol, // 股票代碼
+          name: item.name, // 股票全名
+          assetType: item.assetType, // 資產類型
+          price: item.price, // 價格
+          shares: item.shares, // 股數
+          transactionType: item.transaction_type, // 買入或賣出
+          date: item.transaction_date // 交易日期
+        }));
+      })
       .catch(err => console.error(err))
   }
 })
@@ -100,6 +114,8 @@ const addTransaction = () => {
     const data = {
         uid,
         symbol: selectedSymbol.value.ticker,
+        name: selectedSymbol.value.name,
+        assetType: selectedSymbol.value.assetType,
         shares: newShare.value,
         price: newPrice.value,
         transactionType: selectedOperation.value.code,
@@ -163,12 +179,14 @@ const addTransaction = () => {
             </Dialog>
         </div>
 
-        <DataTable v-model:selection="selectedProducts" :value="products" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable v-model:selection="selectedProducts" :value="assets" dataKey="id" tableStyle="min-width: 50rem">
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-            <Column field="code" header="Code"></Column>
+            <Column field="symbol" header="Symbol"></Column>
             <Column field="name" header="Name"></Column>
-            <Column field="category" header="Category"></Column>
-            <Column field="quantity" header="Quantity"></Column>
+            <Column field="shares" header="Shares"></Column>
+            <Column field="price" header="Price"></Column>
+            <Column field="transactionType" header="Operation"></Column>
+            <Column field="date" header="Date"></Column>
         </DataTable>
 
 
