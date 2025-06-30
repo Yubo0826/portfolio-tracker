@@ -34,6 +34,7 @@ export function useAuth() {
   onMounted(() => {
     onAuthStateChanged(auth, (currentUser) => {
       user.value = currentUser;
+      console.log("Auth state changed:", currentUser ? currentUser.email : "No user logged in");
     });
   });
 

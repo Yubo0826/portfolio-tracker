@@ -2,8 +2,8 @@
 import { RouterLink, RouterView } from 'vue-router'
 import Button from 'primevue/button'
 
-import { useAuth } from "@/composables/useAuth";
-const { user, login, logout } = useAuth();
+import { useAuthStore } from '@/stores/auth'
+const auth = useAuthStore()
 
 </script>
 
@@ -27,12 +27,12 @@ const { user, login, logout } = useAuth();
 
       <div>
         <h1>Google 登入</h1>
-        <div v-if="user">
-          <p>歡迎，{{ user.displayName }}（{{ user.email }}）</p>
-          <button @click="logout">登出</button>
+        <div v-if="auth.user">
+          <p>歡迎，{{ auth.user.displayName }}（{{ auth.user.email }}）</p>
+          <button @click="auth.logout">登出</button>
         </div>
         <div v-else>
-          <button @click="login">使用 Google 登入</button>
+          <button @click="auth.login">使用 Google 登入</button>
         </div>
       </div>
     </div>
