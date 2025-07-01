@@ -11,14 +11,17 @@ import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
 
-
 const visible = ref(false);
 
 const assets = ref([]);
 const selectedAssets = ref([]);
 
+
+const uid = ref(null);
+
 watch(() => auth.user, (newUser) => {
   if (newUser) {
+    uid.value = newUser.uid;
     api.get('http://localhost:3000/api/transactions?uid=' + newUser.uid)
       .then(data => {
         console.log('Search results:', data);
@@ -37,7 +40,7 @@ watch(() => auth.user, (newUser) => {
   }
 })
 
-const operationType = ref([
+const transactionType = ref([
     { name: 'Buy', code: 'buy' },
     { name: 'Sell', code: 'sell' }
 ]);
@@ -66,6 +69,26 @@ const deleteSelectedAssets = () => {
     .catch(error => {
         console.error('Error deleting assets:', error);
     });
+}
+
+const updateSelectedAssets = (id) => {
+    console.log('Updating asset with ID:', id);
+    const assetToUpdate = assets.value.find(asset => asset.id === id);
+    if (!assetToUpdate) {
+        console.warn('Asset not found for ID:', id);
+        return;
+    }
+    // 在這裡可以打開一個對話框或其他方式來更新資產
+    visible.value = true; // 假設我們使用同一個對話框來添加或更新交易
+    selectedSymbol.value = { 
+        ticker: assetToUpdate.symbol,
+        name: assetToUpdate.name,
+        assetType: assetToUpdate.assetType
+     };
+    newShare.value = assetToUpdate.shares;
+    newPrice.value = assetToUpdate.price;
+    newDate.value = new Date(assetToUpdate.date);
+    selectedOperation.value = transactionType.value.find(op => op.code === assetToUpdate.transactionType) || transactionType.value[0];
 }
 
 
@@ -116,59 +139,15 @@ const totalPrice = computed(() => {
     return newShare.value * newPrice.value;
 });
 
-const newShare = ref(0);
-const newDate = ref(null);
-const selectedOperation = ref('buy');
-
-// 添加交易紀錄
-const addTransaction = () => {
-    console.log('Adding transaction...');
-    const uid = auth.user.uid;
-    console.log('User ID:', uid);
-    if (!uid) {
-        console.error('User ID is not available');
-        return;
-    }
-    // fake data
-    // const data = {
-    //     uid,
-    //     symbol: 'vt',
-    //     shares: 1000,
-    //     price: 127,
-    //     transactionType: 'buy',
-    //     transactionDate: '2025-06-30',
-    // };
-
-    const data = {
-        uid,
-        symbol: selectedSymbol.value.ticker,
-        name: selectedSymbol.value.name,
-        assetType: selectedSymbol.value.assetType,
-        shares: newShare.value,
-        price: newPrice.value,
-        transactionType: selectedOperation.value.code,
-        transactionDate: newDate.value?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-    };
-    
-    api.post('http://localhost:3000/api/transactions', data)
-    .then(response => {
-        console.log('Transaction added:', response.data);
-        // visible.value = false; 
-        // 可以在這裡更新 products 或其他狀態
-    })
-    .catch(error => {
-        console.error('Error adding transaction:', error);
-    });
-}
-
 
 </script>
 <template>
     <div>
         <div class="tool-bar">
-            <!-- <Button label="Delete" severity="danger" /> -->
             <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
             <Button label="Add" @click="visible = true" icon="pi pi-plus" />
+            
+            <!-- Dialog for adding or updating transactions -->
             <Dialog v-model:visible="visible" modal header="Add transaction" :style="{ width: '30rem' }">
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
                 <div class="flex items-center gap-4 mb-4">
@@ -202,7 +181,7 @@ const addTransaction = () => {
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Operation</label>
-                    <Select v-model="selectedOperation" :options="operationType" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
+                    <Select v-model="selectedOperation" :options="transactionType" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Total</label>
@@ -225,7 +204,7 @@ const addTransaction = () => {
             <Column field="date" header="Date"></Column>
             <Column field="" header="Action">
                 <template #body="slotProps">
-                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="deleteSelectedAssets(slotProps.data)" />
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedAssets(slotProps.data.id)" />
                 </template>  
             </Column>
         </DataTable>
