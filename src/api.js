@@ -32,7 +32,7 @@ const api = {
     get: (url, headers) => request(url, 'GET', null, headers),
     post: (url, data, headers) => request(url, 'POST', data, headers),
     put: (url, data, headers) => request(url, 'PUT', data, headers),
-    delete: (url, headers) => request(url, 'DELETE', null, headers)
+    delete: (url, data, headers) => request(url, 'DELETE', data, headers)
   };
 
 export default api;

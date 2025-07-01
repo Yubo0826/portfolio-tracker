@@ -17,6 +17,7 @@
     "firebase": "^11.9.1",
     "lodash": "^4.17.21",
     "pinia": "^3.0.1",
+    "primeicons": "^7.0.0",
     "primevue": "^4.3.5",
     "tailwindcss": "^4.1.10",
     "tailwindcss-primeui": "^0.6.1",

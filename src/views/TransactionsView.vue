@@ -5,6 +5,7 @@ import api from '../api.js';
 import Button from 'primevue/button';
 import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
+import 'primeicons/primeicons.css'
 
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
@@ -14,6 +15,7 @@ const auth = useAuthStore()
 const visible = ref(false);
 
 const assets = ref([]);
+const selectedAssets = ref([]);
 
 watch(() => auth.user, (newUser) => {
   if (newUser) {
@@ -39,6 +41,32 @@ const operationType = ref([
     { name: 'Buy', code: 'buy' },
     { name: 'Sell', code: 'sell' }
 ]);
+
+const addShare = (amount) => {
+    if (newShare.value === null || newShare.value === undefined) {
+        newShare.value = 0;
+    }
+    newShare.value += amount;
+}
+
+const deleteSelectedAssets = () => {
+    console.log('Deleting selected assets:', selectedAssets.value);
+    if (selectedAssets.value.length === 0) {
+        console.warn('No assets selected for deletion');
+        return;
+    }
+    const idsToDelete = selectedAssets.value.map(asset => asset.id);
+    api.delete('http://localhost:3000/api/transactions', { ids: idsToDelete })
+    .then(data => {
+        console.log('Assets deleted:', data);
+        // 更新本地 assets 列表
+        assets.value = assets.value.filter(asset => !idsToDelete.includes(asset.id));
+        selectedAssets.value = []; // 清空選擇的資產
+    })
+    .catch(error => {
+        console.error('Error deleting assets:', error);
+    });
+}
 
 
 // Auto complete symbol search
@@ -138,9 +166,10 @@ const addTransaction = () => {
 <template>
     <div>
         <div class="tool-bar">
-            <Button label="Add" @click="visible = true" />
-            {{ auth.user?.displayName || 'Guest' }}
-            <Dialog v-model:visible="visible" modal header="Add transaction" :style="{ width: '25rem' }">
+            <!-- <Button label="Delete" severity="danger" /> -->
+            <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
+            <Button label="Add" @click="visible = true" icon="pi pi-plus" />
+            <Dialog v-model:visible="visible" modal header="Add transaction" :style="{ width: '30rem' }">
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">Symbol</label>
@@ -150,11 +179,18 @@ const addTransaction = () => {
                         :suggestions="filteredSymbols" 
                         @complete="debouncedSearch" 
                         @item-select="onItemSelect"
-                        :delay="600" />
+                        :delay="600" 
+                        />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="shares" class="font-semibold w-24">Shares</label>
                     <InputNumber v-model="newShare" id="shares" class="flex-auto" showButtons autocomplete="off" />
+                </div>
+                <div class="flex items-center gap-2 mb-4 p-2 text-xs">
+                    <label for="" class="font-semibold w-24"></label>
+                    <Button @click="addShare(100)" label="+100" severity="secondary" rounded />
+                    <Button @click="addShare(500)" label="+500" severity="secondary" rounded />
+                    <Button @click="addShare(1000)" label="+1000" severity="secondary" rounded />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="date" class="font-semibold w-24">Date</label>
@@ -179,7 +215,7 @@ const addTransaction = () => {
             </Dialog>
         </div>
 
-        <DataTable v-model:selection="selectedProducts" :value="assets" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable v-model:selection="selectedAssets" :value="assets" dataKey="id" tableStyle="min-width: 50rem">
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
             <Column field="symbol" header="Symbol"></Column>
             <Column field="name" header="Name"></Column>
@@ -187,6 +223,11 @@ const addTransaction = () => {
             <Column field="price" header="Price"></Column>
             <Column field="transactionType" header="Operation"></Column>
             <Column field="date" header="Date"></Column>
+            <Column field="" header="Action">
+                <template #body="slotProps">
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="deleteSelectedAssets(slotProps.data)" />
+                </template>  
+            </Column>
         </DataTable>
 
 
