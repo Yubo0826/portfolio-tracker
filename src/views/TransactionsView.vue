@@ -16,6 +16,12 @@ const visible = ref(false);
 const assets = ref([]);
 const selectedAssets = ref([]);
 
+if (auth.user) {
+  console.log('User is logged in:', auth.user);
+} else {
+  console.log('No user is logged in');
+}
+
 
 const uid = ref(null);
 
@@ -31,7 +37,7 @@ watch(() => auth.user, (newUser) => {
           name: item.name, // 股票全名
           assetType: item.assetType, // 資產類型
           price: item.price, // 價格
-          shares: item.shares, // 股數
+          shares: parseInt(item.shares) || 0, // 股數
           transactionType: item.transaction_type, // 買入或賣出
           date: item.transaction_date // 交易日期
         }));
@@ -40,10 +46,28 @@ watch(() => auth.user, (newUser) => {
   }
 })
 
-const transactionType = ref([
-    { name: 'Buy', code: 'buy' },
-    { name: 'Sell', code: 'sell' }
-]);
+const getTransactions = async () => {
+    if (!uid.value) {
+        console.warn('No user ID found, cannot fetch transactions');
+        return;
+    }
+    try {
+        const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}`);
+        console.log('Fetched transactions:', data);
+        assets.value = data.map(item => ({
+            id: item.id,
+            symbol: item.symbol,
+            name: item.name,
+            assetType: item.assetType,
+            price: item.price,
+            shares: parseInt(item.shares) || 0,
+            transactionType: item.transaction_type,
+            date: item.transaction_date
+        }));
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+    }
+}
 
 const addShare = (amount) => {
     if (newShare.value === null || newShare.value === undefined) {
@@ -71,25 +95,77 @@ const deleteSelectedAssets = () => {
     });
 }
 
+const editingId = ref(null); // 如果有值表示目前在更新中
+
 const updateSelectedAssets = (id) => {
-    console.log('Updating asset with ID:', id);
     const assetToUpdate = assets.value.find(asset => asset.id === id);
-    if (!assetToUpdate) {
-        console.warn('Asset not found for ID:', id);
-        return;
-    }
-    // 在這裡可以打開一個對話框或其他方式來更新資產
-    visible.value = true; // 假設我們使用同一個對話框來添加或更新交易
+    if (!assetToUpdate) return;
+
+    visible.value = true;
+    editingId.value = id; // 設定編輯 ID
+
     selectedSymbol.value = { 
         ticker: assetToUpdate.symbol,
         name: assetToUpdate.name,
         assetType: assetToUpdate.assetType
-     };
+    };
     newShare.value = assetToUpdate.shares;
     newPrice.value = assetToUpdate.price;
     newDate.value = new Date(assetToUpdate.date);
     selectedOperation.value = transactionType.value.find(op => op.code === assetToUpdate.transactionType) || transactionType.value[0];
-}
+};
+
+const newShare = ref(null);
+const newDate = ref(null);
+const selectedOperation = ref(null);
+
+const saveTransaction = async () => {
+    if (!selectedSymbol.value || !newShare.value || !newPrice.value || !newDate.value || !selectedOperation.value) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    const payload = {
+        uid: uid.value,
+        symbol: selectedSymbol.value.ticker,
+        name: selectedSymbol.value.name,
+        assetType: selectedSymbol.value.assetType,
+        shares: newShare.value,
+        price: newPrice.value,
+        transaction_type: selectedOperation.value.code,
+        transaction_date: newDate.value.toISOString().split('T')[0]
+    };
+
+    try {
+        if (editingId.value !== null) {
+            // 更新交易
+            await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
+            // 更新本地資料
+            const index = assets.value.findIndex(a => a.id === editingId.value);
+            if (index !== -1) assets.value[index] = { id: editingId.value, ...payload };
+
+        } else {
+            // 新增交易
+            const result = await api.post('http://localhost:3000/api/transactions', payload);
+            assets.value.push(result); // 假設後端會回傳新增的資料（含 id）
+        }
+
+        visible.value = false;
+        resetDialog();
+    } catch (err) {
+        console.error('Error saving transaction:', err);
+    }
+};
+
+const resetDialog = () => {
+    console.log('Resetting dialog');
+    editingId.value = null;
+    selectedSymbol.value = null;
+    newShare.value = null;
+    newPrice.value = null;
+    newDate.value = null;
+    selectedOperation.value = null;
+};
 
 
 // Auto complete symbol search
@@ -135,8 +211,17 @@ const onItemSelect = async (event) => {
     }
 };
 
+const transactionType = ref([
+    { name: 'Buy', code: 'buy' },
+    { name: 'Sell', code: 'sell' }
+]);
+
 const totalPrice = computed(() => {
     return newShare.value * newPrice.value;
+});
+
+const dialogHeader = computed(() => {
+    return editingId.value !== null ? 'Update Transaction' : 'New Transaction';
 });
 
 
@@ -148,8 +233,19 @@ const totalPrice = computed(() => {
             <Button label="Add" @click="visible = true" icon="pi pi-plus" />
             
             <!-- Dialog for adding or updating transactions -->
-            <Dialog v-model:visible="visible" modal header="Add transaction" :style="{ width: '30rem' }">
-                <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
+            <Dialog v-model:visible="visible" modal :style="{ width: '30rem' }">
+                <template #header>
+                    <div class="inline-flex items-center justify-center gap-2">
+                        <span class="font-bold whitespace-nowrap">{{ dialogHeader }}</span>
+                    </div>    
+                </template>
+                <span class="text-surface-500 dark:text-surface-400 block mb-8">
+                    先填入股票代碼，然後選擇日期，系統會自動查詢當天的價格。<br />
+                </span>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="date" class="font-semibold w-24">Date</label>
+                    <DatePicker v-model="newDate" />
+                </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">Symbol</label>
                     <AutoComplete 
@@ -172,10 +268,6 @@ const totalPrice = computed(() => {
                     <Button @click="addShare(1000)" label="+1000" severity="secondary" rounded />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
-                    <label for="date" class="font-semibold w-24">Date</label>
-                    <DatePicker v-model="newDate" />
-                </div>
-                <div class="flex items-center gap-4 mb-4">
                     <label for="price" class="font-semibold w-24">Price</label>
                     <InputText v-model="newPrice" id="price" class="flex-auto" autocomplete="off" />
                 </div>
@@ -188,8 +280,8 @@ const totalPrice = computed(() => {
                     ${{ totalPrice }} USD
                 </div>
                 <div class="flex justify-end gap-2">
-                    <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
-                    <Button type="button" label="Add" @click="addTransaction"></Button>
+                    <Button type="button" label="Cancel" severity="secondary" @click="resetDialog(), visible = false"></Button>
+                    <Button type="button" label="Add" @click="saveTransaction"></Button>
                 </div>
             </Dialog>
         </div>

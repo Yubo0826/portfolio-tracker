@@ -8,24 +8,25 @@ import router from './router'
 
 const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
-
-app.mount('#app')
-
-
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
-
+// import Material from '@primeuix/themes/material';
+// import Lara from '@primeuix/themes/lara';
 
 app.use(PrimeVue, {
     theme: {
         preset: Aura,
         options: {
-            // cssLayer: false
+            darkModeSelector: '.my-app-dark',
         }
     }
  });
+
+app.use(createPinia())
+app.use(router)
+
+app.mount('#app')
+
 
 import VueApexCharts from "vue3-apexcharts";
 app.use(VueApexCharts);
