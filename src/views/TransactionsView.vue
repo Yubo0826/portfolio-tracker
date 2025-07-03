@@ -11,40 +11,33 @@ import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
 
-const visible = ref(false);
+
+const transactionType = ref([
+    { name: 'Buy', code: 'buy' },
+    { name: 'Sell', code: 'sell' }
+]);
 
 const assets = ref([]);
 const selectedAssets = ref([]);
+const visible = ref(false);
 
-if (auth.user) {
-  console.log('User is logged in:', auth.user);
-} else {
-  console.log('No user is logged in');
+const setAssets = (data) => {
+    assets.value = data.map(item => ({
+        id: item.id,
+        symbol: item.symbol,
+        name: item.name,
+        assetType: item.assetType,
+        price: item.price,
+        shares: parseInt(item.shares) || 0,
+        transactionType: item.transaction_type,
+        date: item.transaction_date.split('T')[0]
+    }));
 }
 
 
-const uid = ref(null);
 
-watch(() => auth.user, (newUser) => {
-  if (newUser) {
-    uid.value = newUser.uid;
-    api.get('http://localhost:3000/api/transactions?uid=' + newUser.uid)
-      .then(data => {
-        console.log('Search results:', data);
-        assets.value = data.map(item => ({
-          id: item.id,
-          symbol: item.symbol, // 股票代碼
-          name: item.name, // 股票全名
-          assetType: item.assetType, // 資產類型
-          price: item.price, // 價格
-          shares: parseInt(item.shares) || 0, // 股數
-          transactionType: item.transaction_type, // 買入或賣出
-          date: item.transaction_date // 交易日期
-        }));
-      })
-      .catch(err => console.error(err))
-  }
-})
+// 根據 google 登入的用戶 ID 取得交易資料
+const uid = ref(null);
 
 const getTransactions = async () => {
     if (!uid.value) {
@@ -54,20 +47,31 @@ const getTransactions = async () => {
     try {
         const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}`);
         console.log('Fetched transactions:', data);
-        assets.value = data.map(item => ({
-            id: item.id,
-            symbol: item.symbol,
-            name: item.name,
-            assetType: item.assetType,
-            price: item.price,
-            shares: parseInt(item.shares) || 0,
-            transactionType: item.transaction_type,
-            date: item.transaction_date
-        }));
+        setAssets(data);
     } catch (error) {
         console.error('Error fetching transactions:', error);
     }
 }
+
+// 如果有用戶登入，則設定 uid
+if (auth.user) {
+    uid.value = auth.user.uid; 
+    getTransactions(); // 取得交易資料
+    console.log('User is logged in:', auth.user);
+} else {
+    console.log('No user is logged in');
+}
+
+/*
+    1. 監聽 auth.user 的變化，如果有用戶登入則取得交易資料
+    2. 如果已在登入狀態下刷新瀏覽器 auth.user 會自動重新登入
+*/
+watch(() => auth.user, (newUser) => {
+  if (newUser) {
+    uid.value = newUser.uid;
+    getTransactions(); // 取得交易資料
+  }
+})
 
 const addShare = (amount) => {
     if (newShare.value === null || newShare.value === undefined) {
@@ -117,19 +121,39 @@ const updateSelectedAssets = (id) => {
 
 const newShare = ref(null);
 const newDate = ref(null);
-const selectedOperation = ref(null);
+const selectedOperation = ref(transactionType.value[0]); // 預設為買入
+
+const errors = ref({
+  date: false,
+  symbol: false,
+  shares: false,
+  price: false,
+  operation: false
+})
+
+// 檢查新增 & 更新資產欄位是否有錯誤
+const hasError = computed(() => {
+    errors.value = {
+        date: !newDate.value,
+        symbol: !selectedSymbol.value,
+        shares: !newShare.value || newShare.value <= 0,
+        price: !newPrice.value || newPrice.value <= 0,
+        operation: !selectedOperation.value
+    }
+    return Object.values(errors.value).some(Boolean);
+});
 
 const saveTransaction = async () => {
-    if (!selectedSymbol.value || !newShare.value || !newPrice.value || !newDate.value || !selectedOperation.value) {
-        alert('Please fill in all fields');
-        return;
+    if (hasError.value) {
+        console.warn('欄位未填寫完整')
+        return
     }
 
     const payload = {
         uid: uid.value,
         symbol: selectedSymbol.value.ticker,
         name: selectedSymbol.value.name,
-        assetType: selectedSymbol.value.assetType,
+        asset_type: selectedSymbol.value.assetType,
         shares: newShare.value,
         price: newPrice.value,
         transaction_type: selectedOperation.value.code,
@@ -147,7 +171,7 @@ const saveTransaction = async () => {
         } else {
             // 新增交易
             const result = await api.post('http://localhost:3000/api/transactions', payload);
-            assets.value.push(result); // 假設後端會回傳新增的資料（含 id）
+            setAssets(result);
         }
 
         visible.value = false;
@@ -164,7 +188,7 @@ const resetDialog = () => {
     newShare.value = null;
     newPrice.value = null;
     newDate.value = null;
-    selectedOperation.value = null;
+    selectedOperation.value = transactionType.value[0]; // 預設為買入
 };
 
 
@@ -211,13 +235,8 @@ const onItemSelect = async (event) => {
     }
 };
 
-const transactionType = ref([
-    { name: 'Buy', code: 'buy' },
-    { name: 'Sell', code: 'sell' }
-]);
-
 const totalPrice = computed(() => {
-    return newShare.value * newPrice.value;
+    return Number((newShare.value * newPrice.value).toFixed(2));
 });
 
 const dialogHeader = computed(() => {
@@ -240,14 +259,20 @@ const dialogHeader = computed(() => {
                     </div>    
                 </template>
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">
-                    先填入股票代碼，然後選擇日期，系統會自動查詢當天的價格。<br />
+                    先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
                 </span>
                 <div class="flex items-center gap-4 mb-4">
-                    <label for="date" class="font-semibold w-24">Date</label>
-                    <DatePicker v-model="newDate" />
+                    <label for="date" class="font-semibold w-24">
+                        Date
+                        <span style="color: #f27362;">*</span>
+                    </label>
+                    <DatePicker v-model="newDate" showIcon fluid iconDisplay="input" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
-                    <label for="symbol" class="font-semibold w-24">Symbol</label>
+                    <label for="symbol" class="font-semibold w-24">
+                        Symbol
+                        <span style="color: #f27362;">*</span>
+                    </label>
                     <AutoComplete 
                         v-model="selectedSymbol" 
                         optionLabel="ticker" 
@@ -258,8 +283,12 @@ const dialogHeader = computed(() => {
                         />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
-                    <label for="shares" class="font-semibold w-24">Shares</label>
+                    <label for="shares" class="font-semibold w-24">
+                        Shares
+                        <span style="color: #f27362;">*</span>
+                    </label>
                     <InputNumber v-model="newShare" id="shares" class="flex-auto" showButtons autocomplete="off" />
+                    <small v-if="errors.shares" class="text-red">請輸入股數</small>
                 </div>
                 <div class="flex items-center gap-2 mb-4 p-2 text-xs">
                     <label for="" class="font-semibold w-24"></label>
@@ -268,7 +297,10 @@ const dialogHeader = computed(() => {
                     <Button @click="addShare(1000)" label="+1000" severity="secondary" rounded />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
-                    <label for="price" class="font-semibold w-24">Price</label>
+                    <label for="price" class="font-semibold w-24">
+                        Price
+                        <span style="color: #f27362;">*</span>
+                    </label>
                     <InputText v-model="newPrice" id="price" class="flex-auto" autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
@@ -281,7 +313,7 @@ const dialogHeader = computed(() => {
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="resetDialog(), visible = false"></Button>
-                    <Button type="button" label="Add" @click="saveTransaction"></Button>
+                    <Button type="button" label="Add" @click="saveTransaction" :disabled="hasError"></Button>
                 </div>
             </Dialog>
         </div>
