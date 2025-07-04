@@ -14,6 +14,11 @@ import Aura from '@primeuix/themes/aura';
 // import Material from '@primeuix/themes/material';
 // import Lara from '@primeuix/themes/lara';
 
+import Tooltip from 'primevue/tooltip';
+
+app.directive('tooltip', Tooltip);
+
+
 app.use(PrimeVue, {
     theme: {
         preset: Aura,

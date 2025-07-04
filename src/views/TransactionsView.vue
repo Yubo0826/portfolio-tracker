@@ -109,7 +109,7 @@ const updateSelectedAssets = (id) => {
     editingId.value = id; // 設定編輯 ID
 
     selectedSymbol.value = { 
-        ticker: assetToUpdate.symbol,
+        symbol: assetToUpdate.symbol,
         name: assetToUpdate.name,
         assetType: assetToUpdate.assetType
     };
@@ -148,10 +148,26 @@ const saveTransaction = async () => {
         console.warn('欄位未填寫完整')
         return
     }
+    
+    /* 如果類型是賣出:
+        1. symbol 必須存在於 assets 中
+        2. shares 必須小於已存在的 shares
+    */
+    if (selectedOperation.value.code === 'sell') {
+        const existingAsset = assets.value.find(asset => asset.symbol === selectedSymbol.value.ticker.toUpperCase());
+        if (!existingAsset) {
+            alert('Cannot sell a symbol that does not exist in your assets');
+            return;
+        }
+        if (newShare.value > existingAsset.shares) {
+            alert('Cannot sell more shares than you own');
+            return;
+        }
+    }
 
     const payload = {
         uid: uid.value,
-        symbol: selectedSymbol.value.ticker,
+        symbol: selectedSymbol.value.ticker.toUpperCase(),
         name: selectedSymbol.value.name,
         asset_type: selectedSymbol.value.assetType,
         shares: newShare.value,
@@ -313,7 +329,7 @@ const dialogHeader = computed(() => {
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="resetDialog(), visible = false"></Button>
-                    <Button type="button" label="Add" @click="saveTransaction" :disabled="hasError"></Button>
+                    <Button type="button" label="Add" v-tooltip.bottom="'請填入完整信息'" bottom @click="saveTransaction" :disabled="hasError"></Button>
                 </div>
             </Dialog>
         </div>
