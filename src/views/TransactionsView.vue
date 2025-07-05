@@ -10,30 +10,29 @@ import 'primeicons/primeicons.css'
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
-
-
 const transactionType = ref([
     { name: 'Buy', code: 'buy' },
     { name: 'Sell', code: 'sell' }
 ]);
 
-const assets = ref([]);
+const transactions = ref([]);
 const selectedAssets = ref([]);
 const visible = ref(false);
+const isLoading = ref(false);
 
-const setAssets = (data) => {
-    assets.value = data.map(item => ({
+const setTransactions = (data) => {
+    transactions.value = data.map(item => ({
         id: item.id,
         symbol: item.symbol,
         name: item.name,
         assetType: item.assetType,
-        price: item.price,
+        price: parseFloat(item.price) || 0,
+        fee: parseFloat(item.fee) || 0,
         shares: parseInt(item.shares) || 0,
         transactionType: item.transaction_type,
         date: item.transaction_date.split('T')[0]
     }));
 }
-
 
 
 // 根據 google 登入的用戶 ID 取得交易資料
@@ -45,11 +44,15 @@ const getTransactions = async () => {
         return;
     }
     try {
+        isLoading.value = true;
         const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}`);
         console.log('Fetched transactions:', data);
-        setAssets(data);
+        setTransactions(data);
     } catch (error) {
         console.error('Error fetching transactions:', error);
+    }
+    finally {
+        isLoading.value = false;
     }
 }
 
@@ -81,28 +84,28 @@ const addShare = (amount) => {
 }
 
 const deleteSelectedAssets = () => {
-    console.log('Deleting selected assets:', selectedAssets.value);
+    console.log('Deleting selected transactions:', selectedAssets.value);
     if (selectedAssets.value.length === 0) {
-        console.warn('No assets selected for deletion');
+        console.warn('No transactions selected for deletion');
         return;
     }
     const idsToDelete = selectedAssets.value.map(asset => asset.id);
     api.delete('http://localhost:3000/api/transactions', { ids: idsToDelete })
     .then(data => {
         console.log('Assets deleted:', data);
-        // 更新本地 assets 列表
-        assets.value = assets.value.filter(asset => !idsToDelete.includes(asset.id));
+        // 更新本地 transactions 列表
+        transactions.value = transactions.value.filter(asset => !idsToDelete.includes(asset.id));
         selectedAssets.value = []; // 清空選擇的資產
     })
     .catch(error => {
-        console.error('Error deleting assets:', error);
+        console.error('Error deleting transactions:', error);
     });
 }
 
 const editingId = ref(null); // 如果有值表示目前在更新中
 
 const updateSelectedAssets = (id) => {
-    const assetToUpdate = assets.value.find(asset => asset.id === id);
+    const assetToUpdate = transactions.value.find(asset => asset.id === id);
     if (!assetToUpdate) return;
 
     visible.value = true;
@@ -114,12 +117,14 @@ const updateSelectedAssets = (id) => {
         assetType: assetToUpdate.assetType
     };
     newShare.value = assetToUpdate.shares;
+    newFee.value = assetToUpdate.fee || 0;
     newPrice.value = assetToUpdate.price;
     newDate.value = new Date(assetToUpdate.date);
     selectedOperation.value = transactionType.value.find(op => op.code === assetToUpdate.transactionType) || transactionType.value[0];
 };
 
 const newShare = ref(null);
+const newFee = ref(0);
 const newDate = ref(null);
 const selectedOperation = ref(transactionType.value[0]); // 預設為買入
 
@@ -150,60 +155,64 @@ const saveTransaction = async () => {
     }
     
     /* 如果類型是賣出:
-        1. symbol 必須存在於 assets 中
-        2. shares 必須小於已存在的 shares
+        1. 股票必須已存在於資產中
+        2. shares 必須小於在資產已存在的 shares
+        以上後端會判斷
     */
-    if (selectedOperation.value.code === 'sell') {
-        const existingAsset = assets.value.find(asset => asset.symbol === selectedSymbol.value.ticker.toUpperCase());
-        if (!existingAsset) {
-            alert('Cannot sell a symbol that does not exist in your assets');
-            return;
-        }
-        if (newShare.value > existingAsset.shares) {
-            alert('Cannot sell more shares than you own');
-            return;
-        }
+
+    if (newFee.value < 0) {
+        alert('Fee cannot be negative');
+        return;
     }
 
     const payload = {
         uid: uid.value,
-        symbol: selectedSymbol.value.ticker.toUpperCase(),
+        symbol: selectedSymbol.value.symbol.toUpperCase(),
         name: selectedSymbol.value.name,
-        asset_type: selectedSymbol.value.assetType,
+        assetType: selectedSymbol.value.assetType,
         shares: newShare.value,
+        fee: newFee.value || 0,
         price: newPrice.value,
-        transaction_type: selectedOperation.value.code,
-        transaction_date: newDate.value.toISOString().split('T')[0]
+        transactionType: selectedOperation.value.code,
+        transactionDate: newDate.value.toISOString().split('T')[0]
     };
+
+    console.log('Saving transaction payload:', payload);
 
     try {
         if (editingId.value !== null) {
             // 更新交易
             await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
             // 更新本地資料
-            const index = assets.value.findIndex(a => a.id === editingId.value);
-            if (index !== -1) assets.value[index] = { id: editingId.value, ...payload };
+            const index = transactions.value.findIndex(a => a.id === editingId.value);
+            if (index !== -1) transactions.value[index] = { id: editingId.value, ...payload };
 
         } else {
             // 新增交易
             const result = await api.post('http://localhost:3000/api/transactions', payload);
-            setAssets(result);
+            setTransactions(result);
         }
 
         visible.value = false;
         resetDialog();
     } catch (err) {
-        console.error('Error saving transaction:', err);
+        console.error(err);
+        if (err.message === 'Not enough shares to sell') {
+            alert(`Not enough shares to sell. Please check your holdings.`);
+        } else {
+            alert(err.message || 'An error occurred while saving the transaction');
+        }
     }
 };
 
 const resetDialog = () => {
-    console.log('Resetting dialog');
+    console.log('Reset dialog');
     editingId.value = null;
     selectedSymbol.value = null;
     newShare.value = null;
     newPrice.value = null;
     newDate.value = null;
+    newFee.value = 0;
     selectedOperation.value = transactionType.value[0]; // 預設為買入
 };
 
@@ -219,7 +228,11 @@ const search = async (event) => {
     api.get('http://localhost:3000/api/search/symbols?query=' + event.query)
     .then(data => {
         console.log('Search results:', data);
-        filteredSymbols.value = data;
+        filteredSymbols.value = data.map(item => ({
+            symbol: item.ticker,
+            name: item.name,
+            assetType: item.assetType
+        }));
     })
     .catch(error => {
         console.error('Error fetching symbols:', error);
@@ -235,7 +248,7 @@ const newPrice = ref(null);
 
 const onItemSelect = async (event) => {
     console.log('Selected symbol:', event.value);
-    const symbol = event.value.ticker
+    const symbol = event.value.symbol
     const date = newDate.value?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]; // 使用選擇的日期或當前日期
     if (symbol) {
         api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`)
@@ -282,7 +295,7 @@ const dialogHeader = computed(() => {
                         Date
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <DatePicker v-model="newDate" showIcon fluid iconDisplay="input" />
+                    <DatePicker v-model="newDate" showIcon fluid iconDisplay="input" placeholder="交易的日期" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">
@@ -291,7 +304,7 @@ const dialogHeader = computed(() => {
                     </label>
                     <AutoComplete 
                         v-model="selectedSymbol" 
-                        optionLabel="ticker" 
+                        optionLabel="symbol" 
                         :suggestions="filteredSymbols" 
                         @complete="debouncedSearch" 
                         @item-select="onItemSelect"
@@ -303,8 +316,7 @@ const dialogHeader = computed(() => {
                         Shares
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <InputNumber v-model="newShare" id="shares" class="flex-auto" showButtons autocomplete="off" />
-                    <small v-if="errors.shares" class="text-red">請輸入股數</small>
+                    <InputNumber v-model="newShare" id="shares" class="flex-auto" autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-2 mb-4 p-2 text-xs">
                     <label for="" class="font-semibold w-24"></label>
@@ -317,11 +329,15 @@ const dialogHeader = computed(() => {
                         Price
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <InputText v-model="newPrice" id="price" class="flex-auto" autocomplete="off" />
+                    <InputText v-model="newPrice" id="price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Operation</label>
                     <Select v-model="selectedOperation" :options="transactionType" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
+                </div>
+                <div class="flex items-center gap-4 mb-8">
+                    <label for="fee" class="font-semibold w-24">Fee</label>
+                    <InputNumber v-model="newFee" id="fee" class="flex-auto" showButtons autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Total</label>
@@ -329,24 +345,45 @@ const dialogHeader = computed(() => {
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="resetDialog(), visible = false"></Button>
-                    <Button type="button" label="Add" v-tooltip.bottom="'請填入完整信息'" bottom @click="saveTransaction" :disabled="hasError"></Button>
+                    <Button v-if="hasError" type="button" label="Add" v-tooltip.bottom="'請填入完整信息'" bottom @click="saveTransaction" disabled></Button>
+                    <Button v-else type="button" label="Add" bottom @click="saveTransaction"></Button>
                 </div>
             </Dialog>
         </div>
 
-        <DataTable v-model:selection="selectedAssets" :value="assets" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable v-model:selection="selectedAssets" :value="transactions" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
             <Column field="symbol" header="Symbol"></Column>
             <Column field="name" header="Name"></Column>
             <Column field="shares" header="Shares"></Column>
             <Column field="price" header="Price"></Column>
-            <Column field="transactionType" header="Operation"></Column>
+            <Column field="fee" header="Fee"></Column>
+            <Column field="" header="Operation">
+                <template #body="slotProps">
+                    <div>
+                        <span 
+                            v-if="slotProps.data.transactionType === 'buy'"
+                            class="bg-green-400 text-green-800 rounded-full px-4 py-1.5 text-white font-bold text-xs"
+                            >
+                            Buy
+                        </span>
+                        <span v-else class="bg-red-400 text-red-800 rounded-full px-4 py-1.5 text-white font-bold text-xs">Sell</span>
+                    </div>
+                </template> 
+            </Column>
             <Column field="date" header="Date"></Column>
             <Column field="" header="Action">
                 <template #body="slotProps">
                     <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedAssets(slotProps.data.id)" />
                 </template>  
             </Column>
+
+            <template #empty>
+                <div class="p-4 text-center text-gray-500">
+                <i class="pi pi-info-circle mr-2" />
+                    現在並無資料。
+                </div>
+            </template>
         </DataTable>
 
 

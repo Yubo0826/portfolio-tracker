@@ -23,7 +23,6 @@ const request = async (url, method = 'GET', data = null, headers = {}) => {
   
       return result;
     } catch (error) {
-      console.error('Fetch error:', error);
       throw error;
     }
   };
