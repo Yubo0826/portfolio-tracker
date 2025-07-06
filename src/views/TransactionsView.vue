@@ -6,6 +6,9 @@ import Button from 'primevue/button';
 import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import 'primeicons/primeicons.css'
+import Toast from 'primevue/toast';
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
 
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
@@ -16,6 +19,7 @@ const transactionType = ref([
 ]);
 
 const transactions = ref([]);
+const holdings = ref([]);
 const selectedAssets = ref([]);
 const visible = ref(false);
 const isLoading = ref(false);
@@ -34,6 +38,14 @@ const setTransactions = (data) => {
     }));
 }
 
+const setHoldings = (data) => {
+    holdings.value = data.map(item => ({
+        symbol: item.symbol,
+        name: item.name,
+        total_shares: parseInt(item.total_shares) || 0,
+    }));
+}
+
 
 // 根據 google 登入的用戶 ID 取得交易資料
 const uid = ref(null);
@@ -46,8 +58,9 @@ const getTransactions = async () => {
     try {
         isLoading.value = true;
         const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}`);
-        console.log('Fetched transactions:', data);
-        setTransactions(data);
+        console.log('Fetched data:', data);
+        setTransactions(data.transactions);
+        setHoldings(data.holdings);
     } catch (error) {
         console.error('Error fetching transactions:', error);
     }
@@ -116,6 +129,7 @@ const updateSelectedAssets = (id) => {
         name: assetToUpdate.name,
         assetType: assetToUpdate.assetType
     };
+    oldShare.value = assetToUpdate.shares;
     newShare.value = assetToUpdate.shares;
     newFee.value = assetToUpdate.fee || 0;
     newPrice.value = assetToUpdate.price;
@@ -123,6 +137,7 @@ const updateSelectedAssets = (id) => {
     selectedOperation.value = transactionType.value.find(op => op.code === assetToUpdate.transactionType) || transactionType.value[0];
 };
 
+const oldShare = ref(null);
 const newShare = ref(null);
 const newFee = ref(0);
 const newDate = ref(null);
@@ -153,15 +168,61 @@ const saveTransaction = async () => {
         console.warn('欄位未填寫完整')
         return
     }
+
+    /* 
+        如果更新資料且類型是賣出，檢查：
+        新的 shares 是否會超出原本的持有量
+    */
+   
+    if (editingId.value !== null && selectedOperation.value.code === 'sell') {
+        const holding = holdings.value.find(h => h.symbol === selectedSymbol.value.symbol.toUpperCase());
+        if (newShare.value > holding.total_shares + oldShare.value) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error Message',
+                detail: 'Not enough shares to sell.',
+                life: 3000
+            });
+            return;
+        }
+    }
     
-    /* 如果類型是賣出:
+    /* 
+        如果新增資料且類型是賣出，檢查：
         1. 股票必須已存在於資產中
         2. shares 必須小於在資產已存在的 shares
-        以上後端會判斷
     */
 
+    if (editingId.value === null && selectedOperation.value.code === 'sell') {
+        const holding = holdings.value.find(h => h.symbol === selectedSymbol.value.symbol.toUpperCase());
+        console.log('Holding for sell check:', holding);
+        if (!holding) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error Message',
+                detail: `You don't own any shares of ${selectedSymbol.value.symbol}`,
+                life: 3000
+            });
+            return;
+        }
+        if (newShare.value > holding.total_shares) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error Message',
+                detail: `Not enough shares to sell. You only have ${holding.total_shares} shares of ${selectedSymbol.value.symbol}`,
+                life: 3000
+            });
+            return;
+        }
+    }
+
     if (newFee.value < 0) {
-        alert('Fee cannot be negative');
+        toast.add({
+            severity: 'error',
+            summary: 'Error Message',
+            detail: 'Fee cannot be negative.',
+            life: 3000
+        });
         return;
     }
 
@@ -182,15 +243,18 @@ const saveTransaction = async () => {
     try {
         if (editingId.value !== null) {
             // 更新交易
-            await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
+            const result = await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
             // 更新本地資料
-            const index = transactions.value.findIndex(a => a.id === editingId.value);
-            if (index !== -1) transactions.value[index] = { id: editingId.value, ...payload };
-
+            // const index = transactions.value.findIndex(a => a.id === editingId.value);
+            // if (index !== -1) transactions.value[index] = { id: editingId.value, ...payload };
+            console.log('Transaction updated:', result);
+            setTransactions(result.transactions);
+            setHoldings(result.holdings);
         } else {
             // 新增交易
             const result = await api.post('http://localhost:3000/api/transactions', payload);
-            setTransactions(result);
+            setTransactions(result.transactions);
+            setHoldings(result.holdings);
         }
 
         visible.value = false;
@@ -209,6 +273,7 @@ const resetDialog = () => {
     console.log('Reset dialog');
     editingId.value = null;
     selectedSymbol.value = null;
+    oldShare.value = null;
     newShare.value = null;
     newPrice.value = null;
     newDate.value = null;
@@ -276,19 +341,22 @@ const dialogHeader = computed(() => {
 </script>
 <template>
     <div>
+        <Toast />
         <div class="tool-bar">
             <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
             <Button label="Add" @click="visible = true" icon="pi pi-plus" />
             
             <!-- Dialog for adding or updating transactions -->
-            <Dialog v-model:visible="visible" modal :style="{ width: '30rem' }">
+            <Dialog v-model:visible="visible" @hide="resetDialog" modal :style="{ width: '30rem' }">
                 <template #header>
                     <div class="inline-flex items-center justify-center gap-2">
                         <span class="font-bold whitespace-nowrap">{{ dialogHeader }}</span>
                     </div>    
                 </template>
                 <span class="text-surface-500 dark:text-surface-400 block mb-8">
-                    先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
+                    <span v-if="!editingId">
+                        先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
+                    </span>
                 </span>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="date" class="font-semibold w-24">
@@ -309,6 +377,7 @@ const dialogHeader = computed(() => {
                         @complete="debouncedSearch" 
                         @item-select="onItemSelect"
                         :delay="600" 
+                        :disabled="editingId" 
                         />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
@@ -333,7 +402,7 @@ const dialogHeader = computed(() => {
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Operation</label>
-                    <Select v-model="selectedOperation" :options="transactionType" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
+                    <Select v-model="selectedOperation" :options="transactionType" :disabled="editingId" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="fee" class="font-semibold w-24">Fee</label>
