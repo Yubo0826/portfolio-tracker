@@ -20,6 +20,9 @@ function toggleDarkMode() {
         <RouterLink to="/dashboard">
           <Button label="Dashboard" severity="secondary" rounded class="m-1" />
         </RouterLink>
+        <RouterLink to="/holdings">
+          <Button label="Holdings" severity="secondary" rounded class="m-1" />
+        </RouterLink>
         <RouterLink to="/transactions">
           <Button label="Transactions" severity="secondary" rounded class="m-1" />
         </RouterLink>

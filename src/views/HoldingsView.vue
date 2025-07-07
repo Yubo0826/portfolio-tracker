@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import api from '../api.js';
 
 import { useAuthStore } from '@/stores/auth'
@@ -11,6 +11,7 @@ const isLoading = ref(true);
 
 // 根據 google 登入的用戶 ID 取得資料
 const uid = ref(null);
+
 
 const setHoldings = (data) => {
     holdings.value = data.map(item => ({
@@ -44,20 +45,35 @@ const getHoldings = async () => {
     }
 }
 
+
+
 // 如果有用戶登入，則設定 uid
 if (auth.user) {
     uid.value = auth.user.uid; 
-    getTransactions(); // 取得交易資料
+    getHoldings(); // 取得交易資料
     console.log('User is logged in:', auth.user);
 } else {
     console.log('No user is logged in');
 }
+
+/*
+    1. 監聽 auth.user 的變化，如果有用戶登入則取得交易資料
+    2. 如果已在登入狀態下刷新瀏覽器 auth.user 會自動重新登入
+*/
+
+watch(() => auth.user, (newUser) => {
+  if (newUser) {
+    uid.value = newUser.uid;
+    getHoldings(); // 取得交易資料
+  }
+})
+
 </script>
 <template>
   <div>
     <h1>持有資產</h1>
     <p>這裡將顯示您的持有資產列表。</p>
-    <DataTable v-model:selection="selectedAssets" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+    <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column field="symbol" header="Symbol"></Column>
         <Column field="name" header="Name"></Column>

@@ -103,7 +103,7 @@ const deleteSelectedAssets = () => {
         return;
     }
     const idsToDelete = selectedAssets.value.map(asset => asset.id);
-    api.delete('http://localhost:3000/api/transactions', { ids: idsToDelete })
+    api.delete(`http://localhost:3000/api/transactions?uid=${uid.value}`, { ids: idsToDelete })
     .then(data => {
         console.log('Assets deleted:', data);
         // 更新本地 transactions 列表
