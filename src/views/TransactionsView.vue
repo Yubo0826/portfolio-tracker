@@ -248,8 +248,25 @@ const saveTransaction = async () => {
             // const index = transactions.value.findIndex(a => a.id === editingId.value);
             // if (index !== -1) transactions.value[index] = { id: editingId.value, ...payload };
             console.log('Transaction updated:', result);
+            if (result.message === 'No changes detected, transaction not updated') {
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Warn Message',
+                    detail: 'No changes detected, transaction not updated.',
+                    life: 3000
+                });
+                return;
+            }
+
             setTransactions(result.transactions);
             setHoldings(result.holdings);
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success Message',
+                detail: 'Transaction updated successfully.',
+                life: 3000
+            });
         } else {
             // 新增交易
             const result = await api.post('http://localhost:3000/api/transactions', payload);

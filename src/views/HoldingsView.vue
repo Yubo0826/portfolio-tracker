@@ -18,12 +18,11 @@ const setHoldings = (data) => {
         id: item.id,
         symbol: item.symbol,
         name: item.name,
-        assetType: item.assetType,
-        price: parseFloat(item.price) || 0,
-        fee: parseFloat(item.fee) || 0,
-        shares: parseInt(item.shares) || 0,
+        assetType: item.asset_type,
+        avgCost: parseFloat(item.avg_cost) || 0,
+        shares: parseInt(item.total_shares) || 0,
         transactionType: item.transaction_type,
-        date: item.transaction_date.split('T')[0]
+        lastUpdated: item.last_updated.split('T')[0]
     }));
 }
 
@@ -41,6 +40,24 @@ const getHoldings = async () => {
         console.error('Error fetching holdings:', error);
     }
     finally {
+        isLoading.value = false;
+    }
+}
+
+const deleteSelectedHoldings = async () => {
+    if (selectedHoldings.value.length === 0) {
+        console.warn('No holdings selected for deletion');
+        return;
+    }
+    try {
+        isLoading.value = true;
+        const idsToDelete = selectedHoldings.value.map(item => item.id);
+        console.log('Deleted holdings:', idsToDelete);
+        await api.delete(`http://localhost:3000/api/holdings?uid=${uid.value}`, { ids: idsToDelete });
+        getHoldings(); // 重新取得交易資料
+    } catch (error) {
+        console.error('Error deleting holdings:', error);
+    } finally {
         isLoading.value = false;
     }
 }
@@ -71,15 +88,14 @@ watch(() => auth.user, (newUser) => {
 </script>
 <template>
   <div>
-    <h1>持有資產</h1>
-    <p>這裡將顯示您的持有資產列表。</p>
+    <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
     <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column field="symbol" header="Symbol"></Column>
         <Column field="name" header="Name"></Column>
         <Column field="shares" header="Shares"></Column>
-        <Column field="avg_cost" header="Averge Cost"></Column>
-        <Column field="last_updated" header="Lastest Date"></Column>
+        <Column field="avgCost" header="Averge Cost"></Column>
+        <Column field="lastUpdated" header="Lastest Date"></Column>
 
         <template #empty>
             <div class="p-4 text-center text-gray-500">
