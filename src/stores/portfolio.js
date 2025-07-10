@@ -2,6 +2,8 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import api from '@/api'
 import { useAuthStore } from '@/stores/auth'
+import { set } from 'lodash'
+
 const auth = useAuthStore()
 const uid = computed(() => auth.user ? auth.user.uid : null)
 
@@ -9,7 +11,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   const currentPortfolio = ref(null)
   const portfolios = ref([])
 
-  async function getPortfolios() {
+  async function fetchPortfolios() {
     if (!uid.value) {
         console.warn('No user ID found, cannot fetch portfolios');
         return;
@@ -22,17 +24,47 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     }
   }
 
+  function setPortfolios(portfoliosList) {
+    if (!Array.isArray(portfoliosList)) {
+      console.error('Invalid portfolios list:', portfoliosList);
+      return;
+    }
+    portfolios.value = portfoliosList;
+  }
+
   function setCurrentPortfolio(portfolio) {
     currentPortfolio.value = portfolio
   }
 
-  function addPortfolio(portfolio) {
-    portfolios.value.push(portfolio)
+  async function addPortfolio(newPortfolio) {
+    const { uid, name, description } = newPortfolio;
+    if (!newPortfolio.name) {
+        console.warn('Name are required to add a portfolio');
+        return;
+    }
+    try {
+        const data = await api.post('http://localhost:3000/api/portfolio', {
+            uid,
+            name,
+            description,
+        });
+        setPortfolios(data.portfolios);
+    } catch (error) {
+        console.error('Error adding portfolio:', error);
+    }
   }
 
   function removePortfolio(portfolioId) {
     portfolios.value = portfolios.value.filter(p => p.id !== portfolioId)
   }
 
-  return { portfolios, getPortfolios, setCurrentPortfolio, addPortfolio, removePortfolio }
+  return {
+    portfolios,
+    currentPortfolio,
+    fetchPortfolios,
+    setPortfolios,
+    addPortfolio,
+    removePortfolio,
+    setCurrentPortfolio,
+  }
 })

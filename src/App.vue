@@ -1,11 +1,18 @@
 <script setup>
+import { ref, watch } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
+import Button from 'primevue/button'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
-const portfolio = usePortfolioStore()
-import Button from 'primevue/button'
+const portfolioStore = usePortfolioStore()
+
+watch(() => auth.user, (newUser) => {
+  if (newUser) {
+    portfolioStore.fetchPortfolios();
+  }
+})
 
 function toggleDarkMode() {
     document.documentElement.classList.toggle('my-app-dark');

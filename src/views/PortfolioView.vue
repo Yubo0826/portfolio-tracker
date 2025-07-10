@@ -4,8 +4,8 @@ import api from '../api.js';
 import Textarea from 'primevue/textarea';
 import FloatLabel from 'primevue/floatlabel';
 import 'primeicons/primeicons.css'
+import { usePortfolioStore } from '@/stores/portfolio';
 
-const portfolios = ref([]);
 const selectedPortfolios = ref([]);
 const isLoading = ref(false);
 
@@ -13,42 +13,6 @@ import { useAuthStore } from '@/stores/auth';
 const auth = useAuthStore();
 const uid = ref(null);
 
-const getPortfolios = async () => {
-    if (!uid.value) {
-        console.warn('No user ID found, cannot fetch portfolios');
-        return;
-    }
-    try {
-        isLoading.value = true;
-        const data = await api.get(`http://localhost:3000/api/portfolio?uid=${uid.value}`);
-        console.log('Fetched portfolios:', data);
-        portfolios.value = data.portfolios.map(item => ({
-            id: item.id,
-            name: item.name,
-            description: item.description
-        }));
-    } catch (error) {
-        console.error('Error fetching portfolios:', error);
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-// 如果有用戶登入，則設定 uid
-if (auth.user) {
-    uid.value = auth.user.uid; 
-    getPortfolios();
-    console.log('User is logged in:', auth.user.uid);
-} else {
-    console.log('No user is logged in');
-}
-
-watch(() => auth.user, (newUser) => {
-  if (newUser) {
-    uid.value = newUser.uid;
-    getPortfolios();
-  }
-})
 
 const addPortfolio = async () => {
     if (!newPortfolio.value.name || !newPortfolio.value.description) {
@@ -57,11 +21,7 @@ const addPortfolio = async () => {
     }
     try {
         isLoading.value = true;
-        const data = await api.post('http://localhost:3000/api/portfolio', {
-            uid: uid.value,
-            name: newPortfolio.value.name,
-            description: newPortfolio.value.description
-        });
+        const data = await usePortfolioStore.addPortfolio
         portfolios.value.push(data);
         newPortfolio.value.name = '';
         newPortfolio.value.description = '';
