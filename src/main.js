@@ -40,6 +40,7 @@ app.use(VueApexCharts);
 
 // primevue components
 import Button from 'primevue/button';
+import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -48,6 +49,7 @@ import InputNumber from 'primevue/inputnumber';
 import DatePicker from 'primevue/datepicker';
 
 app.component('Button', Button);
+app.component('Select', Select);
 app.component('InputText', InputText);
 app.component('DataTable', DataTable);
 app.component('Column', Column);

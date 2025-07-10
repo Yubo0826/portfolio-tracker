@@ -1,7 +1,10 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
+
 const auth = useAuthStore()
+const portfolio = usePortfolioStore()
 import Button from 'primevue/button'
 
 function toggleDarkMode() {
@@ -16,6 +19,9 @@ function toggleDarkMode() {
       <nav>
         <RouterLink to="/">
           <Button label="Home" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/portfolio">
+          <Button label="Portfolio" severity="secondary" rounded class="m-1" />
         </RouterLink>
         <RouterLink to="/dashboard">
           <Button label="Dashboard" severity="secondary" rounded class="m-1" />

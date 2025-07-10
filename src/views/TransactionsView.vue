@@ -2,8 +2,6 @@
 import { computed, watch, ref } from 'vue';
 import api from '../api.js';
 
-import Button from 'primevue/button';
-import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import 'primeicons/primeicons.css'
 import Toast from 'primevue/toast';
@@ -323,7 +321,7 @@ const search = async (event) => {
     
 }
 
-const debouncedSearch = debounce(search, 300);
+const debouncedSearch = debounce(search, 100);
 
 // Callback：查詢選擇的股票當天的價格 (根據選擇的日期)
 const newPrice = ref(null);
