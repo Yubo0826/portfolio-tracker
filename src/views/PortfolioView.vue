@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
+import Textarea from 'primevue/textarea'
+import FloatLabel from 'primevue/floatlabel'
 
 const portfolioStore = usePortfolioStore()
 const auth = useAuthStore()
@@ -77,7 +79,6 @@ const updateSelectedPortfolios = (id) => {
             </div>
             <div class="flex items-center gap-4 mb-8">
                 <label for="description" class="font-semibold w-24">Description</label>
-                <InputTextarea id="description" class="flex-auto" v-model="newPortfolio.description" rows="3" />
                 <FloatLabel variant="on">
                     <Textarea id="over_label" v-model="newPortfolio.description" rows="5" cols="30" style="resize: none" />
                     <label for="on_label">On Label</label>

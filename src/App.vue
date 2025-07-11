@@ -4,6 +4,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
+import 'primeicons/primeicons.css'
 
 const auth = useAuthStore()
 
