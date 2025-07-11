@@ -1,9 +1,15 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 import Textarea from 'primevue/textarea'
 import FloatLabel from 'primevue/floatlabel'
+
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+
+const confirm = useConfirm();
+const toast = useToast();
 
 const portfolioStore = usePortfolioStore()
 const auth = useAuthStore()
@@ -65,13 +71,74 @@ const updateSelectedPortfolios = (id) => {
   dialogVisible.value = true
   newPortfolio.value = { name: p.name, description: p.description }
 }
+
+const updatePortfolio = async () => {
+  const { name, description } = newPortfolio.value
+  if (!name) {
+    console.warn('Name are required')
+    return
+  }
+
+  try {
+    isLoading.value = true
+    await portfolioStore.editPortfolio(editingId.value, { name, description })
+    newPortfolio.value = { name: '', description: '' }
+  } catch (error) {
+    console.error('Error updating portfolio:', error)
+  } finally {
+    editingId.value = null
+    isLoading.value = false
+    dialogVisible.value = false
+  }
+}
+
+const confirm2 = () => {
+    confirm.require({
+        message: 'Do you want to delete this record?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            portfolioStore.removePortfolio(selectedPortfolios.value.map(p => p.id))
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
+        },
+        reject: () => {
+            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
+
+const clickSave = () => {
+  if (editingId.value) {
+    updatePortfolio()
+  } else {
+    addPortfolio()
+  }
+}
+
+const dialogTitle = computed(() => {
+  return editingId.value ? 'Update Portfolio' : 'Add Portfolio'
+})
+
 </script>
 
 <template>
 <div>
+    <Toast />
+    <ConfirmDialog></ConfirmDialog>
     <Button label="Add Portfolio" icon="pi pi-plus" class="p-button-success mb-3" @click="dialogVisible = true" />
+    <Button label="Delete" @click="confirm2" icon="pi pi-trash" class="mr-2" severity="danger" />
 
-    <Dialog v-model:visible="dialogVisible" header="Add Portfolio" modal :style="{ width: '50vw' }">
+    <Dialog v-model:visible="dialogVisible" :header="dialogTitle" modal :style="{ width: '50vw' }">
         <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
             <div class="flex items-center gap-4 mb-4">
                 <label for="name" class="font-semibold w-24">Name</label>
@@ -86,7 +153,7 @@ const updateSelectedPortfolios = (id) => {
             </div>
             <div class="flex justify-end gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="dialogVisible = false"></Button>
-                <Button type="button" label="Save" @click="addPortfolio"></Button>
+                <Button type="button" label="Save" @click="clickSave"></Button>
             </div>
     </Dialog>
 

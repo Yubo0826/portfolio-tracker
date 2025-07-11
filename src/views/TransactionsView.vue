@@ -3,7 +3,6 @@ import { computed, watch, ref } from 'vue';
 import api from '../api.js';
 
 import AutoComplete from 'primevue/autocomplete';
-import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 

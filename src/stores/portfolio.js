@@ -54,8 +54,43 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     }
   }
 
-  function removePortfolio(portfolioId) {
-    portfolios.value = portfolios.value.filter(p => p.id !== portfolioId)
+  async function editPortfolio(portfolioId, updatedPortfolio) {
+    const { name, description } = updatedPortfolio;
+    if (!name) {
+        console.warn('Name is required to edit a portfolio');
+        return;
+    }
+    try {
+        const data = await api.put(`http://localhost:3000/api/portfolio/`, {
+            uid: auth.user.uid,
+            id: portfolioId,
+            name,
+            description,
+        });
+        const index = portfolios.value.findIndex(p => p.id === portfolioId);
+        if (index !== -1) {
+            portfolios.value[index] = data.portfolio;
+        }
+    } catch (error) {
+        console.error('Error editing portfolio:', error);
+    }
+  }
+
+  async function removePortfolio(ids) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+        console.warn('No portfolio IDs provided for removal');
+        return;
+    }
+    try {
+      console.log('Removing portfolios with IDs:', ids);
+        await api.delete(`http://localhost:3000/api/portfolio`, {
+          uid: auth.user.uid,
+          ids,
+      });
+        portfolios.value = portfolios.value.filter(p => !ids.includes(p.id));
+    } catch (error) {
+        console.error('Error removing portfolio:', error);
+    }
   }
 
   return {
@@ -64,6 +99,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     fetchPortfolios,
     setPortfolios,
     addPortfolio,
+    editPortfolio,
     removePortfolio,
     setCurrentPortfolio,
   }
