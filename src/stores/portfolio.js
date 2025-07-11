@@ -1,23 +1,23 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import api from '@/api'
 import { useAuthStore } from '@/stores/auth'
-import { set } from 'lodash'
 
-const auth = useAuthStore()
-const uid = computed(() => auth.user ? auth.user.uid : null)
 
 export const usePortfolioStore = defineStore('portfolio', () => {
+  const auth = useAuthStore()
   const currentPortfolio = ref(null)
   const portfolios = ref([])
 
   async function fetchPortfolios() {
-    if (!uid.value) {
+    if (!auth.user) {
         console.warn('No user ID found, cannot fetch portfolios');
         return;
     }
     try {
-        const data = await api.get(`/portfolios?uid=${uid.value}`);
+        console.log('Fetching portfolios for user:', auth.user.uid);
+        const data = await api.get(`http://localhost:3000/api/portfolio?uid=${auth.user.uid}`);
+        console.log('Fetched portfolios:', data);
         portfolios.value = data.portfolios;
     } catch (error) {
         console.error('Error fetching portfolios:', error);
@@ -37,18 +37,18 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   }
 
   async function addPortfolio(newPortfolio) {
-    const { uid, name, description } = newPortfolio;
-    if (!newPortfolio.name) {
+    const { name, description } = newPortfolio;
+    if (!name) {
         console.warn('Name are required to add a portfolio');
         return;
     }
     try {
         const data = await api.post('http://localhost:3000/api/portfolio', {
-            uid,
+            uid: auth.user.uid,
             name,
             description,
         });
-        setPortfolios(data.portfolios);
+        portfolios.value.push(data.portfolio);
     } catch (error) {
         console.error('Error adding portfolio:', error);
     }

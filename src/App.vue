@@ -1,18 +1,34 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
-import Button from 'primevue/button'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
+import Button from 'primevue/button'
 
 const auth = useAuthStore()
+
 const portfolioStore = usePortfolioStore()
+
+// 如果有用戶登入，則設定 uid
+if (auth.user) {
+    portfolioStore.fetchPortfolios()
+    console.log('User is logged in:', auth.user);
+} else {
+    console.log('No user is logged in');
+}
+
+/*
+    1. 監聽 auth.user 的變化，如果有用戶登入則取得交易資料
+    2. 如果已在登入狀態下刷新瀏覽器 auth.user 會自動重新登入
+*/
 
 watch(() => auth.user, (newUser) => {
   if (newUser) {
+    console.log('User is logged in:', newUser);
     portfolioStore.fetchPortfolios();
   }
 })
+
 
 function toggleDarkMode() {
     document.documentElement.classList.toggle('my-app-dark');

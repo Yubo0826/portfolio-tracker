@@ -1,55 +1,70 @@
 <script setup>
-import { ref, watch } from 'vue';
-import api from '../api.js';
-import Textarea from 'primevue/textarea';
-import FloatLabel from 'primevue/floatlabel';
-import 'primeicons/primeicons.css'
-import { usePortfolioStore } from '@/stores/portfolio';
+import { ref, onMounted } from 'vue'
+import { usePortfolioStore } from '@/stores/portfolio'
+import { useAuthStore } from '@/stores/auth'
 
-const selectedPortfolios = ref([]);
-const isLoading = ref(false);
+const portfolioStore = usePortfolioStore()
+const auth = useAuthStore()
 
-import { useAuthStore } from '@/stores/auth';
-const auth = useAuthStore();
-const uid = ref(null);
+const selectedPortfolios = ref([])
+const isLoading = ref(false)
+const dialogVisible = ref(false)
+const editingId = ref(null)
+
+const newPortfolio = ref({
+  name: '',
+  description: '',
+})
+
+const getPortfolios = async () => {
+  if (!auth.user?.uid) {
+    console.warn('No user ID found, cannot fetch portfolios')
+    return
+  }
+  try {
+    isLoading.value = true
+    await portfolioStore.fetchPortfolios()
+  } catch (error) {
+    console.error('Error fetching portfolios:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  getPortfolios()
+})
 
 
 const addPortfolio = async () => {
-    if (!newPortfolio.value.name || !newPortfolio.value.description) {
-        console.warn('Name and description are required to add a portfolio');
-        return;
-    }
-    try {
-        isLoading.value = true;
-        const data = await usePortfolioStore.addPortfolio
-        portfolios.value.push(data);
-        newPortfolio.value.name = '';
-        newPortfolio.value.description = '';
-    } catch (error) {
-        console.error('Error adding portfolio:', error);
-    } finally {
-        isLoading.value = false;
-        dialogVisible.value = false;
-    }
-};
+  const { name, description } = newPortfolio.value
+  if (!name) {
+    console.warn('Name are required')
+    return
+  }
 
-const editingId = ref(null);
+  try {
+    isLoading.value = true
+    await portfolioStore.addPortfolio({ name, description })
+    newPortfolio.value = { name: '', description: '' }
+  } catch (error) {
+    console.error('Error adding portfolio:', error)
+  } finally {
+    isLoading.value = false
+    dialogVisible.value = false
+  }
+}
+
+
 const updateSelectedPortfolios = (id) => {
-    const portfolio = portfolios.value.find(p => p.id === id);
-    console.log('Editing portfolio:', portfolio);
-    editingId.value = id;
-    dialogVisible.value = true;
-    newPortfolio.value.name = portfolio.name;
-    newPortfolio.value.description = portfolio.description;
-};
-
-const dialogVisible = ref(false);
-const newPortfolio = ref({
-    name: '',
-    description: ''
-});
-
+  const p = portfolioStore.portfolios.find(p => p.id === id)
+  if (!p) return
+  editingId.value = id
+  dialogVisible.value = true
+  newPortfolio.value = { name: p.name, description: p.description }
+}
 </script>
+
 <template>
 <div>
     <Button label="Add Portfolio" icon="pi pi-plus" class="p-button-success mb-3" @click="dialogVisible = true" />
@@ -74,7 +89,7 @@ const newPortfolio = ref({
             </div>
     </Dialog>
 
-    <DataTable v-model:selection="selectedPortfolios" :value="portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+    <DataTable v-model:selection="selectedPortfolios" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column field="name" header="Name"></Column>
         <Column field="description" header="Description"></Column>
