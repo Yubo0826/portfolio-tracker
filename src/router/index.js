@@ -36,6 +36,16 @@ const router = createRouter({
       path: '/portfolio',
       name: 'portfolio',
       component: () => import('../views/PortfolioView.vue'),
+    },
+    {
+      path: '/allocation',
+      name: 'allocation',
+      component: () => import('../views/AllocationView.vue'),
+    },
+    {
+      path: '/rebalancing',
+      name: 'rebalancing',
+      component: () => import('../views/RebalancingView.vue'),
     }
   ],
 })

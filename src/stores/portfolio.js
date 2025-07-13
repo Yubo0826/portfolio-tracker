@@ -19,6 +19,11 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         const data = await api.get(`http://localhost:3000/api/portfolio?uid=${auth.user.uid}`);
         console.log('Fetched portfolios:', data);
         portfolios.value = data.portfolios;
+        if (data.portfolios.length > 0) {
+            currentPortfolio.value = data.portfolios[0];
+        } else {
+            currentPortfolio.value = null;
+        }
     } catch (error) {
         console.error('Error fetching portfolios:', error);
     }

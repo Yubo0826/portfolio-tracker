@@ -1,5 +1,5 @@
 <script setup>
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
@@ -12,7 +12,7 @@ const portfolioStore = usePortfolioStore()
 
 // 如果有用戶登入，則設定 uid
 if (auth.user) {
-    portfolioStore.fetchPortfolios()
+    getPortfolios()
     console.log('User is logged in:', auth.user);
 } else {
     console.log('No user is logged in');
@@ -26,10 +26,24 @@ if (auth.user) {
 watch(() => auth.user, (newUser) => {
   if (newUser) {
     console.log('User is logged in:', newUser);
-    portfolioStore.fetchPortfolios();
+    getPortfolios();
   }
 })
 
+const selectedPortfolio = ref(null);
+
+async function getPortfolios() {
+    if (!auth.user?.uid) {
+        console.warn('No user ID found, cannot fetch portfolios');
+        return;
+    }
+    try {
+        await portfolioStore.fetchPortfolios();
+        selectedPortfolio.value = portfolioStore.currentPortfolio;
+    } catch (error) {
+        console.error('Error fetching portfolios:', error);
+    }
+}
 
 function toggleDarkMode() {
     document.documentElement.classList.toggle('my-app-dark');
@@ -56,9 +70,17 @@ function toggleDarkMode() {
         <RouterLink to="/transactions">
           <Button label="Transactions" severity="secondary" rounded class="m-1" />
         </RouterLink>
+        <RouterLink to="/allocation">
+          <Button label="Allocation" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/rebalancing">
+          <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
+        </RouterLink>
       </nav>
 
       <Button label="Toggle Dark Mode" @click="toggleDarkMode()" class="m-4" />
+
+      <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="w-full md:w-56" />
 
       <div>
         <h1>Google 登入</h1>

@@ -9,6 +9,9 @@ const toast = useToast();
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
+import { usePortfolioStore } from '@/stores/portfolio';
+const portfolioStore = usePortfolioStore()
+
 const transactionType = ref([
     { name: 'Buy', code: 'buy' },
     { name: 'Sell', code: 'sell' }
@@ -99,7 +102,12 @@ const deleteSelectedAssets = () => {
         return;
     }
     const idsToDelete = selectedAssets.value.map(asset => asset.id);
-    api.delete(`http://localhost:3000/api/transactions?uid=${uid.value}`, { ids: idsToDelete })
+    const payload = {
+        uid: uid.value,
+        portfolio_id: portfolioStore.currentPortfolio?.id,
+        ids: idsToDelete
+    };
+    api.delete(`http://localhost:3000/api/transactions`, payload)
     .then(data => {
         console.log('Assets deleted:', data);
         // 更新本地 transactions 列表
@@ -226,12 +234,12 @@ const saveTransaction = async () => {
         uid: uid.value,
         symbol: selectedSymbol.value.symbol.toUpperCase(),
         name: selectedSymbol.value.name,
-        assetType: selectedSymbol.value.assetType,
+        asset_type: selectedSymbol.value.assetType,
         shares: newShare.value,
         fee: newFee.value || 0,
         price: newPrice.value,
-        transactionType: selectedOperation.value.code,
-        transactionDate: newDate.value.toISOString().split('T')[0]
+        transaction_type: selectedOperation.value.code,
+        transaction_date: newDate.value.toISOString().split('T')[0]
     };
 
     console.log('Saving transaction payload:', payload);
