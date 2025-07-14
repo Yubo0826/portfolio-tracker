@@ -5,6 +5,9 @@ import api from '../api.js';
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
+import { usePortfolioStore } from '@/stores/portfolio';
+const portfolioStore = usePortfolioStore()
+
 const holdings = ref([]);
 const selectedHoldings = ref([]);
 const isLoading = ref(true);
@@ -33,7 +36,7 @@ const getHoldings = async () => {
     }
     try {
         isLoading.value = true;
-        const data = await api.get(`http://localhost:3000/api/holdings?uid=${uid.value}`);
+        const data = await api.get(`http://localhost:3000/api/holdings?uid=${uid.value}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
         console.log('Fetched holdings:', data);
         setHoldings(data);
     } catch (error) {
@@ -53,7 +56,12 @@ const deleteSelectedHoldings = async () => {
         isLoading.value = true;
         const idsToDelete = selectedHoldings.value.map(item => item.id);
         console.log('Deleted holdings:', idsToDelete);
-        await api.delete(`http://localhost:3000/api/holdings?uid=${uid.value}`, { ids: idsToDelete });
+        const payload = {
+            uid: uid.value,
+            portfolio_id: portfolioStore.currentPortfolio?.id,
+            ids: idsToDelete
+        }
+        await api.delete(`http://localhost:3000/api/holdings?uid=${uid.value}`, payload);
         getHoldings(); // 重新取得交易資料
     } catch (error) {
         console.error('Error deleting holdings:', error);

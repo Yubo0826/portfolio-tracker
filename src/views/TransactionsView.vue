@@ -3,6 +3,7 @@ import { computed, watch, ref } from 'vue';
 import api from '../api.js';
 
 import AutoComplete from 'primevue/autocomplete';
+import SelectButton from 'primevue/selectbutton';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
@@ -56,10 +57,14 @@ const getTransactions = async () => {
     }
     try {
         isLoading.value = true;
-        const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}`);
-        console.log('Fetched data:', data);
-        setTransactions(data.transactions);
-        setHoldings(data.holdings);
+        if (portfolioStore.currentPortfolio) {
+            const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}&portfolio_id=${portfolioStore.currentPortfolio.id}`);
+            console.log('Fetched data:', data);
+            setTransactions(data.transactions);
+            setHoldings(data.holdings);
+        } else {
+            console.warn('No current portfolio selected');
+        }
     } catch (error) {
         console.error('Error fetching transactions:', error);
     }
@@ -145,7 +150,7 @@ const oldShare = ref(null);
 const newShare = ref(null);
 const newFee = ref(0);
 const newDate = ref(null);
-const selectedOperation = ref(transactionType.value[0]); // 預設為買入
+const selectedOperation = ref(transactionType.value[0].code); // 預設為買入
 
 const errors = ref({
   date: false,
@@ -178,7 +183,7 @@ const saveTransaction = async () => {
         新的 shares 是否會超出原本的持有量
     */
    
-    if (editingId.value !== null && selectedOperation.value.code === 'sell') {
+    if (editingId.value !== null && selectedOperation.value === 'sell') {
         const holding = holdings.value.find(h => h.symbol === selectedSymbol.value.symbol.toUpperCase());
         if (newShare.value > holding.total_shares + oldShare.value) {
             toast.add({
@@ -197,7 +202,7 @@ const saveTransaction = async () => {
         2. shares 必須小於在資產已存在的 shares
     */
 
-    if (editingId.value === null && selectedOperation.value.code === 'sell') {
+    if (editingId.value === null && selectedOperation.value === 'sell') {
         const holding = holdings.value.find(h => h.symbol === selectedSymbol.value.symbol.toUpperCase());
         console.log('Holding for sell check:', holding);
         if (!holding) {
@@ -232,13 +237,14 @@ const saveTransaction = async () => {
 
     const payload = {
         uid: uid.value,
+        portfolio_id: portfolioStore.currentPortfolio?.id,
         symbol: selectedSymbol.value.symbol.toUpperCase(),
         name: selectedSymbol.value.name,
         asset_type: selectedSymbol.value.assetType,
         shares: newShare.value,
         fee: newFee.value || 0,
         price: newPrice.value,
-        transaction_type: selectedOperation.value.code,
+        transaction_type: selectedOperation.value,
         transaction_date: newDate.value.toISOString().split('T')[0]
     };
 
@@ -299,7 +305,7 @@ const resetDialog = () => {
     newPrice.value = null;
     newDate.value = null;
     newFee.value = 0;
-    selectedOperation.value = transactionType.value[0]; // 預設為買入
+    selectedOperation.value = transactionType.value[0].code; // 預設為買入
 };
 
 
@@ -423,7 +429,7 @@ const dialogHeader = computed(() => {
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Operation</label>
-                    <Select v-model="selectedOperation" :options="transactionType" :disabled="editingId" optionLabel="name" placeholder="Select a operation" class="w-full md:w-56" />
+                    <SelectButton v-model="selectedOperation" :options="transactionType" optionLabel="name" optionValue="code" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="fee" class="font-semibold w-24">Fee</label>

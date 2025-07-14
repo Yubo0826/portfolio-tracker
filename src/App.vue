@@ -32,6 +32,20 @@ watch(() => auth.user, (newUser) => {
 
 const selectedPortfolio = ref(null);
 
+// Pinia → Local v-model 同步
+watch(() => portfolioStore.currentPortfolio, (newVal) => {
+  if (newVal?.id !== selectedPortfolio.value?.id) {
+    selectedPortfolio.value = newVal
+  }
+})
+
+// Local v-model → Pinia 同步
+watch(selectedPortfolio, (newVal) => {
+  if (newVal?.id !== portfolioStore.currentPortfolio?.id) {
+    portfolioStore.setCurrentPortfolio(newVal)
+  }
+})
+
 async function getPortfolios() {
     if (!auth.user?.uid) {
         console.warn('No user ID found, cannot fetch portfolios');
@@ -81,7 +95,7 @@ function toggleDarkMode() {
       <Button label="Toggle Dark Mode" @click="toggleDarkMode()" class="m-4" />
 
       <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="w-full md:w-56" />
-
+      {{ portfolioStore.currentPortfolio?.name || 'No Portfolio Selected' }}
       <div>
         <h1>Google 登入</h1>
         <div v-if="auth.user">

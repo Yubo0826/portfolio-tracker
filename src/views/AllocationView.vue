@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/api';
+import AutoComplete from 'primevue/autocomplete';
 
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
@@ -15,7 +16,11 @@ const selectedAssets = ref([]);
 const getAllocation = async () => {
     try {
         isLoading.value = true;
-        const data = await api('http://localhost:3000/api/allocation');
+        if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) {
+            console.warn('No user ID found, cannot fetch allocation');
+            return;
+        }
+        const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
         console.log('Fetched allocation:', data);
         // assets.value = data.map(item => ({
         //     id: item.id,
@@ -66,6 +71,54 @@ const updateAllocation = async () => {
 }
 
 
+// Auto complete symbol search
+import debounce from 'lodash/debounce';
+const selectedSymbol = ref(null);
+const filteredSymbols = ref([]);
+
+const search = async (event) => {
+    console.log('Searching for symbols:', event.query);
+    if (!event.query.trim().length) return;
+    api.get('http://localhost:3000/api/search/symbols?query=' + event.query)
+    .then(data => {
+        console.log('Search results:', data);
+        filteredSymbols.value = data.map(item => ({
+            symbol: item.ticker,
+            name: item.name,
+            assetType: item.assetType
+        }));
+    })
+    .catch(error => {
+        console.error('Error fetching symbols:', error);
+        filteredSymbols.value = [];
+    });
+    
+}
+
+const debouncedSearch = debounce(search, 100);
+
+// Callback：查詢選擇的股票當天的價格 (根據選擇的日期)
+const newPrice = ref(null);
+
+const onItemSelect = async (event) => {
+    console.log('Selected symbol:', event.value);
+    const symbol = event.value.symbol
+    const date = newDate.value?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]; // 使用選擇的日期或當前日期
+    if (symbol) {
+        api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`)
+        .then(data => {
+            console.log('Search results:', data);
+            if (data.length === 1) {
+                newPrice.value = data[0].close; // close 屬性是當天的收盤價
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching symbols:', error);
+        });
+    }
+};
+
+
 </script>
 <template>
     <div>
@@ -78,17 +131,30 @@ const updateAllocation = async () => {
                 <template #header>
                     123
                 </template>
-                <template #body="slotProps">
-                    <!-- <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" /> -->
-                </template>  
+                <!-- <template #body="slotProps">
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
+                </template>   -->
             </Column>
 
-            <template #empty>
+            <template #footer>
+                <AutoComplete 
+                    v-model="selectedSymbol" 
+                    optionLabel="symbol" 
+                    :suggestions="filteredSymbols" 
+                    @complete="debouncedSearch" 
+                    @item-select="onItemSelect"
+                    :delay="600"  
+                    />
+
+                    <Button icon="pi pi-check" variant="text" rounded aria-label="Filter" />
+            </template>
+
+            <!-- <template #empty>
                 <div class="p-4 text-center text-gray-500">
                 <i class="pi pi-info-circle mr-2" />
                     現在並無資料。
                 </div>
-            </template>
+            </template> -->
 
         </DataTable>
     </div>
