@@ -97,27 +97,44 @@ const search = async (event) => {
 
 const debouncedSearch = debounce(search, 100);
 
-// Callback：查詢選擇的股票當天的價格 (根據選擇的日期)
-const newPrice = ref(null);
-
+// Callback
+const newAsset = ref({
+    symbol: '',
+    name: '',
+    rate: 0 // 預設值
+});
 const onItemSelect = async (event) => {
-    console.log('Selected symbol:', event.value);
-    const symbol = event.value.symbol
-    const date = newDate.value?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]; // 使用選擇的日期或當前日期
-    if (symbol) {
-        api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`)
-        .then(data => {
-            console.log('Search results:', data);
-            if (data.length === 1) {
-                newPrice.value = data[0].close; // close 屬性是當天的收盤價
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching symbols:', error);
-        });
-    }
+    console.log('Selected stock:', event.value);
+    newAsset.value = {
+        symbol: event.value.symbol,
+        name: event.value.name,
+        rate: 0 // 預設值
+    };
 };
 
+const addAsset = async () => {
+    if (!newAsset.value.symbol || !newAsset.value.name) {
+        console.warn('Symbol and name are required');
+        return;
+    }
+    try {
+        isLoading.value = true;
+        // 假設有一個 API 可以新增資產
+        const addedAsset = await api.post('http://localhost:3000/api/allocation/', {
+            uid: auth.user?.uid,
+            portfolioId: portfolioStore.currentPortfolio?.id,
+            symbol: newAsset.value.symbol,
+            name: newAsset.value.name,
+            rate: newAsset.value.rate
+        });
+        assets.value.push(addedAsset);
+        newAsset.value = { symbol: '', name: '', rate: 0 }; // 重置輸入框
+    } catch (error) {
+        console.error('Error adding asset:', error);
+    } finally {
+        isLoading.value = false;
+    }
+};
 
 </script>
 <template>
