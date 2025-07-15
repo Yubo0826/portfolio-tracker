@@ -93,6 +93,12 @@ watch(() => auth.user, (newUser) => {
   }
 })
 
+watch(() => portfolioStore.currentPortfolio, (newVal) => {
+    if (newVal?.id) {
+        getTransactions();
+    }
+});
+
 const addShare = (amount) => {
     if (newShare.value === null || newShare.value === undefined) {
         newShare.value = 0;

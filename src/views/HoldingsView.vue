@@ -93,6 +93,12 @@ watch(() => auth.user, (newUser) => {
   }
 })
 
+watch(() => portfolioStore.currentPortfolio, (newVal) => {
+  if (newVal?.id) {
+    getHoldings();
+  }
+});
+
 </script>
 <template>
   <div>

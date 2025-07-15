@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import api from '@/api';
 import AutoComplete from 'primevue/autocomplete';
 import InputNumber from 'primevue/inputnumber';
@@ -7,6 +7,8 @@ import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import debounce from 'lodash/debounce';
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
 
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -102,6 +104,15 @@ const removeAsset = (data) => {
 
 const saveAllocation = async () => {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
+  if (totalTarget.value !== 100) {
+    toast.add({
+        severity: 'error',
+        summary: 'Error Message',
+        detail: 'Total target must equal 100%',
+        life: 3000
+    });
+    return;
+  }
   try {
     const data = await api.post('http://localhost:3000/api/allocation/', {
       uid: auth.user.uid,
@@ -114,12 +125,24 @@ const saveAllocation = async () => {
   }
 };
 
+const totalTarget = computed(() => {
+  return assets.value.reduce((sum, asset) => sum + (Number(asset.target) || 0), 0);
+});
+
+const close = () => {
+  inputVisible.value = false;
+  selectedSymbol.value = null;
+  newTarget.value = 0;
+  newAssetRow.value = null;
+};
+
 
 
 </script>
 
 <template>
   <div>
+    <Toast />
     <div class="flex justify-end mb-4">
         <Button label="Save" @click="saveAllocation" />
     </div>
@@ -147,24 +170,34 @@ const saveAllocation = async () => {
         </Column>
 
         <!-- Target -->
-        <Column field="target" header="Target (%)" style="width: 30%">
+        <Column field="target" header="" style="width: 20%">
             <template #body="{ data }">
                 <InputNumber v-model="data.target" suffix="%" showButtons :min="0" :max="100" />
             </template>
 
-            <template #footer>
-            <InputNumber v-if="inputVisible" v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
+            <template #header>
+                <span v-if="totalTarget === 100" class="font-semibold">Target (%)</span>
+                <span v-else class="text-gray-500 font-semibold">Total: {{ totalTarget }}%</span>
+            </template>
+
+            <template #footer v-if="inputVisible">
+            <InputNumber v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
             </template>
         </Column>
 
         <!-- Action -->
-        <Column style="width: 10%">
+        <Column style="width: 20%">
             <template #body="{ data }">
-                <Button icon="pi pi-times" text severity="danger" @click="removeAsset(data)" />
+                <div class="flex justify-end">
+                    <Button icon="pi pi-times" text severity="danger" @click="removeAsset(data)" />
+                </div>
             </template>
 
-            <template #footer>
-                <Button v-if="inputVisible" @click="confirmAddAsset" icon="pi pi-check" rounded variant="outlined" aria-label="Filter" />
+            <template #footer v-if="inputVisible">
+                <div class="flex justify-end items-center">
+                    <Button icon="pi pi-check" variant="text" rounded aria-label="Filter" @click="confirmAddAsset" />
+                    <Button icon="pi pi-times" text severity="danger" @click="close" />
+                </div>
             </template>
         </Column>
     </DataTable>
