@@ -1,178 +1,172 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import api from '@/api';
 import AutoComplete from 'primevue/autocomplete';
+import InputNumber from 'primevue/inputnumber';
+import Button from 'primevue/button';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import debounce from 'lodash/debounce';
 
-import { useAuthStore } from '@/stores/auth'
-const auth = useAuthStore()
-
+import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
-const portfolioStore = usePortfolioStore()
+
+const auth = useAuthStore();
+const portfolioStore = usePortfolioStore();
 
 const isLoading = ref(true);
 const assets = ref([]);
-const selectedAssets = ref([]);
-
-const getAllocation = async () => {
-    try {
-        isLoading.value = true;
-        if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) {
-            console.warn('No user ID found, cannot fetch allocation');
-            return;
-        }
-        const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
-        console.log('Fetched allocation:', data);
-        // assets.value = data.map(item => ({
-        //     id: item.id,
-        //     symbol: item.symbol,
-        //     name: item.name,
-        //     assetType: item.asset_type,
-        //     avgCost: parseFloat(item.avg_cost) || 0,
-        //     shares: parseInt(item.total_shares) || 0,
-        //     transactionType: item.transaction_type,
-        //     lastUpdated: item.last_updated.split('T')[0]
-        // }));
-    } catch (error) {
-        console.error('Error fetching allocation:', error);
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-onMounted(() => {
-    getAllocation();
-});
-
-const updateAllocation = async () => {
-    if (assets.value.length === 0) {
-        console.warn('No assets to save');
-        return;
-    }
-    try {
-        isLoading.value = true;
-        const data = assets.value.map(asset => ({
-            symbol: asset.symbol,
-            name: asset.name,
-            rate: asset.rate,
-            // 其他需要更新的字段
-        }));
-        console.log('Saving allocation:', data);
-        const newAllocation = await api.post('http://localhost:3000/api/allocation', {
-            uid: auth.user?.uid,
-            portfolioId: portfolioStore.currentPortfolio?.id,
-            assets: data
-         });
-        assets.value = newAllocation;
-    } catch (error) {
-        console.error('Error saving allocation:', error);
-    } finally {
-        isLoading.value = false;
-    }
-}
-
-
-// Auto complete symbol search
-import debounce from 'lodash/debounce';
 const selectedSymbol = ref(null);
 const filteredSymbols = ref([]);
+const inputVisible = ref(false);
+const newTarget = ref(0);
+const newAssetRow = ref(null);
 
-const search = async (event) => {
-    console.log('Searching for symbols:', event.query);
-    if (!event.query.trim().length) return;
-    api.get('http://localhost:3000/api/search/symbols?query=' + event.query)
-    .then(data => {
-        console.log('Search results:', data);
-        filteredSymbols.value = data.map(item => ({
-            symbol: item.ticker,
-            name: item.name,
-            assetType: item.assetType
-        }));
-    })
-    .catch(error => {
-        console.error('Error fetching symbols:', error);
-        filteredSymbols.value = [];
-    });
-    
+const getAllocation = async () => {
+  try {
+    isLoading.value = true;
+    if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
+    const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    console.log('Fetched allocation:', data);
+    assets.value = data;
+  } catch (error) {
+    console.error('Error fetching allocation:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 如果有用戶登入，則設定 uid
+if (auth.user) {
+    getAllocation(); // 取得交易資料
+} else {
+    console.log('No user is logged in');
 }
 
-const debouncedSearch = debounce(search, 100);
+// 監聽 auth.user 的變化，如果有用戶變化則取得交易資料
+watch(() => auth.user, (newUser) => {
+    if (newUser) {
+        getAllocation();
+    }
+})
 
-// Callback
-const newAsset = ref({
-    symbol: '',
-    name: '',
-    rate: 0 // 預設值
+watch(() => portfolioStore.currentPortfolio, (newVal) => {
+  if (newVal?.id) {
+    getAllocation();
+  }
 });
-const onItemSelect = async (event) => {
-    console.log('Selected stock:', event.value);
-    newAsset.value = {
-        symbol: event.value.symbol,
-        name: event.value.name,
-        rate: 0 // 預設值
-    };
+
+const search = async (event) => {
+  if (!event.query.trim().length) return;
+  try {
+    const data = await api.get('http://localhost:3000/api/search/symbols?query=' + event.query);
+    console.log('Fetched symbols:', data);
+    filteredSymbols.value = data.map(item => ({
+      symbol: item.ticker,
+      name: item.name,
+      icon: item.icon || `https://logo.clearbit.com/${item.ticker}.com`
+    }));
+  } catch (error) {
+    console.error('Error fetching symbols:', error);
+    filteredSymbols.value = [];
+  }
 };
 
-const addAsset = async () => {
-    if (!newAsset.value.symbol || !newAsset.value.name) {
-        console.warn('Symbol and name are required');
-        return;
-    }
-    try {
-        isLoading.value = true;
-        // 假設有一個 API 可以新增資產
-        const addedAsset = await api.post('http://localhost:3000/api/allocation/', {
-            uid: auth.user?.uid,
-            portfolioId: portfolioStore.currentPortfolio?.id,
-            symbol: newAsset.value.symbol,
-            name: newAsset.value.name,
-            rate: newAsset.value.rate
-        });
-        assets.value.push(addedAsset);
-        newAsset.value = { symbol: '', name: '', rate: 0 }; // 重置輸入框
-    } catch (error) {
-        console.error('Error adding asset:', error);
-    } finally {
-        isLoading.value = false;
-    }
+const debouncedSearch = debounce(search, 300);
+
+const onItemSelect = (event) => {
+  newAssetRow.value = {
+    symbol: event.value.symbol,
+    name: event.value.name,
+    icon: event.value.icon,
+  };
 };
+
+const confirmAddAsset = async () => {
+    if (!newAssetRow.value?.symbol || !newAssetRow.value?.name) return;
+    assets.value.push(
+        {
+            ...newAssetRow.value,
+            target: newTarget.value
+        }
+    );
+    newAssetRow.value = null;
+    selectedSymbol.value = null;
+    newTarget.value = 0;
+    inputVisible.value = false;
+};
+
+const removeAsset = (data) => {
+  assets.value = assets.value.filter(a => a.symbol !== data.symbol);
+};
+
+const saveAllocation = async () => {
+  if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
+  try {
+    const data = await api.post('http://localhost:3000/api/allocation/', {
+      uid: auth.user.uid,
+      portfolio_id: portfolioStore.currentPortfolio.id,
+      assets: assets.value
+    });
+    console.log('Allocation saved successfully', data);
+  } catch (error) {
+    console.error('Error saving allocation:', error);
+  }
+};
+
+
 
 </script>
+
 <template>
-    <div>
-        <Button>Save</Button>
-        <DataTable v-model:selection="selectedAssets" :value="assets" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-            <Column field="symbol" header="Symbol"></Column>
-            <Column field="name" header="Name"></Column>
-            <Column field="">
-                <template #header>
-                    123
-                </template>
-                <!-- <template #body="slotProps">
-                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
-                </template>   -->
-            </Column>
+  <div>
+    <div class="flex justify-end mb-4">
+        <Button label="Save" @click="saveAllocation" />
+    </div>
 
-            <template #footer>
-                <AutoComplete 
-                    v-model="selectedSymbol" 
-                    optionLabel="symbol" 
-                    :suggestions="filteredSymbols" 
-                    @complete="debouncedSearch" 
-                    @item-select="onItemSelect"
-                    :delay="600"  
-                    />
-
-                    <Button icon="pi pi-check" variant="text" rounded aria-label="Filter" />
+    <DataTable :value="assets" editMode="row" dataKey="symbol">
+        <!-- Name -->
+        <Column field="name" header="Asset" style="width: 40%">
+            <template #body="{ data }">
+                <div>
+                    <!-- <img :src="data.icon" class="w-5 h-5 mr-2" /> -->
+                    <span class="font-bold mr-4">{{ data.symbol }}</span>
+                    <div class="">{{ data.name }}</div>
+                </div>
             </template>
 
-            <!-- <template #empty>
-                <div class="p-4 text-center text-gray-500">
-                <i class="pi pi-info-circle mr-2" />
-                    現在並無資料。
+            <template #footer>
+                <div v-if="!inputVisible">
+                    <Button icon="pi pi-plus" text label="Add Asset" @click="inputVisible = true" />
                 </div>
-            </template> -->
+                <div v-else class="flex flex-col gap-2">
+                    <AutoComplete v-model="selectedSymbol" optionLabel="symbol" :suggestions="filteredSymbols"
+                    @complete="debouncedSearch" @item-select="onItemSelect" placeholder="Search ticker or name" />
+                </div>
+            </template>
+        </Column>
 
-        </DataTable>
-    </div>
+        <!-- Target -->
+        <Column field="target" header="Target (%)" style="width: 30%">
+            <template #body="{ data }">
+                <InputNumber v-model="data.target" suffix="%" showButtons :min="0" :max="100" />
+            </template>
+
+            <template #footer>
+            <InputNumber v-if="inputVisible" v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
+            </template>
+        </Column>
+
+        <!-- Action -->
+        <Column style="width: 10%">
+            <template #body="{ data }">
+                <Button icon="pi pi-times" text severity="danger" @click="removeAsset(data)" />
+            </template>
+
+            <template #footer>
+                <Button v-if="inputVisible" @click="confirmAddAsset" icon="pi pi-check" rounded variant="outlined" aria-label="Filter" />
+            </template>
+        </Column>
+    </DataTable>
+  </div>
 </template>

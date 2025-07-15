@@ -96,7 +96,9 @@ watch(() => auth.user, (newUser) => {
 </script>
 <template>
   <div>
-    <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
+    <div class="flex justify-end mb-4">
+        <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
+    </div>
     <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column field="symbol" header="Symbol"></Column>

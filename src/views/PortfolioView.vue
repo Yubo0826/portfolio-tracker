@@ -135,8 +135,10 @@ const dialogTitle = computed(() => {
 <div>
     <Toast />
     <ConfirmDialog></ConfirmDialog>
-    <Button label="Add Portfolio" icon="pi pi-plus" class="p-button-success mb-3 mr-2" @click="dialogVisible = true" />
-    <Button label="Delete" @click="confirm2" icon="pi pi-trash" class="mr-2" severity="danger" />
+    <div class="flex justify-end mb-4">
+        <Button label="Add Portfolio" icon="pi pi-plus" class="p-button-success mr-2" @click="dialogVisible = true" />
+        <Button label="Delete" @click="confirm2" icon="pi pi-trash" class="mr-2" severity="danger" />
+    </div>
 
     <Dialog v-model:visible="dialogVisible" :header="dialogTitle" modal :style="{ width: '50vw' }">
         <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>

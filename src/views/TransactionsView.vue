@@ -369,7 +369,7 @@ const dialogHeader = computed(() => {
 <template>
     <div>
         <Toast />
-        <div class="tool-bar">
+        <div class="flex justify-end mb-4">
             <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
             <Button label="Add" @click="visible = true" icon="pi pi-plus" />
             
@@ -485,10 +485,3 @@ const dialogHeader = computed(() => {
 
     </div>
 </template>
-<style scoped>
-.tool-bar {
-    display: flex;
-    justify-content: flex-end;
-    margin: 20px 0;
-}
-</style>
