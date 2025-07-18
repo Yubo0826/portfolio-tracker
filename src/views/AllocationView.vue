@@ -120,6 +120,12 @@ const saveAllocation = async () => {
       assets: assets.value
     });
     console.log('Allocation saved successfully', data);
+    toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Allocation saved successfully',
+        life: 3000
+    });
   } catch (error) {
     console.error('Error saving allocation:', error);
   }
@@ -142,7 +148,7 @@ const close = () => {
 
 <template>
   <div>
-    <Toast />
+    <Toast position="bottom-center" />
     <div class="flex justify-end mb-4">
         <Button label="Save" @click="saveAllocation" />
     </div>
@@ -181,7 +187,7 @@ const close = () => {
             </template>
 
             <template #footer v-if="inputVisible">
-            <InputNumber v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
+                <InputNumber v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
             </template>
         </Column>
 

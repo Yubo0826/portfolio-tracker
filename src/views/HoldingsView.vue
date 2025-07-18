@@ -24,7 +24,6 @@ const setHoldings = (data) => {
         assetType: item.asset_type,
         avgCost: parseFloat(item.avg_cost) || 0,
         shares: parseInt(item.total_shares) || 0,
-        transactionType: item.transaction_type,
         lastUpdated: item.last_updated.split('T')[0]
     }));
 }
