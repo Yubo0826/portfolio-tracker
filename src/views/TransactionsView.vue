@@ -3,7 +3,6 @@ import { computed, watch, ref } from 'vue';
 import api from '../api.js';
 
 import AutoComplete from 'primevue/autocomplete';
-import SelectButton from 'primevue/selectbutton';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
@@ -155,7 +154,7 @@ const updateSelectedAssets = (id) => {
 const oldShare = ref(null);
 const newShare = ref(null);
 const newFee = ref(0);
-const newDate = ref(null);
+const newDate = ref(new Date()); // 預設今天
 const selectedOperation = ref(transactionType.value[0].code); // 預設為買入
 
 const errors = ref({
@@ -180,7 +179,12 @@ const hasError = computed(() => {
 
 const saveTransaction = async () => {
     if (hasError.value) {
-        console.warn('欄位未填寫完整')
+        toast.add({
+            severity: 'error',
+            summary: 'Error Message',
+            detail: 'Please fill in all required fields.',
+            life: 3000
+        });
         return
     }
 
@@ -348,17 +352,30 @@ const onItemSelect = async (event) => {
     console.log('Selected symbol:', event.value);
     const symbol = event.value.symbol
     const date = newDate.value?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]; // 使用選擇的日期或當前日期
-    if (symbol) {
-        api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`)
-        .then(data => {
-            console.log('Search results:', data);
-            if (data.length === 1) {
-                newPrice.value = data[0].close; // close 屬性是當天的收盤價
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching symbols:', error);
-        });
+    searchPrice(symbol, date);
+};
+
+const onDateSelect = async (event) => {
+    console.log('Selected date:', event);
+    if (selectedSymbol.value) {
+        const symbol = selectedSymbol.value.symbol;
+        const date = event.toISOString().split('T')[0]; // 使用選擇的日期
+        searchPrice(symbol, date);
+    }
+};
+
+const searchPrice = async (symbol, date) => {
+    if (!symbol || !date) return;
+    try {
+        const data = await api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`);
+        if (data.length > 0) {
+            newPrice.value = data[0].close; // close 屬性是當天的收盤價
+        } else {
+            newPrice.value = null; // 沒有找到價格
+        }
+    } catch (error) {
+        console.error('Error fetching price:', error);
+        newPrice.value = null;
     }
 };
 
@@ -396,7 +413,7 @@ const dialogHeader = computed(() => {
                         Date
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <DatePicker v-model="newDate" showIcon fluid iconDisplay="input" placeholder="交易的日期" />
+                    <DatePicker v-model="newDate" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" placeholder="交易的日期" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">
@@ -453,14 +470,14 @@ const dialogHeader = computed(() => {
             </Dialog>
         </div>
 
-        <DataTable v-model:selection="selectedAssets" :value="transactions" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable v-model:selection="selectedAssets" :value="transactions" sortField="date" sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-            <Column field="symbol" header="Symbol"></Column>
-            <Column field="name" header="Name"></Column>
-            <Column field="shares" header="Shares"></Column>
-            <Column field="price" header="Price"></Column>
-            <Column field="fee" header="Fee"></Column>
-            <Column field="" header="Operation">
+            <Column field="symbol" sortable header="Symbol"></Column>
+            <Column field="name" sortable header="Name"></Column>
+            <Column field="shares" sortable header="Shares"></Column>
+            <Column field="price" sortable header="Price"></Column>
+            <Column field="fee" sortable header="Fee"></Column>
+            <Column field="" sortable header="Operation">
                 <template #body="slotProps">
                     <div>
                         <span 
@@ -473,7 +490,7 @@ const dialogHeader = computed(() => {
                     </div>
                 </template> 
             </Column>
-            <Column field="date" header="Date"></Column>
+            <Column field="date" sortable header="Date"></Column>
             <Column field="" header="Action">
                 <template #body="slotProps">
                     <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedAssets(slotProps.data.id)" />

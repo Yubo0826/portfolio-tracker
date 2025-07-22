@@ -31,10 +31,10 @@ app.use(PrimeVue, {
 
 app.use(ConfirmationService);
 app.use(ToastService);
-app.use(createPinia())
-app.use(router)
+app.use(createPinia());
+app.use(router);
 
-app.mount('#app')
+app.mount('#app');
 
 
 import VueApexCharts from "vue3-apexcharts";
@@ -51,6 +51,7 @@ import InputNumber from 'primevue/inputnumber';
 import DatePicker from 'primevue/datepicker';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
+import SelectButton from 'primevue/selectbutton';
 
 app.component('Button', Button);
 app.component('Select', Select);
@@ -62,3 +63,4 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('InputNumber', InputNumber);
 app.component('DatePicker', DatePicker);
 app.component('Toast', Toast);
+app.component('SelectButton', SelectButton);
