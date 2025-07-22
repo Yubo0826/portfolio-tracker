@@ -34,8 +34,6 @@ app.use(ToastService);
 app.use(createPinia());
 app.use(router);
 
-app.mount('#app');
-
 
 import VueApexCharts from "vue3-apexcharts";
 app.use(VueApexCharts);
@@ -64,3 +62,6 @@ app.component('InputNumber', InputNumber);
 app.component('DatePicker', DatePicker);
 app.component('Toast', Toast);
 app.component('SelectButton', SelectButton);
+
+
+app.mount('#app');

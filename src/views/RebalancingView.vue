@@ -189,6 +189,7 @@ const addTransaction = (data) => {
     // 在這裡處理添加交易的邏輯
     newTransaction.value = {
         symbol: data.symbol,
+        name: data.name,
         shares: Number(data.sharesToBuy) || 0,
         price: Number(data.currentPrice) || 0,
         fee: 0,
@@ -311,7 +312,7 @@ const transactionType = ref([
                 </div>    
             </template>
             <span class="text-surface-500 dark:text-surface-400 block mb-8">
-                <span v-if="!editingId">
+                <span>
                     先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
                 </span>
             </span>
@@ -335,7 +336,6 @@ const transactionType = ref([
                     @complete="debouncedSearch"
                     @item-select="onItemSelect"
                     :delay="600" 
-                    :disabled="editingId" 
                     /> -->
             </div>
             <div class="flex items-center gap-4 mb-4">

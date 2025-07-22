@@ -470,7 +470,7 @@ const dialogHeader = computed(() => {
             </Dialog>
         </div>
 
-        <DataTable v-model:selection="selectedAssets" :value="transactions" sortField="date" sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable v-model:selection="selectedAssets" :value="transactions" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
             <Column field="symbol" sortable header="Symbol"></Column>
             <Column field="name" sortable header="Name"></Column>
