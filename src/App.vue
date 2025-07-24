@@ -150,7 +150,13 @@ const menuItems = [
 
       <div class="flex justify-center items-center mb-4">
 
-        <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border" />
+        <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border">
+          <template #footer>
+              <div class="p-3">
+                  <Button label="Add New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus" />
+              </div>
+          </template>
+        </Select>
 
         <Button
           :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
