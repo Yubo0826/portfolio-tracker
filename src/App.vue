@@ -1,9 +1,11 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
+import Avatar from 'primevue/avatar';
+import Menu from 'primevue/menu';
 import 'primeicons/primeicons.css'
 
 const auth = useAuthStore()
@@ -59,9 +61,63 @@ async function getPortfolios() {
     }
 }
 
-function toggleDarkMode() {
-    document.documentElement.classList.toggle('my-app-dark');
-}
+const isDark = ref(false);
+
+const toggleDarkMode = () => {
+  isDark.value = !isDark.value;
+
+  if (isDark.value) {
+    document.documentElement.classList.add('my-app-dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('my-app-dark');
+    localStorage.setItem('theme', 'light');
+  }
+};
+
+// 初始載入：套用 localStorage 的偏好
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    isDark.value = true;
+    document.documentElement.classList.add('my-app-dark');
+  }
+});
+
+// 登入會員相關
+
+const menu = ref();
+
+const toggleMenu = (event) => {
+  menu.value.toggle(event);
+};
+
+const menuItems = [
+  {
+    label: '個人頁面',
+    icon: 'pi pi-user',
+    command: () => {
+      router.push('/profile');
+    },
+  },
+  {
+    label: '設定',
+    icon: 'pi pi-cog',
+    command: () => {
+      router.push('/settings');
+    },
+  },
+  {
+    separator: true,
+  },
+  {
+    label: '登出',
+    icon: 'pi pi-sign-out',
+    command: () => {
+      auth.logout();
+    },
+  },
+];
 
 </script>
 
@@ -92,20 +148,31 @@ function toggleDarkMode() {
         </RouterLink>
       </nav>
 
-      <Button label="Toggle Dark Mode" @click="toggleDarkMode()" class="m-4" />
+      <div class="flex justify-center items-center mb-4">
 
-      <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="w-full md:w-56" />
-      {{ portfolioStore.currentPortfolio?.name || 'No Portfolio Selected' }}
-      <div>
-        <h1>Google 登入</h1>
-        <div v-if="auth.user">
-          <p>歡迎，{{ auth.user.displayName }}（{{ auth.user.email }}）</p>
-          <button @click="auth.logout">登出</button>
-        </div>
-        <div v-else>
-          <button @click="auth.login">使用 Google 登入</button>
-        </div>
+        <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border" />
+
+        <Button
+          :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+          @click="toggleDarkMode"
+          class="m-4 p-button-rounded p-button-text"
+          aria-label="Toggle Dark Mode"
+        />
+        
+        <!-- 有登入 -->
+        <template v-if="auth.user">
+          <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="mr-2 cursor-pointer" />
+          <Menu ref="menu" :model="menuItems" :popup="true" />
+        </template>
+        <!-- 沒登入 -->
+        <template v-else>
+          <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="mr-2 cursor-pointer" />
+        </template>
+  
+        
       </div>
+
+
     </div>
   </header>
 
@@ -115,5 +182,10 @@ function toggleDarkMode() {
 <style scoped>
 header {
   text-align: center;
+}
+
+.no-border .p-dropdown {
+  border: none !important;
+  box-shadow: none !important;
 }
 </style>

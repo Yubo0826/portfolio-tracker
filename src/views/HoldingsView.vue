@@ -109,7 +109,7 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
         <Column field="symbol" header="Symbol"></Column>
         <Column field="name" header="Name"></Column>
         <Column field="shares" header="Shares"></Column>
-        <Column field="avgCost" header="Averge Cost"></Column>
+        <Column field="avgCost" header="Average Cost"></Column>
         <Column field="lastUpdated" header="Lastest Date"></Column>
 
         <template #empty>
