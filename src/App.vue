@@ -1,12 +1,14 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar';
 import Menu from 'primevue/menu';
-import 'primeicons/primeicons.css'
+import 'primeicons/primeicons.css';
+
+const router = useRouter()
 
 const auth = useAuthStore()
 
@@ -119,6 +121,15 @@ const menuItems = [
   },
 ];
 
+const selectVisible = ref(false);
+const PortfolioSelect = ref(null);
+
+const goToPortfolio = () => {
+  selectVisible.value = false; // 關閉選擇器
+  router.push('/portfolio');
+  PortfolioSelect.value.hide();
+};
+
 </script>
 
 <template>
@@ -150,10 +161,13 @@ const menuItems = [
 
       <div class="flex justify-center items-center mb-4">
 
-        <Select v-model="selectedPortfolio" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border">
+        <Select v-model="selectedPortfolio" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border">
           <template #footer>
               <div class="p-3">
-                  <Button label="Add New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus" />
+                  <Button label="New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus text-left" />
+              </div>
+              <div class="p-3 border-t-1 border-gray-200">
+                  <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
               </div>
           </template>
         </Select>

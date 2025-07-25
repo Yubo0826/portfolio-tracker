@@ -24,6 +24,8 @@ const setHoldings = (data) => {
         assetType: item.asset_type,
         avgCost: parseFloat(item.avg_cost) || 0,
         shares: parseInt(item.total_shares) || 0,
+        currentPrice: parseFloat(item.current_price) || 0,
+        currentValue: parseFloat(item.current_price) * (parseInt(item.total_shares) || 0) || 0,
         lastUpdated: item.last_updated.split('T')[0]
     }));
 }
@@ -110,6 +112,8 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
         <Column field="name" header="Name"></Column>
         <Column field="shares" header="Shares"></Column>
         <Column field="avgCost" header="Average Cost"></Column>
+        <Column field="currentPrice" header="Current Price"></Column>
+        <Column field="currentValue" header="Current Value"></Column>
         <Column field="lastUpdated" header="Lastest Date"></Column>
 
         <template #empty>
