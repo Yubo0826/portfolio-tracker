@@ -413,7 +413,7 @@ const dialogHeader = computed(() => {
                         Date
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <DatePicker v-model="newDate" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" placeholder="交易的日期" />
+                    <DatePicker v-model="newDate" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" class="flex-auto" placeholder="交易的日期" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">
@@ -508,3 +508,11 @@ const dialogHeader = computed(() => {
 
     </div>
 </template>
+<style scoped>
+:deep(.p-autocomplete) {
+    flex: 1 1 auto;
+}
+:deep(.p-autocomplete-input) {
+    flex: 1 1 auto;
+}
+</style>

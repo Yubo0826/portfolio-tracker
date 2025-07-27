@@ -163,9 +163,9 @@ const goToPortfolio = () => {
 
         <Select v-model="selectedPortfolio" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border">
           <template #footer>
-              <div class="p-3">
+              <!-- <div class="p-3">
                   <Button label="New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus text-left" />
-              </div>
+              </div> -->
               <div class="p-3 border-t-1 border-gray-200">
                   <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
               </div>
