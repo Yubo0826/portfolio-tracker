@@ -5,12 +5,11 @@ import FloatLabel from 'primevue/floatlabel'
 
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
+const auth = useAuthStore();
+const portfolioStore = usePortfolioStore();
 
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
-
-const auth = useAuthStore();
-const portfolioStore = usePortfolioStore();
 
 const allocation = ref([]);
 const holdings = ref([]);
