@@ -15,20 +15,33 @@ const isLoading = ref(true);
 // 根據 google 登入的用戶 ID 取得資料
 const uid = ref(null);
 
-
 const setHoldings = (data) => {
-    holdings.value = data.map(item => ({
-        id: item.id,
-        symbol: item.symbol,
-        name: item.name,
-        assetType: item.asset_type,
-        avgCost: parseFloat(item.avg_cost) || 0,
-        shares: parseInt(item.total_shares) || 0,
-        currentPrice: parseFloat(item.current_price) || 0,
-        currentValue: parseFloat(item.current_price) * (parseInt(item.total_shares) || 0) || 0,
-        lastUpdated: item.last_updated.split('T')[0]
-    }));
-}
+  holdings.value = data.map(item => {
+    const shares = parseInt(item.total_shares) || 0;
+    const avgCost = parseFloat(item.avg_cost) || 0;
+    const currentPrice = parseFloat(item.current_price) || 0;
+    const target = parseFloat(item.target_percentage) || 0;
+    const lastUpdated = item.last_updated?.split('T')[0] || '';
+
+    const totalCost = avgCost * shares;
+    const currentValue = Math.round(currentPrice * shares * 100) / 100;
+
+    return {
+      id: item.id,
+      symbol: item.symbol,
+      name: item.name,
+      assetType: item.asset_type,
+      shares,
+      avgCost,
+      currentPrice,
+      totalCost,
+      currentValue,
+      target,
+      lastUpdated
+    };
+  });
+};
+
 
 const getHoldings = async () => {
     if (!uid.value) {

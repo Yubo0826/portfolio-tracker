@@ -58,9 +58,9 @@
 
     <Card>
         <template #content>
-            <DataTable :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+            <DataTable :value="holdings" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
                 <!-- Name -->
-                <Column field="name" header="資產" style="width: 40%">
+                <Column field="name" header="現在資產" style="width: 40%">
                     <template #body="{ data }">
                         <div>
                             <!-- <img :src="data.icon" class="w-5 h-5 mr-2" /> -->
@@ -74,11 +74,11 @@
                 <Column field="avgCost" header="平均成本"></Column>
                 <Column field="totalCost" header="交易金額"></Column>
                 <Column field="currentPrice" header="市值"></Column>
-                <Column field="currentValue" header="總市值"></Column>
+                <Column field="currentValue" header="總市值" sortable></Column>
                 <Column field="target" header="配置比例">
                     <template #body="{ data }">
-                        <span class="font-bold mr-4">{{ data.target }}%</span>
-                        <div>{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</div>
+                        <span class="font-bold mr-4">{{  ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
+                        <div>{{ data.target || 0 }}%</div>
                     </template>
                 </Column>
 
@@ -104,34 +104,72 @@ import { usePortfolioStore } from '@/stores/portfolio';
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 
-const holdings = ref([]);
 const isLoading = ref(false);
+
+const holdings = ref([]);
 const getHoldings = async () => {
     try {
-        const payload = {
-            uid: auth.user?.uid,
-            portfolio_id: portfolioStore.currentPortfolio?.id
-        };
-        const data = await api.post(`http://localhost:3000/api/holdings/refresh-prices`, payload);
+        const data = await api.get(`http://localhost:3000/api/holdings/?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
         console.log('Holdings prices refreshed:', data);
-        holdings.value = data.holdings.map(item => ({
-            id: item.id,
-            symbol: item.symbol,
-            name: item.name,
-            assetType: item.asset_type,
-            currentPrice: parseFloat(item.current_price) || 0,
-            avgCost: parseFloat(item.avg_cost) || 0,
-            totalCost: parseFloat(item.avg_cost) * (parseInt(item.total_shares) || 0) || 0,
-            shares: parseInt(item.total_shares) || 0,
-            lastUpdated: item.last_updated.split('T')[0],
-            currentValue: parseFloat(item.current_price) * (parseInt(item.total_shares) || 0) || 0,
-            target: parseFloat(item.target_percentage) || 0
-        }));
-        setChartData();
+        setHoldings(data);
     } catch (error) {
         console.error('Error fetching current prices:', error);
     }
 }
+
+const setHoldings = (data) => {
+  holdings.value = data.map(item => {
+    const shares = parseInt(item.total_shares) || 0;
+    const avgCost = parseFloat(item.avg_cost) || 0;
+    const currentPrice = parseFloat(item.current_price) || 0;
+    const target = parseFloat(item.target_percentage) || 0;
+    const lastUpdated = item.last_updated?.split('T')[0] || '';
+
+    const totalCost = avgCost * shares;
+    const currentValue = Math.round(currentPrice * shares * 100) / 100;
+
+    return {
+      id: item.id,
+      symbol: item.symbol,
+      name: item.name,
+      assetType: item.asset_type,
+      shares,
+      avgCost,
+      currentPrice,
+      totalCost,
+      currentValue,
+      target,
+      lastUpdated
+    };
+  });
+
+  setChartData();
+};
+
+const allocation = ref([]);
+
+const getAllocation = async () => {
+  try {
+    if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
+    const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    console.log('Fetched allocation:', data);
+    allocation.value = data;
+  } catch (error) {
+    console.error('Error fetching allocation:', error);
+  }
+};
+
+const getData = async () => {
+    isLoading.value = true;
+    try {
+        await getHoldings();
+        await getAllocation();
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    } finally {
+        isLoading.value = false;
+    }
+};
 
 const totalValue = ref(0);
 const totalProfit = ref(0);
@@ -159,17 +197,36 @@ const holdingsChart = computed(() => ({
   ]
 }));
 
+// 各股目標配置的比例
+const allocationChart = computed(() => ({
+  chart: {
+    type: 'donut',
+  },
+  labels: allocation.value.map(a => a.symbol),
+  responsive: [
+    {
+      breakpoint: 480,
+      options: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  ]
+}));
+
+
 const holdingsSeries = computed(() => {
     return holdings.value.map(holding => holding.currentValue);
 });
 
 const allocationSeries = computed(() => {
-    return holdings.value.map(holding => holding.target);
+    return allocation.value.map(a => a.target);
 });
 
 // 如果有用戶登入，則設定 uid
 if (auth.user) {
-    getHoldings(); // 取得交易資料
+    getData(); // 取得交易資料
 } else {
     console.log('No user is logged in');
 }
@@ -177,7 +234,7 @@ if (auth.user) {
 watch(
   () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],
   ([uid, pid]) => {
-    if (uid && pid) getHoldings();
+    if (uid && pid) getData();
   },
   { immediate: true }
 );
