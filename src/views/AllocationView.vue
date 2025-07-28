@@ -18,6 +18,7 @@ const portfolioStore = usePortfolioStore();
 
 const isLoading = ref(true);
 const assets = ref([]);
+const oldAssets = ref([]);
 const selectedSymbol = ref(null);
 const filteredSymbols = ref([]);
 const inputVisible = ref(false);
@@ -31,6 +32,7 @@ const getAllocation = async () => {
     const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
     console.log('Fetched allocation:', data);
     assets.value = data;
+    oldAssets.value = JSON.parse(JSON.stringify(data));
   } catch (error) {
     console.error('Error fetching allocation:', error);
   } finally {
@@ -57,6 +59,11 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
     getAllocation();
   }
 });
+
+const test = () => {
+  console.log('assets.value', assets.value);
+  console.log('oldAssets.value', oldAssets.value);
+}
 
 const search = async (event) => {
   if (!event.query.trim().length) return;
@@ -102,6 +109,10 @@ const removeAsset = (data) => {
   assets.value = assets.value.filter(a => a.symbol !== data.symbol);
 };
 
+const saveButtonDisabled = computed(() => {
+  return JSON.stringify(assets.value) === JSON.stringify(oldAssets.value);
+});
+
 const saveAllocation = async () => {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
   if (totalTarget.value !== 100) {
@@ -120,6 +131,7 @@ const saveAllocation = async () => {
       assets: assets.value
     });
     console.log('Allocation saved successfully', data);
+    oldAssets.value = JSON.parse(JSON.stringify(assets.value)); // 更新舊的資產數據
     toast.add({
         severity: 'success',
         summary: 'Success',
@@ -150,9 +162,8 @@ const close = () => {
   <div>
     <Toast position="bottom-center" />
     <div class="flex justify-end mb-4">
-        <Button label="Save" @click="saveAllocation" />
+        <Button label="Save" @click="saveAllocation" :disabled="saveButtonDisabled" />
     </div>
-
     <DataTable :value="assets" editMode="row" dataKey="symbol">
         <!-- Name -->
         <Column field="name" header="Asset" style="width: 40%">

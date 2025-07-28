@@ -162,6 +162,11 @@ const goToPortfolio = () => {
       <div class="flex justify-center items-center mb-4">
 
         <Select v-model="selectedPortfolio" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border">
+          <template #header>
+              <div class="p-3">
+                  <span class="font-bold">選擇投資組合</span>
+              </div>
+          </template>
           <template #footer>
               <!-- <div class="p-3">
                   <Button label="New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus text-left" />
