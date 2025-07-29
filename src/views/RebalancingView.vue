@@ -361,7 +361,7 @@ const transactionType = ref([
             </div>
             <div class="flex items-center gap-4 mb-8">
                 <label for="operation" class="font-semibold w-24">Total</label>
-                ${{ newTransaction.shares * newTransaction.price + newTransaction.fee }} USD
+                $ {{ Math.round((newTransaction.shares * newTransaction.price + newTransaction.fee) * 100) / 100 }} USD
             </div>
             <div class="flex justify-end gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="resetDialog()"></Button>

@@ -472,7 +472,14 @@ const dialogHeader = computed(() => {
 
         <DataTable v-model:selection="selectedAssets" :value="transactions" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-            <Column field="symbol" sortable header="Symbol"></Column>
+            <Column field="symbol" sortable header="Symbol">
+                <!-- <template #sorticon="{ sorted, sortOrder }">
+                    <i
+                        v-show="sorted"
+                        :class="sortOrder === 1 ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
+                    ></i>
+                </template> -->
+            </Column>
             <Column field="name" sortable header="Name"></Column>
             <Column field="shares" sortable header="Shares"></Column>
             <Column field="price" sortable header="Price"></Column>

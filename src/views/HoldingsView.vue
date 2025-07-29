@@ -25,6 +25,8 @@ const setHoldings = (data) => {
 
     const totalCost = avgCost * shares;
     const currentValue = Math.round(currentPrice * shares * 100) / 100;
+    const totalProfit = Math.round((currentValue - totalCost) * 100) / 100;
+    const profitPercentage = ((currentValue / (totalCost || 1)) * 100 - 100).toFixed(2);
 
     return {
       id: item.id,
@@ -37,7 +39,9 @@ const setHoldings = (data) => {
       totalCost,
       currentValue,
       target,
-      lastUpdated
+      lastUpdated,
+      totalProfit,
+      profitPercentage
     };
   });
 };
@@ -124,10 +128,26 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
         <Column field="symbol" header="Symbol"></Column>
         <Column field="name" header="Name"></Column>
         <Column field="shares" header="Shares"></Column>
-        <Column field="avgCost" header="Average Cost"></Column>
+        <Column field="totalCost" header="Total Cost"></Column>
         <Column field="currentPrice" header="Current Price"></Column>
         <Column field="currentValue" header="Current Value"></Column>
-        <Column field="lastUpdated" header="Lastest Date"></Column>
+        <Column field="totalProfit" header="Total Profit">
+            <template #body="{ data }">
+                <div :class="{
+                'text-[#5cd59b]': data.totalProfit >= 0,
+                'text-[#f27362]': data.totalProfit < 0
+                }">
+                    <span class="font-bold mr-4 whitespace-nowrap">{{ data.totalProfit > 0 ? '+' : '-' }}${{ Math.abs(data.totalProfit).toFixed(2) }}</span>
+                    <div class="flex items-center gap-2">
+                        <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                        <i v-else class="pi pi-sort-down-fill"></i>
+                        <span>
+                            {{ Math.abs(data.profitPercentage) }}%
+                        </span>
+                    </div>
+                </div>
+            </template>
+        </Column>
 
         <template #empty>
             <div class="p-4 text-center text-gray-500">

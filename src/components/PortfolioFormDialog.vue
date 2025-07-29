@@ -100,7 +100,7 @@ const updatePortfolio = async () => {
           <label for="description" class="font-semibold w-24">Description</label>
           <FloatLabel variant="on">
               <Textarea id="over_label" class="flex-auto" v-model="newPortfolio.description" rows="5" cols="30" style="resize: none" />
-              <label for="on_label">On Label</label>
+              <!-- <label for="on_label">On Label</label> -->
           </FloatLabel>
       </div>
       <div class="flex justify-end gap-2">
