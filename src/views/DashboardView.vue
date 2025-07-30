@@ -5,11 +5,11 @@
         <!-- Total Value Card -->
         <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm font-semibold">Total Value</div>
+                <div class="text-sm font-semibold">{{ $t('totalValue') }}</div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">$3879.76</div>
+                <div class="text-2xl font-bold">{{ totalValue.toFixed(1) }}</div>
                 <div class="text-lg font-bold">$</div>
                 </div>
             </template>
@@ -18,14 +18,19 @@
         <!-- Total Profit Card -->
         <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm font-semibold">Total Profit
+                <div class="text-sm font-semibold">
+                    {{ $t('totalProfit') }}
                     <i class="pi pi-question-circle" v-tooltip.bottom="'總收益 = 總市值 - 總成本'"></i>
                 </div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">$843.64</div>
-                <div class="text-lg font-bold">$</div>
+                    <!-- <div class="bg-[#5cd59b] text-sm px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="pi pi-arrow-up text-xs"></i>
+                        <span>4.2%</span>
+                    </div> -->
+                    <div class="text-2xl font-bold">{{ totalProfit.toFixed(1) }}</div>
+                    <div class="text-lg font-bold">$</div>
                 </div>
             </template>
         </Card>

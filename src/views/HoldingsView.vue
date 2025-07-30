@@ -88,6 +88,21 @@ const deleteSelectedHoldings = async () => {
     }
 }
 
+// 重新整理持股最近的價格
+const getRefreshHoldings = async () => {
+    try {
+        const payload = {
+            uid: auth.user?.uid,
+            portfolio_id: portfolioStore.currentPortfolio?.id
+        };
+        const data = await api.post(`http://localhost:3000/api/holdings/refresh-prices`, payload);
+        console.log('Holdings prices refreshed:', data);
+        setHoldings(data.holdings);
+    } catch (error) {
+        console.error('Error fetching current prices:', error);
+    }
+}
+
 
 
 // 如果有用戶登入，則設定 uid
@@ -122,6 +137,7 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
   <div>
     <div class="flex justify-end mb-4">
         <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
+        <Button label="Refresh Prices" @click="getRefreshHoldings" icon="pi pi-refresh" class="mr-2" />
     </div>
     <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>

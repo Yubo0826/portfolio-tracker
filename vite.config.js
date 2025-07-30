@@ -5,10 +5,12 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 import tailwindcss from '@tailwindcss/vite'
+import yaml from '@rollup/plugin-yaml'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    yaml(),
     vue(),
     vueDevTools(),
     tailwindcss()

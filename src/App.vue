@@ -84,6 +84,7 @@ onMounted(() => {
     isDark.value = true;
     document.documentElement.classList.add('my-app-dark');
   }
+  router.push('/dashboard'); // 預設導向到 Dashboard
 });
 
 // 登入會員相關
@@ -136,12 +137,12 @@ const goToPortfolio = () => {
   <header>
     <div class="wrapper">
       <nav>
-        <RouterLink to="/">
+        <!-- <RouterLink to="/">
           <Button label="Home" severity="secondary" rounded class="m-1" />
         </RouterLink>
         <RouterLink to="/portfolio">
           <Button label="Portfolio" severity="secondary" rounded class="m-1" />
-        </RouterLink>
+        </RouterLink> -->
         <RouterLink to="/dashboard">
           <Button label="Dashboard" severity="secondary" rounded class="m-1" />
         </RouterLink>

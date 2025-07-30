@@ -8,6 +8,18 @@ import router from './router'
 
 const app = createApp(App)
 
+import { createI18n } from 'vue-i18n'
+import messages from './i18n/index.js'
+
+const langCookie = sessionStorage.getItem('lang') || 'en';
+const i18n = createI18n({
+    legacy: false,
+    locale: langCookie,
+    messages
+});
+
+app.use(i18n);
+
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import PrimeVue from 'primevue/config';
@@ -18,7 +30,6 @@ import Aura from '@primeuix/themes/aura';
 import Tooltip from 'primevue/tooltip';
 
 app.directive('tooltip', Tooltip);
-
 
 app.use(PrimeVue, {
     theme: {
