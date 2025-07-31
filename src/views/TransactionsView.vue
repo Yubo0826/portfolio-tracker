@@ -6,11 +6,11 @@ import AutoComplete from 'primevue/autocomplete';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
-import { useAuthStore } from '@/stores/auth'
-const auth = useAuthStore()
+import { useAuthStore } from '@/stores/auth';
+const auth = useAuthStore();
 
 import { usePortfolioStore } from '@/stores/portfolio';
-const portfolioStore = usePortfolioStore()
+const portfolioStore = usePortfolioStore();
 
 const transactionType = ref([
     { name: 'Buy', code: 'buy' },
@@ -22,6 +22,38 @@ const holdings = ref([]);
 const selectedAssets = ref([]);
 const visible = ref(false);
 const isLoading = ref(false);
+
+const transactionForm = ref({
+    date: new Date(),
+    symbol: null,
+    name: '',
+    assetType: '',
+    shares: null,
+    price: null,
+    fee: 0,
+    operation: 'buy'
+});
+
+const errors = ref({
+    date: false,
+    symbol: false,
+    shares: false,
+    price: false,
+    operation: false
+});
+
+const hasError = computed(() => {
+    errors.value = {
+        date: !transactionForm.value.date,
+        symbol: !transactionForm.value.symbol,
+        shares: !transactionForm.value.shares || transactionForm.value.shares <= 0,
+        price: !transactionForm.value.price || transactionForm.value.price <= 0,
+        operation: !transactionForm.value.operation
+    };
+    return Object.values(errors.value).some(Boolean);
+});
+
+const uid = ref(null);
 
 const setTransactions = (data) => {
     transactions.value = data.map(item => ({
@@ -35,82 +67,69 @@ const setTransactions = (data) => {
         transactionType: item.transaction_type,
         date: item.transaction_date.split('T')[0]
     }));
-}
+};
 
 const setHoldings = (data) => {
     holdings.value = data.map(item => ({
         symbol: item.symbol,
         name: item.name,
-        total_shares: parseInt(item.total_shares) || 0,
+        total_shares: parseInt(item.total_shares) || 0
     }));
-}
-
-
-// 根據 google 登入的用戶 ID 取得交易資料
-const uid = ref(null);
+};
 
 const getTransactions = async () => {
-    if (!uid.value) {
-        console.warn('No user ID found, cannot fetch transactions');
-        return;
-    }
+    if (!uid.value) return;
     try {
         isLoading.value = true;
         if (portfolioStore.currentPortfolio) {
             const data = await api.get(`http://localhost:3000/api/transactions?uid=${uid.value}&portfolio_id=${portfolioStore.currentPortfolio.id}`);
-            console.log('Fetched data:', data);
             setTransactions(data.transactions);
             setHoldings(data.holdings);
-        } else {
-            console.warn('No current portfolio selected');
         }
     } catch (error) {
-        console.error('Error fetching transactions:', error);
-    }
-    finally {
+        console.error(error);
+    } finally {
         isLoading.value = false;
     }
-}
+};
 
-// 如果有用戶登入，則設定 uid
 if (auth.user) {
-    uid.value = auth.user.uid; 
-    getTransactions(); // 取得交易資料
-    console.log('User is logged in:', auth.user);
-} else {
-    console.log('No user is logged in');
+    uid.value = auth.user.uid;
+    getTransactions();
 }
 
-/*
-    1. 監聽 auth.user 的變化，如果有用戶登入則取得交易資料
-    2. 如果已在登入狀態下刷新瀏覽器 auth.user 會自動重新登入
-*/
 watch(() => auth.user, (newUser) => {
-  if (newUser) {
-    uid.value = newUser.uid;
-    getTransactions(); // 取得交易資料
-  }
-})
-
-watch(() => portfolioStore.currentPortfolio, (newVal) => {
-    if (newVal?.id) {
+    if (newUser) {
+        uid.value = newUser.uid;
         getTransactions();
     }
 });
 
+watch(() => portfolioStore.currentPortfolio, (newVal) => {
+    if (newVal?.id) getTransactions();
+});
+
+const resetDialog = () => {
+    editingId.value = null;
+    transactionForm.value = {
+        date: new Date(),
+        symbol: null,
+        name: '',
+        assetType: '',
+        shares: null,
+        price: null,
+        fee: 0,
+        operation: 'buy'
+    };
+};
+
 const addShare = (amount) => {
-    if (newShare.value === null || newShare.value === undefined) {
-        newShare.value = 0;
-    }
-    newShare.value += amount;
-}
+    if (!transactionForm.value.shares) transactionForm.value.shares = 0;
+    transactionForm.value.shares += amount;
+};
 
 const deleteSelectedAssets = () => {
-    console.log('Deleting selected transactions:', selectedAssets.value);
-    if (selectedAssets.value.length === 0) {
-        console.warn('No transactions selected for deletion');
-        return;
-    }
+    if (selectedAssets.value.length === 0) return;
     const idsToDelete = selectedAssets.value.map(asset => asset.id);
     const payload = {
         uid: uid.value,
@@ -119,248 +138,61 @@ const deleteSelectedAssets = () => {
     };
     api.delete(`http://localhost:3000/api/transactions`, payload)
     .then(data => {
-        console.log('Assets deleted:', data);
-        // 更新本地 transactions 列表
         transactions.value = transactions.value.filter(asset => !idsToDelete.includes(asset.id));
-        selectedAssets.value = []; // 清空選擇的資產
-    })
-    .catch(error => {
-        console.error('Error deleting transactions:', error);
-    });
-}
+        selectedAssets.value = [];
+    }).catch(console.error);
+};
 
-const editingId = ref(null); // 如果有值表示目前在更新中
+const editingId = ref(null);
 
 const updateSelectedAssets = (id) => {
-    const assetToUpdate = transactions.value.find(asset => asset.id === id);
-    if (!assetToUpdate) return;
-
+    const asset = transactions.value.find(asset => asset.id === id);
+    if (!asset) return;
     visible.value = true;
-    editingId.value = id; // 設定編輯 ID
-
-    selectedSymbol.value = { 
-        symbol: assetToUpdate.symbol,
-        name: assetToUpdate.name,
-        assetType: assetToUpdate.assetType
+    editingId.value = id;
+    transactionForm.value = {
+        date: new Date(asset.date),
+        symbol: asset.symbol,
+        name: asset.name,
+        assetType: asset.assetType,
+        shares: asset.shares,
+        price: asset.price,
+        fee: asset.fee,
+        operation: asset.transactionType
     };
-    oldShare.value = assetToUpdate.shares;
-    newShare.value = assetToUpdate.shares;
-    newFee.value = assetToUpdate.fee || 0;
-    newPrice.value = assetToUpdate.price;
-    newDate.value = new Date(assetToUpdate.date);
-    selectedOperation.value = transactionType.value.find(op => op.code === assetToUpdate.transactionType) || transactionType.value[0];
 };
 
-const oldShare = ref(null);
-const newShare = ref(null);
-const newFee = ref(0);
-const newDate = ref(new Date()); // 預設今天
-const selectedOperation = ref(transactionType.value[0].code); // 預設為買入
-
-const errors = ref({
-  date: false,
-  symbol: false,
-  shares: false,
-  price: false,
-  operation: false
-})
-
-// 檢查新增 & 更新資產欄位是否有錯誤
-const hasError = computed(() => {
-    errors.value = {
-        date: !newDate.value,
-        symbol: !selectedSymbol.value,
-        shares: !newShare.value || newShare.value <= 0,
-        price: !newPrice.value || newPrice.value <= 0,
-        operation: !selectedOperation.value
-    }
-    return Object.values(errors.value).some(Boolean);
-});
-
-const saveTransaction = async () => {
-    if (hasError.value) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error Message',
-            detail: 'Please fill in all required fields.',
-            life: 3000
-        });
-        return
-    }
-
-    /* 
-        如果更新資料且類型是賣出，檢查：
-        新的 shares 是否會超出原本的持有量
-    */
-   
-    if (editingId.value !== null && selectedOperation.value === 'sell') {
-        const holding = holdings.value.find(h => h.symbol === selectedSymbol.value.symbol.toUpperCase());
-        if (newShare.value > holding.total_shares + oldShare.value) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error Message',
-                detail: 'Not enough shares to sell.',
-                life: 3000
-            });
-            return;
-        }
-    }
-    
-    /* 
-        如果新增資料且類型是賣出，檢查：
-        1. 股票必須已存在於資產中
-        2. shares 必須小於在資產已存在的 shares
-    */
-
-    if (editingId.value === null && selectedOperation.value === 'sell') {
-        const holding = holdings.value.find(h => h.symbol === selectedSymbol.value.symbol.toUpperCase());
-        console.log('Holding for sell check:', holding);
-        if (!holding) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error Message',
-                detail: `You don't own any shares of ${selectedSymbol.value.symbol}`,
-                life: 3000
-            });
-            return;
-        }
-        if (newShare.value > holding.total_shares) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error Message',
-                detail: `Not enough shares to sell. You only have ${holding.total_shares} shares of ${selectedSymbol.value.symbol}`,
-                life: 3000
-            });
-            return;
-        }
-    }
-
-    if (newFee.value < 0) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error Message',
-            detail: 'Fee cannot be negative.',
-            life: 3000
-        });
-        return;
-    }
-
-    const payload = {
-        uid: uid.value,
-        portfolio_id: portfolioStore.currentPortfolio?.id,
-        symbol: selectedSymbol.value.symbol.toUpperCase(),
-        name: selectedSymbol.value.name,
-        asset_type: selectedSymbol.value.assetType,
-        shares: newShare.value,
-        fee: newFee.value || 0,
-        price: newPrice.value,
-        transaction_type: selectedOperation.value,
-        transaction_date: newDate.value.toISOString().split('T')[0]
-    };
-
-    console.log('Saving transaction payload:', payload);
-
-    try {
-        if (editingId.value !== null) {
-            // 更新交易
-            const result = await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
-            // 更新本地資料
-            // const index = transactions.value.findIndex(a => a.id === editingId.value);
-            // if (index !== -1) transactions.value[index] = { id: editingId.value, ...payload };
-            console.log('Transaction updated:', result);
-            if (result.message === 'No changes detected, transaction not updated') {
-                toast.add({
-                    severity: 'warn',
-                    summary: 'Warn Message',
-                    detail: 'No changes detected, transaction not updated.',
-                    life: 3000
-                });
-                return;
-            }
-
-            setTransactions(result.transactions);
-            setHoldings(result.holdings);
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success Message',
-                detail: 'Transaction updated successfully.',
-                life: 3000
-            });
-        } else {
-            // 新增交易
-            const result = await api.post('http://localhost:3000/api/transactions', payload);
-            setTransactions(result.transactions);
-            setHoldings(result.holdings);
-        }
-
-        visible.value = false;
-        resetDialog();
-    } catch (err) {
-        console.error(err);
-        if (err.message === 'Not enough shares to sell') {
-            alert(`Not enough shares to sell. Please check your holdings.`);
-        } else {
-            alert(err.message || 'An error occurred while saving the transaction');
-        }
-    }
-};
-
-const resetDialog = () => {
-    console.log('Reset dialog');
-    editingId.value = null;
-    selectedSymbol.value = null;
-    oldShare.value = null;
-    newShare.value = null;
-    newPrice.value = null;
-    newDate.value = null;
-    newFee.value = 0;
-    selectedOperation.value = transactionType.value[0].code; // 預設為買入
-};
-
-
-// Auto complete symbol search
 import debounce from 'lodash/debounce';
-const selectedSymbol = ref(null);
 const filteredSymbols = ref([]);
 
 const search = async (event) => {
-    console.log('Searching for symbols:', event.query);
     if (!event.query.trim().length) return;
     api.get('http://localhost:3000/api/search/symbols?query=' + event.query)
     .then(data => {
-        console.log('Search results:', data);
         filteredSymbols.value = data.map(item => ({
             symbol: item.ticker,
             name: item.name,
             assetType: item.assetType
         }));
-    })
-    .catch(error => {
-        console.error('Error fetching symbols:', error);
-        filteredSymbols.value = [];
-    });
-    
-}
+    }).catch(() => filteredSymbols.value = []);
+};
 
 const debouncedSearch = debounce(search, 100);
 
-// Callback：查詢選擇的股票當天的價格 (根據選擇的日期)
-const newPrice = ref(null);
-
 const onItemSelect = async (event) => {
-    console.log('Selected symbol:', event.value);
-    const symbol = event.value.symbol
-    const date = newDate.value?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]; // 使用選擇的日期或當前日期
-    searchPrice(symbol, date);
+    const selected = event.value;
+    transactionForm.value.symbol = selected.symbol;
+    transactionForm.value.name = selected.name;
+    transactionForm.value.assetType = selected.assetType;
+    const date = transactionForm.value.date?.toISOString().split('T')[0];
+    searchPrice(selected.symbol, date);
 };
 
 const onDateSelect = async (event) => {
-    console.log('Selected date:', event);
-    if (selectedSymbol.value) {
-        const symbol = selectedSymbol.value.symbol;
-        const date = event.toISOString().split('T')[0]; // 使用選擇的日期
-        searchPrice(symbol, date);
+    transactionForm.value.date = event;
+    if (transactionForm.value.symbol) {
+        const date = event.toISOString().split('T')[0];
+        searchPrice(transactionForm.value.symbol, date);
     }
 };
 
@@ -369,25 +201,78 @@ const searchPrice = async (symbol, date) => {
     try {
         const data = await api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`);
         if (data.length > 0) {
-            newPrice.value = data[0].close; // close 屬性是當天的收盤價
+            transactionForm.value.price = data[0].close;
         } else {
-            newPrice.value = null; // 沒有找到價格
+            transactionForm.value.price = null;
         }
-    } catch (error) {
-        console.error('Error fetching price:', error);
-        newPrice.value = null;
+    } catch (e) {
+        transactionForm.value.price = null;
     }
 };
 
 const totalPrice = computed(() => {
-    return Number((newShare.value * newPrice.value).toFixed(2));
+    return Number((transactionForm.value.shares * transactionForm.value.price).toFixed(2)) || 0;
 });
 
-const dialogHeader = computed(() => {
-    return editingId.value !== null ? 'Update Transaction' : 'New Transaction';
-});
+const dialogHeader = computed(() => editingId.value !== null ? 'Update Transaction' : 'New Transaction');
 
+const saveTransaction = async () => {
+    if (hasError.value) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Please fill in all required fields.', life: 3000 });
+        return;
+    }
 
+    if (editingId.value !== null && transactionForm.value.operation === 'sell') {
+        const holding = holdings.value.find(h => h.symbol === transactionForm.value.symbol.toUpperCase());
+        if (transactionForm.value.shares > (holding?.total_shares || 0)) {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Not enough shares to sell.', life: 3000 });
+            return;
+        }
+    }
+
+    if (editingId.value === null && transactionForm.value.operation === 'sell') {
+        const holding = holdings.value.find(h => h.symbol === transactionForm.value.symbol.toUpperCase());
+        if (!holding || transactionForm.value.shares > holding.total_shares) {
+            toast.add({ severity: 'error', summary: 'Error', detail: `Not enough shares to sell.`, life: 3000 });
+            return;
+        }
+    }
+
+    if (transactionForm.value.fee < 0) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Fee cannot be negative.', life: 3000 });
+        return;
+    }
+
+    const payload = {
+        uid: uid.value,
+        portfolio_id: portfolioStore.currentPortfolio?.id,
+        symbol: transactionForm.value.symbol.toUpperCase(),
+        name: transactionForm.value.name,
+        asset_type: transactionForm.value.assetType,
+        shares: transactionForm.value.shares,
+        fee: transactionForm.value.fee || 0,
+        price: transactionForm.value.price,
+        transaction_type: transactionForm.value.operation,
+        transaction_date: transactionForm.value.date.toISOString().split('T')[0]
+    };
+
+    try {
+        if (editingId.value !== null) {
+            const result = await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
+            setTransactions(result.transactions);
+            setHoldings(result.holdings);
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Transaction updated.', life: 3000 });
+        } else {
+            const result = await api.post('http://localhost:3000/api/transactions', payload);
+            setTransactions(result.transactions);
+            setHoldings(result.holdings);
+        }
+        visible.value = false;
+        resetDialog();
+    } catch (err) {
+        alert(err.message || 'Error saving transaction');
+    }
+};
 </script>
 <template>
     <div>
@@ -413,7 +298,7 @@ const dialogHeader = computed(() => {
                         Date
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <DatePicker v-model="newDate" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" class="flex-auto" placeholder="交易的日期" />
+                    <DatePicker v-model="transactionForm.date" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" class="flex-auto" placeholder="交易的日期" />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="symbol" class="font-semibold w-24">
@@ -421,7 +306,7 @@ const dialogHeader = computed(() => {
                         <span style="color: #f27362;">*</span>
                     </label>
                     <AutoComplete 
-                        v-model="selectedSymbol" 
+                        v-model="transactionForm.symbol" 
                         optionLabel="symbol" 
                         :suggestions="filteredSymbols" 
                         @complete="debouncedSearch" 
@@ -435,7 +320,7 @@ const dialogHeader = computed(() => {
                         Shares
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <InputNumber v-model="newShare" id="shares" class="flex-auto" autocomplete="off" />
+                    <InputNumber v-model="transactionForm.shares" id="shares" class="flex-auto" autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-2 mb-4 p-2 text-xs">
                     <label for="" class="font-semibold w-24"></label>
@@ -448,15 +333,15 @@ const dialogHeader = computed(() => {
                         Price
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <InputText v-model="newPrice" id="price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
+                    <InputText v-model="transactionForm.price" id="price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Operation</label>
-                    <SelectButton v-model="selectedOperation" :options="transactionType" optionLabel="name" optionValue="code" />
+                    <SelectButton v-model="transactionForm.operation" :options="transactionType" optionLabel="name" optionValue="code" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="fee" class="font-semibold w-24">Fee</label>
-                    <InputNumber v-model="newFee" id="fee" class="flex-auto" showButtons autocomplete="off" />
+                    <InputNumber v-model="transactionForm.fee" id="fee" class="flex-auto" showButtons autocomplete="off" />
                 </div>
                 <div class="flex items-center gap-4 mb-8">
                     <label for="operation" class="font-semibold w-24">Total</label>

@@ -84,7 +84,6 @@ onMounted(() => {
     isDark.value = true;
     document.documentElement.classList.add('my-app-dark');
   }
-  router.push('/dashboard'); // 預設導向到 Dashboard
 });
 
 // 登入會員相關

@@ -23,7 +23,7 @@ const setHoldings = (data) => {
     const target = parseFloat(item.target_percentage) || 0;
     const lastUpdated = item.last_updated?.split('T')[0] || '';
 
-    const totalCost = avgCost * shares;
+    const totalCost = Math.round(avgCost * shares * 100) / 100;
     const currentValue = Math.round(currentPrice * shares * 100) / 100;
     const totalProfit = Math.round((currentValue - totalCost) * 100) / 100;
     const profitPercentage = ((currentValue / (totalCost || 1)) * 100 - 100).toFixed(2);

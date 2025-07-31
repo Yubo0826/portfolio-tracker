@@ -60,10 +60,6 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
   }
 });
 
-const test = () => {
-  console.log('assets.value', assets.value);
-  console.log('oldAssets.value', oldAssets.value);
-}
 
 const search = async (event) => {
   if (!event.query.trim().length) return;
@@ -92,7 +88,16 @@ const onItemSelect = (event) => {
 };
 
 const confirmAddAsset = async () => {
-    if (!newAssetRow.value?.symbol || !newAssetRow.value?.name) return;
+    if (!newAssetRow.value?.symbol || !newAssetRow.value?.name) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error Message',
+            detail: '請重新輸入後選擇下拉選單中的資產',
+            life: 3000
+        });
+        return;
+    }
+
     assets.value.push(
         {
             ...newAssetRow.value,
@@ -115,7 +120,7 @@ const saveButtonDisabled = computed(() => {
 
 const saveAllocation = async () => {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
-  if (totalTarget.value !== 100) {
+  if (assets.value.length > 0 && totalTarget.value !== 100) {
     toast.add({
         severity: 'error',
         summary: 'Error Message',
@@ -181,7 +186,7 @@ const close = () => {
                 </div>
                 <div v-else class="flex flex-col gap-2">
                     <AutoComplete v-model="selectedSymbol" optionLabel="symbol" :suggestions="filteredSymbols"
-                    @complete="debouncedSearch" @item-select="onItemSelect" placeholder="Search ticker or name" />
+                    @complete="debouncedSearch" @item-select="onItemSelect" placeholder="Input Symbol" />
                 </div>
             </template>
         </Column>
