@@ -91,6 +91,7 @@ const deleteSelectedHoldings = async () => {
 // 重新整理持股最近的價格
 const getRefreshHoldings = async () => {
     try {
+        isLoading.value = true;
         const payload = {
             uid: auth.user?.uid,
             portfolio_id: portfolioStore.currentPortfolio?.id
@@ -100,6 +101,9 @@ const getRefreshHoldings = async () => {
         setHoldings(data.holdings);
     } catch (error) {
         console.error('Error fetching current prices:', error);
+    }
+    finally {
+        isLoading.value = false;
     }
 }
 
@@ -139,6 +143,7 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
         <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
         <Button label="Refresh Prices" @click="getRefreshHoldings" icon="pi pi-refresh" class="mr-2" />
     </div>
+    <img src="https://finance.yahoo.com/quote/AAPL/" alt="">
     <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column field="symbol" header="Symbol"></Column>

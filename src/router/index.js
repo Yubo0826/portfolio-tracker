@@ -46,6 +46,11 @@ const router = createRouter({
       path: '/rebalancing',
       name: 'rebalancing',
       component: () => import('../views/RebalancingView.vue'),
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component: () => import('../views/TestView.vue'),
     }
   ],
 })

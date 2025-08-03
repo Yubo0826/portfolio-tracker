@@ -67,16 +67,17 @@
                 <!-- Name -->
                 <Column field="name" header="現在資產" style="width: 40%">
                     <template #body="{ data }">
-                        <div>
-                            <!-- <img :src="data.icon" class="w-5 h-5 mr-2" /> -->
-                            <span class="font-bold mr-4">{{ data.symbol }}</span>
-                            <div class="">{{ data.name }}</div>
+                        <div class="flex items-center">
+                            <StockIcon :symbol="data.symbol" class="mr-8"></StockIcon>                        
+                            <div>
+                                <span class="font-bold mr-4">{{ data.symbol }}</span>
+                                <div class="">{{ data.name }}</div>
+                            </div>
                         </div>
                     </template>
                 </Column>
         
                 <Column field="shares" header="持有股數"></Column>
-                <Column field="avgCost" header="平均成本"></Column>
                 <Column field="totalCost" header="交易金額"></Column>
                 <Column field="currentPrice" header="市值"></Column>
                 <Column field="currentValue" header="總市值" sortable></Column>
@@ -100,6 +101,7 @@
 </div>
 </template>
 <script setup>
+import StockIcon from '@/components/StockIcon.vue';
 import Card from 'primevue/card';
 import { ref, watch, computed } from 'vue';
 import api from '@/api';
@@ -229,6 +231,7 @@ const allocationSeries = computed(() => {
     return allocation.value.map(a => a.target);
 });
 
+
 // 如果有用戶登入，則設定 uid
 if (auth.user) {
     getData(); // 取得交易資料
@@ -243,4 +246,6 @@ watch(
   },
   { immediate: true }
 );
+
+
 </script>

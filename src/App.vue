@@ -157,6 +157,9 @@ const goToPortfolio = () => {
         <RouterLink to="/rebalancing">
           <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
         </RouterLink>
+        <RouterLink to="/test">
+          <Button label="Test" severity="secondary" rounded class="m-1" />
+        </RouterLink>
       </nav>
 
       <div class="flex justify-center items-center mb-4">

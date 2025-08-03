@@ -165,7 +165,7 @@ const close = () => {
 
 <template>
   <div>
-    <Toast position="bottom-center" />
+    <Toast position="top-center" />
     <div class="flex justify-end mb-4">
         <Button label="Save" @click="saveAllocation" :disabled="saveButtonDisabled" />
     </div>
@@ -198,8 +198,8 @@ const close = () => {
             </template>
 
             <template #header>
-                <span v-if="totalTarget === 100" class="font-semibold">Target (%)</span>
-                <span v-else class="text-gray-500 font-semibold">Total: {{ totalTarget }}%</span>
+                <span v-if="totalTarget === 100" class="font-semibold  p-1">Target: 100%</span>
+                <span v-else class="text-gray-500 bg-orange-300 rounded-md p-1 font-semibold">Total: {{ totalTarget }}%</span>
             </template>
 
             <template #footer v-if="inputVisible">

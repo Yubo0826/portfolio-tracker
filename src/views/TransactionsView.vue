@@ -140,6 +140,7 @@ const deleteSelectedAssets = () => {
     .then(data => {
         transactions.value = transactions.value.filter(asset => !idsToDelete.includes(asset.id));
         selectedAssets.value = [];
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Transactions deleted successfully.', life: 3000 });
     }).catch(console.error);
 };
 
@@ -167,12 +168,18 @@ const filteredSymbols = ref([]);
 
 const search = async (event) => {
     if (!event.query.trim().length) return;
-    api.get('http://localhost:3000/api/search/symbols?query=' + event.query)
+    api.get('http://localhost:3000/api/yahoo/symbol?query=' + event.query)
     .then(data => {
+        console.log('Search symbols:', data);
+        // filteredSymbols.value = data.map(item => ({
+        //     symbol: item.ticker,
+        //     name: item.name,
+        //     assetType: item.assetType
+        // }));
         filteredSymbols.value = data.map(item => ({
-            symbol: item.ticker,
-            name: item.name,
-            assetType: item.assetType
+            symbol: item.symbol,
+            name: item.longname,
+            assetType: item.typeDisp,
         }));
     }).catch(() => filteredSymbols.value = []);
 };
@@ -198,10 +205,12 @@ const onDateSelect = async (event) => {
 
 const searchPrice = async (symbol, date) => {
     if (!symbol || !date) return;
+    const nextDay = new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     try {
-        const data = await api.get(`http://localhost:3000/api/search/price/${symbol}?startDate=${date}&endDate=${date}`);
-        if (data.length > 0) {
-            transactionForm.value.price = data[0].close;
+        const data = await api.get(`http://localhost:3000/api/yahoo/chart/?symbol=${symbol}&period1=${date}&period2=${nextDay}`);
+        console.log('Fetched price data:', data);
+        if (data.quotes && data.quotes.length > 0) {
+            transactionForm.value.price = data.quotes[0].close.toFixed(2);
         } else {
             transactionForm.value.price = null;
         }
@@ -276,7 +285,7 @@ const saveTransaction = async () => {
 </script>
 <template>
     <div>
-        <Toast />
+        <Toast position="top-center" />
         <div class="flex justify-end mb-4">
             <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
             <Button label="Add" @click="visible = true" icon="pi pi-plus" />
