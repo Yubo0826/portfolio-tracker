@@ -15,12 +15,15 @@
         :options="chartOptions"
         :series="chartSeries"
       />
+
+      <KLineChart />
     </div>
   </template>
   
   <script setup>
   import { ref, onMounted } from 'vue'
   import api from '@/api'
+  import KLineChart from '@/components/KLineChart.vue'
   
   const selectedRange = ref('7d')
   
@@ -116,6 +119,7 @@ async function fetchChartData() {
       }))
 
     chartSeries.value[0].data = chartData
+    console.log('Chart data:', chartSeries.value[0].data)
   } catch (error) {
     console.error('取得資料失敗:', error)
   }
