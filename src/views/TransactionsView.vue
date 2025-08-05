@@ -252,6 +252,8 @@ const saveTransaction = async () => {
         return;
     }
 
+    
+
     const payload = {
         uid: uid.value,
         portfolio_id: portfolioStore.currentPortfolio?.id,
@@ -265,14 +267,18 @@ const saveTransaction = async () => {
         transaction_date: transactionForm.value.date.toISOString().split('T')[0]
     };
 
+    console.log('Saving transaction payload:', payload);
+
     try {
         if (editingId.value !== null) {
             const result = await api.put(`http://localhost:3000/api/transactions/${editingId.value}`, payload);
+             console.log('Transaction saved:', result);
             setTransactions(result.transactions);
             setHoldings(result.holdings);
             toast.add({ severity: 'success', summary: 'Success', detail: 'Transaction updated.', life: 3000 });
         } else {
             const result = await api.post('http://localhost:3000/api/transactions', payload);
+            console.log('Transaction saved:', result);
             setTransactions(result.transactions);
             setHoldings(result.holdings);
         }
@@ -321,7 +327,7 @@ const saveTransaction = async () => {
                         @complete="debouncedSearch" 
                         @item-select="onItemSelect"
                         :delay="600" 
-                        :disabled="editingId" 
+                        :disabled="editingId ? true : false" 
                         />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
