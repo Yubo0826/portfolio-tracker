@@ -34,6 +34,19 @@
                 </div>
             </template>
         </Card>
+
+        <!-- XIRR Card -->
+        <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+            <template #title>
+                <div class="text-sm font-semibold">IRR</div>
+            </template>
+            <template #content>
+                <div class="flex justify-between items-center mt-2">
+                <div class="text-2xl font-bold">{{ irr }}</div>
+                <div class="text-lg font-bold">%</div>
+                </div>
+            </template>
+        </Card>
     </div>
 
     <div class="flex flex-col sm:flex-row w-full gap-4 mb-12">
@@ -54,7 +67,7 @@
             </template>
             <template #content>
                 <div class="flex justify-between items-center mb-4">
-                    <apexchart width="380" type="donut" :options="holdingsChart" :series="allocationSeries"></apexchart>
+                    <apexchart width="380" type="donut" :options="allocationChart" :series="allocationSeries"></apexchart>
                 </div>
                 <div class="text-sm text-gray-500 mb-4">各股目標配置的比例</div>
             </template>
@@ -67,11 +80,11 @@
                 <!-- Name -->
                 <Column field="name" header="現在資產" style="width: 40%">
                     <template #body="{ data }">
-                        <div class="flex items-center">
+                        <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md">
                             <StockIcon :symbol="data.symbol" class="mr-8"></StockIcon>                        
                             <div>
                                 <span class="font-bold mr-4">{{ data.symbol }}</span>
-                                <div class="">{{ data.name }}</div>
+                                <div>{{ data.name }}</div>
                             </div>
                         </div>
                     </template>
@@ -105,6 +118,7 @@ import StockIcon from '@/components/StockIcon.vue';
 import Card from 'primevue/card';
 import { ref, watch, computed } from 'vue';
 import api from '@/api';
+import xirr from 'xirr';
 
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -114,6 +128,8 @@ const portfolioStore = usePortfolioStore();
 const isLoading = ref(false);
 
 const holdings = ref([]);
+
+// 取得持股資料
 const getHoldings = async () => {
     try {
         const data = await api.get(`http://localhost:3000/api/holdings/?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
@@ -155,6 +171,7 @@ const setHoldings = (data) => {
 
 const allocation = ref([]);
 
+// 取得資產配置資料
 const getAllocation = async () => {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
@@ -166,16 +183,58 @@ const getAllocation = async () => {
   }
 };
 
-const getData = async () => {
-    isLoading.value = true;
+const transactions = ref([]);
+
+// 取得交易資料
+const getTransactions = async () => {
     try {
-        await getHoldings();
-        await getAllocation();
+        if (portfolioStore.currentPortfolio) {
+            const data = await api.get(`http://localhost:3000/api/transactions?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+            setTransactions(data.transactions);
+        }
     } catch (error) {
-        console.error('Error fetching data:', error);
-    } finally {
-        isLoading.value = false;
+        console.error(error);
     }
+};
+
+const setTransactions = (data) => {
+    transactions.value = data.map(item => ({
+        id: item.id,
+        symbol: item.symbol,
+        name: item.name,
+        assetType: item.assetType,
+        price: parseFloat(item.price) || 0,
+        fee: parseFloat(item.fee) || 0,
+        shares: parseInt(item.shares) || 0,
+        transactionType: item.transaction_type,
+        date: item.transaction_date.split('T')[0]
+    }));
+};
+
+const dividends = ref([]);
+
+const getDividends = async () => {
+  try {
+    const data = await api.get(`http://localhost:3000/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    console.log('Dividends data:', data);
+    setDividends(data);
+  } catch (error) {
+    console.error('Error fetching dividends:', error);
+  }
+};
+
+const setDividends = (data) => {
+  dividends.value = data.map(item => {
+    return {
+      id: item.id,
+      symbol: item.symbol,
+      name: item.name,
+      shares: item.shares,
+      amount: item.amount,
+      totalAmount: (item.shares * item.amount).toFixed(2),
+      date: item.date.slice(0, 10) // 格式化日期為 YYYY-MM-DD
+    };
+  });
 };
 
 const totalValue = ref(0);
@@ -231,6 +290,57 @@ const allocationSeries = computed(() => {
     return allocation.value.map(a => a.target);
 });
 
+const irr = computed(() => {
+  if (!transactions.value.length || !holdings.value.length) return null;
+
+  const cashflows = [];
+
+  // 處理所有交易紀錄
+  transactions.value.forEach(tx => {
+    const amount = (tx.price * tx.shares + tx.fee) * (tx.transactionType === 'buy' ? -1 : 1);
+    cashflows.push({
+      amount,
+      when: new Date(tx.date),
+    });
+  });
+
+  dividends.value.forEach(d => {
+    cashflows.push({
+        amount: parseFloat(d.totalAmount),
+        when: new Date(d.date),
+    });
+  });
+
+  // 加入當前總市值作為最後一筆現金流入
+  cashflows.push({
+    amount: holdings.value.reduce((sum, h) => sum + h.currentValue, 0),
+    when: new Date(),
+  });
+
+  console.log('Cashflows for XIRR:', cashflows);
+
+  try {
+    const rate = xirr(cashflows);
+    return (rate * 100).toFixed(2); // 轉成百分比顯示
+  } catch (error) {
+    console.error('Error calculating XIRR:', error);
+    return 'N/A';
+  }
+});
+
+const getData = async () => {
+    isLoading.value = true;
+    try {
+        await getHoldings();
+        await getAllocation();
+        await getTransactions();
+        await getDividends();
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    } finally {
+        isLoading.value = false;
+    }
+};
 
 // 如果有用戶登入，則設定 uid
 if (auth.user) {

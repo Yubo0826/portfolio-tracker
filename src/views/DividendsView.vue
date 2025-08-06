@@ -1,17 +1,17 @@
 <template>
     <div>
       <div class="flex justify-end mb-4">
-          <Button label="Refresh Prices" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" />
+          <Button label="Refresh" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" />
       </div>
       <DataTable :value="dividends" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
           <Column field="" header="Holding" style="width: 40%">
             <template #body="{ data }">
                 <div>
-                    <div class="">{{ data.name }}</div>
-                    <span class="font-bold mr-4">{{ data.symbol }}</span>
+                  <span class="font-bold mr-4">{{ data.symbol }}</span>
+                  <div>{{ data.name }}</div>
                 </div>
             </template>
-        </Column>
+          </Column>
           <Column field="shares" header="Shares"></Column>
           <Column field="amount" header="Amount"></Column>
           <Column field="totalAmount" header="Total Amount"></Column>
@@ -85,7 +85,7 @@ const refreshDividends = async () => {
 
 watch(() => auth.user, (newUser) => {
   if (newUser && portfolioStore.currentPortfolio?.id) {
-    getDividends(); // 取得交易資料
+    getDividends();
   }
 })
 
@@ -97,7 +97,7 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
 
 onMounted(() => {
   if (auth.user?.uid && portfolioStore.currentPortfolio?.id) {
-    getDividends(); // 取得交易資料
+    getDividends();
   } else {
     console.log('No user is logged in or portfolio is not selected');
   }

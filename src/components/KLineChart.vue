@@ -19,8 +19,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineProps } from 'vue'
 import api from '@/api'
+
+const props = defineProps({
+  symbol: {
+    type: String,
+    required: true
+  }
+})
 
 const selectedRange = ref('1mo')
 
@@ -51,7 +58,7 @@ const chartOptions = ref({
     }
   },
   title: {
-    text: 'AAPL K 線圖',
+    text: `${props.symbol} · K 線圖`,
     align: 'left'
   },
   xaxis: {
@@ -100,13 +107,12 @@ function formatDate(date) {
 }
 
 async function fetchChartData() {
-  const symbol = 'AAPL'
   const range = selectedRange.value
   const { period1, period2 } = getPeriodRange(range)
 
   try {
     const res = await api.get(
-      `http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`
+      `http://localhost:3000/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`
     )
     const quotes = res.quotes || []
 

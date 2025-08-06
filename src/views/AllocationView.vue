@@ -1,12 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import api from '@/api';
-import AutoComplete from 'primevue/autocomplete';
-import InputNumber from 'primevue/inputnumber';
-import Button from 'primevue/button';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import debounce from 'lodash/debounce';
+import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
@@ -20,7 +15,6 @@ const isLoading = ref(true);
 const assets = ref([]);
 const oldAssets = ref([]);
 const selectedSymbol = ref(null);
-const filteredSymbols = ref([]);
 const inputVisible = ref(false);
 const newTarget = ref(0);
 const newAssetRow = ref(null);
@@ -60,39 +54,24 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
   }
 });
 
-
-const search = async (event) => {
-  if (!event.query.trim().length) return;
-  try {
-    const data = await api.get('http://localhost:3000/api/search/symbols?query=' + event.query);
-    console.log('Fetched symbols:', data);
-    filteredSymbols.value = data.map(item => ({
-      symbol: item.ticker,
-      name: item.name,
-      icon: item.icon || `https://logo.clearbit.com/${item.ticker}.com`
-    }));
-  } catch (error) {
-    console.error('Error fetching symbols:', error);
-    filteredSymbols.value = [];
-  }
-};
-
-const debouncedSearch = debounce(search, 300);
-
-const onItemSelect = (event) => {
-  newAssetRow.value = {
-    symbol: event.value.symbol,
-    name: event.value.name,
-    icon: event.value.icon,
-  };
-};
-
 const confirmAddAsset = async () => {
     if (!newAssetRow.value?.symbol || !newAssetRow.value?.name) {
         toast.add({
             severity: 'error',
             summary: 'Error Message',
             detail: '請重新輸入後選擇下拉選單中的資產',
+            life: 3000
+        });
+        return;
+    }
+
+    // 檢查是否已存在相同的資產
+    const existingAsset = assets.value.find(asset => asset.symbol === newAssetRow.value.symbol);
+    if (existingAsset) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error Message',
+            detail: '此資產已存在，請勿重複添加',
             life: 3000
         });
         return;
@@ -159,8 +138,6 @@ const close = () => {
   newAssetRow.value = null;
 };
 
-
-
 </script>
 
 <template>
@@ -185,8 +162,16 @@ const close = () => {
                     <Button icon="pi pi-plus" text label="Add Asset" @click="inputVisible = true" />
                 </div>
                 <div v-else class="flex flex-col gap-2">
-                    <AutoComplete v-model="selectedSymbol" optionLabel="symbol" :suggestions="filteredSymbols"
-                    @complete="debouncedSearch" @item-select="onItemSelect" placeholder="Input Symbol" />
+                    <SymbolAutoComplete 
+                      v-model="selectedSymbol"
+                      @update="({ symbol, name, assetType }) => {
+                          newAssetRow = {
+                              symbol,
+                              name,
+                              assetType
+                          };
+                      }"
+                    />
                 </div>
             </template>
         </Column>

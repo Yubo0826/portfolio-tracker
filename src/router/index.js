@@ -53,6 +53,11 @@ const router = createRouter({
       component: () => import('../views/DividendsView.vue'),
     },
     {
+      path: '/asset/:symbol',
+      name: 'asset',
+      component: () => import('../views/AssetView.vue'),
+    },
+    {
       path: '/test',
       name: 'test',
       component: () => import('../views/TestView.vue'),

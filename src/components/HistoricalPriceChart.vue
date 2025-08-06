@@ -20,15 +20,19 @@
         :options="chartOptions"
         :series="chartSeries"
       />
-
-      <KLineChart />
     </div>
   </template>
   
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineProps } from 'vue'
 import api from '@/api'
-import KLineChart from '@/components/KLineChart.vue'
+
+const props = defineProps({
+  symbol: {
+    type: String,
+    required: true
+  }
+})
 
 const selectedRange = ref('7d')
 
@@ -42,7 +46,7 @@ const rangeOptions = [
 
 const chartOptions = ref({
     chart: {
-        id: 'aapl-chart',
+        id: `${props.symbol}-chart`,
         zoom: { enabled: true },
         toolbar: { show: true },
     },
@@ -58,7 +62,7 @@ const chartOptions = ref({
         }
     },
     title: {
-        text: 'Apple (AAPL) 歷史股價走勢',
+        text: `${props.symbol} · 歷史股價走勢`,
         align: 'left'
     },
     tooltip: {
@@ -115,12 +119,11 @@ function formatDate(date) {
 
 
 async function fetchChartData() {
-    const symbol = 'AAPL'
     const range = selectedRange.value
     const { period1, period2 } = getPeriodRange(range)
 
     try {
-        const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
+        const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`)
         console.log('取得資料:', data)
         const quotes = data.quotes || []
         

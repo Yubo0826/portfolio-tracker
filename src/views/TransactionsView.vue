@@ -1,8 +1,8 @@
 <script setup>
 import { computed, watch, ref } from 'vue';
 import api from '../api.js';
+import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 
-import AutoComplete from 'primevue/autocomplete';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
@@ -163,38 +163,6 @@ const updateSelectedAssets = (id) => {
     };
 };
 
-import debounce from 'lodash/debounce';
-const filteredSymbols = ref([]);
-
-const search = async (event) => {
-    if (!event.query.trim().length) return;
-    api.get('http://localhost:3000/api/yahoo/symbol?query=' + event.query)
-    .then(data => {
-        console.log('Search symbols:', data);
-        // filteredSymbols.value = data.map(item => ({
-        //     symbol: item.ticker,
-        //     name: item.name,
-        //     assetType: item.assetType
-        // }));
-        filteredSymbols.value = data.map(item => ({
-            symbol: item.symbol,
-            name: item.longname,
-            assetType: item.typeDisp,
-        }));
-    }).catch(() => filteredSymbols.value = []);
-};
-
-const debouncedSearch = debounce(search, 100);
-
-const onItemSelect = async (event) => {
-    const selected = event.value;
-    transactionForm.value.symbol = selected.symbol;
-    transactionForm.value.name = selected.name;
-    transactionForm.value.assetType = selected.assetType;
-    const date = transactionForm.value.date?.toISOString().split('T')[0];
-    searchPrice(selected.symbol, date);
-};
-
 const onDateSelect = async (event) => {
     transactionForm.value.date = event;
     if (transactionForm.value.symbol) {
@@ -320,15 +288,19 @@ const saveTransaction = async () => {
                         Symbol
                         <span style="color: #f27362;">*</span>
                     </label>
-                    <AutoComplete 
-                        v-model="transactionForm.symbol" 
-                        optionLabel="symbol" 
-                        :suggestions="filteredSymbols" 
-                        @complete="debouncedSearch" 
-                        @item-select="onItemSelect"
-                        :delay="600" 
-                        :disabled="editingId ? true : false" 
-                        />
+                    <SymbolAutoComplete
+                        v-model="transactionForm.symbol"
+                        @update="({ symbol, name, assetType }) => {
+                            transactionForm.name = name;
+                            transactionForm.assetType = assetType;
+
+                            const date = transactionForm.date?.toISOString().split('T')[0];
+                            if (symbol && date) {
+                                searchPrice(symbol, date);
+                            }
+                        }"
+                        :disabled="editingId ? true : false"
+                    />
                 </div>
                 <div class="flex items-center gap-4 mb-4">
                     <label for="shares" class="font-semibold w-24">

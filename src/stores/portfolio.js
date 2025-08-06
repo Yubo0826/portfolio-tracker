@@ -15,7 +15,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         return;
     }
     try {
-        console.log('Fetching portfolios for user:', auth.user.uid);
+
         const data = await api.get(`http://localhost:3000/api/portfolio?uid=${auth.user.uid}`);
         console.log('Fetched portfolios:', data);
         portfolios.value = data.portfolios;

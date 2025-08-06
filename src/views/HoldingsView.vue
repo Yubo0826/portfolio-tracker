@@ -80,7 +80,7 @@ const deleteSelectedHoldings = async () => {
             ids: idsToDelete
         }
         await api.delete(`http://localhost:3000/api/holdings?uid=${uid.value}`, payload);
-        getHoldings(); // 重新取得交易資料
+        getHoldings();
     } catch (error) {
         console.error('Error deleting holdings:', error);
     } finally {
@@ -112,7 +112,7 @@ const getRefreshHoldings = async () => {
 // 如果有用戶登入，則設定 uid
 if (auth.user) {
     uid.value = auth.user.uid; 
-    getHoldings(); // 取得交易資料
+    getHoldings();
     console.log('User is logged in:', auth.user);
 } else {
     console.log('No user is logged in');
@@ -126,7 +126,7 @@ if (auth.user) {
 watch(() => auth.user, (newUser) => {
   if (newUser) {
     uid.value = newUser.uid;
-    getHoldings(); // 取得交易資料
+    getHoldings();
   }
 })
 
