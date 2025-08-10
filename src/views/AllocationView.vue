@@ -187,7 +187,7 @@ const close = () => {
                 <span v-else class="text-gray-500 bg-orange-300 rounded-md p-1 font-semibold">Total: {{ totalTarget }}%</span>
             </template>
 
-            <template #footer v-if="inputVisible">
+            <template #footer v-if="inputVisible && newAssetRow">
                 <InputNumber v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
             </template>
         </Column>
@@ -202,7 +202,7 @@ const close = () => {
 
             <template #footer v-if="inputVisible">
                 <div class="flex justify-end items-center">
-                    <Button icon="pi pi-check" variant="text" rounded aria-label="Filter" @click="confirmAddAsset" />
+                    <Button v-if="newAssetRow && newTarget" icon="pi pi-check" variant="text" rounded aria-label="Filter" @click="confirmAddAsset" />
                     <Button icon="pi pi-times" text severity="danger" @click="close" />
                 </div>
             </template>

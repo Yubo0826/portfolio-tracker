@@ -34,7 +34,7 @@ const props = defineProps({
   }
 })
 
-const selectedRange = ref('7d')
+const selectedRange = ref('3mo')
 
 const rangeOptions = [
     { label: '近 7 天', value: '7d' },
@@ -124,7 +124,6 @@ async function fetchChartData() {
 
     try {
         const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`)
-        console.log('取得資料:', data)
         const quotes = data.quotes || []
         
         const chartData = quotes
@@ -135,7 +134,6 @@ async function fetchChartData() {
         }))
         
         chartSeries.value[0].data = chartData
-        console.log('Chart data:', chartSeries.value[0].data)
         calculateGrowthRate()
     } catch (error) {
         console.error('取得資料失敗:', error)

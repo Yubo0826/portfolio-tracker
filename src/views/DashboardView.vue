@@ -9,8 +9,8 @@
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">{{ totalValue.toFixed(1) }}</div>
-                <div class="text-lg font-bold">$</div>
+                <div class="text-2xl font-bold">${{ totalValue.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</div>
+                <!-- <div class="text-lg font-bold">$</div> -->
                 </div>
             </template>
         </Card>
@@ -29,8 +29,8 @@
                         <i class="pi pi-arrow-up text-xs"></i>
                         <span>4.2%</span>
                     </div> -->
-                    <div class="text-2xl font-bold">{{ totalProfit.toFixed(1) }}</div>
-                    <div class="text-lg font-bold">$</div>
+                    <div class="text-2xl font-bold">${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</div>
+                    <!-- <div class="text-lg font-bold">$</div> -->
                 </div>
             </template>
         </Card>
@@ -38,12 +38,18 @@
         <!-- XIRR Card -->
         <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm font-semibold">IRR</div>
+                <div class="text-sm font-semibold">
+                    IRR
+                    <i 
+                        class="pi pi-question-circle" 
+                        v-tooltip.bottom="'使用 XIRR 計算的年化投資報酬率，考慮了每筆買進、賣出、股息發放的時間與金額，以及目前持有資產的市值。'">
+                    </i>
+                </div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">{{ irr }}</div>
-                <div class="text-lg font-bold">%</div>
+                <div class="text-2xl font-bold">{{ irr }}%</div>
+                <!-- <div class="text-lg font-bold">%</div> -->
                 </div>
             </template>
         </Card>
@@ -78,26 +84,54 @@
         <template #content>
             <DataTable :value="holdings" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
                 <!-- Name -->
-                <Column field="name" header="現在資產" style="width: 40%">
+                <Column field="name" header="現在資產">
                     <template #body="{ data }">
                         <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md">
                             <StockIcon :symbol="data.symbol" class="mr-8"></StockIcon>                        
                             <div>
                                 <span class="font-bold mr-4">{{ data.symbol }}</span>
-                                <div>{{ data.name }}</div>
+                                <div class="truncate">{{ data.name }}</div>
                             </div>
                         </div>
                     </template>
                 </Column>
         
                 <Column field="shares" header="持有股數"></Column>
-                <Column field="totalCost" header="交易金額"></Column>
-                <Column field="currentPrice" header="市值"></Column>
-                <Column field="currentValue" header="總市值" sortable></Column>
+                <Column field="totalCost" header="交易成本">
+                    <template #body="{ data }">
+                        <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                        <div class="text-[#b5b5c3]">{{ data.avgCost.toFixed(2) }} / 股</div>
+                    </template>
+                </Column>
+                <Column field="currentPrice" header="股價">
+                    <template #body="{ data }">
+                        <span class="font-bold mr-4">${{ data.currentPrice.toFixed(2) }}</span>
+                        <!-- <div class="text-[#b5b5c3]">{{ data.lastUpdated }}</div> -->
+                    </template>
+                </Column>
+                <Column field="currentValue" header="總價值" sortable>
+                    <template #body="{ data }">
+                        <!-- 總市值 -->
+                        <span class="font-bold mr-4">${{ data.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+                        <!-- 增益比例 -->
+                        <div :class="{
+                        'text-[#5cd59b]': data.profitPercentage >= 0,
+                        'text-[#f27362]': data.profitPercentage < 0
+                        }">
+                            <div class="flex items-center gap-2">
+                                <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                                <i v-else class="pi pi-sort-down-fill"></i>
+                                <span>
+                                    {{ data.profitPercentage }}%
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+                </Column>
                 <Column field="target" header="配置比例">
                     <template #body="{ data }">
-                        <span class="font-bold mr-4">{{  ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
-                        <div>{{ data.target || 0 }}%</div>
+                        <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
+                        <div class="text-[#b5b5c3]">{{ data.target || 0 }}%</div>
                     </template>
                 </Column>
 
@@ -133,7 +167,6 @@ const holdings = ref([]);
 const getHoldings = async () => {
     try {
         const data = await api.get(`http://localhost:3000/api/holdings/?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
-        console.log('Holdings prices refreshed:', data);
         setHoldings(data);
     } catch (error) {
         console.error('Error fetching current prices:', error);
@@ -150,6 +183,8 @@ const setHoldings = (data) => {
 
     const totalCost = avgCost * shares;
     const currentValue = Math.round(currentPrice * shares * 100) / 100;
+    const totalProfit = Math.round((currentValue - totalCost) * 100) / 100;
+    const profitPercentage = ((currentValue / (totalCost || 1)) * 100 - 100).toFixed(2);
 
     return {
       id: item.id,
@@ -160,6 +195,8 @@ const setHoldings = (data) => {
       avgCost,
       currentPrice,
       totalCost,
+      totalProfit,
+      profitPercentage,
       currentValue,
       target,
       lastUpdated
@@ -176,7 +213,6 @@ const getAllocation = async () => {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
     const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
-    console.log('Fetched allocation:', data);
     allocation.value = data;
   } catch (error) {
     console.error('Error fetching allocation:', error);
@@ -216,7 +252,6 @@ const dividends = ref([]);
 const getDividends = async () => {
   try {
     const data = await api.get(`http://localhost:3000/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
-    console.log('Dividends data:', data);
     setDividends(data);
   } catch (error) {
     console.error('Error fetching dividends:', error);
@@ -290,6 +325,18 @@ const allocationSeries = computed(() => {
     return allocation.value.map(a => a.target);
 });
 
+// 年被動收益率
+const annualReturn = computed(() => {
+  if (!holdings.value.length) return 0;
+
+  const totalCost = holdings.value.reduce((sum, h) => sum + (h.avgCost * h.shares), 0);
+  const currentValue = holdings.value.reduce((sum, h) => sum + h.currentValue, 0);
+
+  if (totalCost === 0) return 0;
+
+  return ((currentValue - totalCost) / totalCost) * 100;
+});
+
 const irr = computed(() => {
   if (!transactions.value.length || !holdings.value.length) return null;
 
@@ -316,8 +363,6 @@ const irr = computed(() => {
     amount: holdings.value.reduce((sum, h) => sum + h.currentValue, 0),
     when: new Date(),
   });
-
-  console.log('Cashflows for XIRR:', cashflows);
 
   try {
     const rate = xirr(cashflows);

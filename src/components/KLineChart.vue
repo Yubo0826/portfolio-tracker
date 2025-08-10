@@ -29,7 +29,7 @@ const props = defineProps({
   }
 })
 
-const selectedRange = ref('1mo')
+const selectedRange = ref('3mo')
 
 const rangeOptions = [
   { label: '近 7 天', value: '7d' },
