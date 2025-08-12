@@ -1,8 +1,16 @@
 <template>
-  <div class="max-w-100% m-1rem auto">
+  <div class="flex justify-center flex-wrap">
     <!-- <Button @click="$router.go(-1)">Back</Button> -->
-    <HistoricalPriceChart :symbol="symbol" />
-    <KLineChart :symbol="symbol" />
+    <Card class="w-2/3 mb-8">
+      <template #content>
+        <HistoricalPriceChart :symbol="symbol" />
+      </template>
+    </Card>
+    <Card class="w-2/3 mb-8">
+      <template #content>
+        <KLineChart :symbol="symbol" />
+      </template>
+    </Card>
   </div>
 </template>
   

@@ -284,7 +284,7 @@ const transactionType = ref([
 <template>
     <div>
         <Toast />
-        <div class="flex items-center mb-4">
+        <div class="flex justify-center items-center mb-4">
             <FloatLabel variant="on" class="mr-4">
                 <InputNumber v-model="depositAmount" prefix="$" />
                 <label for="on_label">Deposit Amount</label>

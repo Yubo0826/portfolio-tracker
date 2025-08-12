@@ -1,156 +1,40 @@
 <template>
-    <div class="chart-container">
-      <div class="flex justify-between mb-4">
-        <div>
-            <label for="range">時間區間：</label>
-            <select v-model="selectedRange" @change="fetchChartData">
-              <option v-for="option in rangeOptions" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-        </div>
-        <div v-if="growthRate !== null" :class="growthRate >= 0 ? 'text-green-500' : 'text-red-500'" class="font-semibold mt-2">
-            區間漲跌率：{{ growthRate }}%
-        </div>
-      </div>
-  
-      <apexchart
-        width="100%"
-        type="line"
-        :options="chartOptions"
-        :series="chartSeries"
-      />
-
-      <KLineChart />
-    </div>
+    <TabMenu :model="items" v-model:activeIndex="activeIndex" />
   </template>
   
-<script setup>
-import { ref, onMounted } from 'vue'
-import api from '@/api'
-import KLineChart from '@/components/KLineChart.vue'
-
-const selectedRange = ref('7d')
-
-const rangeOptions = [
-    { label: '近 7 天', value: '7d' },
-    { label: '近 1 個月', value: '1mo' },
-    { label: '近 3 個月', value: '3mo' },
-    { label: '近 1 年', value: '1y' },
-    { label: '近 5 年', value: '5y' },
-]
-
-const chartOptions = ref({
-    chart: {
-        id: 'aapl-chart',
-        zoom: { enabled: true },
-        toolbar: { show: true },
-    },
-    xaxis: {
-        type: 'datetime',
-    },
-    yaxis: {
-        labels: {
-        formatter: (val) => `$${val.toFixed(2)}`
-        },
-        title: {
-        text: '股價 (美元)'
-        }
-    },
-    title: {
-        text: 'Apple (AAPL) 歷史股價走勢',
-        align: 'left'
-    },
-    tooltip: {
-        x: {
-        format: 'yyyy/MM/dd HH:mm'
-        }
-    }
-})
-
-const chartSeries = ref([
-{
-    name: '收盤價',
-    data: []
-}
-])
-
-const growthRate = ref(null)
-
-function calculateGrowthRate() {
-    if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
-    const firstPrice = chartSeries.value[0].data[0].y
-    const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
-    growthRate.value = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2)
-}
-
-function getPeriodRange(range) {
-    const today = new Date()
-    const endDate = formatDate(today) // period2
-
-    const daysMap = {
-        '7d': 7,
-        '1mo': 30,
-        '3mo': 90,
-        '6mo': 180,
-        '1y': 365,
-        '2y': 730,
-        '5y': 1825
-    }
-
-    const days = daysMap[range] || 30
-    const start = new Date()
-    start.setDate(start.getDate() - days)
-    const startDate = formatDate(start) // period1
-
-    return {
-        period1: startDate,
-        period2: endDate
-    }
-}
-
-function formatDate(date) {
-    return date.toISOString().split('T')[0] // 轉為 YYYY-MM-DD
-}
-
-
-async function fetchChartData() {
-    const symbol = 'AAPL'
-    const range = selectedRange.value
-    const { period1, period2 } = getPeriodRange(range)
-
-    try {
-        const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
-        console.log('取得資料:', data)
-        const quotes = data.quotes || []
-        
-        const chartData = quotes
-        .filter(q => q.close !== null)
-        .map(q => ({
-            x: new Date(q.date),
-            y: q.close.toFixed(2)
-        }))
-        
-        chartSeries.value[0].data = chartData
-        console.log('Chart data:', chartSeries.value[0].data)
-        calculateGrowthRate()
-    } catch (error) {
-        console.error('取得資料失敗:', error)
-    }
-}
-
-
-onMounted(fetchChartData)
-
-</script>
-<style scoped>
-.chart-container {
-    max-width: 100%;
-    margin: 1rem auto;
-}
-
-.controls {
-    margin-bottom: 1rem;
-}
-</style>
+  <script setup>
+  import { ref } from 'vue';
+  import TabMenu from 'primevue/tabmenu';
   
+  const items = ref([
+      { label: '1天' },
+      { label: '5天' },
+      { label: '1個月' },
+      { label: '6個月' },
+      { label: 'YTD' },
+      { label: '1年' },
+      { label: '5年' },
+      { label: '最長' }
+  ]);
+  
+  const activeIndex = ref(3); // 預設選中第四個，即 '6個月'
+  </script>
+  
+  <style>
+  /* 這裡可以覆蓋 PrimeVue 的 TabMenu 樣式 */
+  /* 需要全域或使用 deep selector，因為 TabMenu 的結構複雜 */
+  /* 例如: */
+  .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+      color: #6c757d;
+      padding: 0.5rem 0.25rem;
+  }
+  
+  .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
+      color: #007bff;
+  }
+  
+  .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link::before {
+      background: #007bff;
+      height: 2px;
+  }
+  </style>

@@ -149,7 +149,6 @@
 </template>
 <script setup>
 import StockIcon from '@/components/StockIcon.vue';
-import Card from 'primevue/card';
 import { ref, watch, computed } from 'vue';
 import api from '@/api';
 import xirr from 'xirr';

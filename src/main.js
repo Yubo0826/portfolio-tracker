@@ -61,6 +61,7 @@ import DatePicker from 'primevue/datepicker';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import SelectButton from 'primevue/selectbutton';
+import Card from 'primevue/card';
 
 app.component('Button', Button);
 app.component('Select', Select);
@@ -73,6 +74,7 @@ app.component('InputNumber', InputNumber);
 app.component('DatePicker', DatePicker);
 app.component('Toast', Toast);
 app.component('SelectButton', SelectButton);
+app.component('Card', Card);
 
 
 app.mount('#app');

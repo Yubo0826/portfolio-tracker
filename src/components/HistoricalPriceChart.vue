@@ -9,10 +9,15 @@
               </option>
             </select>
         </div>
+
         <div v-if="growthRate !== null" :class="growthRate >= 0 ? 'text-green-500' : 'text-red-500'" class="font-semibold mt-2">
             區間漲跌率：{{ growthRate }}%
         </div>
       </div>
+
+        <div>
+            <TabMenu :model="rangeOptions" v-model:activeIndex="activeIndex" />
+        </div>
   
       <apexchart
         width="100%"
@@ -24,7 +29,8 @@
   </template>
   
 <script setup>
-import { ref, onMounted, defineProps } from 'vue'
+import { ref, onMounted, watch, defineProps } from 'vue'
+import TabMenu from 'primevue/tabmenu';
 import api from '@/api'
 
 const props = defineProps({
@@ -37,12 +43,15 @@ const props = defineProps({
 const selectedRange = ref('3mo')
 
 const rangeOptions = [
-    { label: '近 7 天', value: '7d' },
-    { label: '近 1 個月', value: '1mo' },
-    { label: '近 3 個月', value: '3mo' },
-    { label: '近 1 年', value: '1y' },
-    { label: '近 5 年', value: '5y' },
+    { label: '7 天', value: '7d' },
+    { label: '1 個月', value: '1mo' },
+    { label: '3 個月', value: '3mo' },
+    { label: '1 年', value: '1y' },
+    { label: '5 年', value: '5y' },
 ]
+
+
+const activeIndex = ref(3);
 
 const chartOptions = ref({
     chart: {
@@ -119,7 +128,7 @@ function formatDate(date) {
 
 
 async function fetchChartData() {
-    const range = selectedRange.value
+    const range = rangeOptions[activeIndex.value].value
     const { period1, period2 } = getPeriodRange(range)
 
     try {
@@ -140,6 +149,11 @@ async function fetchChartData() {
     }
 }
 
+watch(activeIndex, (newIndex, oldIndex) => {
+  if (newIndex !== oldIndex) {
+    fetchChartData();
+  }
+});
 
 onMounted(fetchChartData)
 

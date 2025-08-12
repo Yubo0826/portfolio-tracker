@@ -134,14 +134,10 @@ const goToPortfolio = () => {
 
 <template>
   <header>
-    <div class="wrapper">
+    <div class="flex justify-between items-center mb-8">
+      <div></div>
+
       <nav>
-        <!-- <RouterLink to="/">
-          <Button label="Home" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/portfolio">
-          <Button label="Portfolio" severity="secondary" rounded class="m-1" />
-        </RouterLink> -->
         <RouterLink to="/dashboard">
           <Button label="Dashboard" severity="secondary" rounded class="m-1" />
         </RouterLink>
@@ -165,9 +161,8 @@ const goToPortfolio = () => {
         </RouterLink>
       </nav>
 
-      <div class="flex justify-center items-center mb-4">
-
-        <Select v-model="selectedPortfolio" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="no-border">
+      <div class="flex justify-center items-center">
+        <Select v-model="selectedPortfolio" size="small" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="m-2">
           <template #header>
               <div class="p-3">
                   <span class="font-bold">選擇投資組合</span>
@@ -186,24 +181,27 @@ const goToPortfolio = () => {
         <Button
           :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
           @click="toggleDarkMode"
-          class="m-4 p-button-rounded p-button-text"
+          class="p-button-rounded p-button-text"
           aria-label="Toggle Dark Mode"
         />
-        
+
+        <Button
+          class="p-button-rounded p-button-text"
+          icon="pi pi-language"
+          aria-label="Language"
+        />
+
         <!-- 有登入 -->
         <template v-if="auth.user">
-          <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="mr-2 cursor-pointer" />
+          <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
           <Menu ref="menu" :model="menuItems" :popup="true" />
         </template>
         <!-- 沒登入 -->
         <template v-else>
-          <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="mr-2 cursor-pointer" />
+          <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" />
         </template>
-  
-        
+
       </div>
-
-
     </div>
   </header>
 
@@ -213,10 +211,5 @@ const goToPortfolio = () => {
 <style scoped>
 header {
   text-align: center;
-}
-
-.no-border .p-dropdown {
-  border: none !important;
-  box-shadow: none !important;
 }
 </style>
