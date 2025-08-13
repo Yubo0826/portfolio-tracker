@@ -57,7 +57,7 @@ const chartOptions = ref({
     chart: {
         id: `${props.symbol}-chart`,
         zoom: { enabled: true },
-        toolbar: { show: true },
+        toolbar: { show: false },
     },
     xaxis: {
         type: 'datetime',
@@ -70,13 +70,13 @@ const chartOptions = ref({
         text: '股價 (美元)'
         }
     },
-    title: {
-        text: `${props.symbol} · 歷史股價走勢`,
-        align: 'left'
-    },
+    // title: {
+    //     text: `${props.symbol} · 歷史股價走勢`,
+    //     align: 'left'
+    // },
     tooltip: {
         x: {
-        format: 'yyyy/MM/dd HH:mm'
+            format: 'yyyy/MM/dd HH:mm'
         }
     }
 })
@@ -133,6 +133,7 @@ async function fetchChartData() {
 
     try {
         const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`)
+        console.log('Chart data:', data)
         const quotes = data.quotes || []
         
         const chartData = quotes
