@@ -162,6 +162,27 @@ const goToPortfolio = () => {
       </nav>
 
       <div class="flex justify-center items-center">
+        <Button
+          class="p-button-rounded p-button-text"
+          aria-label="Search"
+          icon="pi pi-search"
+        />
+        
+
+        <Button
+          :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+          @click="toggleDarkMode"
+          class="p-button-rounded p-button-text"
+          aria-label="Toggle Dark Mode"
+        />
+
+        <Button
+          class="p-button-rounded p-button-text"
+          icon="pi pi-language"
+          aria-label="Language"
+        />
+
+        <!-- 選擇投資組合 -->
         <Select v-model="selectedPortfolio" size="small" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="m-2">
           <template #header>
               <div class="p-3">
@@ -177,19 +198,6 @@ const goToPortfolio = () => {
               </div>
           </template>
         </Select>
-
-        <Button
-          :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-          @click="toggleDarkMode"
-          class="p-button-rounded p-button-text"
-          aria-label="Toggle Dark Mode"
-        />
-
-        <Button
-          class="p-button-rounded p-button-text"
-          icon="pi pi-language"
-          aria-label="Language"
-        />
 
         <!-- 有登入 -->
         <template v-if="auth.user">
