@@ -15,28 +15,84 @@
     </Breadcrumb>
 
     <div class="pl-4">
-      <h1 class="text-2xl mb-4">{{ fullName }}</h1>
+      <div class="flex items-center">
+        <h1 class="text-2xl">{{ info.fullName }}</h1>
+      </div>
       <div class="chart-container">
         <div class="grid grid-cols-3 gap-16">
           <!-- 左邊 -->
           <div class="col-span-2">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center justify-between">
               <div class="flex items-center mb-2">
-                  <div class="text-3xl font-semibold mr-4">${{ regularMarketPrice }}</div>
-                  <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                      <span v-if="growthRate >= 0" class="mr-1">▲</span>
-                      <span v-else class="mr-1">▼</span>
-                      <span class=" font-semibold">{{ change.toFixed(2) }}</span>
-                      <span class="ml-2 font-semibold">{{ growthRate }}%</span>
-                  </div>
+                  <div class="text-3xl font-semibold mr-4">${{ info.regularMarketPrice }}</div>
+                  <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
+                    <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                      <span v-if="growthRate >= 0">+</span>
+                      <span v-else>-</span>
+                      <span class="ml-1 font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
+                      <span v-if="growthRate >= 0">▲</span>
+                      <span v-else>▼</span>
+                        <span class="ml-1 font-semibold">{{ growthRate }}%</span>
+                    </div>
+                  </Tag>
               </div>
-              <span>
-                  {{ formatUTC8(regularMarketTime) }}
-              </span>
+
+              <Select 
+                v-model="chartType" 
+                :options="chartTypeOptions" 
+                optionLabel="label"
+                :pt="{
+                  root: { class: '!border-0 hover:bg-red-600' },
+                  label: { class: 'text-sm font-semibold' },
+                  input: { class: 'p-inputtext-sm' }
+                }" />
+
+            </div>
+            
+            <!-- 收盤時間 -->
+            <div class="flex justify-between text-[#5f6368] text-xs ">
+                <span>已收盤：{{ formatUTC8(info.regularMarketTime) }}</span>
+                
             </div>
 
-            <div>
-                <TabMenu :model="rangeOptions" v-model:activeIndex="activeIndex" />
+            <!-- 時段區塊 -->
+            <div class="flex justify-between items-center mt-4">
+              <!-- <div class="flex mb-2 gap-2 justify-end">
+                  <Button
+                    v-for="range in rangeOptions"
+                    variant="text" size="small" rounded :label="range.label"
+                    @click="currentRange = range.value" 
+                    :pt="{
+                      root: { class: '!text-[#7e8299] !p-button-text !border-0 !hover:bg-blue-100' },
+                      label: { class: '!text-sm !font-semibold' }
+                    }"
+                  />
+              </div> -->
+
+                <!-- <TabMenu 
+                  :model="rangeOptions" 
+                  v-model:activeIndex="activeIndex"
+                  :pt="{
+                    inkbar: '!border-blue-100',
+                    label: 'text-blue-600 !font-semibold',
+                  }"
+                  /> -->
+
+                  <Tabs 
+                    v-model:value="currentRange"
+                    >
+                      <TabList
+                        :pt="{
+                          tabList: { style: { borderWidth: '0px' } },
+                          content: { style: { borderWidth: '0px' } },
+                          activeBar: { style: { backgroundColor: '#5b9ef5', height: '2px' } },
+                        }"
+                      >
+                          <Tab v-for="tab in rangeOptions" :key="tab.label" :value="tab.value">{{ tab.label }}</Tab>
+                      </TabList>
+                  </Tabs>
+
+                <span class="text-[#5f6368] text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
             </div>
         
             <apexchart
@@ -52,37 +108,25 @@
             <Card class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
-                  <div class="flex justify-between border-b pb-2">
+                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
                     <span>前次收盤價</span>
-                    <span class="font-semibold">$1,200.00</span>
+                    <span class="font-semibold">{{ info.chartPreviousClose }}</span>
                   </div>
-                  <div class="flex justify-between border-b pb-2">
+                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
                     <span>單日股價範圍</span>
-                    <span class="font-semibold">$1,175.00 - $1,190.00</span>
+                    <span class="font-semibold">${{ info.regularMarketDayLow }} - ${{ info.regularMarketDayHigh }}</span>
                   </div>
-                  <div class="flex justify-between border-b pb-2">
+                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
                     <span>一年股價範圍</span>
-                    <span class="font-semibold">$780.00 - $1,200.00</span>
+                    <span class="font-semibold">${{ info.fiftyTwoWeekLow }} - ${{ info.fiftyTwoWeekHigh }}</span>
                   </div>
-                  <div class="flex justify-between border-b pb-2">
-                    <span>總市值</span>
-                    <span class="font-semibold">30.47兆 TWD</span>
+                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
+                    <span>今日交易量</span>
+                    <span class="font-semibold">{{ info.regularMarketVolume }}</span>
                   </div>
-                  <div class="flex justify-between border-b pb-2">
-                    <span>平均交易量</span>
-                    <span class="font-semibold">3,178.01萬</span>
-                  </div>
-                  <div class="flex justify-between border-b pb-2">
-                    <span>本益比</span>
-                    <span class="font-semibold">20.87</span>
-                  </div>
-                  <div class="flex justify-between border-b pb-2">
-                    <span>股利收益率</span>
-                    <span class="font-semibold">1.53%</span>
-                  </div>
-                  <div class="flex justify-between">
+                  <div class="flex justify-between border-gray-300 py-4 px-0">
                     <span>主要交易所</span>
-                    <span class="font-semibold">TPE</span>
+                    <span class="font-semibold">{{ info.fullExchangeName }}</span>
                   </div>
                 </div>
               </template>
@@ -98,24 +142,39 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, defineProps } from 'vue'
+import { ref, onMounted, watch, defineProps, reactive } from 'vue'
 import TabMenu from 'primevue/tabmenu';
 import Breadcrumb from 'primevue/breadcrumb';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
 import api from '@/api'
 import { useRoute  } from 'vue-router'
+import { Tag } from 'primevue';
 
 const route  = useRoute()
 const symbol = route.params.symbol
 
-const selectedRange = ref('3mo')
+const chartType = ref('line')
+
+const currentRange = ref('3mo')
 
 const rangeOptions = [
-  { label: '7 天', value: '7d' },
-  { label: '1 個月', value: '1mo' },
-  { label: '3 個月', value: '3mo' },
-  { label: '1 年', value: '1y' },
-  { label: '5 年', value: '5y' },
+  { label: '7天', value: '7d' },
+  { label: '1個月', value: '1mo' },
+  { label: '3個月', value: '3mo' },
+  { label: '6個月', value: '6mo' },
+  { label: 'YTD', value: 'ytd' },
+  { label: '1年', value: '1y' },
+  { label: '5年 ', value: '5y' },
 ]
+
+const chartTypeOptions = ref([
+  { label: '線圖', value: 'line', icon: 'pi pi-chart-line' },
+  { label: 'K線圖', value: 'candlestick', icon: 'pi pi-chart-bar' }
+]);
 
 const activeIndex = ref(3);
 
@@ -129,13 +188,14 @@ const chartOptions = ref({
       type: 'datetime',
   },
   yaxis: {
-      labels: {
+    labels: {
       formatter: (val) => `$${val.toFixed(2)}`
-      },
-      title: {
+    },
+    title: {
       text: '股價 (美元)'
-      }
+    }
   },
+  colors: ['#10b981'],
   // title: {
   //     text: `${props.symbol} · 歷史股價走勢`,
   //     align: 'left'
@@ -148,10 +208,10 @@ const chartOptions = ref({
 })
 
 const chartSeries = ref([
-{
-  name: '收盤價',
-  data: []
-}
+  {
+    name: '收盤價',
+    data: []
+  }
 ])
 
 const home = ref({
@@ -189,6 +249,14 @@ function getPeriodRange(range) {
       '5y': 1825
   }
 
+  if (range === 'ytd') {
+      const start = new Date(today.getFullYear(), 0, 1) // 當年第一天
+      return {
+          period1: formatDate(start),
+          period2: endDate
+      }
+  }
+
   const days = daysMap[range] || 30
   const start = new Date()
   start.setDate(start.getDate() - days)
@@ -204,20 +272,71 @@ function formatDate(date) {
   return date.toISOString().split('T')[0] // 轉為 YYYY-MM-DD
 }
 
-const fullName = ref('')
-const regularMarketPrice = ref(0)
-const regularMarketTime = ref('')
+function formatStrDate(dateStr, locale = 'en-US') {
+  const date = new Date(dateStr);
+
+  console.log('formatStrDate:', date, locale)
+
+  // 英文：Aug 17, 20
+  if (locale.startsWith('en')) {
+    return new Intl.DateTimeFormat(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: '2-digit'
+    }).format(date);
+  }
+
+  // 中文：8月17日, 2020年
+  if (locale.startsWith('zh')) {
+    const formatted = new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+    }).format(date);
+
+    // 根據中文常見習慣再手動調整格式
+    const [year, month, day] = formatted.match(/\d+/g);
+    return `${month}月${day}日, ${year}年`;
+  }
+
+  // fallback
+  return dateStr;
+}
+
+const info = reactive({
+  fullName: '',
+  regularMarketPrice: 0,
+  regularMarketTime: '',
+  chartPreviousClose: 0,
+  fiftyTwoWeekHigh: 0,
+  fiftyTwoWeekLow: 0,
+  fullExchangeName: '',
+  regularMarketVolume: 0
+})
+
+const startDate = ref('')
+const endDate = ref('')
 
 async function fetchChartData() {
-  const range = rangeOptions[activeIndex.value].value
-  const { period1, period2 } = getPeriodRange(range)
+  // const range = rangeOptions[activeIndex.value].value
+  const { period1, period2 } = getPeriodRange(currentRange.value)
+  
+  startDate.value = formatStrDate(period1)
+  endDate.value = formatStrDate(period2)
 
   try {
       const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
       console.log('Chart data:', data)
-      fullName.value = data.meta.longName || symbol
-      regularMarketPrice.value = data.meta.regularMarketPrice || 0
-      regularMarketTime.value = data.meta.regularMarketTime || ''
+      info.fullName = data.meta.longName || symbol
+      info.regularMarketPrice = data.meta.regularMarketPrice || 0
+      info.regularMarketDayHigh = data.meta.regularMarketDayHigh || 0
+      info.regularMarketDayLow = data.meta.regularMarketDayLow || 0
+      info.regularMarketTime = data.meta.regularMarketTime || ''
+      info.chartPreviousClose = data.meta.chartPreviousClose || 0
+      info.fiftyTwoWeekHigh = data.meta.fiftyTwoWeekHigh || 0
+      info.fiftyTwoWeekLow = data.meta.fiftyTwoWeekLow || 0
+      info.fullExchangeName = data.meta.fullExchangeName || ''
+      info.regularMarketVolume = data.meta.regularMarketVolume || 0
 
       const quotes = data.quotes || []
       
@@ -258,8 +377,14 @@ function formatUTC8(isoString) {
   return `${month}月${day}日, ${period}${hour}:${minute}:${second} [UTC+8]`;
 }
 
-watch(activeIndex, (newIndex, oldIndex) => {
-if (newIndex !== oldIndex) {
+watch(activeIndex, (newValue, oldValue) => {
+if (newValue !== oldValue) {
+  fetchChartData();
+}
+});
+
+watch(currentRange, (newValue, oldValue) => {
+if (newValue !== oldValue) {
   fetchChartData();
 }
 });
@@ -275,5 +400,17 @@ onMounted(fetchChartData)
 
 .controls {
   margin-bottom: 1rem;
+}
+
+</style>
+<style>
+.p-tab {
+  font-size: small;
+  border-width: 0!important;
+}
+
+.p-tab-active {
+  color: #5b9ef5!important;
+  font-weight: 600!important;
 }
 </style>

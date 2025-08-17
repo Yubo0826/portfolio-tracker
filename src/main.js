@@ -36,6 +36,7 @@ app.use(PrimeVue, {
         preset: Aura,
         options: {
             darkModeSelector: '.my-app-dark',
+            cssLayer: false
         }
     }
  });
@@ -62,6 +63,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import SelectButton from 'primevue/selectbutton';
 import Card from 'primevue/card';
+import Tag from 'primevue/tag';
 
 app.component('Button', Button);
 app.component('Select', Select);
@@ -75,6 +77,7 @@ app.component('DatePicker', DatePicker);
 app.component('Toast', Toast);
 app.component('SelectButton', SelectButton);
 app.component('Card', Card);
+app.component('Tag', Tag);
 
 
 app.mount('#app');
