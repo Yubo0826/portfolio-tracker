@@ -54,5 +54,17 @@ const onItemSelect = (event) => {
         @item-select="onItemSelect"
         placeholder="Search symbol"
         class="w-full"
-    />
+    >
+        <template #option="slotProps">
+            <div class="flex flex-col">
+                <span class="text-base font-semibold">{{ slotProps.option.symbol }}</span>
+                <span class="text-sm text-gray-500">
+                {{ slotProps.option.name }}
+                <template v-if="slotProps.option.assetType">
+                    ({{ slotProps.option.assetType }})
+                </template>
+                </span>
+            </div>
+        </template>
+    </AutoComplete>
 </template>

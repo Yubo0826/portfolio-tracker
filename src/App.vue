@@ -6,7 +6,9 @@ import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar';
 import Menu from 'primevue/menu';
+import Dialog from 'primevue/dialog';
 import 'primeicons/primeicons.css';
+import SearchBox from './components/SearchBox.vue'
 
 const router = useRouter()
 
@@ -64,6 +66,7 @@ async function getPortfolios() {
 }
 
 const isDark = ref(false);
+const searchBoxVisible = ref(false);
 
 const toggleDarkMode = () => {
   isDark.value = !isDark.value;
@@ -166,6 +169,7 @@ const goToPortfolio = () => {
           class="p-button-rounded p-button-text"
           aria-label="Search"
           icon="pi pi-search"
+          @click="searchBoxVisible = true"
         />
         
 
@@ -214,6 +218,11 @@ const goToPortfolio = () => {
   </header>
 
   <RouterView />
+
+
+  <Dialog v-model:visible="searchBoxVisible" modal position="top" :style="{ width: '25rem' }">
+    <SearchBox></SearchBox>
+  </Dialog>
 </template>
 
 <style scoped>

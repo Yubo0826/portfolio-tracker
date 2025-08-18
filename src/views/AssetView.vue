@@ -37,7 +37,7 @@
                   </Tag>
               </div>
 
-              <Select 
+              <!-- <Select 
                 v-model="chartType" 
                 :options="chartTypeOptions" 
                 optionLabel="label"
@@ -45,7 +45,25 @@
                   root: { class: '!border-0 hover:bg-red-600' },
                   label: { class: 'text-sm font-semibold' },
                   input: { class: 'p-inputtext-sm' }
-                }" />
+                }" /> -->
+
+                <Select
+                  v-model="chartType"
+                  :options="chartTypeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  :pt="{
+                    item: (item) => ({
+                      class: 'flex items-center',
+                      children: [
+                        { tag: 'i', class: item.icon + ' mr-2' },
+                        { tag: 'span', textContent: item.label }
+                      ]
+                    }),
+                    label: { class: 'text-sm font-semibold' }
+                  }"
+                />
+
 
             </div>
             
@@ -69,14 +87,6 @@
                   />
               </div> -->
 
-                <!-- <TabMenu 
-                  :model="rangeOptions" 
-                  v-model:activeIndex="activeIndex"
-                  :pt="{
-                    inkbar: '!border-blue-100',
-                    label: 'text-blue-600 !font-semibold',
-                  }"
-                  /> -->
 
                   <Tabs 
                     v-model:value="currentRange"
@@ -94,13 +104,25 @@
 
                 <span class="text-[#5f6368] text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
             </div>
-        
-            <apexchart
-              width="100%"
-              type="line"
-              :options="chartOptions"
-              :series="chartSeries"
-            />
+
+            <!-- 圖表區 -->
+            <div>
+              <apexchart
+                v-if="chartType === 'line'"
+                width="100%"
+                type="line"
+                :options="chartOptions"
+                :series="chartSeries"
+              />
+
+              <apexchart
+                v-else-if="chartType === 'candlestick'"
+                width="100%"
+                type="candlestick"
+                :options="candleOptions"
+                :series="candleSeries"
+              />
+            </div>
           </div>
 
           <!-- 右邊 -->
@@ -142,14 +164,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, defineProps, reactive } from 'vue'
-import TabMenu from 'primevue/tabmenu';
+import { ref, onMounted, watch, reactive } from 'vue'
 import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
 import api from '@/api'
 import { useRoute  } from 'vue-router'
 import { Tag } from 'primevue';
@@ -158,6 +177,10 @@ const route  = useRoute()
 const symbol = route.params.symbol
 
 const chartType = ref('line')
+const chartTypeOptions = ref([
+  { label: '線圖', value: 'line', icon: 'pi pi-chart-line' },
+  { label: 'K線圖', value: 'candlestick', icon: 'pi pi-chart-bar' }
+]);
 
 const currentRange = ref('3mo')
 
@@ -171,18 +194,11 @@ const rangeOptions = [
   { label: '5年 ', value: '5y' },
 ]
 
-const chartTypeOptions = ref([
-  { label: '線圖', value: 'line', icon: 'pi pi-chart-line' },
-  { label: 'K線圖', value: 'candlestick', icon: 'pi pi-chart-bar' }
-]);
-
-const activeIndex = ref(3);
-
 const chartOptions = ref({
   chart: {
       id: `${symbol}-chart`,
       zoom: { enabled: true },
-      toolbar: { show: false },
+      toolbar: { show: true },
   },
   xaxis: {
       type: 'datetime',
@@ -213,6 +229,47 @@ const chartSeries = ref([
     data: []
   }
 ])
+
+const candleSeries = ref([
+  {
+    name: 'K線圖',
+    data: []
+  }
+])
+
+const candleOptions = ref({
+  chart: {
+    type: 'candlestick',
+    height: 400,
+    toolbar: {
+      show: true
+    },
+    zoom: {
+      enabled: true
+    }
+  },
+  // title: {
+  //   text: `${symbol} · K 線圖`,
+  //   align: 'left'
+  // },
+  xaxis: {
+    type: 'datetime'
+  },
+  yaxis: {
+    tooltip: {
+      enabled: true
+    },
+    title: {
+      text: '價格 (USD)'
+    }
+  },
+  tooltip: {
+    x: {
+      format: 'yyyy/MM/dd'
+    }
+  }
+})
+
 
 const home = ref({
     icon: 'pi pi-home',
@@ -318,41 +375,56 @@ const startDate = ref('')
 const endDate = ref('')
 
 async function fetchChartData() {
-  // const range = rangeOptions[activeIndex.value].value
   const { period1, period2 } = getPeriodRange(currentRange.value)
-  
+
   startDate.value = formatStrDate(period1)
   endDate.value = formatStrDate(period2)
 
   try {
-      const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
-      console.log('Chart data:', data)
-      info.fullName = data.meta.longName || symbol
-      info.regularMarketPrice = data.meta.regularMarketPrice || 0
-      info.regularMarketDayHigh = data.meta.regularMarketDayHigh || 0
-      info.regularMarketDayLow = data.meta.regularMarketDayLow || 0
-      info.regularMarketTime = data.meta.regularMarketTime || ''
-      info.chartPreviousClose = data.meta.chartPreviousClose || 0
-      info.fiftyTwoWeekHigh = data.meta.fiftyTwoWeekHigh || 0
-      info.fiftyTwoWeekLow = data.meta.fiftyTwoWeekLow || 0
-      info.fullExchangeName = data.meta.fullExchangeName || ''
-      info.regularMarketVolume = data.meta.regularMarketVolume || 0
+    const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
+    const quotes = data.quotes || []
 
-      const quotes = data.quotes || []
-      
-      const chartData = quotes
-      .filter(q => q.close !== null)
-      .map(q => ({
+    Object.assign(info, {
+      fullName: data.meta.longName || symbol,
+      regularMarketPrice: data.meta.regularMarketPrice || 0,
+      regularMarketDayHigh: data.meta.regularMarketDayHigh || 0,
+      regularMarketDayLow: data.meta.regularMarketDayLow || 0,
+      regularMarketTime: data.meta.regularMarketTime || '',
+      chartPreviousClose: data.meta.chartPreviousClose || 0,
+      fiftyTwoWeekHigh: data.meta.fiftyTwoWeekHigh || 0,
+      fiftyTwoWeekLow: data.meta.fiftyTwoWeekLow || 0,
+      fullExchangeName: data.meta.fullExchangeName || '',
+      regularMarketVolume: data.meta.regularMarketVolume || 0
+    })
+
+    if (chartType.value === 'line') {
+      const lineData = quotes
+        .filter(q => q.close !== null)
+        .map(q => ({
           x: new Date(q.date),
-          y: q.close.toFixed(2)
-      }))
-      
-      chartSeries.value[0].data = chartData
+          y: Number(q.close.toFixed(2))
+        }))
+      chartSeries.value[0].data = lineData
       calculateGrowthRate()
+    } else if (chartType.value === 'candlestick') {
+      const candleData = quotes
+        .filter(q => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
+        .map(q => ({
+          x: new Date(q.date),
+          y: [
+            parseFloat(q.open.toFixed(2)),
+            parseFloat(q.high.toFixed(2)),
+            parseFloat(q.low.toFixed(2)),
+            parseFloat(q.close.toFixed(2))
+          ]
+        }))
+      candleSeries.value[0].data = candleData
+    }
   } catch (error) {
-      console.error('取得資料失敗:', error)
+    console.error('取得資料失敗:', error)
   }
 }
+
 
 function formatUTC8(isoString) {
   const date = new Date(isoString);
@@ -377,17 +449,15 @@ function formatUTC8(isoString) {
   return `${month}月${day}日, ${period}${hour}:${minute}:${second} [UTC+8]`;
 }
 
-watch(activeIndex, (newValue, oldValue) => {
-if (newValue !== oldValue) {
-  fetchChartData();
-}
-});
-
 watch(currentRange, (newValue, oldValue) => {
 if (newValue !== oldValue) {
   fetchChartData();
 }
 });
+
+watch(chartType, () => {
+  fetchChartData()
+})
 
 onMounted(fetchChartData)
 
@@ -407,6 +477,7 @@ onMounted(fetchChartData)
 .p-tab {
   font-size: small;
   border-width: 0!important;
+  padding: 1rem!important;
 }
 
 .p-tab-active {
