@@ -3,9 +3,9 @@
 <div>
     <div class="flex flex-col sm:flex-row w-full gap-4 mb-12">
         <!-- Total Value Card -->
-        <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+        <Card :class="$style.cardInfo" class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm font-semibold">{{ $t('totalValue') }}</div>
+                <div class="text-sm">{{ $t('totalValue') }}</div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
@@ -16,9 +16,9 @@
         </Card>
 
         <!-- Total Profit Card -->
-        <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+        <Card :class="$style.cardInfo" class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm font-semibold">
+                <div class="text-sm">
                     {{ $t('totalProfit') }}
                     <i class="pi pi-question-circle" v-tooltip.bottom="'總收益 = 總市值 - 總成本'"></i>
                 </div>
@@ -36,9 +36,9 @@
         </Card>
 
         <!-- XIRR Card -->
-        <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+        <Card :class="$style.cardInfo" class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm font-semibold">
+                <div class="text-sm">
                     IRR
                     <i 
                         class="pi pi-question-circle" 
@@ -403,3 +403,9 @@ watch(
 
 
 </script>
+<style module>
+.cardInfo {
+    background-color: #f8f8f8;
+    border: none;
+}
+</style>

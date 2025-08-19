@@ -10,6 +10,7 @@ import Dialog from 'primevue/dialog';
 import 'primeicons/primeicons.css';
 import SearchBox from './components/SearchBox.vue'
 
+
 const router = useRouter()
 
 const auth = useAuthStore()
@@ -229,4 +230,11 @@ const goToPortfolio = () => {
 header {
   text-align: center;
 }
+</style>
+
+<style>
+  .p-card {
+    border: 1px solid #eaeaea;
+    box-shadow: none!important;
+  }
 </style>
