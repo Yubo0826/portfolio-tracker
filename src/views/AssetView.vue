@@ -170,7 +170,6 @@ import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
-import ToggleSwitch from 'primevue/toggleswitch';
 import api from '@/api'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
@@ -203,34 +202,67 @@ const rangeOptions = [
   { label: '5年 ', value: '5y' },
 ]
 
-const chartOptions = ref({
+const chartOptions = computed(() => ({
   chart: {
-      id: `${symbol.value}-chart`,
-      zoom: { enabled: true },
-      toolbar: { show: true },
+    id: `${symbol.value}-chart`,
+    type: 'area',
+    zoom: { enabled: false },
+    toolbar: { show: false },
   },
+  stroke: {
+    curve: 'smooth',
+    width: 2,
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      gradientToColors: [growthRate.value >= 0 ? '#a7f3d0' : '#fecaca'],
+      opacityFrom: 0.5,
+      opacityTo: 0,
+      stops: [0, 100]
+    }
+  },
+  colors: [growthRate.value >= 0 ? '#10b981' : '#ef4444'],
   xaxis: {
-      type: 'datetime',
+    type: 'datetime',
+    labels: {
+      style: {
+        fontSize: '12px',
+        colors: '#999'
+      }
+    }
   },
   yaxis: {
     labels: {
-      formatter: (val) => `$${val.toFixed(2)}`
+      formatter: (val) => `$${val.toFixed(2)}`,
+      style: {
+        fontSize: '12px',
+        colors: '#999'
+      }
     },
     title: {
-      text: '股價 (美元)'
+      text: '股價 (美元)',
+      style: {
+        fontSize: '14px'
+      }
     }
   },
-  colors: ['#10b981'],
-  // title: {
-  //     text: `${props.symbol} · 歷史股價走勢`,
-  //     align: 'left'
-  // },
   tooltip: {
-      x: {
-          format: 'yyyy/MM/dd HH:mm'
-      }
+    x: {
+      format: 'yyyy/MM/dd'
+    }
+  },
+  grid: {
+    show: true,
+    borderColor: '#eee',
+    strokeDashArray: 5,
   }
-})
+}))
+
+
+
 
 const chartSeries = ref([
   {

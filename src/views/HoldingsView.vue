@@ -1,3 +1,44 @@
+<template>
+  <div>
+    <div class="flex justify-end mb-4">
+        <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
+        <Button label="Refresh Prices" @click="getRefreshHoldings" icon="pi pi-refresh" class="mr-2" />
+    </div>
+    <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+        <Column field="symbol" header="Symbol"></Column>
+        <Column field="name" header="Name"></Column>
+        <Column field="shares" header="Shares"></Column>
+        <Column field="totalCost" header="Total Cost"></Column>
+        <Column field="currentPrice" header="Current Price"></Column>
+        <Column field="currentValue" header="Current Value"></Column>
+        <Column field="totalProfit" header="Total Profit">
+            <template #body="{ data }">
+                <div :class="{
+                'text-[#5cd59b]': data.totalProfit >= 0,
+                'text-[#f27362]': data.totalProfit < 0
+                }">
+                    <span class="font-bold mr-4 whitespace-nowrap">{{ data.totalProfit > 0 ? '+' : '-' }}${{ Math.abs(data.totalProfit).toFixed(2) }}</span>
+                    <div class="flex items-center gap-2">
+                        <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                        <i v-else class="pi pi-sort-down-fill"></i>
+                        <span>
+                            {{ Math.abs(data.profitPercentage) }}%
+                        </span>
+                    </div>
+                </div>
+            </template>
+        </Column>
+
+        <template #empty>
+            <div class="p-4 text-center text-gray-500">
+            <i class="pi pi-info-circle mr-2" />
+                現在並無資料。
+            </div>
+        </template>
+    </DataTable>
+  </div>
+</template>
 <script setup>
 import { ref, watch } from 'vue';
 import api from '../api.js';
@@ -137,45 +178,3 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
 });
 
 </script>
-<template>
-  <div>
-    <div class="flex justify-end mb-4">
-        <Button label="Delete" @click="deleteSelectedHoldings" icon="pi pi-trash" class="mr-2" severity="danger" />
-        <Button label="Refresh Prices" @click="getRefreshHoldings" icon="pi pi-refresh" class="mr-2" />
-    </div>
-    <img src="https://finance.yahoo.com/quote/AAPL/" alt="">
-    <DataTable v-model:selection="selectedHoldings" :value="holdings" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-        <Column field="symbol" header="Symbol"></Column>
-        <Column field="name" header="Name"></Column>
-        <Column field="shares" header="Shares"></Column>
-        <Column field="totalCost" header="Total Cost"></Column>
-        <Column field="currentPrice" header="Current Price"></Column>
-        <Column field="currentValue" header="Current Value"></Column>
-        <Column field="totalProfit" header="Total Profit">
-            <template #body="{ data }">
-                <div :class="{
-                'text-[#5cd59b]': data.totalProfit >= 0,
-                'text-[#f27362]': data.totalProfit < 0
-                }">
-                    <span class="font-bold mr-4 whitespace-nowrap">{{ data.totalProfit > 0 ? '+' : '-' }}${{ Math.abs(data.totalProfit).toFixed(2) }}</span>
-                    <div class="flex items-center gap-2">
-                        <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-                        <i v-else class="pi pi-sort-down-fill"></i>
-                        <span>
-                            {{ Math.abs(data.profitPercentage) }}%
-                        </span>
-                    </div>
-                </div>
-            </template>
-        </Column>
-
-        <template #empty>
-            <div class="p-4 text-center text-gray-500">
-            <i class="pi pi-info-circle mr-2" />
-                現在並無資料。
-            </div>
-        </template>
-    </DataTable>
-  </div>
-</template>
