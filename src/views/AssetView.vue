@@ -46,6 +46,7 @@
                   label: { class: 'text-sm font-semibold' },
                   input: { class: 'p-inputtext-sm' }
                 }" /> -->
+              
 
                 <Select
                   v-model="chartType"
@@ -169,6 +170,7 @@ import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
+import ToggleSwitch from 'primevue/toggleswitch';
 import api from '@/api'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';

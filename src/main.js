@@ -22,18 +22,46 @@ app.use(i18n);
 
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
+import Tooltip from 'primevue/tooltip';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
-// import Material from '@primeuix/themes/material';
-// import Lara from '@primeuix/themes/lara';
 
-import Tooltip from 'primevue/tooltip';
+import { definePreset } from '@primeuix/themes';
+
+const MyPreset = definePreset(Aura, {
+    components: {
+        card: {
+            colorScheme: {
+                light: {
+                    root: {
+                        background: '{surface.0}',
+                        color: '{surface.700}'
+                    },
+                    subtitle: {
+                        color: '{surface.500}'
+                    }
+                },
+                dark: {
+                    root: {
+                        background: '{surface.900}',
+                        color: '{surface.0}'
+                    },
+                    subtitle: {
+                        color: '{surface.400}'
+                    }
+                }
+            }
+        }
+    }
+});
+
+
 
 app.directive('tooltip', Tooltip);
 
 app.use(PrimeVue, {
     theme: {
-        preset: Aura,
+        preset: MyPreset,
         options: {
             darkModeSelector: '.my-app-dark',
             cssLayer: false
