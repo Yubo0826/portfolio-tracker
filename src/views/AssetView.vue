@@ -164,17 +164,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive } from 'vue'
+import { ref, onMounted, watch, computed, reactive } from 'vue'
 import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import api from '@/api'
-import { useRoute  } from 'vue-router'
+import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
 
 const route  = useRoute()
-const symbol = route.params.symbol
+const symbol = computed(() => route.params.symbol)
+
+onBeforeRouteUpdate((to, from) => {
+  const s = to.params.symbol
+  items.value = [{ label: s }]
+  console.log('Route updated to symbol:', s)
+  fetchChartData(s)
+})
 
 const chartType = ref('line')
 const chartTypeOptions = ref([
@@ -196,7 +203,7 @@ const rangeOptions = [
 
 const chartOptions = ref({
   chart: {
-      id: `${symbol}-chart`,
+      id: `${symbol.value}-chart`,
       zoom: { enabled: true },
       toolbar: { show: true },
   },
@@ -276,7 +283,7 @@ const home = ref({
     route: '/dashboard'
 });
 const items = ref([
-    { label: symbol },
+    { label: symbol.value },
 ]);
 
 // 計算成長率和變化量
@@ -374,7 +381,7 @@ const info = reactive({
 const startDate = ref('')
 const endDate = ref('')
 
-async function fetchChartData() {
+async function fetchChartData(symbol) {
   const { period1, period2 } = getPeriodRange(currentRange.value)
 
   startDate.value = formatStrDate(period1)
@@ -382,6 +389,7 @@ async function fetchChartData() {
 
   try {
     const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
+    console.log('Chart data:', data)
     const quotes = data.quotes || []
 
     Object.assign(info, {
@@ -451,15 +459,17 @@ function formatUTC8(isoString) {
 
 watch(currentRange, (newValue, oldValue) => {
 if (newValue !== oldValue) {
-  fetchChartData();
+  fetchChartData(symbol.value);
 }
 });
 
 watch(chartType, () => {
-  fetchChartData()
+  fetchChartData(symbol.value);
 })
 
-onMounted(fetchChartData)
+onMounted(() => {
+  fetchChartData(symbol.value);
+})
 
 </script>
 <style scoped>

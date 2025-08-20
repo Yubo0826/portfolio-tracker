@@ -1,3 +1,92 @@
+<template>
+  <header>
+    <div class="flex justify-between items-center mb-8">
+      <div></div>
+
+      <nav>
+        <RouterLink to="/dashboard">
+          <Button label="Dashboard" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/holdings">
+          <Button label="Holdings" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/transactions">
+          <Button label="Transactions" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/allocation">
+          <Button label="Allocation" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/rebalancing">
+          <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/dividends">
+          <Button label="Dividends" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+        <RouterLink to="/test">
+          <Button label="Test" severity="secondary" rounded class="m-1" />
+        </RouterLink>
+      </nav>
+
+      <div class="flex justify-center items-center">
+        <Button
+          class="p-button-rounded p-button-text"
+          aria-label="Search"
+          icon="pi pi-search"
+          @click="searchBoxVisible = true"
+        />
+        
+
+        <Button
+          :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+          @click="toggleDarkMode"
+          class="p-button-rounded p-button-text"
+          aria-label="Toggle Dark Mode"
+        />
+
+        <Button
+          class="p-button-rounded p-button-text"
+          icon="pi pi-language"
+          aria-label="Language"
+        />
+
+        <!-- 選擇投資組合 -->
+        <Select v-model="selectedPortfolio" size="small" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="m-2">
+          <template #header>
+              <div class="p-3">
+                  <span class="font-bold">選擇投資組合</span>
+              </div>
+          </template>
+          <template #footer>
+              <!-- <div class="p-3">
+                  <Button label="New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus text-left" />
+              </div> -->
+              <div class="p-3 border-t-1 border-gray-200">
+                  <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
+              </div>
+          </template>
+        </Select>
+
+        <!-- 有登入 -->
+        <template v-if="auth.user">
+          <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
+          <Menu ref="menu" :model="menuItems" :popup="true" />
+        </template>
+        <!-- 沒登入 -->
+        <template v-else>
+          <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" />
+        </template>
+
+      </div>
+    </div>
+  </header>
+
+  <RouterView />
+
+
+  <Dialog v-model:visible="searchBoxVisible" modal position="top" :style="{ width: '25rem' }">
+    <SearchBox @close="searchBoxVisible = false"></SearchBox>
+  </Dialog>
+</template>
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
@@ -134,96 +223,6 @@ const goToPortfolio = () => {
 };
 
 </script>
-
-<template>
-  <header>
-    <div class="flex justify-between items-center mb-8">
-      <div></div>
-
-      <nav>
-        <RouterLink to="/dashboard">
-          <Button label="Dashboard" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/holdings">
-          <Button label="Holdings" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/transactions">
-          <Button label="Transactions" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/allocation">
-          <Button label="Allocation" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/rebalancing">
-          <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/dividends">
-          <Button label="Dividends" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/test">
-          <Button label="Test" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-      </nav>
-
-      <div class="flex justify-center items-center">
-        <Button
-          class="p-button-rounded p-button-text"
-          aria-label="Search"
-          icon="pi pi-search"
-          @click="searchBoxVisible = true"
-        />
-        
-
-        <Button
-          :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-          @click="toggleDarkMode"
-          class="p-button-rounded p-button-text"
-          aria-label="Toggle Dark Mode"
-        />
-
-        <Button
-          class="p-button-rounded p-button-text"
-          icon="pi pi-language"
-          aria-label="Language"
-        />
-
-        <!-- 選擇投資組合 -->
-        <Select v-model="selectedPortfolio" size="small" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="m-2">
-          <template #header>
-              <div class="p-3">
-                  <span class="font-bold">選擇投資組合</span>
-              </div>
-          </template>
-          <template #footer>
-              <!-- <div class="p-3">
-                  <Button label="New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus text-left" />
-              </div> -->
-              <div class="p-3 border-t-1 border-gray-200">
-                  <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
-              </div>
-          </template>
-        </Select>
-
-        <!-- 有登入 -->
-        <template v-if="auth.user">
-          <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
-          <Menu ref="menu" :model="menuItems" :popup="true" />
-        </template>
-        <!-- 沒登入 -->
-        <template v-else>
-          <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" />
-        </template>
-
-      </div>
-    </div>
-  </header>
-
-  <RouterView />
-
-
-  <Dialog v-model:visible="searchBoxVisible" modal position="top" :style="{ width: '25rem' }">
-    <SearchBox></SearchBox>
-  </Dialog>
-</template>
 
 <style scoped>
 header {

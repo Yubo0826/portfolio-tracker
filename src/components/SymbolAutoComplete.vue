@@ -53,6 +53,7 @@ const onItemSelect = (event) => {
         :disabled="disabled"
         @item-select="onItemSelect"
         placeholder="Search symbol"
+        forceSelection
         class="w-full"
     >
         <template #option="slotProps">
