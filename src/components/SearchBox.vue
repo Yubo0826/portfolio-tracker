@@ -1,8 +1,5 @@
 <template>
-  <!-- 外層：不是 dropdown；清楚固定讓清單顯示在輸入框下面 -->
-  <div
-    class="w-full max-w-2xl rounded-2xl shadow-2xl backdrop-blur text-neutral-100"
-  >
+  <div class="w-full max-w-2xl rounded-2xl shadow-2xl backdrop-blur">
     <!-- Search input -->
     <div class="relative">
       <svg
@@ -25,8 +22,8 @@
         @input="onInput"
         id="searchInput"
         type="text"
-        placeholder="Search docs"
-        class="w-full bg-transparent placeholder-neutral-500 text-neutral-100 px-12 py-4 outline-none"
+        placeholder="輸入股票、ETF代號或名稱"
+        class="w-full bg-transparent placeholder-neutral-500 px-12 py-4 outline-none"
         autocomplete="off"
         aria-autocomplete="list"
         aria-controls="resultsList"
@@ -35,28 +32,23 @@
         :aria-activedescendant="activeIndex >= 0 ? `opt-${activeIndex}` : undefined"
       />
 
-      <button
-        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-neutral-400 hover:text-neutral-200 focus:outline-none"
-        aria-label="清除"
-        @click="clearAll"
-      >
-        ×
-      </button>
+
+      <i @click="clearAll" class="pi pi-times absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-neutral-400 focus:outline-none"></i>
     </div>
 
-    <!-- Results menu（永遠在輸入框下方） -->
+    <!-- Results -->
     <div class="max-h-96 overflow-auto">
       <div
-        v-if="filtered.length"
+        v-if="results.length"
         class="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-neutral-500"
       >
-        Documentation
+        搜尋結果
       </div>
 
-      <ul v-if="filtered.length" id="resultsList" role="listbox" class="py-2">
+      <ul v-if="results.length" id="resultsList" role="listbox" class="py-2">
         <li
-          v-for="(item, idx) in filtered"
-          :key="item.title"
+          v-for="(item, idx) in results"
+          :key="item.symbol + idx"
           :id="`opt-${idx}`"
           role="option"
           :aria-selected="activeIndex === idx"
@@ -80,39 +72,69 @@
       </ul>
 
       <div
-        v-else
+        v-else-if="query.trim().length > 0 && !loading"
         class="select-none py-12 text-center text-sm text-neutral-400"
       >
-        No recent searches
+        No results
+      </div>
+
+      <div v-if="loading" class="select-none py-12 text-center text-sm text-neutral-400">
+        Loading...
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import debounce from 'lodash/debounce'
+import api from '@/api'
+import { useRouter } from 'vue-router'
 
-// 假資料：實作時可改成 API 結果
-const DATA = [
-  { title: 'Vue.js Documentation', symbol: 'VUE', name: 'Vue.js Framework', assetType: 'Framework' },
-  { title: 'React Documentation', symbol: 'REACT', name: 'React Library', assetType: 'Library' },
-  { title: 'Angular Documentation', symbol: 'ANGULAR', name: 'Angular Framework', assetType: 'Framework' },
-  { title: 'Svelte Documentation', symbol: 'SVELTE', name: 'Svelte Framework', assetType: 'Framework' },
-  // 更多項目...
-]
+const router = useRouter()
+const emit = defineEmits(['close']);
 
 const query = ref('')
 const inputEl = ref(null)
+const results = ref([])
 const activeIndex = ref(-1)
+const loading = ref(false)
 
-const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  return DATA.filter((d) => d.title.toLowerCase().includes(q))
-})
+// 搜尋資料
+const search = async () => {
+  const q = query.value.trim()
+  if (!q.length) {
+    results.value = []
+    return
+  }
+
+  loading.value = true
+  try {
+    const data = await api.get('http://localhost:3000/api/yahoo/symbol?query=' + q)
+    results.value = data.map(item => ({
+      symbol: item.symbol,
+      name: item.longname,
+      assetType: item.typeDisp,
+    }))
+    activeIndex.value = results.value.length ? 0 : -1
+  } catch (err) {
+    results.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+const debouncedSearch = debounce(search, 300)
 
 function onInput() {
-  activeIndex.value = filtered.value.length ? 0 : -1
+  debouncedSearch()
+}
+
+function clearAll() {
+  query.value = ''
+  results.value = []
+  activeIndex.value = -1
+  inputEl.value?.focus()
 }
 
 function setActive(idx) {
@@ -120,20 +142,14 @@ function setActive(idx) {
 }
 
 function select(idx) {
-  const item = filtered.value[idx]
+  const item = results.value[idx]
   if (!item) return
-  // 專案內可改成路由跳轉或開啟連結
-  alert('Selected: ' + item.title)
-}
-
-function clearAll() {
-  query.value = ''
-  onInput()
-  inputEl.value?.focus()
+  emit('close');
+  router.push({ name: 'asset', params: { symbol: item.symbol } });
 }
 
 function onKeydown(e) {
-  const max = filtered.value.length - 1
+  const max = results.value.length - 1
   if (e.key === 'ArrowDown') {
     e.preventDefault()
     activeIndex.value = Math.min(activeIndex.value + 1, max)
@@ -151,14 +167,6 @@ function onKeydown(e) {
 }
 
 onMounted(() => {
-  onInput()
   inputEl.value?.focus()
 })
 </script>
-
-<!--
-使用方式：
-1) 已在專案中安裝 TailwindCSS（或於全域引入 compiled CSS）。
-2) 將本檔命名為 SearchPanel.vue，於頁面中 <SearchPanel /> 使用即可。
-3) 如需串接後端，可將 DATA 換成 props 或 from API 的結果。
--->

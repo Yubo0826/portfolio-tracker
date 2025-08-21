@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
-import { useRouter } from 'vue-router'
 import AutoComplete from 'primevue/autocomplete';
 import debounce from 'lodash/debounce';
 import api from '@/api';
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
