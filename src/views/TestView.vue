@@ -1,107 +1,61 @@
-<script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import AutoComplete from 'primevue/autocomplete';
-import debounce from 'lodash/debounce';
-import api from '@/api';
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const props = defineProps({
-  modelValue: String,
-  disabled: {
-    type: Boolean,
-    default: false
-  }
-});
-
-const emit = defineEmits(['close']);
-
-const filteredSymbols = ref([]);
-const loading = ref(false);
-
-const search = async (event) => {
-  if (!event.query.trim().length) return;
-  loading.value = true;
-  try {
-    const data = await api.get('http://localhost:3000/api/yahoo/symbol?query=' + event.query);
-    filteredSymbols.value = data
-      .filter(item => ['EQUITY', 'ETF'].includes(item.quoteType))
-      .map(item => ({
-        symbol: item.symbol,
-        name: item.longname,
-        assetType: item.typeDisp,
-      }));
-  } catch (e) {
-    filteredSymbols.value = [];
-  } finally {
-    loading.value = false;
-  }
-};
-
-const debouncedSearch = debounce(search, 150);
-
-const onItemSelect = (event) => {
-  if (!event.value) return;
-  emit('close');
-  router.push({ name: 'asset', params: { symbol: event.value.symbol } });
-};
-
-const acRef = ref(null)
-
-onMounted(async () => {
-  await nextTick()
-  console.log(acRef.value)
-  // 方式 A：透過 DOM 找到內部 input
-  // acRef.value?.$el?.querySelector('input')?.focus()
-  // 方式 B：若版本支援，也可試試組件方法
-})
-
-</script>
-
 <template>
-  <div class="relative max-w-xl w-full mx-auto">
-    <AutoComplete
-      :modelValue="modelValue"
-      :suggestions="filteredSymbols"
-      field="symbol"
-      @complete="debouncedSearch"
-      :disabled="disabled"
-      @item-select="onItemSelect"
-      placeholder="Enter symbol or name of asset"
-      class="w-full rounded-xl shadow-md border border-gray-300"
-      inputClass="w-full pl-10 pr-16 py-2 outline-none text-gray-800"
-      :loading="loading"
-      ref="acRef"
+  <div class="w-48">
+    <Dropdown
+      v-model="selectedChart"
+      :options="chartTypes"
+      optionLabel="label"
+      class="w-full chart-dropdown"
     >
+      <template #value="{ value }">
+        <div class="flex items-center gap-2">
+          <i :class="value.icon" />
+          <span>{{ value.label }}</span>
+        </div>
+      </template>
 
-      <!-- 🔽 搜尋結果 -->
       <template #option="slotProps">
-        <div @click="onItemSelect(slotProps.option)" class="flex items-center space-x-2">
-          <i class="pi pi-search" />
-          <div class="flex flex-col py-2 px-4">
-            <span class="text-base font-semibold text-black">{{ slotProps.option.symbol }}</span>
-            <span class="text-sm text-gray-500">
-              {{ slotProps.option.name }}
-              <template v-if="slotProps.option.assetType">
-                ({{ slotProps.option.assetType }})
-              </template>
-            </span>
-          </div>
+        <div class="flex items-center gap-2">
+          <i :class="slotProps.option.icon" />
+          <span>{{ slotProps.option.label }}</span>
         </div>
       </template>
-
-      <!-- ❌ 無結果時 -->
-      <template #empty>
-        <div class="py-4 px-4 text-center text-gray-400">No matching symbols</div>
-      </template>
-
-      <!-- 📌 Footer -->
-      <!-- <template #footer>
-        <div class="py-2 px-4 text-right text-xs text-gray-400 border-t border-gray-100">
-          Data from Yahoo Finance
-        </div>
-      </template> -->
-    </AutoComplete>
+    </Dropdown>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+import Dropdown from 'primevue/dropdown';
+
+const chartTypes = [
+  { label: 'Mountain', value: 'mountain', icon: 'pi pi-chart-line' },
+  { label: 'Candle', value: 'candle', icon: 'pi pi-chart-bar' },
+];
+
+const selectedChart = ref(chartTypes[0]);
+</script>
+
+<style scoped>
+.chart-dropdown .p-dropdown-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-dropdown .p-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.chart-dropdown .p-dropdown-items {
+  background-color: #1e1e2f;
+  color: white;
+}
+
+.chart-dropdown .p-dropdown-item.p-highlight {
+  background-color: #3245a6;
+  color: white;
+}
+</style>

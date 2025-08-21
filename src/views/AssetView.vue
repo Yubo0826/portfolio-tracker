@@ -37,33 +37,23 @@
                   </Tag>
               </div>
 
-              <!-- <Select 
-                v-model="chartType" 
-                :options="chartTypeOptions" 
+              <!-- 選擇圖表類型 -->
+              <Select
+                v-model="chartType"
+                :options="chartTypeOptions"
                 optionLabel="label"
+                optionValue="value"
                 :pt="{
-                  root: { class: '!border-0 hover:bg-red-600' },
-                  label: { class: 'text-sm font-semibold' },
-                  input: { class: 'p-inputtext-sm' }
-                }" /> -->
-              
-
-                <Select
-                  v-model="chartType"
-                  :options="chartTypeOptions"
-                  optionLabel="label"
-                  optionValue="value"
-                  :pt="{
-                    item: (item) => ({
-                      class: 'flex items-center',
-                      children: [
-                        { tag: 'i', class: item.icon + ' mr-2' },
-                        { tag: 'span', textContent: item.label }
-                      ]
-                    }),
-                    label: { class: 'text-sm font-semibold' }
-                  }"
-                />
+                  root: { style: { border: 'none', boxShadow: 'none' } }
+                }"
+              >
+                <template #option="slotProps">
+                  <div class="flex items-center">
+                    <div class="w-6 h-6 mr-2" v-html="slotProps.option.icon"></div>
+                    <div>{{ slotProps.option.label }}</div>
+                  </div>
+                </template>
+              </Select>
 
 
             </div>
@@ -109,9 +99,9 @@
             <!-- 圖表區 -->
             <div>
               <apexchart
-                v-if="chartType === 'line'"
+                v-if="chartType === 'mountain'"
                 width="100%"
-                type="line"
+                type="area"
                 :options="chartOptions"
                 :series="chartSeries"
               />
@@ -184,11 +174,28 @@ onBeforeRouteUpdate((to, from) => {
   fetchChartData(s)
 })
 
-const chartType = ref('line')
-const chartTypeOptions = ref([
-  { label: '線圖', value: 'line', icon: 'pi pi-chart-line' },
-  { label: 'K線圖', value: 'candlestick', icon: 'pi pi-chart-bar' }
-]);
+const chartType = ref('mountain')
+const chartTypeOptions = [
+  {
+    label: '山形圖',
+    value: 'mountain',
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4dabf7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 17L9 11l4 4 8-8" />
+        <path d="M3 17h18" stroke="#a5d8ff" />
+      </svg>
+    `
+  },
+  {
+    label: 'K線圖',
+    value: 'candlestick',
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fab005" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 3v18M6 8h4v8H6zM14 5v14M14 10h4v4h-4z" />
+      </svg>
+    `
+  }
+];
 
 const currentRange = ref('3mo')
 
@@ -439,7 +446,7 @@ async function fetchChartData(symbol) {
       regularMarketVolume: data.meta.regularMarketVolume || 0
     })
 
-    if (chartType.value === 'line') {
+    if (chartType.value === 'mountain') {
       const lineData = quotes
         .filter(q => q.close !== null)
         .map(q => ({
