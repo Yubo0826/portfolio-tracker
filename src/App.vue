@@ -83,8 +83,10 @@
   <RouterView />
 
 
-  <Dialog v-model:visible="searchBoxVisible" modal position="top" :style="{ width: '25rem' }">
-    <SearchBox @close="searchBoxVisible = false"></SearchBox>
+  <Dialog v-model:visible="searchBoxVisible" modal dismissableMask position="top" :style="{ width: '25rem', top: '5rem' }" :closeOnEscape="true" :showHeader="false">
+    <template #container>
+      <SearchBox @close="searchBoxVisible = false"></SearchBox>
+    </template>
   </Dialog>
 </template>
 <script setup>
