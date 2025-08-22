@@ -42,16 +42,21 @@
                 v-model="chartType"
                 :options="chartTypeOptions"
                 optionLabel="label"
-                optionValue="value"
                 :pt="{
                   root: { style: { border: 'none', boxShadow: 'none' } }
                 }"
               >
+                <template #value="slotProps">
+                  <div class="w-4 h-4 flex items-center" v-html="slotProps.value.icon"></div>
+                </template>
                 <template #option="slotProps">
                   <div class="flex items-center">
-                    <div class="w-6 h-6 mr-2" v-html="slotProps.option.icon"></div>
+                    <div class="w-4 h-4 mr-4" v-html="slotProps.option.icon"></div>
                     <div>{{ slotProps.option.label }}</div>
                   </div>
+                </template>
+                <template #dropdownicon>
+                  <i class="pi pi-chevron-down" style="font-size: .5rem"></i>
                 </template>
               </Select>
 
@@ -66,18 +71,6 @@
 
             <!-- 時段區塊 -->
             <div class="flex justify-between items-center mt-4">
-              <!-- <div class="flex mb-2 gap-2 justify-end">
-                  <Button
-                    v-for="range in rangeOptions"
-                    variant="text" size="small" rounded :label="range.label"
-                    @click="currentRange = range.value" 
-                    :pt="{
-                      root: { class: '!text-[#7e8299] !p-button-text !border-0 !hover:bg-blue-100' },
-                      label: { class: '!text-sm !font-semibold' }
-                    }"
-                  />
-              </div> -->
-
 
                   <Tabs 
                     v-model:value="currentRange"
@@ -99,7 +92,7 @@
             <!-- 圖表區 -->
             <div>
               <apexchart
-                v-if="chartType === 'mountain'"
+                v-if="chartType && chartType.value === 'area'"
                 width="100%"
                 type="area"
                 :options="chartOptions"
@@ -107,7 +100,7 @@
               />
 
               <apexchart
-                v-else-if="chartType === 'candlestick'"
+                v-else-if="chartType && chartType.value === 'candlestick'"
                 width="100%"
                 type="candlestick"
                 :options="candleOptions"
@@ -174,28 +167,23 @@ onBeforeRouteUpdate((to, from) => {
   fetchChartData(s)
 })
 
-const chartType = ref('mountain')
 const chartTypeOptions = [
   {
-    label: '山形圖',
-    value: 'mountain',
+    label: '面積圖',
+    value: 'area',
     icon: `
-      <svg viewBox="0 0 24 24" fill="none" stroke="#4dabf7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 17L9 11l4 4 8-8" />
-        <path d="M3 17h18" stroke="#a5d8ff" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="#5b9ef5" xml:space="preserve" viewBox="1 162.6 26 14"><path xmlns="http://www.w3.org/2000/svg" d="m17.8 162.6-6.5 8.4c-2.1-2.5-3.2-3.8-3.2-3.8L1 176.6h26z"></path></svg>
     `
   },
   {
     label: 'K線圖',
     value: 'candlestick',
     icon: `
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fab005" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 3v18M6 8h4v8H6zM14 5v14M14 10h4v4h-4z" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="#5b9ef5" viewBox="0 0 12 14"><path d="M3.5.333H1.833V2H.167v10h1.666v1.667H3.5V12h1.667V2H3.5zm0 10H1.833V3.667H3.5zm8.333-6.666h-1.666V.333H8.5v3.334H6.833V9.5H8.5v4.167h1.667V9.5h1.666zm-1.666 4.166H8.5v-2.5h1.667z"></path></svg>
     `
   }
 ];
+const chartType = ref(chartTypeOptions[0]);
 
 const currentRange = ref('3mo')
 
@@ -219,6 +207,9 @@ const chartOptions = computed(() => ({
   stroke: {
     curve: 'smooth',
     width: 2,
+  },
+  dataLabels: {
+    enabled: false
   },
   fill: {
     type: 'gradient',
@@ -446,7 +437,7 @@ async function fetchChartData(symbol) {
       regularMarketVolume: data.meta.regularMarketVolume || 0
     })
 
-    if (chartType.value === 'mountain') {
+    if (chartType.value && chartType.value.value === 'area') {
       const lineData = quotes
         .filter(q => q.close !== null)
         .map(q => ({
@@ -455,7 +446,7 @@ async function fetchChartData(symbol) {
         }))
       chartSeries.value[0].data = lineData
       calculateGrowthRate()
-    } else if (chartType.value === 'candlestick') {
+    } else if (chartType.value && chartType.value.value === 'candlestick') {
       const candleData = quotes
         .filter(q => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
         .map(q => ({
