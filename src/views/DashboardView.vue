@@ -1,11 +1,14 @@
 
 <template>
 <div>
-    <div class="flex flex-col sm:flex-row w-full gap-4 mb-12">
+    <div class="flex flex-col sm:flex-row w-full gap-4 mb-8">
         <!-- Total Value Card -->
         <Card :class="$style.cardInfo" class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm">{{ $t('totalValue') }}</div>
+              <div class="flex items-center text-[#475569]">
+                <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
+                <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
+              </div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
@@ -18,19 +21,17 @@
         <!-- Total Profit Card -->
         <Card :class="$style.cardInfo" class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm">
-                    {{ $t('totalProfit') }}
+              <div class="flex items-center text-[#475569]">
+                <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
+                <div class="text-sm ml-2">
+                  {{ $t('totalProfit') }}
                     <i class="pi pi-question-circle" v-tooltip.bottom="'總收益 = 總市值 - 總成本'"></i>
                 </div>
+              </div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
-                    <!-- <div class="bg-[#5cd59b] text-sm px-2 py-1 rounded-md flex items-center gap-1">
-                        <i class="pi pi-arrow-up text-xs"></i>
-                        <span>4.2%</span>
-                    </div> -->
                     <div class="text-2xl font-bold">${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</div>
-                    <!-- <div class="text-lg font-bold">$</div> -->
                 </div>
             </template>
         </Card>
@@ -38,13 +39,16 @@
         <!-- XIRR Card -->
         <Card :class="$style.cardInfo" class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-                <div class="text-sm">
-                    IRR
+              <div class="flex items-center text-[#475569]">
+                <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
+                <div class="text-sm ml-2">
+                  IRR
                     <i 
                         class="pi pi-question-circle" 
                         v-tooltip.bottom="'使用 XIRR 計算的年化投資報酬率，考慮了每筆買進、賣出、股息發放的時間與金額，以及目前持有資產的市值。'">
                     </i>
                 </div>
+              </div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mt-2">
@@ -55,32 +59,47 @@
         </Card>
     </div>
 
-    <div class="flex flex-col sm:flex-row w-full gap-4 mb-12">
-        <Card class="w-full md:w-1/2">
+
+    <!-- 走勢圖 -->
+    <div class="flex gap-4">
+    
+      <div class="w-3/5">
+        <Card>
+          <template #content>
+
+            <SelectButton v-model="selectedPeriod" :options="periods" optionLabel="label" optionValue="value" class="mb-4" size="small" />
+            <StockChart
+              type="area"
+              :options="chartOptions"
+              :series="chartSeries"
+              @update:date="fetchChartData"
+              height="300"
+            />
+          </template>
+        </Card>
+      </div>
+  
+      <!-- 圓餅圖 -->
+      <div class="w-2/5 h-max">
+        <Card  class="w-full">
             <template #title>
-                <div class="text-sm font-semibold">Holdings Overview</div>
+                <div class="flex items-center justify-between mb-4">
+                  <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
+                  <div @click="$router.push('allocation')" class="text-sm text-gray-500 underline cursor-pointer">前往設定比例</div>
+                </div>
             </template>
             <template #content>
                 <div class="flex justify-between items-center mb-4">
-                    <apexchart width="380" type="donut" :options="holdingsChart" :series="holdingsSeries"></apexchart>
+                    <apexchart v-if="selectedPieType === 'actual'" width="380" type="donut" :options="holdingsChart" :series="holdingsSeries"></apexchart>
+                    <apexchart v-else width="380" type="donut" :options="allocationChart" :series="allocationSeries"></apexchart>
                 </div>
-                <div class="text-sm text-gray-500 mb-4">各股占總值的比例</div>
             </template>
         </Card>
-        <Card class="w-full md:w-1/2">
-            <template #title>
-                <div class="text-sm font-semibold">Allocation Overview</div>
-            </template>
-            <template #content>
-                <div class="flex justify-between items-center mb-4">
-                    <apexchart width="380" type="donut" :options="allocationChart" :series="allocationSeries"></apexchart>
-                </div>
-                <div class="text-sm text-gray-500 mb-4">各股目標配置的比例</div>
-            </template>
-        </Card>
+      </div>
     </div>
 
-    <Card>
+    <!-- Holdings Table -->
+    <Card class="mb-8 mt-8 p-4">
         <template #content>
             <DataTable :value="holdings" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
                 <!-- Name -->
@@ -144,11 +163,13 @@
             </DataTable>
         </template>
     </Card>
-
+    
 </div>
 </template>
 <script setup>
 import StockIcon from '@/components/StockIcon.vue';
+import StockChart from '@/components/StockChart.vue';
+import SelectButton from 'primevue/selectbutton';
 import { ref, watch, computed } from 'vue';
 import api from '@/api';
 import xirr from 'xirr';
@@ -393,19 +414,217 @@ if (auth.user) {
     console.log('No user is logged in');
 }
 
+// Pie Chart Type
+const selectedPieType = ref('actual'); // 預設為配置比例
+const pieChartType = [
+  { label: '實際配置', value: 'actual' },
+  { label: '目標配置', value: 'target' }
+];
+
+// 計算區間的成長率和變化量
+
+const growthRate = ref(null)
+const change = ref(0)
+
+function calculateGrowthRate() {
+  if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
+  const firstPrice = chartSeries.value[0].data[0].y
+  const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
+  change.value = lastPrice - firstPrice
+  growthRate.value = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2)
+}
+
+// 時間區間 部分
+const selectedPeriod = ref(''); // 預設為 1 年
+const periods = [
+  { label: '7天', value: '7d' },
+  { label: '1個月', value: '1mo' },
+  { label: '3個月', value: '3mo' },
+  { label: '6個月', value: '6mo' },
+  { label: 'YTD', value: 'ytd' },
+  { label: '1年', value: '1y' },
+  { label: '5年 ', value: '5y' },
+];
+
+watch(selectedPeriod, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    const { period1, period2 } = getPeriodRange(newValue);
+    fetchChartData(period1, period2);
+  }
+});
+
+function getPeriodRange(range) {
+  const today = new Date()
+  const endDate = formatDate(today) // period2
+
+  const daysMap = {
+      '7d': 7,
+      '1mo': 30,
+      '3mo': 90,
+      '6mo': 180,
+      '1y': 365,
+      '2y': 730,
+      '5y': 1825
+  }
+
+  if (range === 'ytd') {
+      const start = new Date(today.getFullYear(), 0, 1) // 當年第一天
+      return {
+          period1: formatDate(start),
+          period2: endDate
+      }
+  }
+
+  const days = daysMap[range] || 30
+  const start = new Date()
+  start.setDate(start.getDate() - days)
+  const startDate = formatDate(start) // period1
+
+  return {
+      period1: startDate,
+      period2: endDate
+  }
+}
+
+function formatDate(date) {
+  return date.toISOString().split('T')[0] // 轉為 YYYY-MM-DD
+}
+
+function formatStrDate(dateStr, locale = 'en-US') {
+  const date = new Date(dateStr);
+
+  console.log('formatStrDate:', date, locale)
+
+  // 英文：Aug 17, 20
+  if (locale.startsWith('en')) {
+    return new Intl.DateTimeFormat(locale, {
+      month: 'short',
+      day: 'numeric',
+      year: '2-digit'
+    }).format(date);
+  }
+
+  // 中文：8月17日, 2020年
+  if (locale.startsWith('zh')) {
+    const formatted = new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+    }).format(date);
+
+    // 根據中文常見習慣再手動調整格式
+    const [year, month, day] = formatted.match(/\d+/g);
+    return `${month}月${day}日, ${year}年`;
+  }
+
+  // fallback
+  return dateStr;
+}
+
+// 總資產價格走勢圖 邏輯部分
+
+const chartOptions = {
+  chart: {
+    id: `chart`,
+    type: 'area',
+    zoom: { enabled: false },
+    toolbar: { show: false },
+  },
+  stroke: {
+    curve: 'smooth',
+    width: 2,
+  },
+  dataLabels: {
+    enabled: false
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'light',
+      type: 'vertical',
+      gradientToColors: [growthRate.value >= 0 ? '#a7f3d0' : '#fecaca'],
+      opacityFrom: 0.5,
+      opacityTo: 0,
+      stops: [0, 100]
+    }
+  },
+  colors: [growthRate.value >= 0 ? '#10b981' : '#ef4444'],
+  xaxis: {
+    type: 'datetime',
+    labels: {
+      style: {
+        fontSize: '12px',
+        colors: '#999'
+      }
+    }
+  },
+  yaxis: {
+    labels: {
+      formatter: (val) => `$${val.toFixed(2)}`,
+      style: {
+        fontSize: '12px',
+        colors: '#999'
+      }
+    },
+    title: {
+      // text: '股價 (美元)',
+      style: {
+        fontSize: '14px'
+      }
+    }
+  },
+  tooltip: {
+    x: {
+      format: 'yyyy/MM/dd'
+    }
+  },
+  grid: {
+    show: true,
+    borderColor: '#eee',
+    strokeDashArray: 5,
+  }
+};
+
+const chartSeries = ref([
+  {
+    name: '收盤價',
+    data: []
+  }
+])
+
+const fetchChartData = async (period1, period2) => {
+    try {
+        const data = await api.get(`http://localhost:3000/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`);
+        const lineData = data.map(item => ({
+            x: new Date(item.date),
+            y: item.close
+        }));
+        chartSeries.value = [{
+            name: '收盤價',
+            data: lineData
+        }];
+        calculateGrowthRate()
+    } catch (error) {
+        console.error('Error fetching total value chart data:', error);
+    }
+}
+
+
 watch(
   () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],
   ([uid, pid]) => {
-    if (uid && pid) getData();
+    if (uid && pid) {
+      getData()
+      selectedPeriod.value = '3mo'; // 預設選擇
+    };
   },
   { immediate: true }
 );
 
-
 </script>
 <style module>
-.cardInfo {
+/* .cardInfo {
     background-color: #f8f8f8;
     border: none;
-}
+} */
 </style>

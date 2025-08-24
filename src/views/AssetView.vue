@@ -38,7 +38,7 @@
               </div>
 
               <!-- 選擇圖表類型 -->
-              <Select
+              <!-- <Select
                 v-model="chartType"
                 :options="chartTypeOptions"
                 optionLabel="label"
@@ -58,7 +58,34 @@
                 <template #dropdownicon>
                   <i class="pi pi-chevron-down" style="font-size: .5rem"></i>
                 </template>
-              </Select>
+              </Select> -->
+
+              <!-- <Button style="color: grey" icon="pi pi-chart-line" variant="text" rounded aria-label="Filter" />
+              <Button style="color: grey" icon="pi pi-chart-bar" variant="text" rounded aria-label="Filter" /> -->
+
+              <div class="flex items-center space-x-2">
+                <Button
+                  v-if="chartType === 'area'"
+                  :class="[
+                    'p-button-text p-button-rounded',
+                    chartType === 'area' ? 'bg-blue-100 text-blue-500' : 'text-gray-400'
+                  ]"
+                  icon="pi pi-chart-line"
+                  @click="changeChartType('candlestick')"
+                  aria-label="面積圖"
+                />
+
+                <Button
+                  v-else-if="chartType === 'candlestick'"
+                  :class="[
+                    'p-button-text p-button-rounded',
+                    chartType === 'candlestick' ? 'bg-blue-100 text-blue-500' : 'text-gray-400'
+                  ]"
+                  icon="pi pi-chart-bar"
+                  @click="changeChartType('area')"
+                  aria-label="K 線圖"
+                />
+              </div>
 
 
             </div>
@@ -92,7 +119,7 @@
             <!-- 圖表區 -->
             <div>
               <apexchart
-                v-if="chartType && chartType.value === 'area'"
+                v-if="chartType === 'area'"
                 width="100%"
                 type="area"
                 :options="chartOptions"
@@ -100,12 +127,17 @@
               />
 
               <apexchart
-                v-else-if="chartType && chartType.value === 'candlestick'"
+                v-else-if="chartType === 'candlestick'"
                 width="100%"
                 type="candlestick"
                 :options="candleOptions"
                 :series="candleSeries"
               />
+              <!-- <StockChart
+                :type="chartType.value"
+                :options="chartType.value === 'area' ? chartOptions : candleOptions"
+                :series="chartType.value === 'area' ? chartSeries : candleSeries"
+              /> -->
             </div>
           </div>
 
@@ -183,7 +215,14 @@ const chartTypeOptions = [
     `
   }
 ];
-const chartType = ref(chartTypeOptions[0]);
+const chartType = ref('area');
+
+function changeChartType(type) {
+  if (chartType.value !== type) {
+    chartType.value = type
+    fetchChartData(symbol.value)
+  }
+}
 
 const currentRange = ref('3mo')
 
@@ -318,7 +357,7 @@ const items = ref([
     { label: symbol.value },
 ]);
 
-// 計算成長率和變化量
+// 計算區間的成長率和變化量
 
 const growthRate = ref(null)
 const change = ref(0)
@@ -437,7 +476,7 @@ async function fetchChartData(symbol) {
       regularMarketVolume: data.meta.regularMarketVolume || 0
     })
 
-    if (chartType.value && chartType.value.value === 'area') {
+    if (chartType.value === 'area') {
       const lineData = quotes
         .filter(q => q.close !== null)
         .map(q => ({
@@ -446,7 +485,7 @@ async function fetchChartData(symbol) {
         }))
       chartSeries.value[0].data = lineData
       calculateGrowthRate()
-    } else if (chartType.value && chartType.value.value === 'candlestick') {
+    } else if (chartType.value === 'candlestick') {
       const candleData = quotes
         .filter(q => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
         .map(q => ({

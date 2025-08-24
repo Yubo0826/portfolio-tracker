@@ -1,21 +1,22 @@
 <template>
   <div>
-    <Card v-for="symbol in symbols" :key="symbol" class="mb-6">
-      <template #title>
-        <div class="text-sm font-semibold">{{ symbol }} 價格歷史圖表</div>
-      </template>
-      <template #content>
-        <div v-if="loadingMap[symbol]" class="p-4">載入中...</div>
-        <div v-else>
-          <apexchart
-            type="line"
-            height="250"
-            :options="getChartOptions(symbol)"
-            :series="getChartSeries(symbol)"
-          />
-        </div>
-      </template>
-    </Card>
+    <!-- Menu bar container -->
+    <div class="flex items-center justify-between px-8 py-4 shadow-sm bg-white">
+      <!-- Logo -->
+      <div class="text-2xl font-bold">
+        <span class="text-purple-400">Loan</span>
+        <span class="text-gray-900">Planner</span>
+      </div>
+
+      <!-- Menu items -->
+      <nav class="flex space-x-8 text-sm font-medium">
+        <a href="#" class="text-black border-b-2 border-purple-400 pb-1">Dashboard</a>
+        <a href="#" class="text-gray-500 hover:text-black transition">Offer</a>
+        <a href="#" class="text-gray-500 hover:text-black transition">Loan Transaction</a>
+        <a href="#" class="text-gray-500 hover:text-black transition">Analytics</a>
+        <a href="#" class="text-gray-500 hover:text-black transition">News</a>
+      </nav>
+    </div>
   </div>
 </template>
 

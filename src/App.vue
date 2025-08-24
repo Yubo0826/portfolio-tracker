@@ -1,24 +1,26 @@
 <template>
   <header>
     <div class="flex justify-between items-center mb-8">
-      <div></div>
+      <div class="text-3xl font-bold">
+        <span class="text-gray-500">Stock</span><span class="green">Bar</span>
+      </div>
 
       <nav>
         <RouterLink to="/dashboard">
           <Button label="Dashboard" severity="secondary" rounded class="m-1" />
         </RouterLink>
-        <RouterLink to="/holdings">
+        <!-- <RouterLink to="/holdings">
           <Button label="Holdings" severity="secondary" rounded class="m-1" />
-        </RouterLink>
+        </RouterLink> -->
         <RouterLink to="/transactions">
           <Button label="Transactions" severity="secondary" rounded class="m-1" />
         </RouterLink>
-        <RouterLink to="/allocation">
+        <!-- <RouterLink to="/allocation">
           <Button label="Allocation" severity="secondary" rounded class="m-1" />
         </RouterLink>
         <RouterLink to="/rebalancing">
           <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
-        </RouterLink>
+        </RouterLink> -->
         <RouterLink to="/dividends">
           <Button label="Dividends" severity="secondary" rounded class="m-1" />
         </RouterLink>
@@ -49,22 +51,7 @@
           aria-label="Language"
         />
 
-        <!-- 選擇投資組合 -->
-        <Select v-model="selectedPortfolio" size="small" ref="PortfolioSelect" v-model:visible="selectVisible" :options="portfolioStore.portfolios" optionLabel="name" placeholder="Select a City" checkmark :highlightOnSelect="false" class="m-2">
-          <template #header>
-              <div class="p-3">
-                  <span class="font-bold">選擇投資組合</span>
-              </div>
-          </template>
-          <template #footer>
-              <!-- <div class="p-3">
-                  <Button label="New Portfolio" fluid severity="secondary" text size="small" icon="pi pi-plus text-left" />
-              </div> -->
-              <div class="p-3 border-t-1 border-gray-200">
-                  <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
-              </div>
-          </template>
-        </Select>
+        
 
         <!-- 有登入 -->
         <template v-if="auth.user">
@@ -80,6 +67,46 @@
     </div>
   </header>
 
+  <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
+    <div>
+      <a @click="$router.push('portfolio')">
+        All Portfolios
+      </a>
+        / 
+      <!-- 選擇投資組合 -->
+      <Select 
+        v-model="selectedPortfolio" 
+        size="small" ref="PortfolioSelect" 
+        v-model:visible="selectVisible" 
+        :options="portfolioStore.portfolios" optionLabel="name" checkmark 
+        :highlightOnSelect="false" class="m-2"
+        :pt="{
+          root: { style: { 
+            boxShadow: 'none',
+            'hover': {
+              border: '1px solid blue'
+            },
+          } }
+        }"
+        >
+        <template #header>
+            <div class="p-3">
+                <span class="font-bold">選擇投資組合</span>
+            </div>
+        </template>
+        <template #dropdownicon>
+          <i class="pi pi-chevron-down" style="font-size: .75rem"></i>
+        </template>
+      </Select>
+    </div>
+
+    <div>
+      <Button type="button" label="增加資產" icon="pi pi-plus" rounded class="mr-2" />
+      <Button type="button" label="再平衡" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded />
+    </div>
+    
+  </div>
+
   <RouterView />
 
 
@@ -88,10 +115,11 @@
       <SearchBox @close="searchBoxVisible = false"></SearchBox>
     </template>
   </Dialog>
+  
 </template>
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { ref, watch, onMounted, computed } from 'vue'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
@@ -101,8 +129,10 @@ import Dialog from 'primevue/dialog';
 import 'primeicons/primeicons.css';
 import SearchBox from './components/SearchBox.vue'
 
-
+const route = useRoute();
 const router = useRouter()
+
+const isAssetRoute = computed(() => route.name === 'asset');
 
 const auth = useAuthStore()
 
@@ -235,7 +265,7 @@ header {
 
 <style>
   .p-card {
-    border: 1px solid #eaeaea;
+    border: 1px solid #d1d1d1;
     box-shadow: none!important;
   }
 </style>
