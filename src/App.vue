@@ -97,6 +97,11 @@
         <template #dropdownicon>
           <i class="pi pi-chevron-down" style="font-size: .75rem"></i>
         </template>
+        <template #footer>
+            <div class="p-3 border-t-1 border-gray-200">
+                <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
+            </div>
+        </template>
       </Select>
     </div>
 

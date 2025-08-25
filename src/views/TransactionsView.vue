@@ -1,3 +1,132 @@
+<template>
+    <div>
+        <Toast position="top-center" />
+        <div class="flex justify-end mb-4">
+            <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
+            <Button label="Add" @click="visible = true" icon="pi pi-plus" />
+            
+            <!-- Dialog for adding or updating transactions -->
+            <Dialog v-model:visible="visible" @hide="resetDialog" modal :style="{ width: '30rem' }">
+                <template #header>
+                    <div class="inline-flex items-center justify-center gap-2">
+                        <span class="font-bold whitespace-nowrap">{{ dialogHeader }}</span>
+                    </div>    
+                </template>
+                <span class="text-surface-500 dark:text-surface-400 block mb-8">
+                    <span v-if="!editingId">
+                        先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
+                    </span>
+                </span>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="date" class="font-semibold w-24">
+                        Date
+                        <span style="color: #f27362;">*</span>
+                    </label>
+                    <DatePicker v-model="transactionForm.date" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" class="flex-auto" placeholder="交易的日期" />
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="symbol" class="font-semibold w-24">
+                        Symbol
+                        <span style="color: #f27362;">*</span>
+                    </label>
+                    <SymbolAutoComplete
+                        v-model="transactionForm.symbol"
+                        @update="({ symbol, name, assetType }) => {
+                            transactionForm.name = name;
+                            transactionForm.assetType = assetType;
+
+                            const date = transactionForm.date?.toISOString().split('T')[0];
+                            if (symbol && date) {
+                                searchPrice(symbol, date);
+                            }
+                        }"
+                        :disabled="editingId ? true : false"
+                    />
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="shares" class="font-semibold w-24">
+                        Shares
+                        <span style="color: #f27362;">*</span>
+                    </label>
+                    <InputNumber v-model="transactionForm.shares" id="shares" class="flex-auto" autocomplete="off" />
+                </div>
+                <div class="flex items-center gap-2 mb-4 p-2 text-xs">
+                    <label for="" class="font-semibold w-24"></label>
+                    <Button @click="addShare(100)" label="+100" severity="secondary" rounded />
+                    <Button @click="addShare(500)" label="+500" severity="secondary" rounded />
+                    <Button @click="addShare(1000)" label="+1000" severity="secondary" rounded />
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="price" class="font-semibold w-24">
+                        Price
+                        <span style="color: #f27362;">*</span>
+                    </label>
+                    <InputText v-model="transactionForm.price" id="price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
+                </div>
+                <div class="flex items-center gap-4 mb-8">
+                    <label for="operation" class="font-semibold w-24">Operation</label>
+                    <SelectButton v-model="transactionForm.operation" :options="transactionType" optionLabel="name" optionValue="code" />
+                </div>
+                <div class="flex items-center gap-4 mb-8">
+                    <label for="fee" class="font-semibold w-24">Fee</label>
+                    <InputNumber v-model="transactionForm.fee" id="fee" class="flex-auto" showButtons autocomplete="off" />
+                </div>
+                <div class="flex items-center gap-4 mb-8">
+                    <label for="operation" class="font-semibold w-24">Total</label>
+                    ${{ totalPrice }} USD
+                </div>
+                <div class="flex justify-end gap-2">
+                    <Button type="button" label="Cancel" severity="secondary" @click="resetDialog(), visible = false"></Button>
+                    <Button v-if="hasError" type="button" label="Add" v-tooltip.bottom="'請填入完整信息'" bottom @click="saveTransaction" disabled></Button>
+                    <Button v-else type="button" label="Add" bottom @click="saveTransaction"></Button>
+                </div>
+            </Dialog>
+        </div>
+
+        <DataTable v-model:selection="selectedAssets" :value="transactions" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+            <Column field="symbol" sortable header="Symbol">
+                <!-- <template #sorticon="{ sorted, sortOrder }">
+                    <i
+                        v-show="sorted"
+                        :class="sortOrder === 1 ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
+                    ></i>
+                </template> -->
+            </Column>
+            <Column field="name" sortable header="Name"></Column>
+            <Column field="shares" sortable header="Shares"></Column>
+            <Column field="price" sortable header="Price"></Column>
+            <Column field="fee" sortable header="Fee"></Column>
+            <Column field="" sortable header="Operation">
+                <template #body="slotProps">
+                    <div>
+                        <span 
+                            v-if="slotProps.data.transactionType === 'buy'"
+                            class="bg-green-400 text-green-800 rounded-full px-4 py-1.5 text-white font-bold text-xs"
+                            >
+                            Buy
+                        </span>
+                        <span v-else class="bg-red-400 text-red-800 rounded-full px-4 py-1.5 text-white font-bold text-xs">Sell</span>
+                    </div>
+                </template> 
+            </Column>
+            <Column field="date" sortable header="Date"></Column>
+            <Column field="" header="Action">
+                <template #body="slotProps">
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedAssets(slotProps.data.id)" />
+                </template>  
+            </Column>
+
+            <template #empty>
+                <div class="p-4 text-center text-gray-500">
+                <i class="pi pi-info-circle mr-2" />
+                    現在並無資料。
+                </div>
+            </template>
+        </DataTable>
+
+    </div>
+</template>
 <script setup>
 import { computed, watch, ref } from 'vue';
 import api from '../api.js';
@@ -257,136 +386,6 @@ const saveTransaction = async () => {
     }
 };
 </script>
-<template>
-    <div>
-        <Toast position="top-center" />
-        <div class="flex justify-end mb-4">
-            <Button label="Delete" @click="deleteSelectedAssets" icon="pi pi-trash" class="mr-2" severity="danger" />
-            <Button label="Add" @click="visible = true" icon="pi pi-plus" />
-            
-            <!-- Dialog for adding or updating transactions -->
-            <Dialog v-model:visible="visible" @hide="resetDialog" modal :style="{ width: '30rem' }">
-                <template #header>
-                    <div class="inline-flex items-center justify-center gap-2">
-                        <span class="font-bold whitespace-nowrap">{{ dialogHeader }}</span>
-                    </div>    
-                </template>
-                <span class="text-surface-500 dark:text-surface-400 block mb-8">
-                    <span v-if="!editingId">
-                        先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
-                    </span>
-                </span>
-                <div class="flex items-center gap-4 mb-4">
-                    <label for="date" class="font-semibold w-24">
-                        Date
-                        <span style="color: #f27362;">*</span>
-                    </label>
-                    <DatePicker v-model="transactionForm.date" @date-select="onDateSelect" :maxDate="new Date()" showIcon fluid iconDisplay="input" class="flex-auto" placeholder="交易的日期" />
-                </div>
-                <div class="flex items-center gap-4 mb-4">
-                    <label for="symbol" class="font-semibold w-24">
-                        Symbol
-                        <span style="color: #f27362;">*</span>
-                    </label>
-                    <SymbolAutoComplete
-                        v-model="transactionForm.symbol"
-                        @update="({ symbol, name, assetType }) => {
-                            transactionForm.name = name;
-                            transactionForm.assetType = assetType;
-
-                            const date = transactionForm.date?.toISOString().split('T')[0];
-                            if (symbol && date) {
-                                searchPrice(symbol, date);
-                            }
-                        }"
-                        :disabled="editingId ? true : false"
-                    />
-                </div>
-                <div class="flex items-center gap-4 mb-4">
-                    <label for="shares" class="font-semibold w-24">
-                        Shares
-                        <span style="color: #f27362;">*</span>
-                    </label>
-                    <InputNumber v-model="transactionForm.shares" id="shares" class="flex-auto" autocomplete="off" />
-                </div>
-                <div class="flex items-center gap-2 mb-4 p-2 text-xs">
-                    <label for="" class="font-semibold w-24"></label>
-                    <Button @click="addShare(100)" label="+100" severity="secondary" rounded />
-                    <Button @click="addShare(500)" label="+500" severity="secondary" rounded />
-                    <Button @click="addShare(1000)" label="+1000" severity="secondary" rounded />
-                </div>
-                <div class="flex items-center gap-4 mb-4">
-                    <label for="price" class="font-semibold w-24">
-                        Price
-                        <span style="color: #f27362;">*</span>
-                    </label>
-                    <InputText v-model="transactionForm.price" id="price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
-                </div>
-                <div class="flex items-center gap-4 mb-8">
-                    <label for="operation" class="font-semibold w-24">Operation</label>
-                    <SelectButton v-model="transactionForm.operation" :options="transactionType" optionLabel="name" optionValue="code" />
-                </div>
-                <div class="flex items-center gap-4 mb-8">
-                    <label for="fee" class="font-semibold w-24">Fee</label>
-                    <InputNumber v-model="transactionForm.fee" id="fee" class="flex-auto" showButtons autocomplete="off" />
-                </div>
-                <div class="flex items-center gap-4 mb-8">
-                    <label for="operation" class="font-semibold w-24">Total</label>
-                    ${{ totalPrice }} USD
-                </div>
-                <div class="flex justify-end gap-2">
-                    <Button type="button" label="Cancel" severity="secondary" @click="resetDialog(), visible = false"></Button>
-                    <Button v-if="hasError" type="button" label="Add" v-tooltip.bottom="'請填入完整信息'" bottom @click="saveTransaction" disabled></Button>
-                    <Button v-else type="button" label="Add" bottom @click="saveTransaction"></Button>
-                </div>
-            </Dialog>
-        </div>
-
-        <DataTable v-model:selection="selectedAssets" :value="transactions" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-            <Column field="symbol" sortable header="Symbol">
-                <!-- <template #sorticon="{ sorted, sortOrder }">
-                    <i
-                        v-show="sorted"
-                        :class="sortOrder === 1 ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
-                    ></i>
-                </template> -->
-            </Column>
-            <Column field="name" sortable header="Name"></Column>
-            <Column field="shares" sortable header="Shares"></Column>
-            <Column field="price" sortable header="Price"></Column>
-            <Column field="fee" sortable header="Fee"></Column>
-            <Column field="" sortable header="Operation">
-                <template #body="slotProps">
-                    <div>
-                        <span 
-                            v-if="slotProps.data.transactionType === 'buy'"
-                            class="bg-green-400 text-green-800 rounded-full px-4 py-1.5 text-white font-bold text-xs"
-                            >
-                            Buy
-                        </span>
-                        <span v-else class="bg-red-400 text-red-800 rounded-full px-4 py-1.5 text-white font-bold text-xs">Sell</span>
-                    </div>
-                </template> 
-            </Column>
-            <Column field="date" sortable header="Date"></Column>
-            <Column field="" header="Action">
-                <template #body="slotProps">
-                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedAssets(slotProps.data.id)" />
-                </template>  
-            </Column>
-
-            <template #empty>
-                <div class="p-4 text-center text-gray-500">
-                <i class="pi pi-info-circle mr-2" />
-                    現在並無資料。
-                </div>
-            </template>
-        </DataTable>
-
-
-    </div>
-</template>
 <style scoped>
 :deep(.p-autocomplete) {
     flex: 1 1 auto;
