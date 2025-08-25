@@ -38,31 +38,6 @@
               </div>
 
               <!-- 選擇圖表類型 -->
-              <!-- <Select
-                v-model="chartType"
-                :options="chartTypeOptions"
-                optionLabel="label"
-                :pt="{
-                  root: { style: { border: 'none', boxShadow: 'none' } }
-                }"
-              >
-                <template #value="slotProps">
-                  <div class="w-4 h-4 flex items-center" v-html="slotProps.value.icon"></div>
-                </template>
-                <template #option="slotProps">
-                  <div class="flex items-center">
-                    <div class="w-4 h-4 mr-4" v-html="slotProps.option.icon"></div>
-                    <div>{{ slotProps.option.label }}</div>
-                  </div>
-                </template>
-                <template #dropdownicon>
-                  <i class="pi pi-chevron-down" style="font-size: .5rem"></i>
-                </template>
-              </Select> -->
-
-              <!-- <Button style="color: grey" icon="pi pi-chart-line" variant="text" rounded aria-label="Filter" />
-              <Button style="color: grey" icon="pi pi-chart-bar" variant="text" rounded aria-label="Filter" /> -->
-
               <div class="flex items-center space-x-2">
                 <Button
                   v-if="chartType === 'area'"
@@ -133,11 +108,6 @@
                 :options="candleOptions"
                 :series="candleSeries"
               />
-              <!-- <StockChart
-                :type="chartType.value"
-                :options="chartType.value === 'area' ? chartOptions : candleOptions"
-                :series="chartType.value === 'area' ? chartSeries : candleSeries"
-              /> -->
             </div>
           </div>
 
@@ -199,22 +169,6 @@ onBeforeRouteUpdate((to, from) => {
   fetchChartData(s)
 })
 
-const chartTypeOptions = [
-  {
-    label: '面積圖',
-    value: 'area',
-    icon: `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="#5b9ef5" xml:space="preserve" viewBox="1 162.6 26 14"><path xmlns="http://www.w3.org/2000/svg" d="m17.8 162.6-6.5 8.4c-2.1-2.5-3.2-3.8-3.2-3.8L1 176.6h26z"></path></svg>
-    `
-  },
-  {
-    label: 'K線圖',
-    value: 'candlestick',
-    icon: `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="#5b9ef5" viewBox="0 0 12 14"><path d="M3.5.333H1.833V2H.167v10h1.666v1.667H3.5V12h1.667V2H3.5zm0 10H1.833V3.667H3.5zm8.333-6.666h-1.666V.333H8.5v3.334H6.833V9.5H8.5v4.167h1.667V9.5h1.666zm-1.666 4.166H8.5v-2.5h1.667z"></path></svg>
-    `
-  }
-];
 const chartType = ref('area');
 
 function changeChartType(type) {
@@ -298,9 +252,6 @@ const chartOptions = computed(() => ({
   }
 }))
 
-
-
-
 const chartSeries = ref([
   {
     name: '收盤價',
@@ -358,7 +309,6 @@ const items = ref([
 ]);
 
 // 計算區間的成長率和變化量
-
 const growthRate = ref(null)
 const change = ref(0)
 

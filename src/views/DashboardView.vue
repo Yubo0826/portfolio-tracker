@@ -21,10 +21,8 @@
             </template>
             <template #footer>
               <div class="text-sm text-gray-500 mt-4">
-                年化報酬率： 
-                <span :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                  {{ annualReturn.toFixed(2) }}%
-                </span>
+                基準貨幣：USD
+
               </div>
 
             </template>
@@ -47,6 +45,15 @@
                   ${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
               </div>
+            </template>
+            <template #footer>
+              <div class="text-sm text-gray-500 mt-4">
+                投資報酬率： 
+                <span :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                  {{ annualReturn.toFixed(2) }}%
+                </span>
+              </div>
+
             </template>
           </Card>
     
