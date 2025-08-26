@@ -106,7 +106,7 @@
     </div>
 
     <div>
-      <Button type="button" label="增加資產" icon="pi pi-plus" rounded class="mr-2" />
+      <Button @click="transctionDialogVisible = true" type="button" label="增加資產" icon="pi pi-plus" rounded class="mr-2" />
       <Button type="button" label="再平衡" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded />
     </div>
     
@@ -120,6 +120,10 @@
       <SearchBox @close="searchBoxVisible = false"></SearchBox>
     </template>
   </Dialog>
+
+  <TransactionDialog
+      v-model="transctionDialogVisible"
+    />
   
 </template>
 <script setup>
@@ -133,6 +137,7 @@ import Menu from 'primevue/menu';
 import Dialog from 'primevue/dialog';
 import 'primeicons/primeicons.css';
 import SearchBox from './components/SearchBox.vue'
+import TransactionDialog from '@/components/TransactionDialog.vue'
 
 const route = useRoute();
 const router = useRouter()
@@ -142,6 +147,7 @@ const isAssetRoute = computed(() => route.name === 'asset');
 const auth = useAuthStore()
 
 const portfolioStore = usePortfolioStore()
+const transctionDialogVisible = ref(false)
 
 // 如果有用戶登入，則設定 uid
 if (auth.user) {

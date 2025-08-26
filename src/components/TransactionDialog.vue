@@ -230,6 +230,7 @@ const onSave = async () => {
 
 const onHide = () => {
   // Dialog 關閉時重置表單（由外部控制 visible 時不會觸發 close）
+  emit('update:modelValue', false);
   form.value = emptyForm();
 };
 
