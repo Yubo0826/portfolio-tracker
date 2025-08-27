@@ -255,6 +255,9 @@ import api from '@/api'
 import xirr from 'xirr'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
+import { useTransactionsStore } from '@/stores/transactions';
+
+const store = useTransactionsStore();
 
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
@@ -366,19 +369,7 @@ function setHoldings(data) {
   })
   setChartData()
 }
-function setTransactions(data) {
-  transactions.value = data.map(item => ({
-    id: item.id,
-    symbol: item.symbol,
-    name: item.name,
-    assetType: item.assetType,
-    price: parseFloat(item.price) || 0,
-    fee: parseFloat(item.fee) || 0,
-    shares: parseInt(item.shares) || 0,
-    transactionType: item.transaction_type,
-    date: item.transaction_date.split('T')[0]
-  }))
-}
+
 function setDividends(data) {
   dividends.value = data.map(item => ({
     id: item.id,
@@ -415,15 +406,7 @@ async function getAllocation() {
     console.error('Error fetching allocation:', e)
   }
 }
-async function getTransactions() {
-  try {
-    if (!portfolioStore.currentPortfolio) return
-    const data = await api.get(`http://localhost:3000/api/transactions?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
-    setTransactions(data.transactions)
-  } catch (e) {
-    console.error(e)
-  }
-}
+
 async function getDividends() {
   try {
     const data = await api.get(`http://localhost:3000/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
@@ -432,13 +415,13 @@ async function getDividends() {
     console.error('Error fetching dividends:', e)
   }
 }
-async function getData() {
+async function loadData() {
   isLoading.value = true
   try {
     await getHoldings()
     await getAllocation()
-    await getTransactions()
     await getDividends()
+    store.fetchTransactions()
   } catch (e) {
     console.error('Error fetching data:', e)
   } finally {
@@ -472,10 +455,10 @@ const annualReturn = computed(() => {
 })
 
 const irr = computed(() => {
-  if (!transactions.value.length || !holdings.value.length) return null
+  if (!store.transactions.value.length || !holdings.value.length) return null
   const cashflows = []
 
-  transactions.value.forEach(tx => {
+  store.transactions.value.forEach(tx => {
     const amount = (tx.price * tx.shares + tx.fee) * (tx.transactionType === 'buy' ? -1 : 1)
     cashflows.push({ amount, when: new Date(tx.date) })
   })
@@ -582,7 +565,7 @@ watch(
   () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],
   ([uid, pid]) => {
     if (uid && pid) {
-      getData()
+      loadData()
       selectedPeriod.value = '3mo'
     }
   },
@@ -590,7 +573,7 @@ watch(
 )
 
 if (auth.user) {
-  getData()
+  loadData()
 } else {
   console.log('No user is logged in')
 }
