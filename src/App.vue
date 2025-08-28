@@ -1,4 +1,5 @@
 <template>
+  <Toast position="bottom-center" />
   <header>
     <div class="flex justify-between items-center mb-8">
       <div class="text-3xl font-bold">

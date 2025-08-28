@@ -185,7 +185,7 @@
     <!-- Holdings Table -->
     <Card class="mb-8 mt-8 p-4">
       <template #content>
-        <DataTable :value="holdings" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
           <Column field="name" header="現在資產">
             <template #body="{ data }">
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md">
@@ -256,20 +256,20 @@ import xirr from 'xirr'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
+import { useHoldingsStore } from '@/stores/holdings'
 
-const store = useTransactionsStore();
+const transactionsStore = useTransactionsStore();
 
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
+const holdingsStore = useHoldingsStore()
 
 /* =========================
  *  State
  * =======================*/
 const isLoading = ref(false)
 
-const holdings = ref([])
 const allocation = ref([])
-const transactions = ref([])
 const dividends = ref([])
 
 const totalValue = ref(0)
@@ -339,36 +339,6 @@ function getPeriodRange(range) {
 /* =========================
  *  Setters (transform API -> view model)
  * =======================*/
-function setHoldings(data) {
-  holdings.value = data.map(item => {
-    const shares = parseInt(item.total_shares) || 0
-    const avgCost = parseFloat(item.avg_cost) || 0
-    const currentPrice = parseFloat(item.current_price) || 0
-    const target = parseFloat(item.target_percentage) || 0
-    const lastUpdated = item.last_updated?.split('T')[0] || ''
-    const totalCost = avgCost * shares
-    const currentValue = Math.round(currentPrice * shares * 100) / 100
-    const totalProfit = Math.round((currentValue - totalCost) * 100) / 100
-    const profitPercentage = ((currentValue / (totalCost || 1)) * 100 - 100).toFixed(2)
-
-    return {
-      id: item.id,
-      symbol: item.symbol,
-      name: item.name,
-      assetType: item.asset_type,
-      shares,
-      avgCost,
-      currentPrice,
-      totalCost,
-      totalProfit,
-      profitPercentage,
-      currentValue,
-      target,
-      lastUpdated
-    }
-  })
-  setChartData()
-}
 
 function setDividends(data) {
   dividends.value = data.map(item => ({
@@ -381,22 +351,16 @@ function setDividends(data) {
     date: item.date.slice(0, 10)
   }))
 }
+
 function setChartData() {
-  totalValue.value = holdings.value.reduce((sum, h) => sum + h.currentValue, 0)
-  totalProfit.value = holdings.value.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
+  totalValue.value = holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
+  totalProfit.value = holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
 }
 
 /* =========================
  *  API Calls
  * =======================*/
-async function getHoldings() {
-  try {
-    const data = await api.get(`http://localhost:3000/api/holdings/?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
-    setHoldings(data)
-  } catch (e) {
-    console.error('Error fetching current prices:', e)
-  }
-}
+
 async function getAllocation() {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return
@@ -418,10 +382,13 @@ async function getDividends() {
 async function loadData() {
   isLoading.value = true
   try {
-    await getHoldings()
+    await holdingsStore.fetchHoldings()
+    await transactionsStore.fetchTransactions()
     await getAllocation()
     await getDividends()
-    store.fetchTransactions()
+    console.log('Transactions:', transactionsStore.list)
+    console.log('Holdings:', holdingsStore.list)
+    setChartData()
   } catch (e) {
     console.error('Error fetching data:', e)
   } finally {
@@ -432,12 +399,12 @@ async function loadData() {
 /* =========================
  *  Computed (derived data)
  * =======================*/
-const holdingsSeries = computed(() => holdings.value.map(h => h.currentValue))
+const holdingsSeries = computed(() => holdingsStore.list.map(h => h.currentValue))
 const allocationSeries = computed(() => allocation.value.map(a => a.target))
 
 const holdingsChart = computed(() => ({
   chart: { type: 'donut' },
-  labels: holdings.value.map(h => h.symbol),
+  labels: holdingsStore.list.map(h => h.symbol),
   responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }]
 }))
 const allocationChart = computed(() => ({
@@ -447,25 +414,25 @@ const allocationChart = computed(() => ({
 }))
 
 const annualReturn = computed(() => {
-  if (!holdings.value.length) return 0
-  const totalCost = holdings.value.reduce((s, h) => s + h.avgCost * h.shares, 0)
-  const curr = holdings.value.reduce((s, h) => s + h.currentValue, 0)
+  if (!holdingsStore.list.length) return 0
+  const totalCost = holdingsStore.list.reduce((s, h) => s + h.avgCost * h.shares, 0)
+  const curr = holdingsStore.list.reduce((s, h) => s + h.currentValue, 0)
   if (totalCost === 0) return 0
   return ((curr - totalCost) / totalCost) * 100
 })
 
 const irr = computed(() => {
-  if (!store.transactions.value.length || !holdings.value.length) return null
+  if (!transactionsStore.list.length || !holdingsStore.list.length) return null
   const cashflows = []
 
-  store.transactions.value.forEach(tx => {
+  transactionsStore.list.forEach(tx => {
     const amount = (tx.price * tx.shares + tx.fee) * (tx.transactionType === 'buy' ? -1 : 1)
     cashflows.push({ amount, when: new Date(tx.date) })
   })
   dividends.value.forEach(d => {
     cashflows.push({ amount: parseFloat(d.totalAmount), when: new Date(d.date) })
   })
-  cashflows.push({ amount: holdings.value.reduce((s, h) => s + h.currentValue, 0), when: new Date() })
+  cashflows.push({ amount: holdingsStore.list.reduce((s, h) => s + h.currentValue, 0), when: new Date() })
 
   try {
     const rate = xirr(cashflows)
@@ -479,21 +446,21 @@ const irr = computed(() => {
 /** 與目標差值（正=買入、負=賣出） */
 const rebalanceRows = computed(() => {
   const tv = totalValue.value
-  if (!tv || (!holdings.value.length && !allocation.value.length)) return []
+  if (!tv || (!holdingsStore.list.length && !allocation.value.length)) return []
 
   const targetMap = new Map()
   allocation.value.forEach(a => {
     const pct = Number(a.target ?? a.target_percentage ?? a.percentage ?? 0)
     targetMap.set(a.symbol, pct)
   })
-  holdings.value.forEach(h => {
+  holdingsStore.list.forEach(h => {
     if (!targetMap.has(h.symbol) && h.target) targetMap.set(h.symbol, Number(h.target))
   })
 
-  const symbols = new Set([...holdings.value.map(h => h.symbol), ...targetMap.keys()])
+  const symbols = new Set([...holdingsStore.list.map(h => h.symbol), ...targetMap.keys()])
   const out = []
   symbols.forEach(sym => {
-    const h = holdings.value.find(x => x.symbol === sym)
+    const h = holdingsStore.list.find(x => x.symbol === sym)
     const currentVal = h?.currentValue ?? 0
     const currentPct = tv ? (currentVal / tv) * 100 : 0
     const targetPct = targetMap.get(sym) ?? 0

@@ -85,17 +85,17 @@
 
 <script setup>
 import { ref, computed, watch, toRefs } from 'vue';
-import { useToast } from 'primevue/usetoast';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 
 const props = defineProps({
-  modelValue: { type: Boolean, default: false }, // 控制顯示
-  editingId: { type: [Number, String, null], default: null }, // 若有值＝編輯
+    modelValue: { type: Boolean, default: false }, // 控制顯示
+    editingId: { type: [Number, String, null], default: null }, // 若有值＝編輯
 });
 
 const emit = defineEmits(['update:modelValue', 'saved']); // saved(result)
 
+import { useToast } from 'primevue/usetoast';
 const toast = useToast();
 const store = useTransactionsStore();
 

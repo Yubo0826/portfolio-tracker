@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Toast position="top-center" />
 
     <div class="flex justify-end mb-4">
       <Button label="Delete" @click="onDelete" icon="pi pi-trash" class="mr-2" severity="danger" />
@@ -14,7 +13,7 @@
 
     <DataTable
       v-model:selection="selectedAssets"
-      :value="store.transactions"
+      :value="store.list"
       sortField="date"
       :sortOrder="-1"
       :loading="store.isLoading"

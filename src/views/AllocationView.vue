@@ -142,7 +142,6 @@ const close = () => {
 
 <template>
   <div>
-    <Toast position="top-center" />
     <div class="flex justify-end mb-4">
         <Button label="Save" @click="saveAllocation" :disabled="saveButtonDisabled" />
     </div>

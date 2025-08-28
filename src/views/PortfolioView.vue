@@ -91,7 +91,6 @@ const confirm2 = () => {
 
 <template>
 <div>
-    <Toast />
     <ConfirmDialog></ConfirmDialog>
     <div class="flex justify-end mb-4">
         <Button label="Add Portfolio" icon="pi pi-plus" class="p-button-success mr-2" @click="dialogVisible = true" />
