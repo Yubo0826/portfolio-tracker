@@ -1,7 +1,7 @@
 <template>
     <div>
       <div class="flex justify-end mb-4">
-          <Button label="Refresh" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" />
+          <Button label="Refresh" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" size="small" />
       </div>
       <DataTable :value="dividends" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
           <Column field="" header="Holding" style="width: 40%">

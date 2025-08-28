@@ -7,12 +7,14 @@
         icon="pi pi-trash"
         class="mr-2"
         severity="danger"
+        size="small"
       />
       <Button
         label="Refresh Prices"
         @click="store.refreshPrices"
         icon="pi pi-refresh"
         class="mr-2"
+        size="small"
       />
     </div>
 

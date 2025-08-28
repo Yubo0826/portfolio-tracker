@@ -2,7 +2,7 @@
   <Toast position="bottom-center" />
   <header>
     <div class="flex justify-between items-center mb-8">
-      <div class="text-3xl font-bold">
+      <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer">
         <span class="text-gray-500">Stock</span><span class="green">Bar</span>
       </div>
 
@@ -10,24 +10,27 @@
         <RouterLink to="/dashboard">
           <Button label="Dashboard" severity="secondary" rounded class="m-1" />
         </RouterLink>
+        <RouterLink to="/portfolio">
+          <Button label="Portfolio" severity="secondary" rounded class="m-1" />
+        </RouterLink>
         <!-- <RouterLink to="/holdings">
           <Button label="Holdings" severity="secondary" rounded class="m-1" />
         </RouterLink> -->
-        <RouterLink to="/transactions">
+        <!-- <RouterLink to="/transactions">
           <Button label="Transactions" severity="secondary" rounded class="m-1" />
-        </RouterLink>
+        </RouterLink> -->
         <!-- <RouterLink to="/allocation">
           <Button label="Allocation" severity="secondary" rounded class="m-1" />
         </RouterLink>
         <RouterLink to="/rebalancing">
           <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
         </RouterLink> -->
-        <RouterLink to="/dividends">
+        <!-- <RouterLink to="/dividends">
           <Button label="Dividends" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/test">
+        </RouterLink> -->
+        <!-- <RouterLink to="/test">
           <Button label="Test" severity="secondary" rounded class="m-1" />
-        </RouterLink>
+        </RouterLink> -->
       </nav>
 
       <div class="flex justify-center items-center">
@@ -44,12 +47,14 @@
           @click="toggleDarkMode"
           class="p-button-rounded p-button-text"
           aria-label="Toggle Dark Mode"
+          size="small"
         />
 
         <Button
           class="p-button-rounded p-button-text"
           icon="pi pi-language"
           aria-label="Language"
+          size="small"
         />
 
         
@@ -70,8 +75,8 @@
 
   <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
     <div>
-      <a @click="$router.push('portfolio')">
-        All Portfolios
+      <a @click="$router.push('portfolios')">
+        所有投資組合
       </a>
         / 
       <!-- 選擇投資組合 -->

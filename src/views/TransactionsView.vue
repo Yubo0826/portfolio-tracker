@@ -2,8 +2,8 @@
   <div>
 
     <div class="flex justify-end mb-4">
-      <Button label="Delete" @click="onDelete" icon="pi pi-trash" class="mr-2" severity="danger" />
-      <Button label="Add" @click="openCreate" icon="pi pi-plus" />
+      <Button label="Delete" @click="onDelete" icon="pi pi-trash" class="mr-2" severity="danger" size="small" />
+      <Button label="Add" @click="openCreate" icon="pi pi-plus" size="small" />
       <TransactionDialog
         v-model="dialogVisible"
         :editingId="editingId"

@@ -9,7 +9,7 @@
             <template #title>
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
-                <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
+                <div class="text-sm ml-2">總價值</div>
               </div>
             </template>
             <template #content>
@@ -34,7 +34,7 @@
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
-                  {{ $t('totalProfit') }}
+                  總收益
                   <i class="pi pi-question-circle" v-tooltip.bottom="'總收益 = 總市值 - 總成本'"></i>
                 </div>
               </div>
@@ -109,7 +109,7 @@
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
                <Button
                 unstyled
-                label="前往目標設定"
+                label="前往設定目標"
                 icon="pi pi-bullseye"
                 @click="$router.push('allocation')"
                 :pt="{

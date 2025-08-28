@@ -81,7 +81,7 @@
                         :pt="{
                           tabList: { style: { borderWidth: '0px' } },
                           content: { style: { borderWidth: '0px' } },
-                          activeBar: { style: { backgroundColor: '#5b9ef5', height: '2px' } },
+                          // activeBar: { style: { backgroundColor: '#5b9ef5', height: '2px' } },
                         }"
                       >
                           <Tab v-for="tab in rangeOptions" :key="tab.label" :value="tab.value">{{ tab.label }}</Tab>
@@ -505,7 +505,7 @@ onMounted(() => {
 
 </style>
 <style>
-.p-tab {
+/* .p-tab {
   font-size: small;
   border-width: 0!important;
   padding: 1rem!important;
@@ -514,5 +514,5 @@ onMounted(() => {
 .p-tab-active {
   color: #5b9ef5!important;
   font-weight: 600!important;
-}
+} */
 </style>
