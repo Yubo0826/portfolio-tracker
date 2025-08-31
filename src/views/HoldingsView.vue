@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-end mb-8">
       <Button
         label="Delete"
         @click="onDelete"

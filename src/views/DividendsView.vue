@@ -1,6 +1,6 @@
 <template>
     <div>
-      <div class="flex justify-end mb-4">
+      <div class="flex justify-end mb-8">
           <Button label="Refresh" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" size="small" />
       </div>
       <DataTable :value="dividends" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">

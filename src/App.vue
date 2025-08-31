@@ -50,12 +50,12 @@
           size="small"
         />
 
-        <Button
+        <!-- <Button
           class="p-button-rounded p-button-text"
           icon="pi pi-language"
           aria-label="Language"
           size="small"
-        />
+        /> -->
 
         
 
@@ -87,12 +87,10 @@
         :options="portfolioStore.portfolios" optionLabel="name" checkmark 
         :highlightOnSelect="false" class="m-2"
         :pt="{
-          root: { style: { 
-            boxShadow: 'none',
-            'hover': {
-              border: '1px solid blue'
-            },
-          } }
+          root: { 
+            style: { border: '1px solid transparent', boxShadow: 'none' },
+            class: 'custom-select-root' 
+          }
         }"
         >
         <template #header>
@@ -105,7 +103,7 @@
         </template>
         <template #footer>
             <div class="p-3 border-t-1 border-gray-200">
-                <Button label="Manage Portfolio" @click="goToPortfolio" fluid severity="secondary" text size="small" icon="pi pi-cog" />
+                <Button label="增加投增組合" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
             </div>
         </template>
       </Select>
@@ -123,13 +121,20 @@
 
   <Dialog v-model:visible="searchBoxVisible" modal dismissableMask position="top" :style="{ width: '25rem', top: '5rem' }" :closeOnEscape="true" :showHeader="false">
     <template #container>
-      <SearchBox @close="searchBoxVisible = false"></SearchBox>
+      <SearchBox 
+        @close="searchBoxVisible = false"
+        ></SearchBox>
     </template>
   </Dialog>
 
   <TransactionDialog
       v-model="transctionDialogVisible"
     />
+
+  <PortfolioFormDialog 
+      :visible="dialogVisible"
+      @update:visible="dialogVisible = $event"
+      />
   
 </template>
 <script setup>
@@ -144,6 +149,9 @@ import Dialog from 'primevue/dialog';
 import 'primeicons/primeicons.css';
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
+import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
+
+const dialogVisible = ref(false);
 
 const route = useRoute();
 const router = useRouter()
@@ -284,5 +292,9 @@ header {
   .p-card {
     border: 1px solid #d1d1d1;
     box-shadow: none!important;
+  }
+
+  .custom-select-root:hover {
+    border: 1px solid rgb(121, 121, 121)!important;
   }
 </style>

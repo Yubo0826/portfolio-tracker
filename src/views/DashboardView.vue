@@ -14,9 +14,11 @@
             </template>
             <template #content>
               <div class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">
+                <div v-if="totalValue" class="text-2xl font-bold">
                   ${{ totalValue.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
+
+                <div v-else class="text-2xl font-bold text-gray-400">--</div>
               </div>
             </template>
             <template #footer>
@@ -41,17 +43,21 @@
             </template>
             <template #content>
               <div class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">
+                <div v-if="totalProfit" class="text-2xl font-bold">
                   ${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
+
+                <div v-else class="text-2xl font-bold text-gray-400">--</div>
               </div>
             </template>
             <template #footer>
               <div class="text-sm text-gray-500 mt-4">
                 投資報酬率： 
-                <span :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ annualReturn.toFixed(2) }}%
                 </span>
+
+                <span v-else class="text-gray-400">--</span>
               </div>
 
             </template>
@@ -72,9 +78,10 @@
               </div>
             </template>
             <template #content>
-              <div class="flex justify-between items-center mt-2">
+              <div v-if="irr" class="flex justify-between items-center mt-2">
                 <div class="text-2xl font-bold">{{ irr }}%</div>
               </div>
+              <div v-else class="text-2xl font-bold text-gray-400 mt-2">--</div>
             </template>
           </Card>
         </div>
@@ -139,7 +146,7 @@
           </template>
           <!-- Pie -->
           <template #content>
-            <div class="flex justify-between items-center mb-4">
+            <div v-if="holdingsStore.list.length > 0" class="flex justify-between items-center mb-4">
               <apexchart
                 v-if="selectedPieType === 'actual'"
                 width="380"
@@ -153,10 +160,24 @@
                 :options="allocationChart"
                 :series="allocationSeries" />
             </div>
+            <div v-else>
+              <div class="flex flex-col items-center text-center gap-3 py-8">
+                <img class="w-80 h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
+                <!-- 標題 -->
+                <h2 class="text-xl sm:text-2xl font-semibold text-slate-800">
+                  這個投資組合還沒有投資項目
+                </h2>
+
+                <!-- 說明文字 -->
+                <p class="text-sm sm:text-base text-slate-500">
+                  新增投資項目，即可查看成效及管理資產
+                </p>
+              </div>
+            </div>
           </template>
           <!-- Footer -->
           <template #footer>
-            <div class="w-full max-w-md rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div v-if="holdingsStore.list.length > 0" class="w-full max-w-md rounded-2xl border border-slate-200 p-4 shadow-sm">
               <div class="mb-2 grid grid-cols-2">
                 <div class="text-[13px] font-medium text-slate-600">與目標的差值（需調整）</div>
                 <div class="text-right text-[13px] text-slate-500">正數 = 買入 | 負數 = 賣出</div>
@@ -352,7 +373,7 @@ function setDividends(data) {
   }))
 }
 
-function setChartData() {
+function setOverviewValue() {
   totalValue.value = holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
   totalProfit.value = holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
 }
@@ -383,12 +404,19 @@ async function loadData() {
   isLoading.value = true
   try {
     await holdingsStore.fetchHoldings()
+    if (holdingsStore.list.length === 0) {
+      totalValue.value = 0
+      totalProfit.value = 0
+      chartSeries.value = [{ name: '收盤價', data: [] }]
+      return
+    }
     await transactionsStore.fetchTransactions()
     await getAllocation()
     await getDividends()
     console.log('Transactions:', transactionsStore.list)
     console.log('Holdings:', holdingsStore.list)
-    setChartData()
+    setOverviewValue()
+    fetchChartData()
   } catch (e) {
     console.error('Error fetching data:', e)
   } finally {
@@ -508,7 +536,8 @@ function calculateGrowthRate() {
   change.value = lastPrice - firstPrice
   growthRate.value = (((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2)
 }
-async function fetchChartData(period1, period2) {
+async function fetchChartData() {
+  const { period1, period2 } = getPeriodRange(selectedPeriod.value)
   try {
     const data = await api.get(`http://localhost:3000/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
     const lineData = data.map(item => ({ x: new Date(item.date), y: item.close }))
@@ -524,8 +553,7 @@ async function fetchChartData(period1, period2) {
  * =======================*/
 watch(selectedPeriod, (newVal, oldVal) => {
   if (newVal !== oldVal) {
-    const { period1, period2 } = getPeriodRange(newVal)
-    fetchChartData(period1, period2)
+    fetchChartData()
   }
 })
 watch(

@@ -71,14 +71,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return list.value.find((t) => t.id === id) || null;
   };
 
-  const saveTransaction = async ({ id = null, form }) => {
-    if (!uid.value || !portfolioId.value) {
+  const saveTransaction = async ({ id = null, form, p_id = portfolioId.value }) => {
+    if (!uid.value || !p_id) {
       throw new Error('No user or portfolio selected');
     }
 
     const payload = {
       uid: uid.value,
-      portfolio_id: portfolioId.value,
+      portfolio_id: p_id,
       symbol: String(form.symbol || '').toUpperCase(),
       name: form.name || '',
       asset_type: form.assetType || '',
