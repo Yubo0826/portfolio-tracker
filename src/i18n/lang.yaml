@@ -4,6 +4,105 @@ portfolio:
 totalValue:
   en: Total Value
   zh: 總價值
+delete:
+  en: Delete
+  zh: 刪除
+refreshPrices:
+  en: Refresh Prices
+  zh: 重新整理價格
+symbol:
+  en: Symbol
+  zh: 代號
+name:
+  en: Name
+  zh: 名稱
+shares:
+  en: Shares
+  zh: 股數
+totalCost:
+  en: Total Cost
+  zh: 總成本
+currentPrice:
+  en: Current Price
+  zh: 現價
+currentValue:
+  en: Current Value
+  zh: 現值
 totalProfit:
-  en: Total Profit
-  zh: 總利潤
+  en: Total P/L
+  zh: 累計損益
+noData:
+  en: No data yet
+  zh: 目前沒有資料
+# 通用
+refresh:
+  en: Refresh
+  zh: 重新整理
+holding:
+  en: Holding
+  zh: 標的
+
+# 股利頁欄位（更精準）
+dividendPerShare:
+  en: Dividend/Share
+  zh: 每股股利
+dividendTotal:
+  en: Total Dividend
+  zh: 總股利
+date:
+  en: Date
+  zh: 日期
+add:
+  en: Add
+  zh: 新增
+price:
+  en: Price
+  zh: 價格
+fee:
+  en: Fee
+  zh: 手續費
+operation:
+  en: Operation
+  zh: 類型
+buy:
+  en: Buy
+  zh: 買入
+sell:
+  en: Sell
+  zh: 賣出
+action:
+  en: Action
+  zh: 操作
+success:
+  en: Success
+  zh: 成功
+error:
+  en: Error
+  zh: 錯誤
+transactionsDeleteSuccess:
+  en: Transactions deleted successfully.
+  zh: 已刪除交易明細。
+deleteFailed:
+  en: Delete failed
+  zh: 刪除失敗
+addPortfolio:
+  en: Add Portfolio
+  zh: 新增投資組合
+updatePortfolio:
+  en: Update Portfolio
+  zh: 編輯投資組合
+updateYourInfo:
+  en: Update your information.
+  zh: 請更新你的資訊。
+description:
+  en: Description
+  zh: 描述
+cancel:
+  en: Cancel
+  zh: 取消
+save:
+  en: Save
+  zh: 儲存
+nameRequired:
+  en: Name is required
+  zh: 請輸入名稱

@@ -1,9 +1,20 @@
 <template>
   <div>
-
     <div class="flex justify-end mb-8">
-      <Button label="Delete" @click="onDelete" icon="pi pi-trash" class="mr-2" severity="danger" size="small" />
-      <Button label="Add" @click="openCreate" icon="pi pi-plus" size="small" />
+      <Button
+        :label="$t('delete')"
+        @click="onDelete"
+        icon="pi pi-trash"
+        class="mr-2"
+        severity="danger"
+        size="small"
+      />
+      <Button
+        :label="$t('add')"
+        @click="openCreate"
+        icon="pi pi-plus"
+        size="small"
+      />
       <TransactionDialog
         v-model="dialogVisible"
         :editingId="editingId"
@@ -21,31 +32,31 @@
       tableStyle="min-width: 50rem"
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
-      <Column field="symbol" sortable header="Symbol" />
-      <Column field="name" sortable header="Name" />
-      <Column field="shares" sortable header="Shares" />
-      <Column field="price" sortable header="Price" />
-      <Column field="fee" sortable header="Fee" />
-      <Column field="" sortable header="Operation">
+      <Column field="symbol" sortable :header="$t('symbol')" />
+      <Column field="name" sortable :header="$t('name')" />
+      <Column field="shares" sortable :header="$t('shares')" />
+      <Column field="price" sortable :header="$t('price')" />
+      <Column field="fee" sortable :header="$t('fee')" />
+      <Column field="" sortable :header="$t('operation')">
         <template #body="slotProps">
           <div>
             <span
               v-if="slotProps.data.transactionType === 'buy'"
               class="bg-green-400 text-green-800 rounded-full px-4 py-1.5 text-white font-bold text-xs"
             >
-              Buy
+              {{ $t('buy') }}
             </span>
             <span
               v-else
               class="bg-red-400 text-red-800 rounded-full px-4 py-1.5 text-white font-bold text-xs"
             >
-              Sell
+              {{ $t('sell') }}
             </span>
           </div>
         </template>
       </Column>
-      <Column field="date" sortable header="Date" />
-      <Column field="" header="Action">
+      <Column field="date" sortable :header="$t('date')" />
+      <Column field="" :header="$t('action')">
         <template #body="slotProps">
           <Button
             icon="pi pi-pencil"
@@ -59,7 +70,7 @@
       <template #empty>
         <div class="p-4 text-center text-gray-500">
           <i class="pi pi-info-circle mr-2" />
-          現在並無資料。
+          {{ $t('noData') }}
         </div>
       </template>
     </DataTable>
@@ -69,6 +80,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
 import TransactionDialog from '@/components/TransactionDialog.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
@@ -78,6 +90,7 @@ const store = useTransactionsStore();
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 const toast = useToast();
+const { t } = useI18n();
 
 const dialogVisible = ref(false);
 const editingId = ref(null);
@@ -108,9 +121,9 @@ const onDelete = async () => {
   try {
     await store.deleteTransactions(ids);
     selectedAssets.value = [];
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Transactions deleted successfully.', life: 3000 });
+    toast.add({ severity: 'success', summary: t('success'), detail: t('transactionsDeleteSuccess'), life: 3000 });
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Error', detail: e.message || 'Delete failed', life: 3000 });
+    toast.add({ severity: 'error', summary: t('error'), detail: e?.message || t('deleteFailed'), life: 3000 });
   }
 };
 

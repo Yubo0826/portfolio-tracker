@@ -1,30 +1,46 @@
 <template>
-    <div>
-      <div class="flex justify-end mb-8">
-          <Button label="Refresh" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" size="small" />
-      </div>
-      <DataTable :value="dividends" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-          <Column field="" header="Holding" style="width: 40%">
-            <template #body="{ data }">
-                <div>
-                  <span class="font-bold mr-4">{{ data.symbol }}</span>
-                  <div>{{ data.name }}</div>
-                </div>
-            </template>
-          </Column>
-          <Column field="shares" header="Shares"></Column>
-          <Column field="amount" header="Amount"></Column>
-          <Column field="totalAmount" header="Total Amount"></Column>
-          <Column field="date" sortable header="Date"></Column>
-          <template #empty>
-              <div class="p-4 text-center text-gray-500">
-              <i class="pi pi-info-circle mr-2" />
-                  現在並無資料。
-              </div>
-          </template>
-      </DataTable>
+  <div>
+    <div class="flex justify-end mb-8">
+      <Button
+        :label="$t('refresh')"
+        @click="refreshDividends"
+        icon="pi pi-refresh"
+        class="mr-2"
+        size="small"
+      />
     </div>
+
+    <DataTable
+      :value="dividends"
+      sortField="date"
+      :sortOrder="-1"
+      :loading="isLoading"
+      dataKey="id"
+      tableStyle="min-width: 50rem"
+    >
+      <Column field="" :header="$t('holding')" style="width: 40%">
+        <template #body="{ data }">
+          <div>
+            <span class="font-bold mr-4">{{ data.symbol }}</span>
+            <div>{{ data.name }}</div>
+          </div>
+        </template>
+      </Column>
+      <Column field="shares" :header="$t('shares')" />
+      <Column field="amount" :header="$t('dividendPerShare')" />
+      <Column field="totalAmount" :header="$t('dividendTotal')" />
+      <Column field="date" sortable :header="$t('date')" />
+
+      <template #empty>
+        <div class="p-4 text-center text-gray-500">
+          <i class="pi pi-info-circle mr-2" />
+          {{ $t('noData') }}
+        </div>
+      </template>
+    </DataTable>
+  </div>
 </template>
+
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import api from '../api.js';
@@ -59,9 +75,9 @@ const setDividends = (data) => {
       symbol: item.symbol,
       name: item.name,
       shares: item.shares,
-      amount: item.amount,
-      totalAmount: (item.shares * item.amount).toFixed(2),
-      date: item.date.slice(0, 10) // 格式化日期為 YYYY-MM-DD
+      amount: item.amount, // 每股股利
+      totalAmount: (item.shares * item.amount).toFixed(2), // 總股利
+      date: item.date.slice(0, 10) // YYYY-MM-DD
     };
   });
 };
@@ -102,5 +118,4 @@ onMounted(() => {
     console.log('No user is logged in or portfolio is not selected');
   }
 });
-
 </script>

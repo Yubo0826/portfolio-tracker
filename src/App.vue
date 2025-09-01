@@ -40,12 +40,13 @@
           size="small"
         />
 
-        <!-- <Button
+        <Button
+          @click="$i18n.locale = $i18n.locale === 'en' ? 'zh-TW' : 'en'"
           class="p-button-rounded p-button-text"
           icon="pi pi-language"
           aria-label="Language"
           size="small"
-        /> -->
+        />
 
         
 

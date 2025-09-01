@@ -11,7 +11,7 @@ const app = createApp(App)
 import { createI18n } from 'vue-i18n'
 import messages from './i18n/index.js'
 
-const langCookie = sessionStorage.getItem('lang') || 'en';
+const langCookie = sessionStorage.getItem('lang') || 'zh';
 const i18n = createI18n({
     legacy: false,
     locale: langCookie,

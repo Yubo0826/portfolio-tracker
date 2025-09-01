@@ -2,7 +2,7 @@
   <div>
     <div class="flex justify-end mb-8">
       <Button
-        label="Delete"
+        :label="$t('delete')"
         @click="onDelete"
         icon="pi pi-trash"
         class="mr-2"
@@ -10,7 +10,7 @@
         size="small"
       />
       <Button
-        label="Refresh Prices"
+        :label="$t('refreshPrices')"
         @click="store.refreshPrices"
         icon="pi pi-refresh"
         class="mr-2"
@@ -25,14 +25,14 @@
       dataKey="id"
       tableStyle="min-width: 50rem"
     >
-      <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-      <Column field="symbol" header="Symbol"></Column>
-      <Column field="name" header="Name"></Column>
-      <Column field="shares" header="Shares"></Column>
-      <Column field="totalCost" header="Total Cost"></Column>
-      <Column field="currentPrice" header="Current Price"></Column>
-      <Column field="currentValue" header="Current Value"></Column>
-      <Column field="totalProfit" header="Total Profit">
+      <Column selectionMode="multiple" headerStyle="width: 3rem" />
+      <Column field="symbol" :header="$t('symbol')" />
+      <Column field="name" :header="$t('name')" />
+      <Column field="shares" :header="$t('shares')" />
+      <Column field="totalCost" :header="$t('totalCost')" />
+      <Column field="currentPrice" :header="$t('currentPrice')" />
+      <Column field="currentValue" :header="$t('currentValue')" />
+      <Column field="totalProfit" :header="$t('totalProfit')">
         <template #body="{ data }">
           <div
             :class="{
@@ -55,7 +55,7 @@
       <template #empty>
         <div class="p-4 text-center text-gray-500">
           <i class="pi pi-info-circle mr-2" />
-          現在並無資料。
+          {{ $t('noData') }}
         </div>
       </template>
     </DataTable>

@@ -1,0 +1,249 @@
+--- a/portfolio-tracker-main/src/i18n/lang.yaml+++ b/portfolio-tracker-main/src/i18n/lang.yaml@@ -1,9 +1,114 @@+allocation.diffFromTarget:
++  en: Diff from target (needs adjust)
++  zh: 與目標的差距（需調整）
++chart.assetTrend:
++  en: Asset Trend
++  zh: 資產走勢
++chart.dayRange:
++  en: Day Range
++  zh: 當日價格區間
++chart.prevClose:
++  en: Previous Close
++  zh: 前一日收盤
++chart.timeRange:
++  en: 'Time Range:'
++  zh: 時間區間：
++chart.unknownType:
++  en: Unknown chart type
++  zh: 未知圖表類型
++chart.volumeToday:
++  en: Volume (Today)
++  zh: 今日交易量
++common.cancel:
++  en: Cancel
++  zh: 取消
++common.close:
++  en: Close
++  zh: 關閉
++common.save:
++  en: Save
++  zh: 儲存
++common.saveAndAddMore:
++  en: Save & add another
++  zh: 儲存並新增額外
++common.total:
++  en: Total
++  zh: 總和
++nav.allocation:
++  en: Allocation
++  zh: 資產配置
++nav.asset:
++  en: Asset
++  zh: 資產
++nav.dashboard:
++  en: Dashboard
++  zh: 總覽
++nav.dividends:
++  en: Dividends
++  zh: 股息紀錄
++nav.holdings:
++  en: Holdings
++  zh: 持有資產
++nav.home:
++  en: Home
++  zh: 首頁
++nav.portfolio:
++  en: Portfolio
++  zh: 投資組合
++nav.rebalance:
++  en: Rebalance
++  zh: 再平衡
++nav.rebalancing:
++  en: Rebalancing
++  zh: 再平衡
++nav.transactions:
++  en: Transactions
++  zh: 交易明細
+ portfolio:
+   en: Portfolio
+   zh: 投資組合
++portfolio.create:
++  en: Create Portfolio
++  zh: 建立投資組合
++portfolio.description:
++  en: Description
++  zh: 描述
++portfolio.edit:
++  en: Edit Portfolio
++  zh: 編輯投資組合
++portfolio.name:
++  en: Name
++  zh: 名稱
++portfolio.select:
++  en: Select Portfolio
++  zh: 選擇投資組合
++totalProfit:
++  en: Total Profit
++  zh: 累計損益
+ totalValue:
+   en: Total Value
+-  zh: 總價值
+-totalProfit:
+-  en: Total Profit
+-  zh: 總利潤+  zh: 總資產價值
++transaction.addTo:
++  en: Add transaction to
++  zh: 新增交易到
++transaction.amountHint:
++  en: Positive = Buy | Negative = Sell
++  zh: 正數代表買入，負數代表賣出
++transaction.fee:
++  en: Fee
++  zh: 手續費
++transaction.new:
++  en: New Transaction
++  zh: 新增交易
++transaction.type:
++  en: Type
++  zh: 類型
++transaction.update:
++  en: Update Transaction
++  zh: 更新交易明細
++validation.fillAll:
++  en: Please complete all fields
++  zh: 請填入完整資訊
++validation.nameRequired:
++  en: Name is required
++  zh: 請輸入名稱
+--- a/portfolio-tracker-main/src/components/HeaderNav.vue+++ b/portfolio-tracker-main/src/components/HeaderNav.vue@@ -1,5 +1,6 @@ <script setup>
+ import { ref } from 'vue';
++import { useI18n } from 'vue-i18n';
+ 
+ const openDropdown = ref(null);
+ 
+@@ -7,29 +8,31 @@ const closeTimer = ref(null);
+ 
+ // 這裡維護導覽列資料
++const { t } = useI18n();
++
+ const navItems = ref([
+-  { type: 'link', label: 'Dashboard', to: '/dashboard' },
++  { type: 'link', i18nKey: 'nav.dashboard', to: '/dashboard' },
+ 
+   {
+     type: 'menu',
+     key: 'portfolio',
+-    label: 'Portfolio',
++    i18nKey: 'nav.portfolio',
+     to: '/portfolio',
+     children: [
+-      { label: 'Holdings', to: '/portfolio/holdings' },
+-      { label: 'Transactions', to: '/portfolio/transactions' },
+-      { label: 'Dividends', to: '/portfolio/dividends' },
++      { i18nKey: 'nav.holdings', to: '/portfolio/holdings' },
++      { i18nKey: 'nav.transactions', to: '/portfolio/transactions' },
++      { i18nKey: 'nav.dividends', to: '/portfolio/dividends' },
+     ],
+   },
+ 
+   {
+     type: 'menu',
+     key: 'rebalance',
+-    label: 'Rebalance',
++    i18nKey: 'nav.rebalance',
+     to: '/portfolio',
+     children: [
+-      { label: 'Rebalancing', to: '/rebalancing' },
+-      { label: 'Allocation', to: '/allocation' },
++      { i18nKey: 'nav.rebalancing', to: '/rebalancing' },
++      { i18nKey: 'nav.allocation', to: '/allocation' },
+     ],
+   },
+ ]);
+@@ -63,14 +66,14 @@     <template v-for="item in navItems" :key="item.key || item.label">
+       <!-- 單純連結 -->
+       <RouterLink v-if="item.type === 'link'" :to="item.to">
+-        <Button :label="item.label" severity="secondary" variant="text" class="m-1" />
++        <Button :label="$t(item.i18nKey)" severity="secondary" variant="text" class="m-1" />
+       </RouterLink>
+ 
+       <!-- 下拉選單 -->
+       <div v-else class="relative inline-block">
+         <RouterLink :to="item.to">
+           <Button
+-            :label="item.label"
++            :label="$t(item.i18nKey)"
+             severity="secondary"
+             variant="text"
+             class="m-1"
+@@ -100,7 +103,7 @@                 @click="$router.push(child.to), openDropdown = null, closeTimer = null;"
+                 class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+               >
+-                {{ child.label }}
++                {{ $t(child.i18nKey) }}
+               </div>
+             </div>
+           </div>
+--- a/portfolio-tracker-main/src/components/TransactionDialog.vue+++ b/portfolio-tracker-main/src/components/TransactionDialog.vue@@ -2,7 +2,7 @@   <Dialog v-model:visible="localVisible" @hide="onHide" modal :style="{ width: '30rem' }">
+     <template #header>
+       <div class="inline-flex items-center justify-center gap-2">
+-        <span v-if="editingId" class="font-bold whitespace-nowrap">更新交易明細</span>
++        <span v-if="editingId" class="font-bold whitespace-nowrap">{{ $t('transaction.update') }}</span>
+         <span class="font-bold" v-else>
+           新增交易至
+           <!-- 選擇投資組合 -->
+@@ -93,13 +93,13 @@     </div>
+ 
+     <div class="flex justify-end gap-2">
+-      <Button type="button" label="取消" severity="secondary" @click="close" />
+-      <Button v-if="hasError" type="button" label="儲存" v-tooltip.bottom="'請填入完整信息'" disabled />
+-      <Button v-else type="button" label="儲存" @click="onSave" />
++      <Button type="button" :label="$t('common.cancel')" severity="secondary" @click="close" />
++      <Button v-if="hasError" type="button" :label="$t('common.save')" v-tooltip.bottom="$t('validation.fillAll')" disabled />
++      <Button v-else type="button" :label="$t('common.save')" @click="onSave" />
+ 
+       <span v-if="!editingId">
+-        <Button v-if="hasError" type="button" label="儲存並新增額外" v-tooltip.bottom="'請填入完整信息'" disabled />
+-        <Button v-else type="button" label="儲存並新增額外" @click="onSave(true)" />
++        <Button v-if="hasError" type="button" :label="$t('common.saveAndAddMore')" v-tooltip.bottom="$t('validation.fillAll')" disabled />
++        <Button v-else type="button" :label="$t('common.saveAndAddMore')" @click="onSave(true)" />
+       </span>
+ 
+     </div>
+--- a/portfolio-tracker-main/src/components/PortfolioFormDialog.vue+++ b/portfolio-tracker-main/src/components/PortfolioFormDialog.vue@@ -1,8 +1,11 @@ <script setup>
+ import { ref, computed, watch, defineProps, defineEmits } from 'vue'
++import { useI18n } from 'vue-i18n'
+ import { usePortfolioStore } from '@/stores/portfolio'
+ import Textarea from 'primevue/textarea'
+ import FloatLabel from 'primevue/floatlabel'
++
++const { t } = useI18n()
+ 
+ const props = defineProps({
+   visible: Boolean,
+@@ -52,7 +55,7 @@ const addPortfolio = async () => {
+   const { name, description } = newPortfolio.value
+   if (!name) {
+-    console.warn('Name are required')
++    console.warn(t('validation.nameRequired'))
+     return
+   }
+ 
+@@ -69,7 +72,7 @@ 
+ const updatePortfolio = async () => {
+   if (!props.editPortfolio.name) {
+-    console.warn('Name are required')
++    console.warn(t('validation.nameRequired'))
+     return
+   }
+ 
+@@ -104,8 +107,8 @@           </FloatLabel>
+       </div>
+       <div class="flex justify-end gap-2">
+-          <Button type="button" label="Cancel" severity="secondary" @click="emit('update:visible', false)"></Button>
+-          <Button type="button" label="Save" @click="clickSave"></Button>
++          <Button type="button" :label="$t('common.cancel')" severity="secondary" @click="emit('update:visible', false)"></Button>
++          <Button type="button" :label="$t('common.save')" @click="clickSave"></Button>
+       </div>
+   </Dialog>
+ </template>
