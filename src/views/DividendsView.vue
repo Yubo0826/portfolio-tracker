@@ -1,10 +1,10 @@
 <template>
     <div>
       <div class="flex justify-end mb-8">
-          <Button label="Refresh" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" size="small" />
+          <Button :label="t('refresh')" @click="refreshDividends" icon="pi pi-refresh" class="mr-2" size="small" />
       </div>
       <DataTable :value="dividends" sortField="date" :sortOrder="-1" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-          <Column field="" header="Holding" style="width: 40%">
+          <Column field="" :header="t('holding')" style="width: 40%">
             <template #body="{ data }">
                 <div>
                   <span class="font-bold mr-4">{{ data.symbol }}</span>
@@ -12,14 +12,14 @@
                 </div>
             </template>
           </Column>
-          <Column field="shares" header="Shares"></Column>
-          <Column field="amount" header="Amount"></Column>
-          <Column field="totalAmount" header="Total Amount"></Column>
-          <Column field="date" sortable header="Date"></Column>
+          <Column field="shares" :header="t('shares')"></Column>
+          <Column field="amount" :header="t('amount')"></Column>
+          <Column field="totalAmount" :header="t('totalAmount')"></Column>
+          <Column field="date" sortable :header="t('date')"></Column>
           <template #empty>
               <div class="p-4 text-center text-gray-500">
               <i class="pi pi-info-circle mr-2" />
-                  現在並無資料。
+                  {{ t('noDataAvailable') }}
               </div>
           </template>
       </DataTable>
@@ -27,6 +27,7 @@
 </template>
 <script setup>
 import { onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n'
 import api from '../api.js';
 
 import { useAuthStore } from '@/stores/auth'
@@ -34,6 +35,7 @@ const auth = useAuthStore()
 
 import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore()
+const { t } = useI18n()
 
 const isLoading = ref(false);
 const dividends = ref([]);

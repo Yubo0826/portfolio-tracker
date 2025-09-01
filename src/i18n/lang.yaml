@@ -333,9 +333,6 @@ unusedCash:
 loading:
   en: Loading...
   zh: 載入中...
-noData:
-  en: No data available
-  zh: 無資料
 error:
   en: Error
   zh: 錯誤
@@ -359,6 +356,9 @@ amount:
 price:
   en: Price
   zh: 價格
+allRightsReserved:
+  en: All rights reserved
+  zh: 版權所有
 value:
   en: Value
   zh: 價值
