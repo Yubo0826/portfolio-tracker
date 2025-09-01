@@ -1,9 +1,401 @@
+# Navigation & Main Interface
 portfolio:
   en: Portfolio
   zh: 投資組合
+allPortfolios:
+  en: All Portfolios
+  zh: 所有投資組合
+selectPortfolio:
+  en: Select Portfolio
+  zh: 選擇投資組合
+addPortfolio:
+  en: Add Portfolio
+  zh: 增加投資組合
+addAsset:
+  en: Add Asset
+  zh: 增加資產
+rebalance:
+  en: Rebalance
+  zh: 再平衡
+dashboard:
+  en: Dashboard
+  zh: 儀表板
+holdings:
+  en: Holdings
+  zh: 持有資產
+transactions:
+  en: Transactions
+  zh: 交易紀錄
+dividends:
+  en: Dividends
+  zh: 利息紀錄
+allocation:
+  en: Allocation
+  zh: 資產配置
+rebalancing:
+  en: Rebalancing
+  zh: 再平衡
+
+# User Interface
+login:
+  en: Login
+  zh: 有登入
+notLogin:
+  en: Not Login
+  zh: 沒登入
+profile:
+  en: Profile
+  zh: 個人頁面
+settings:
+  en: Settings
+  zh: 設定
+logout:
+  en: Logout
+  zh: 登出
+
+# Dashboard Cards
 totalValue:
   en: Total Value
   zh: 總價值
 totalProfit:
   en: Total Profit
-  zh: 總利潤
+  zh: 總收益
+baseCurrency:
+  en: Base Currency
+  zh: 基準貨幣
+totalProfitTooltip:
+  en: Total Profit = Total Market Value - Total Cost
+  zh: 總收益 = 總市值 - 總成本
+
+# Transaction Dialog
+newTransaction:
+  en: New Transaction
+  zh: 新增交易
+updateTransaction:
+  en: Update Transaction Details
+  zh: 更新交易明細
+addTransactionTo:
+  en: Add transaction to
+  zh: 新增交易至
+transactionInstruction:
+  en: First select the date, then enter the stock symbol, the system will automatically query the price for that day.
+  zh: 先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。
+symbol:
+  en: Symbol
+  zh: 代號
+symbolRequired:
+  en: Symbol *
+  zh: 代號 *
+purchaseDate:
+  en: Purchase Date
+  zh: 購買日期
+purchaseDateRequired:
+  en: Purchase Date *
+  zh: 購買日期 *
+transactionDate:
+  en: Transaction Date
+  zh: 交易的日期
+shares:
+  en: Shares
+  zh: 股數
+sharesRequired:
+  en: Shares *
+  zh: 股數 *
+purchasePrice:
+  en: Purchase Price
+  zh: 購買價格
+purchasePriceRequired:
+  en: Purchase Price *
+  zh: 購買價格 *
+transactionPricePlaceholder:
+  en: Enter the trading price at that time
+  zh: 請輸入交易當時的價格
+fee:
+  en: Fee
+  zh: 手續費
+type:
+  en: Type
+  zh: 類型
+operation:
+  en: Operation
+  zh: 操作
+total:
+  en: Total
+  zh: 總和
+totalAmount:
+  en: Total Amount
+  zh: 總額
+buy:
+  en: Buy
+  zh: 買入
+sell:
+  en: Sell
+  zh: 賣出
+cancel:
+  en: Cancel
+  zh: 取消
+save:
+  en: Save
+  zh: 儲存
+saveAndAddMore:
+  en: Save and Add More
+  zh: 儲存並新增額外
+fillCompleteInfo:
+  en: Please fill in complete information
+  zh: 請填入完整信息
+close:
+  en: Close
+  zh: 關閉
+
+# Portfolio Dialog
+updatePortfolioInfo:
+  en: Update your information.
+  zh: 更新您的資訊。
+name:
+  en: Name
+  zh: 名稱
+description:
+  en: Description
+  zh: 描述
+addPortfolioTitle:
+  en: Add Portfolio
+  zh: 新增投資組合
+updatePortfolioTitle:
+  en: Update Portfolio
+  zh: 更新投資組合
+
+# Asset View & Details
+fullName:
+  en: Full Name
+  zh: 全名
+currentPrice:
+  en: Current Price
+  zh: 當前價格
+marketClosed:
+  en: Market Closed
+  zh: 已收盤
+volume:
+  en: Volume
+  zh: 成交量
+exchange:
+  en: Exchange
+  zh: 交易所
+dayRange:
+  en: Day Range
+  zh: 日內範圍
+fiftyTwoWeekRange:
+  en: 52 Week Range
+  zh: 52週範圍
+previousClose:
+  en: Previous Close
+  zh: 前收盤價
+kLineChart:
+  en: K-Line Chart
+  zh: K 線圖
+
+# Data Labels & Values
+positiveNegativeNote:
+  en: Positive = Buy | Negative = Sell
+  zh: 正數 = 買入 | 負數 = 賣出
+pricePerShare:
+  en: / share
+  zh: / 股
+targetPercent:
+  en: Target (%)
+  zh: 目標 (%)
+actualPercent:
+  en: Actual (%)
+  zh: 實際 (%)
+avgCost:
+  en: Avg Cost
+  zh: 平均成本
+currentValue:
+  en: Current Value
+  zh: 當前價值
+totalCost:
+  en: Total Cost
+  zh: 總成本
+profit:
+  en: Profit
+  zh: 收益
+profitPercent:
+  en: Profit %
+  zh: 收益率
+annualReturn:
+  en: Annual Return
+  zh: 年化報酬率
+annualReturnTooltip:
+  en: XIRR calculated annual return, considering the timing and amount of each buy, sell, dividend payment, and current asset value.
+  zh: 使用 XIRR 計算的年化投資報酬率，考慮了每筆買進、賣出、股息發放的時間與金額，以及目前持有資產的市值。
+
+# Buttons & Actions
+refresh:
+  en: Refresh
+  zh: 刷新
+refreshPrices:
+  en: Refresh Prices
+  zh: 刷新價格
+filter:
+  en: Filter
+  zh: 篩選
+search:
+  en: Search
+  zh: 搜索
+searchSymbol:
+  en: Search symbol
+  zh: 搜尋股票代號
+searchPlaceholder:
+  en: Enter stock, ETF symbol or name
+  zh: 輸入股票、ETF代號或名稱
+add:
+  en: Add
+  zh: 新增
+delete:
+  en: Delete
+  zh: 刪除
+edit:
+  en: Edit
+  zh: 編輯
+update:
+  en: Update
+  zh: 更新
+
+# Time Periods
+period7d:
+  en: 7D
+  zh: 7天
+period1mo:
+  en: 1M
+  zh: 1個月
+period3mo:
+  en: 3M
+  zh: 3個月
+period6mo:
+  en: 6M
+  zh: 6個月
+period1y:
+  en: 1Y
+  zh: 1年
+period2y:
+  en: 2Y
+  zh: 2年
+period5y:
+  en: 5Y
+  zh: 5年
+periodYtd:
+  en: YTD
+  zh: 年至今
+
+# Chart Types
+areaChart:
+  en: Area Chart
+  zh: 面積圖
+candlestickChart:
+  en: Candlestick Chart
+  zh: 蠟燭圖
+lineChart:
+  en: Line Chart
+  zh: 線圖
+
+# Allocation & Rebalancing
+depositAmount:
+  en: Deposit Amount
+  zh: 存款金額
+toBuyShares:
+  en: To Buy Shares
+  zh: 要購買股數
+toCost:
+  en: To Cost
+  zh: 成本
+target100Percent:
+  en: "Target: 100%"
+  zh: "目標: 100%"
+unusedCash:
+  en: Unused Cash
+  zh: 剩餘現金
+
+# Status Messages & Notifications
+loading:
+  en: Loading...
+  zh: 載入中...
+noData:
+  en: No data available
+  zh: 無資料
+error:
+  en: Error
+  zh: 錯誤
+success:
+  en: Success
+  zh: 成功
+transactionAddedSuccess:
+  en: Transaction added successfully.
+  zh: 交易新增成功。
+errorOccurred:
+  en: An error occurred while saving the transaction
+  zh: 儲存交易時發生錯誤
+
+# Common UI Elements
+date:
+  en: Date
+  zh: 日期
+amount:
+  en: Amount
+  zh: 金額
+price:
+  en: Price
+  zh: 價格
+value:
+  en: Value
+  zh: 價值
+percent:
+  en: Percent
+  zh: 百分比
+currency:
+  en: Currency
+  zh: 貨幣
+usd:
+  en: USD
+  zh: 美元
+
+# Footer & Company
+about:
+  en: About
+  zh: 關於
+contact:
+  en: Contact
+  zh: 聯絡
+home:
+  en: Home
+  zh: 首頁
+privacyPolicy:
+  en: Privacy Policy
+  zh: 隱私政策
+termsOfService:
+  en: Terms of Service
+  zh: 服務條款
+pricing:
+  en: Pricing
+  zh: 定價
+
+# Generic Labels
+yes:
+  en: Yes
+  zh: 是
+no:
+  en: No
+  zh: 否
+ok:
+  en: OK
+  zh: 確定
+apply:
+  en: Apply
+  zh: 應用
+reset:
+  en: Reset
+  zh: 重設
+clear:
+  en: Clear
+  zh: 清除
+confirm:
+  en: Confirm
+  zh: 確認

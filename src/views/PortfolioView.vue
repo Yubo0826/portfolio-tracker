@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
@@ -17,6 +18,7 @@ const normalize = (t) => (VALID_TABS.includes(t) ? t : 'holdings')
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 // 依 URL 初始化
 const tab = ref(normalize(route.params.tab))
@@ -47,19 +49,19 @@ watch(tab, (t) => {
         <Tab value="holdings">
           <div class="flex items-center">
             <i class="pi pi-briefcase mr-2"></i>
-            <span>持有資產</span>
+            <span>{{ t('holdings') }}</span>
           </div>
         </Tab>
         <Tab value="transactions">
           <div class="flex items-center">
             <i class="pi pi-receipt mr-2"></i>
-            <span>交易紀錄</span>
+            <span>{{ t('transactions') }}</span>
           </div>
         </Tab>
         <Tab value="dividends">
           <div class="flex items-center">
             <i class="pi pi-wallet mr-2"></i>
-            <span>利息紀錄</span>
+            <span>{{ t('dividends') }}</span>
           </div>
         </Tab>
       </TabList>

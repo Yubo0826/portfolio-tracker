@@ -66,7 +66,7 @@
   <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
     <div>
       <a @click="$router.push('portfolios')">
-        所有投資組合
+        {{ t('allPortfolios') }}
       </a>
         / 
       <!-- 選擇投資組合 -->
@@ -85,7 +85,7 @@
         >
         <template #header>
             <div class="p-3">
-                <span class="font-bold">選擇投資組合</span>
+                <span class="font-bold">{{ t('selectPortfolio') }}</span>
             </div>
         </template>
         <template #dropdownicon>
@@ -93,17 +93,17 @@
         </template>
         <template #footer>
             <div class="p-3 border-t-1 border-gray-200">
-                <Button label="增加投增組合" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
+                <Button :label="t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
             </div>
         </template>
       </Select>
     </div>
 
     <div>
-      <Button @click="transctionDialogVisible = true" type="button" label="增加資產" icon="pi pi-plus" rounded class="mr-2" />
-      <Button type="button" label="再平衡" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded />
+      <Button @click="transctionDialogVisible = true" type="button" :label="t('addAsset')" icon="pi pi-plus" rounded class="mr-2" />
+      <Button type="button" :label="t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded />
     </div>
-    
+
   </div>
 
   <RouterView />
@@ -134,6 +134,7 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar';
 import Menu from 'primevue/menu';
@@ -149,6 +150,7 @@ const dialogVisible = ref(false);
 
 const route = useRoute();
 const router = useRouter()
+const { t } = useI18n()
 
 const isAssetRoute = computed(() => route.name === 'asset');
 
@@ -240,14 +242,14 @@ const toggleMenu = (event) => {
 
 const menuItems = [
   {
-    label: '個人頁面',
+    label: t('profile'),
     icon: 'pi pi-user',
     command: () => {
       router.push('/profile');
     },
   },
   {
-    label: '設定',
+    label: t('settings'),
     icon: 'pi pi-cog',
     command: () => {
       router.push('/settings');
@@ -257,7 +259,7 @@ const menuItems = [
     separator: true,
   },
   {
-    label: '登出',
+    label: t('logout'),
     icon: 'pi pi-sign-out',
     command: () => {
       auth.logout();

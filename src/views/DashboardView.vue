@@ -9,7 +9,7 @@
             <template #title>
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
-                <div class="text-sm ml-2">總價值</div>
+                <div class="text-sm ml-2">{{ t('totalValue') }}</div>
               </div>
             </template>
             <template #content>
@@ -23,7 +23,7 @@
             </template>
             <template #footer>
               <div class="text-sm text-gray-500 mt-4">
-                基準貨幣：USD
+                {{ t('baseCurrency') }}：{{ t('usd') }}
 
               </div>
 
@@ -36,8 +36,8 @@
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
-                  總收益
-                  <i class="pi pi-question-circle" v-tooltip.bottom="'總收益 = 總市值 - 總成本'"></i>
+                  {{ t('totalProfit') }}
+                  <i class="pi pi-question-circle" :v-tooltip.bottom="t('totalProfitTooltip')"></i>
                 </div>
               </div>
             </template>
@@ -52,7 +52,7 @@
             </template>
             <template #footer>
               <div class="text-sm text-gray-500 mt-4">
-                投資報酬率： 
+                {{ t('annualReturn') }}： 
                 <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ annualReturn.toFixed(2) }}%
                 </span>
@@ -72,7 +72,7 @@
                   IRR
                   <i
                     class="pi pi-question-circle"
-                    v-tooltip.bottom="'使用 XIRR 計算的年化投資報酬率，考慮了每筆買進、賣出、股息發放的時間與金額，以及目前持有資產的市值。'">
+                    :v-tooltip.bottom="t('annualReturnTooltip')">
                   </i>
                 </div>
               </div>
@@ -283,6 +283,7 @@
  *  Imports & Stores
  * =======================*/
 import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
@@ -298,6 +299,7 @@ const transactionsStore = useTransactionsStore();
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
+const { t } = useI18n()
 
 /* =========================
  *  State
@@ -312,8 +314,8 @@ const totalProfit = ref(0)
 
 const selectedPieType = ref('actual')
 const pieChartType = [
-  { label: '實際配置', value: 'actual' },
-  { label: '目標配置', value: 'target' }
+  { label: t('actualPercent'), value: 'actual' },
+  { label: t('targetPercent'), value: 'target' }
 ]
 
 const selectedPeriod = ref('')

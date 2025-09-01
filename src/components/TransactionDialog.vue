@@ -2,9 +2,9 @@
   <Dialog v-model:visible="localVisible" @hide="onHide" modal :style="{ width: '30rem' }">
     <template #header>
       <div class="inline-flex items-center justify-center gap-2">
-        <span v-if="editingId" class="font-bold whitespace-nowrap">更新交易明細</span>
+        <span v-if="editingId" class="font-bold whitespace-nowrap">{{ t('updateTransaction') }}</span>
         <span class="font-bold" v-else>
-          新增交易至
+          {{ t('addTransactionTo') }}
           <!-- 選擇投資組合 -->
           <Select 
             v-model="selectedPortfolio"
@@ -29,7 +29,7 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        代號 <span style="color:#f27362">*</span>
+        {{ t('symbolRequired') }}
       </label>
       <SymbolAutoComplete
         v-model="form.symbol"
@@ -40,7 +40,7 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        購買日期 <span style="color:#f27362">*</span>
+        {{ t('purchaseDateRequired') }}
       </label>
       <DatePicker
         v-model="form.date"
@@ -50,13 +50,13 @@
         fluid
         iconDisplay="input"
         class="flex-auto"
-        placeholder="交易的日期"
+        :placeholder="t('transactionDate')"
       />
     </div>
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        股數 <span style="color:#f27362">*</span>
+        {{ t('sharesRequired') }}
       </label>
       <InputNumber v-model="form.shares" class="flex-auto" showButtons autocomplete="off" />
     </div>
@@ -70,36 +70,36 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        購買價格 <span style="color:#f27362">*</span>
+        {{ t('purchasePriceRequired') }}
       </label>
-      <InputText v-model="form.price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
+      <InputText v-model="form.price" class="flex-auto" autocomplete="off" :placeholder="t('transactionPricePlaceholder')" />
     </div>
 
     <div class="flex items-center gap-4 mb-8">
-      <label class="w-24">手續費</label>
+      <label class="w-24">{{ t('fee') }}</label>
       <InputNumber v-model="form.fee" class="flex-auto" showButtons autocomplete="off" />
     </div>
 
     <div class="flex items-center gap-4 mb-8">
-      <label class="w-24">類型</label>
+      <label class="w-24">{{ t('type') }}</label>
       <SelectButton v-model="form.operation" :options="transactionType" optionLabel="name" optionValue="code" />
     </div>
 
     <div style="border: .5px solid #eeee;"></div>
 
     <div class="flex items-center gap-4 my-8">
-      <label class="w-24">總和</label>
-      ${{ totalPrice }} USD
+      <label class="w-24">{{ t('total') }}</label>
+      ${{ totalPrice }} {{ t('usd') }}
     </div>
 
     <div class="flex justify-end gap-2">
-      <Button type="button" label="取消" severity="secondary" @click="close" />
-      <Button v-if="hasError" type="button" label="儲存" v-tooltip.bottom="'請填入完整信息'" disabled />
-      <Button v-else type="button" label="儲存" @click="onSave" />
+      <Button type="button" :label="t('cancel')" severity="secondary" @click="close" />
+      <Button v-if="hasError" type="button" :label="t('save')" :v-tooltip.bottom="t('fillCompleteInfo')" disabled />
+      <Button v-else type="button" :label="t('save')" @click="onSave" />
 
       <span v-if="!editingId">
-        <Button v-if="hasError" type="button" label="儲存並新增額外" v-tooltip.bottom="'請填入完整信息'" disabled />
-        <Button v-else type="button" label="儲存並新增額外" @click="onSave(true)" />
+        <Button v-if="hasError" type="button" :label="t('saveAndAddMore')" :v-tooltip.bottom="t('fillCompleteInfo')" disabled />
+        <Button v-else type="button" :label="t('saveAndAddMore')" @click="onSave(true)" />
       </span>
 
     </div>
@@ -108,6 +108,7 @@
 
 <script setup>
 import { ref, computed, watch, toRefs } from 'vue';
+import { useI18n } from 'vue-i18n'
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -123,10 +124,11 @@ const emit = defineEmits(['update:modelValue', 'saved']); // saved(result)
 
 const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
+const { t } = useI18n()
 
 const transactionType = ref([
-  { name: '買入', code: 'buy' },
-  { name: '賣出', code: 'sell' },
+  { name: t('buy'), code: 'buy' },
+  { name: t('sell'), code: 'sell' },
 ]);
 
 const selectedPortfolio = ref(portfolioStore.currentPortfolio);

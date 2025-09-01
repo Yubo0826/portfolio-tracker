@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, defineProps, defineEmits } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
 import FloatLabel from 'primevue/floatlabel'
@@ -36,9 +37,10 @@ watch(
 const emit = defineEmits(['update:loading', 'update:visible', 'clear:editPortfolio'])
 
 const portfolioStore = usePortfolioStore()
+const { t } = useI18n()
 
 const dialogTitle = computed(() => {
-  return props.editPortfolio.id ? 'Update Portfolio' : 'Add Portfolio'
+  return props.editPortfolio.id ? t('updatePortfolioTitle') : t('addPortfolioTitle')
 })
 
 const clickSave = () => {
@@ -91,21 +93,21 @@ const updatePortfolio = async () => {
 </script>
 <template>
   <Dialog :visible="props.visible" @update:visible="emit('update:visible', $event)" :header="dialogTitle" modal :style="{ width: '30rem' }">
-      <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
+      <span class="text-surface-500 dark:text-surface-400 block mb-8">{{ t('updatePortfolioInfo') }}</span>
       <div class="flex items-center gap-4 mb-4">
-          <label for="name" class="font-semibold w-24">Name</label>
+          <label for="name" class="font-semibold w-24">{{ t('name') }}</label>
           <InputText id="name" class="flex-auto" autocomplete="off" v-model="newPortfolio.name" />
       </div>
       <div class="flex items-center gap-4 mb-8">
-          <label for="description" class="font-semibold w-24">Description</label>
+          <label for="description" class="font-semibold w-24">{{ t('description') }}</label>
           <FloatLabel variant="on">
               <Textarea id="over_label" class="flex-auto" v-model="newPortfolio.description" rows="5" cols="30" style="resize: none" />
               <!-- <label for="on_label">On Label</label> -->
           </FloatLabel>
       </div>
       <div class="flex justify-end gap-2">
-          <Button type="button" label="Cancel" severity="secondary" @click="emit('update:visible', false)"></Button>
-          <Button type="button" label="Save" @click="clickSave"></Button>
+          <Button type="button" :label="t('cancel')" severity="secondary" @click="emit('update:visible', false)"></Button>
+          <Button type="button" :label="t('save')" @click="clickSave"></Button>
       </div>
   </Dialog>
 </template>
