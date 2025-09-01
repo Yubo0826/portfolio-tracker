@@ -40,12 +40,13 @@
           size="small"
         />
 
-        <!-- <Button
+        <Button
           class="p-button-rounded p-button-text"
           icon="pi pi-language"
-          aria-label="Language"
+          :aria-label="t('languageSwitcher')"
           size="small"
-        /> -->
+          @click="toggleLanguage"
+        />
 
         
 
@@ -150,7 +151,7 @@ const dialogVisible = ref(false);
 
 const route = useRoute();
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const isAssetRoute = computed(() => route.name === 'asset');
 
@@ -158,6 +159,12 @@ const auth = useAuthStore()
 
 const portfolioStore = usePortfolioStore()
 const transctionDialogVisible = ref(false)
+
+const toggleLanguage = () => {
+  const newLocale = locale.value === 'zh' ? 'en' : 'zh'
+  locale.value = newLocale
+  sessionStorage.setItem('lang', newLocale)
+}
 
 // 如果有用戶登入，則設定 uid
 if (auth.user) {

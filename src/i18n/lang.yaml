@@ -172,8 +172,8 @@ currentPrice:
   en: Current Price
   zh: 當前價格
 marketClosed:
-  en: Market Closed
-  zh: 已收盤
+  en: "Market Closed:"
+  zh: "已收盤："
 volume:
   en: Volume
   zh: 成交量
@@ -182,16 +182,31 @@ exchange:
   zh: 交易所
 dayRange:
   en: Day Range
-  zh: 日內範圍
+  zh: 單日股價範圍
 fiftyTwoWeekRange:
   en: 52 Week Range
-  zh: 52週範圍
+  zh: 一年股價範圍
 previousClose:
   en: Previous Close
-  zh: 前收盤價
+  zh: 前次收盤價
+todayVolume:
+  en: "Today's Volume"
+  zh: 今日交易量
 kLineChart:
   en: K-Line Chart
   zh: K 線圖
+areaChartLabel:
+  en: Area Chart
+  zh: 面積圖
+dataFetchError:
+  en: Failed to fetch data
+  zh: 取得資料失敗
+am:
+  en: AM
+  zh: 上午
+pm:
+  en: PM
+  zh: 下午
 
 # Data Labels & Values
 positiveNegativeNote:
@@ -244,9 +259,9 @@ search:
 searchSymbol:
   en: Search symbol
   zh: 搜尋股票代號
-searchPlaceholder:
-  en: Enter stock, ETF symbol or name
-  zh: 輸入股票、ETF代號或名稱
+searchResults:
+  en: Search Results
+  zh: 搜尋結果
 add:
   en: Add
   zh: 新增
@@ -393,6 +408,9 @@ apply:
 reset:
   en: Reset
   zh: 重設
+languageSwitcher:
+  en: Language Switcher
+  zh: 語言切換
 clear:
   en: Clear
   zh: 清除

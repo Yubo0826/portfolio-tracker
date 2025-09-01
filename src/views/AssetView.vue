@@ -47,7 +47,7 @@
                   ]"
                   icon="pi pi-chart-line"
                   @click="changeChartType('candlestick')"
-                  aria-label="面積圖"
+                  :aria-label="t('areaChartLabel')"
                 />
 
                 <Button
@@ -58,7 +58,7 @@
                   ]"
                   icon="pi pi-chart-bar"
                   @click="changeChartType('area')"
-                  aria-label="K 線圖"
+                  :aria-label="t('kLineChart')"
                 />
               </div>
 
@@ -67,8 +67,8 @@
             
             <!-- 收盤時間 -->
             <div class="flex justify-between text-[#5f6368] text-xs ">
-                <span>已收盤：{{ formatUTC8(info.regularMarketTime) }}</span>
-                
+                <span>{{ t('marketClosed') }}{{ formatUTC8(info.regularMarketTime) }}</span>
+
             </div>
 
             <!-- 時段區塊 -->
@@ -117,23 +117,23 @@
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>前次收盤價</span>
+                    <span>{{ t('previousClose') }}</span>
                     <span class="font-semibold">{{ info.chartPreviousClose }}</span>
                   </div>
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>單日股價範圍</span>
+                    <span>{{ t('dayRange') }}</span>
                     <span class="font-semibold">${{ info.regularMarketDayLow }} - ${{ info.regularMarketDayHigh }}</span>
                   </div>
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>一年股價範圍</span>
+                    <span>{{ t('fiftyTwoWeekRange') }}</span>
                     <span class="font-semibold">${{ info.fiftyTwoWeekLow }} - ${{ info.fiftyTwoWeekHigh }}</span>
                   </div>
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>今日交易量</span>
+                    <span>{{ t('todayVolume') }}</span>
                     <span class="font-semibold">{{ info.regularMarketVolume }}</span>
                   </div>
                   <div class="flex justify-between border-gray-300 py-4 px-0">
-                    <span>主要交易所</span>
+                    <span>{{ t('exchange') }}</span>
                     <span class="font-semibold">{{ info.fullExchangeName }}</span>
                   </div>
                 </div>
@@ -151,6 +151,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -160,6 +161,7 @@ import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
 
 const route  = useRoute()
+const { t, locale } = useI18n()
 const symbol = computed(() => route.params.symbol)
 
 onBeforeRouteUpdate((to, from) => {
@@ -405,8 +407,8 @@ const endDate = ref('')
 async function fetchChartData(symbol) {
   const { period1, period2 } = getPeriodRange(currentRange.value)
 
-  startDate.value = formatStrDate(period1)
-  endDate.value = formatStrDate(period2)
+  startDate.value = formatStrDate(period1, locale.value)
+  endDate.value = formatStrDate(period2, locale.value)
 
   try {
     const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
@@ -450,7 +452,7 @@ async function fetchChartData(symbol) {
       candleSeries.value[0].data = candleData
     }
   } catch (error) {
-    console.error('取得資料失敗:', error)
+    console.error(t('dataFetchError'), error)
   }
 }
 
@@ -470,12 +472,18 @@ function formatUTC8(isoString) {
   let hour = utc8Date.getUTCHours();
   const minute = pad(utc8Date.getUTCMinutes());
   const second = pad(utc8Date.getUTCSeconds());
-  const period = hour >= 12 ? "下午" : "上午";
+  const period = hour >= 12 ? t('pm') : t('am');
 
   if (hour > 12) hour -= 12;
   if (hour === 0) hour = 12;
 
-  return `${month}月${day}日, ${period}${hour}:${minute}:${second} [UTC+8]`;
+  // Use locale to format date part
+  if (locale.value.startsWith('zh')) {
+    return `${month}月${day}日, ${period}${hour}:${minute}:${second} [UTC+8]`;
+  } else {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[month-1]} ${day}, ${period}${hour}:${minute}:${second} [UTC+8]`;
+  }
 }
 
 watch(currentRange, (newValue, oldValue) => {

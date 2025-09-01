@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n'
 import api from '@/api';
 import FloatLabel from 'primevue/floatlabel'
 
@@ -7,6 +8,7 @@ import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
+const { t } = useI18n()
 
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
@@ -306,20 +308,20 @@ const transactionType = ref([
         <Dialog v-model:visible="transactionDialog" @hide="resetDialog" modal :style="{ width: '30rem' }">
             <template #header>
                 <div class="inline-flex items-center justify-center gap-2">
-                    <span class="font-bold whitespace-nowrap">New Transaction</span>
+                    <span class="font-bold whitespace-nowrap">{{ t('newTransaction') }}</span>
                 </div>    
             </template>
             <span class="text-surface-500 dark:text-surface-400 block mb-8">
                 <span>
-                    先選擇日期，然後填入股票代碼，系統會自動查詢當天的價格。<br />
+                    {{ t('transactionInstruction') }}<br />
                 </span>
             </span>
             <div class="flex items-center gap-4 mb-4">
                 <label for="date" class="font-semibold w-24">
-                    Date
+                    {{ t('date') }}
                     <span style="color: #f27362;">*</span>
                 </label>
-                <DatePicker v-model="newTransaction.date" showIcon fluid iconDisplay="input" placeholder="交易的日期" />
+                <DatePicker v-model="newTransaction.date" showIcon fluid iconDisplay="input" :placeholder="t('transactionDate')" />
             </div>
             <div class="flex items-center gap-4 mb-4">
                 <label for="symbol" class="font-semibold w-24">

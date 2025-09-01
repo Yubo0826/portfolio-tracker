@@ -22,7 +22,7 @@
         @input="onInput"
         id="searchInput"
         type="text"
-        placeholder="輸入股票、ETF代號或名稱"
+        :placeholder="t('searchPlaceholder')"
         class="w-full bg-transparent placeholder-neutral-500 px-12 py-4 outline-none"
         autocomplete="off"
         aria-autocomplete="list"
@@ -42,7 +42,7 @@
         v-if="results.length"
         class="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-neutral-500"
       >
-        搜尋結果
+        {{ t('searchResults') }}
       </div>
 
       <ul v-if="results.length" id="resultsList" role="listbox" class="py-2">
@@ -87,11 +87,13 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import debounce from 'lodash/debounce'
 import api from '@/api'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const { t } = useI18n()
 const emit = defineEmits(['close']);
 
 const query = ref('')
