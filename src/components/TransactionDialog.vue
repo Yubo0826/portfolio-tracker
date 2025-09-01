@@ -9,7 +9,6 @@
           <Select 
             v-model="selectedPortfolio"
             size="small" ref="PortfolioSelect" 
-            v-model:visible="selectVisible" 
             :options="portfolioStore.portfolios" optionLabel="name" checkmark 
             :highlightOnSelect="false" class="m-2 font-normal"
             :pt="{
@@ -129,7 +128,13 @@ const transactionType = ref([
   { name: '賣出', code: 'sell' },
 ]);
 
-const selectedPortfolio = ref(portfolioStore.currentPortfolio);
+const selectedPortfolio = ref(null);
+
+watch(() => portfolioStore.currentPortfolio, (newVal) => {
+  if (newVal?.id !== selectedPortfolio.value?.id) {
+    selectedPortfolio.value = newVal
+  }
+})
 
 const localVisible = ref(false);
 watch(
