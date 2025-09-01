@@ -37,8 +37,12 @@ const router = createRouter({
       name: 'portfolios',
       component: () => import('../views/PortfolioListView.vue'),
     },
+    // 預設導到 holdings（可選，但建議）
+    { path: '/portfolio', redirect: '/portfolio/holdings', component: () => import('../views/PortfolioView.vue') },
+
+    // 用路由參數承載分頁值，只允許三種
     {
-      path: '/portfolio',
+      path: '/portfolio/:tab(holdings|transactions|dividends)',
       name: 'portfolio',
       component: () => import('../views/PortfolioView.vue'),
     },

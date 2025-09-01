@@ -6,32 +6,22 @@
         <span class="text-gray-500">Stock</span><span class="green">Bar</span>
       </div>
 
-      <nav>
+      <HeaderNav />
+
+      <!-- <nav>
         <RouterLink to="/dashboard">
-          <Button label="Dashboard" severity="secondary" rounded class="m-1" />
+          <Button label="Dashboard" severity="secondary" variant="text" class="m-1" />
         </RouterLink>
         <RouterLink to="/portfolio">
-          <Button label="Portfolio" severity="secondary" rounded class="m-1" />
+          <Button label="Portfolio" severity="secondary" variant="text" class="m-1" />
         </RouterLink>
-        <!-- <RouterLink to="/holdings">
-          <Button label="Holdings" severity="secondary" rounded class="m-1" />
-        </RouterLink> -->
-        <!-- <RouterLink to="/transactions">
-          <Button label="Transactions" severity="secondary" rounded class="m-1" />
-        </RouterLink> -->
-        <!-- <RouterLink to="/allocation">
+        <RouterLink to="/allocation">
           <Button label="Allocation" severity="secondary" rounded class="m-1" />
         </RouterLink>
         <RouterLink to="/rebalancing">
           <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
-        </RouterLink> -->
-        <!-- <RouterLink to="/dividends">
-          <Button label="Dividends" severity="secondary" rounded class="m-1" />
-        </RouterLink> -->
-        <!-- <RouterLink to="/test">
-          <Button label="Test" severity="secondary" rounded class="m-1" />
-        </RouterLink> -->
-      </nav>
+        </RouterLink>
+      </nav> -->
 
       <div class="flex justify-center items-center">
         <Button
@@ -118,6 +108,8 @@
 
   <RouterView />
 
+  <Footer></Footer>
+
 
   <Dialog v-model:visible="searchBoxVisible" modal dismissableMask position="top" :style="{ width: '25rem', top: '5rem' }" :closeOnEscape="true" :showHeader="false">
     <template #container>
@@ -150,6 +142,8 @@ import 'primeicons/primeicons.css';
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
+import HeaderNav from './components/HeaderNav.vue'
+import Footer from './components/Footer.vue'
 
 const dialogVisible = ref(false);
 

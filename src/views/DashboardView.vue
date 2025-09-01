@@ -94,6 +94,20 @@
                 <div class="text-sm mb-4 font-bold">資產走勢</div>
                 <SelectButton v-model="selectedPeriod" :options="periods" optionLabel="label" optionValue="value" class="mb-4" size="small" />
               </div>
+              <div class="flex items-center justify-end mb-2">
+                  <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
+                    <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                      <span v-if="growthRate >= 0">+</span>
+                      <span v-else>-</span>
+                      <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }} USD</span>
+                      （
+                      <span v-if="growthRate >= 0">+</span>
+                      <!-- <span v-else>▼</span> -->
+                      <span class="font-semibold">{{ growthRate }}%</span>
+                      ）
+                    </div>
+                  </Tag>
+              </div>
             </template>
             <template #content>
               <StockChart

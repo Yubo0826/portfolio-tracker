@@ -2,8 +2,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
-import Textarea from 'primevue/textarea'
-import FloatLabel from 'primevue/floatlabel'
 
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
