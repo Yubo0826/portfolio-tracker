@@ -32,10 +32,7 @@
       <Column field="date" sortable :header="$t('date')" />
 
       <template #empty>
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-info-circle mr-2" />
-          {{ $t('noData') }}
-        </div>
+        <NoData />
       </template>
     </DataTable>
   </div>
@@ -44,6 +41,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import api from '../utils/api.js';
+import NoData from '@/components/NoData.vue';
 
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()

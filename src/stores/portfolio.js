@@ -20,7 +20,8 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         console.log('Fetched portfolios:', data);
         portfolios.value = data.portfolios;
         if (data.portfolios.length > 0) {
-            currentPortfolio.value = data.portfolios[0];
+            const localStoragePortfolio = JSON.parse(localStorage.getItem('currentPortfolio'));
+            currentPortfolio.value = localStoragePortfolio || data.portfolios[0];
         } else {
             currentPortfolio.value = null;
         }
@@ -39,8 +40,11 @@ export const usePortfolioStore = defineStore('portfolio', () => {
 
   function setCurrentPortfolio(portfolio) {
     currentPortfolio.value = portfolio
-  }
+    localStorage.setItem('currentPortfolio', JSON.stringify(portfolio))
 
+  }
+  
+  // 之後後端or前端可能要卡重複名稱
   async function addPortfolio(newPortfolio) {
     const { name, description } = newPortfolio;
     if (!name) {

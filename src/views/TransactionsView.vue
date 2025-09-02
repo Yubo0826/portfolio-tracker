@@ -68,10 +68,7 @@
       </Column>
 
       <template #empty>
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-info-circle mr-2" />
-          {{ $t('noData') }}
-        </div>
+        <NoData />
       </template>
     </DataTable>
   </div>
@@ -85,6 +82,7 @@ import TransactionDialog from '@/components/TransactionDialog.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
+import NoData from '@/components/NoData.vue';
 
 const store = useTransactionsStore();
 const auth = useAuthStore();

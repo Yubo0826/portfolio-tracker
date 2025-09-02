@@ -53,10 +53,7 @@
       </Column>
 
       <template #empty>
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-info-circle mr-2" />
-          {{ $t('noData') }}
-        </div>
+        <NoData />
       </template>
     </DataTable>
   </div>
@@ -67,6 +64,7 @@ import { ref, watch } from 'vue';
 import { useHoldingsStore } from '@/stores/holdings';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
+import NoData from '@/components/NoData.vue';
 
 const store = useHoldingsStore();
 const auth = useAuthStore();
