@@ -4,10 +4,9 @@ import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
 import FloatLabel from 'primevue/floatlabel'
 import { useI18n } from 'vue-i18n'
-import { useToast } from 'primevue/usetoast';
-const toast = useToast();
-
 const { t } = useI18n()
+
+import * as toast from '@/composables/toast'
 
 const props = defineProps({
   visible: Boolean,
@@ -56,25 +55,14 @@ const clickSave = () => {
 
 const addPortfolio = async () => {
   const { name, description } = newPortfolio.value
-  if (!name) {
-    console.warn(t('nameRequired'))
-    return
-  }
 
   try {
     await portfolioStore.addPortfolio({ name, description })
     newPortfolio.value = { name: '', description: '' }
-    toast.add({
-      type: 'success',
-      summary: 'Portfolio Added',
-      detail: '',
-      severity: 'custom',
-      group: 'standard',
-      life: 3000,
-    })
-
+    toast.success(`${t('portfolioAdded')}「${name}」`, '')
   } catch (error) {
     console.error('Error adding portfolio:', error)
+    toast.error(t('errorOccurred'), error.message || '')
   } finally {
     emit('update:loading', false)
     emit('update:visible', false)
@@ -82,11 +70,6 @@ const addPortfolio = async () => {
 }
 
 const updatePortfolio = async () => {
-  if (!props.editPortfolio.name) {
-    console.warn(t('nameRequired'))
-    return
-  }
-
   const { name, description } = newPortfolio.value
 
   try {
@@ -94,13 +77,20 @@ const updatePortfolio = async () => {
     await portfolioStore.editPortfolio(props.editPortfolio.id, { name, description })
     emit('clear:editPortfolio')
     newPortfolio.value = { name: '', description: '' }
+    toast.success(`${t('portfolioModified')}「${name}」`, '')
   } catch (error) {
     console.error('Error updating portfolio:', error)
+    toast.error(t('errorOccurred'), error.message || '')
   } finally {
     emit('update:loading', false)
     emit('update:visible', false)
   }
 }
+
+const saveDisabled = computed(() => {
+  return !newPortfolio.value.name.trim()
+})
+
 </script>
 
 <template>
@@ -136,7 +126,7 @@ const updatePortfolio = async () => {
 
     <div class="flex justify-end gap-2">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="emit('update:visible', false)" />
-      <Button type="button" :label="$t('save')" @click="clickSave" />
+      <Button type="button" :label="$t('save')" @click="clickSave" :disabled="saveDisabled" />
     </div>
   </Dialog>
 </template>

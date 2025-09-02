@@ -32,7 +32,7 @@ totalProfit:
   en: Total P/L
   zh: 累計損益
 noData:
-  en: No data yet
+  en: No data Found
   zh: 目前沒有資料
 # 通用
 refresh:
@@ -79,6 +79,9 @@ success:
 error:
   en: Error
   zh: 錯誤
+warn:
+  en: Warn
+  zh: 警告
 transactionsDeleteSuccess:
   en: Transactions deleted successfully.
   zh: 已刪除交易明細。
@@ -106,3 +109,45 @@ save:
 nameRequired:
   en: Name is required
   zh: 請輸入名稱
+errorOccurred:
+  en: An error occurred
+  zh: 發生錯誤
+portfolioAdded:
+  en: Portfolio added
+  zh: 已新增投資組合
+portfolioModified:
+  en: Portfolio modified
+  zh: 投資組合已修改
+portfolioDeleted:
+  en: Portfolio deleted
+  zh: 投資組合已刪除
+portfolioDeletedConfirm:
+  en: Are you sure you want to delete the selected portfolios? This action cannot be undone.
+  zh: 確定要刪除選取的投資組合嗎？此操作無法復原。
+allPortfolios:
+  en: All Portfolios
+  zh: 所有投資組合
+selectPortfolio:
+  en: Select Portfolio
+  zh: 選擇投資組合
+addInvestment:
+  en: Add Investment
+  zh: 新增資產
+rebalance:
+  en: Rebalance
+  zh: 再平衡
+dashboard:
+  en: Dashboard
+  zh: 儀表板
+holdings:
+  en: Holdings
+  zh: 持有資產
+transactions:
+  en: Transactions
+  zh: 交易明細
+dividends:
+  en: Dividends
+  zh: 股利
+allocation:
+  en: Allocation
+  zh: 資產配置

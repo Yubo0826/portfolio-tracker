@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const openDropdown = ref(null);
 
@@ -8,28 +10,28 @@ const closeTimer = ref(null);
 
 // 這裡維護導覽列資料
 const navItems = ref([
-  { type: 'link', label: 'Dashboard', to: '/dashboard' },
+  { type: 'link', label: t('dashboard'), to: '/dashboard' },
 
   {
     type: 'menu',
     key: 'portfolio',
-    label: 'Portfolio',
+    label: t('portfolio'),
     to: '/portfolio',
     children: [
-      { label: 'Holdings', to: '/portfolio/holdings' },
-      { label: 'Transactions', to: '/portfolio/transactions' },
-      { label: 'Dividends', to: '/portfolio/dividends' },
+      { label: t('holdings'), to: '/portfolio/holdings' },
+      { label: t('transactions'), to: '/portfolio/transactions' },
+      { label: t('dividends'), to: '/portfolio/dividends' },
     ],
   },
 
   {
     type: 'menu',
     key: 'rebalance',
-    label: 'Rebalance',
+    label: t('rebalance'),
     to: '/portfolio',
     children: [
-      { label: 'Rebalancing', to: '/rebalancing' },
-      { label: 'Allocation', to: '/allocation' },
+      { label: t('rebalance'), to: '/rebalancing' },
+      { label: t('allocation'), to: '/allocation' },
     ],
   },
 ]);

@@ -1,5 +1,4 @@
 <template>
-  <!-- <Toast position="bottom-center" /> -->
   <CustomToast />
 
   <header>
@@ -9,29 +8,9 @@
       </div>
 
       <HeaderNav />
-
-      <!-- <nav>
-        <RouterLink to="/dashboard">
-          <Button label="Dashboard" severity="secondary" variant="text" class="m-1" />
-        </RouterLink>
-        <RouterLink to="/portfolio">
-          <Button label="Portfolio" severity="secondary" variant="text" class="m-1" />
-        </RouterLink>
-        <RouterLink to="/allocation">
-          <Button label="Allocation" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-        <RouterLink to="/rebalancing">
-          <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
-        </RouterLink>
-      </nav> -->
       
 
       <div class="flex justify-center items-center">
-        <Button label="成功訊息" @click="showSuccess" />
-        <Button label="警告訊息" @click="showWarning" />
-        <Button label="錯誤訊息" @click="showError" />
-
-
         <Button
           class="p-button-rounded p-button-text"
           aria-label="Search"
@@ -74,15 +53,14 @@
 
   <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
     <div>
-      <a @click="$router.push('portfolios')">
-        所有投資組合
+      <a @click="$router.push('/portfolios')">
+        {{ $t('allPortfolios') }}
       </a>
         / 
       <!-- 選擇投資組合 -->
       <Select 
         v-model="selectedPortfolio" 
         size="small" ref="PortfolioSelect" 
-        v-model:visible="selectVisible" 
         :options="portfolioStore.portfolios" optionLabel="name" checkmark 
         :highlightOnSelect="false" class="m-2"
         :pt="{
@@ -94,7 +72,7 @@
         >
         <template #header>
             <div class="p-3">
-                <span class="font-bold">選擇投資組合</span>
+                <span class="font-bold">{{ $t('selectPortfolio') }}</span>
             </div>
         </template>
         <template #dropdownicon>
@@ -102,15 +80,15 @@
         </template>
         <template #footer>
             <div class="p-3 border-t-1 border-gray-200">
-                <Button label="增加投增組合" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
+                <Button :label="$t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
             </div>
         </template>
       </Select>
     </div>
 
     <div>
-      <Button @click="transctionDialogVisible = true" type="button" label="增加資產" icon="pi pi-plus" rounded class="mr-2" />
-      <Button type="button" label="再平衡" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded />
+      <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" rounded class="mr-2" />
+      <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded />
     </div>
     
   </div>
@@ -274,23 +252,6 @@ const menuItems = [
     },
   },
 ];
-
-import * as toast from '@/composables/toast'
-
-const selectVisible = ref(false);
-const PortfolioSelect = ref(null);
-
-const showSuccess = () => {
-  toast.success('Successfully Message', 'Today 10:30PM')
-}
-
-const showWarning = () => {
-  toast.warn('Alert Message', 'Today 10:30PM')
-}
-
-const showError = () => {
-  toast.error('Error Message', 'Today 10:30PM')
-}
 
 </script>
 

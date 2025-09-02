@@ -1,15 +1,16 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import * as toast from '@/composables/toast'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 
 import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
 
 import PortfolioFormDialog from '@/components/PortfolioFormDialog.vue'
 
 const confirm = useConfirm();
-const toast = useToast();
 
 const portfolioStore = usePortfolioStore()
 const auth = useAuthStore()
@@ -17,11 +18,6 @@ const auth = useAuthStore()
 const selectedPortfolios = ref([])
 const isLoading = ref(false)
 const dialogVisible = ref(false)
-
-const newPortfolio = ref({
-  name: '',
-  description: '',
-})
 
 const editPortfolio = ref({
     id: null,
@@ -62,22 +58,22 @@ const updateSelectedPortfolios = (id) => {
 
 const confirm2 = () => {
     confirm.require({
-        message: 'Do you want to delete this record?',
-        header: 'Danger Zone',
+        message: t('portfolioDeletedConfirm'),
+        header: t('warn'),
         icon: 'pi pi-info-circle',
-        rejectLabel: 'Cancel',
+        rejectLabel: t('cancel'),
         rejectProps: {
-            label: 'Cancel',
+            label: t('cancel'),
             severity: 'secondary',
             outlined: true
         },
         acceptProps: {
-            label: 'Delete',
+            label: t('delete'),
             severity: 'danger'
         },
         accept: () => {
             portfolioStore.removePortfolio(selectedPortfolios.value.map(p => p.id))
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
+            toast.success(`${t('portfolioDeleted')}`)
         },
         // reject: () => {
         //     toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
@@ -90,9 +86,9 @@ const confirm2 = () => {
 <template>
 <div>
     <ConfirmDialog></ConfirmDialog>
-    <div class="flex justify-end mb-4">
-        <Button label="Add Portfolio" icon="pi pi-plus" class="p-button-success mr-2" @click="dialogVisible = true" />
-        <Button label="Delete" @click="confirm2" icon="pi pi-trash" class="mr-2" severity="danger" />
+    <div class="flex justify-end mb-8 mt-8">
+        <Button :label="$t('add')" icon="pi pi-plus" class="p-button-success mr-2" @click="dialogVisible = true" size="small" />
+        <Button :label="$t('delete')" @click="confirm2" :disabled="selectedPortfolios.length === 0" icon="pi pi-trash" class="mr-2" size="small" severity="danger" />
     </div>
 
     <PortfolioFormDialog 
@@ -105,9 +101,9 @@ const confirm2 = () => {
 
     <DataTable v-model:selection="selectedPortfolios" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-        <Column field="name" header="Name"></Column>
-        <Column field="description" header="Description"></Column>
-        <Column field="" header="Action">
+        <Column field="name" :header="$t('name')"></Column>
+        <Column field="description" :header="$t('description')"></Column>
+        <Column field="" :header="$t('action')">
             <template #body="slotProps">
                 <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
             </template>  
@@ -116,7 +112,7 @@ const confirm2 = () => {
         <template #empty>
             <div class="p-4 text-center text-gray-500">
             <i class="pi pi-info-circle mr-2" />
-                現在並無資料。
+              {{ $t('noData') }}
             </div>
         </template>
 

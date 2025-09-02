@@ -93,13 +93,16 @@
 
     <div class="flex justify-end gap-2">
       <Button type="button" label="取消" severity="secondary" @click="close" />
-      <Button v-if="hasError" type="button" label="儲存" v-tooltip.bottom="'請填入完整信息'" disabled />
-      <Button v-else type="button" label="儲存" @click="onSave" />
-
+      
+      <!-- 儲存並新增額外項目 -->
       <span v-if="!editingId">
         <Button v-if="hasError" type="button" label="儲存並新增額外" v-tooltip.bottom="'請填入完整信息'" disabled />
         <Button v-else type="button" label="儲存並新增額外" @click="onSave(true)" />
       </span>
+
+      <!-- 儲存後關閉視窗 -->
+      <Button v-if="hasError" type="button" label="儲存" v-tooltip.bottom="'請填入完整信息'" disabled />
+      <Button v-else type="button" label="儲存" @click="onSave(false)" />
 
     </div>
   </Dialog>
@@ -255,10 +258,13 @@ const onSave = async (saveAnother = false) => {
       life: 3000,
     });
     emit('saved', result);
-    if (!saveAnother) {
+    console.log('Transaction saved:', result);
+    console.log('saveAnother:', saveAnother);
+    if (saveAnother) {
+      form.value = emptyForm();
+    } else {
       close();
-    }   
-    form.value = emptyForm();
+    }
   } catch (err) {
     toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Error saving transaction', life: 3000 });
   }
