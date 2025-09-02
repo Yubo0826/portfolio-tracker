@@ -155,7 +155,7 @@ import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
-import api from '@/api'
+import api from '@/utils/api'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
 

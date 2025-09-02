@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import api from '@/api';
+import api from '@/utils/api';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useToast } from "primevue/usetoast";
 const toast = useToast();

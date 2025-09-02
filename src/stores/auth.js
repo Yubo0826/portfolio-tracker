@@ -8,7 +8,7 @@ import {
   setPersistence,
   browserLocalPersistence
 } from 'firebase/auth'
-import api from '@/api'
+import api from '@/utils/api.js';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)

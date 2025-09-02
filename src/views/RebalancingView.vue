@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
-import api from '@/api';
+import api from '@/utils/api';
 import FloatLabel from 'primevue/floatlabel'
 
 import { useAuthStore } from '@/stores/auth';

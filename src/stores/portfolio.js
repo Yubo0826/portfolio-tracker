@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import api from '@/utils/api.js';
 import { useAuthStore } from '@/stores/auth'
 
 

@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref, onMounted, defineProps } from 'vue'
-import api from '@/api'
+import api from '@/utils/api'
 
 const props = defineProps({
   symbol: {

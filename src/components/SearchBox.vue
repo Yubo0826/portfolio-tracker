@@ -88,7 +88,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import debounce from 'lodash/debounce'
-import api from '@/api'
+import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

@@ -1,5 +1,7 @@
 <template>
-  <Toast position="bottom-center" />
+  <!-- <Toast position="bottom-center" /> -->
+  <CustomToast />
+
   <header>
     <div class="flex justify-between items-center mb-8">
       <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer">
@@ -22,8 +24,14 @@
           <Button label="Rebalancing" severity="secondary" rounded class="m-1" />
         </RouterLink>
       </nav> -->
+      
 
       <div class="flex justify-center items-center">
+        <Button label="成功訊息" @click="showSuccess" />
+        <Button label="警告訊息" @click="showWarning" />
+        <Button label="錯誤訊息" @click="showError" />
+
+
         <Button
           class="p-button-rounded p-button-text"
           aria-label="Search"
@@ -145,6 +153,7 @@ import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
 import HeaderNav from './components/HeaderNav.vue'
 import Footer from './components/Footer.vue'
+import CustomToast from './components/CustomToast.vue'
 
 const dialogVisible = ref(false);
 
@@ -266,14 +275,22 @@ const menuItems = [
   },
 ];
 
+import * as toast from '@/composables/toast'
+
 const selectVisible = ref(false);
 const PortfolioSelect = ref(null);
 
-const goToPortfolio = () => {
-  selectVisible.value = false; // 關閉選擇器
-  router.push('/portfolio');
-  PortfolioSelect.value.hide();
-};
+const showSuccess = () => {
+  toast.success('Successfully Message', 'Today 10:30PM')
+}
+
+const showWarning = () => {
+  toast.warn('Alert Message', 'Today 10:30PM')
+}
+
+const showError = () => {
+  toast.error('Error Message', 'Today 10:30PM')
+}
 
 </script>
 

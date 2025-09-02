@@ -27,7 +27,7 @@
 import { ref } from 'vue';
 import AutoComplete from 'primevue/autocomplete';
 import debounce from 'lodash/debounce';
-import api from '@/api';
+import api from '@/utils/api.js';
 
 const props = defineProps({
     modelValue: String,

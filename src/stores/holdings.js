@@ -1,7 +1,7 @@
 // src/stores/holdings.js
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import api from '@/api.js';
+import api from '@/utils/api.js';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
 

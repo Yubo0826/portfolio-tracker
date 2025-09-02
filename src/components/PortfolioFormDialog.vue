@@ -3,6 +3,11 @@ import { ref, computed, watch, defineProps, defineEmits } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
 import FloatLabel from 'primevue/floatlabel'
+import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast';
+const toast = useToast();
+
+const { t } = useI18n()
 
 const props = defineProps({
   visible: Boolean,
@@ -37,9 +42,9 @@ const emit = defineEmits(['update:loading', 'update:visible', 'clear:editPortfol
 
 const portfolioStore = usePortfolioStore()
 
-const dialogTitle = computed(() => {
-  return props.editPortfolio.id ? 'Update Portfolio' : 'Add Portfolio'
-})
+const dialogTitle = computed(() =>
+  props.editPortfolio.id ? t('updatePortfolio') : t('addPortfolio')
+)
 
 const clickSave = () => {
   if (props.editPortfolio.id) {
@@ -52,13 +57,22 @@ const clickSave = () => {
 const addPortfolio = async () => {
   const { name, description } = newPortfolio.value
   if (!name) {
-    console.warn('Name are required')
+    console.warn(t('nameRequired'))
     return
   }
 
   try {
     await portfolioStore.addPortfolio({ name, description })
     newPortfolio.value = { name: '', description: '' }
+    toast.add({
+      type: 'success',
+      summary: 'Portfolio Added',
+      detail: '',
+      severity: 'custom',
+      group: 'standard',
+      life: 3000,
+    })
+
   } catch (error) {
     console.error('Error adding portfolio:', error)
   } finally {
@@ -69,7 +83,7 @@ const addPortfolio = async () => {
 
 const updatePortfolio = async () => {
   if (!props.editPortfolio.name) {
-    console.warn('Name are required')
+    console.warn(t('nameRequired'))
     return
   }
 
@@ -87,25 +101,42 @@ const updatePortfolio = async () => {
     emit('update:visible', false)
   }
 }
-
 </script>
+
 <template>
-  <Dialog :visible="props.visible" @update:visible="emit('update:visible', $event)" :header="dialogTitle" modal :style="{ width: '30rem' }">
-      <span class="text-surface-500 dark:text-surface-400 block mb-8">Update your information.</span>
-      <div class="flex items-center gap-4 mb-4">
-          <label for="name" class="font-semibold w-24">Name</label>
-          <InputText id="name" class="flex-auto" autocomplete="off" v-model="newPortfolio.name" />
-      </div>
-      <div class="flex items-center gap-4 mb-8">
-          <label for="description" class="font-semibold w-24">Description</label>
-          <FloatLabel variant="on">
-              <Textarea id="over_label" class="flex-auto" v-model="newPortfolio.description" rows="5" cols="30" style="resize: none" />
-              <!-- <label for="on_label">On Label</label> -->
-          </FloatLabel>
-      </div>
-      <div class="flex justify-end gap-2">
-          <Button type="button" label="Cancel" severity="secondary" @click="emit('update:visible', false)"></Button>
-          <Button type="button" label="Save" @click="clickSave"></Button>
-      </div>
+  <Dialog
+    :visible="props.visible"
+    @update:visible="emit('update:visible', $event)"
+    :header="dialogTitle"
+    modal
+    :style="{ width: '30rem' }"
+  >
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">
+      {{ $t('updateYourInfo') }}
+    </span>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label for="name" class="font-semibold w-24">{{ $t('name') }}</label>
+      <InputText id="name" class="flex-auto" autocomplete="off" v-model="newPortfolio.name" />
+    </div>
+
+    <div class="flex items-center gap-4 mb-8">
+      <label for="description" class="font-semibold w-24">{{ $t('description') }}</label>
+      <FloatLabel variant="on">
+        <Textarea
+          id="over_label"
+          class="flex-auto"
+          v-model="newPortfolio.description"
+          rows="5"
+          cols="30"
+          style="resize: none"
+        />
+      </FloatLabel>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <Button type="button" :label="$t('cancel')" severity="secondary" @click="emit('update:visible', false)" />
+      <Button type="button" :label="$t('save')" @click="clickSave" />
+    </div>
   </Dialog>
 </template>

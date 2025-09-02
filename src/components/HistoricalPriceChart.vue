@@ -49,7 +49,7 @@
 <script setup>
 import { ref, onMounted, watch, defineProps } from 'vue'
 import TabMenu from 'primevue/tabmenu';
-import api from '@/api'
+import api from '@/utils/api'
 import { useRoute  } from 'vue-router'
 
 const route  = useRoute()

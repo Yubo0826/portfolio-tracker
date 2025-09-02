@@ -43,7 +43,7 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue';
-import api from '../api.js';
+import api from '../utils/api.js';
 
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
