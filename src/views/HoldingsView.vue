@@ -1,19 +1,19 @@
 <template>
   <div>
     <div class="flex justify-end mb-8">
+      <!-- :label="$t('delete')" -->
       <Button
-        :label="$t('delete')"
         @click="onDelete"
         icon="pi pi-trash"
-        class="mr-2"
+        class="p-button-rounded p-button-text mr-2"
         severity="danger"
         size="small"
       />
+      <!-- :label="$t('refreshPrices')" -->
       <Button
-        :label="$t('refreshPrices')"
         @click="store.refreshPrices"
         icon="pi pi-refresh"
-        class="mr-2"
+        class="p-button-rounded p-button-text mr-2"
         size="small"
       />
     </div>
