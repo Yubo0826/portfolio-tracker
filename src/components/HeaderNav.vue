@@ -10,13 +10,14 @@ const closeTimer = ref(null);
 
 // 這裡維護導覽列資料
 const navItems = ref([
-  { type: 'link', label: t('dashboard'), to: '/dashboard' },
+  { type: 'link', label: t('dashboard'), to: '/dashboard', matchPath: ['/dashboard'] },
 
   {
     type: 'menu',
     key: 'portfolio',
     label: t('portfolio'),
     to: '/portfolio',
+    matchPath: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends'],
     children: [
       { label: t('holdings'), to: '/portfolio/holdings' },
       { label: t('transactions'), to: '/portfolio/transactions' },
@@ -28,7 +29,8 @@ const navItems = ref([
     type: 'menu',
     key: 'rebalance',
     label: t('rebalance'),
-    to: '/portfolio',
+    to: '/rebalancing',
+    matchPath: ['/rebalancing', '/allocation'],
     children: [
       { label: t('rebalance'), to: '/rebalancing' },
       { label: t('allocation'), to: '/allocation' },
@@ -65,7 +67,13 @@ const cancelClose = () => {
     <template v-for="item in navItems" :key="item.key || item.label">
       <!-- 單純連結 -->
       <RouterLink v-if="item.type === 'link'" :to="item.to">
-        <Button :label="item.label" severity="secondary" variant="text" class="m-1" />
+        <Button 
+          :pt="{
+            label: {
+              class: item.matchPath.includes($router.currentRoute.value.path) ? 'text-[#5cd59b]' : ''
+            }
+          }"
+          :label="item.label" severity="secondary" variant="text" class="m-1" />
       </RouterLink>
 
       <!-- 下拉選單 -->
@@ -76,6 +84,11 @@ const cancelClose = () => {
             severity="secondary"
             variant="text"
             class="m-1"
+            :pt="{
+              label: {
+                class: item.matchPath.includes($router.currentRoute.value.path) ? 'text-[#5cd59b]' : ''
+              }
+            }"
             @mouseenter="cancelClose(); toggleDropdown(item.key)"
             @mouseleave="closeDropdown(180)"
           />
