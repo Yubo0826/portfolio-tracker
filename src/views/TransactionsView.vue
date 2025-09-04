@@ -2,19 +2,18 @@
   <div>
     <div class="flex justify-end mb-8">
       <Button
-        :label="$t('delete')"
         @click="onDelete"
         icon="pi pi-trash"
-        class="mr-2"
+        class="p-button-rounded p-button-text mr-2"
         severity="danger"
         size="small"
       />
-      <Button
-        :label="$t('add')"
+      <!-- <Button
         @click="openCreate"
         icon="pi pi-plus"
+        class="p-button-rounded p-button-text mr-2"
         size="small"
-      />
+      /> -->
       <TransactionDialog
         v-model="dialogVisible"
         :editingId="editingId"

@@ -9,7 +9,7 @@
             <template #title>
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
-                <div class="text-sm ml-2">總價值</div>
+                <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
               </div>
             </template>
             <template #content>
@@ -17,27 +17,24 @@
                 <div v-if="totalValue" class="text-2xl font-bold">
                   ${{ totalValue.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
-
                 <div v-else class="text-2xl font-bold text-gray-400">--</div>
               </div>
             </template>
             <template #footer>
               <div class="text-sm text-gray-500 mt-4">
-                基準貨幣：USD
-
+                {{ $t('baseCurrency', { code: 'USD' }) }}
               </div>
-
             </template>
           </Card>
-    
+
           <!-- Total Profit Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
-                  總收益
-                  <i class="pi pi-question-circle" v-tooltip.bottom="'總收益 = 總市值 - 總成本'"></i>
+                  {{ $t('totalProfit') }}
+                  <i class="pi pi-question-circle" v-tooltip.bottom="$t('totalProfitHint')"></i>
                 </div>
               </div>
             </template>
@@ -46,34 +43,31 @@
                 <div v-if="totalProfit" class="text-2xl font-bold">
                   ${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
-
                 <div v-else class="text-2xl font-bold text-gray-400">--</div>
               </div>
             </template>
             <template #footer>
               <div class="text-sm text-gray-500 mt-4">
-                投資報酬率： 
+                {{ $t('roi') }}
                 <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ annualReturn.toFixed(2) }}%
                 </span>
-
                 <span v-else class="text-gray-400">--</span>
               </div>
-
             </template>
           </Card>
-    
+
           <!-- XIRR Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center text-[#475569]">
                 <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
-                  IRR
+                  {{ $t('irr') }}
                   <i
                     class="pi pi-question-circle"
-                    v-tooltip.bottom="'使用 XIRR 計算的年化投資報酬率，考慮了每筆買進、賣出、股息發放的時間與金額，以及目前持有資產的市值。'">
-                  </i>
+                    v-tooltip.bottom="$t('xirrHint')"
+                  />
                 </div>
               </div>
             </template>
@@ -85,28 +79,44 @@
             </template>
           </Card>
         </div>
-    
+
         <!-- 資產走勢圖 -->
         <div>
           <Card>
             <template #title>
-              <div class="flex items-center justify-between text-[#252525]">
-                <div class="text-sm mb-4 font-bold">資產走勢</div>
-                <SelectButton v-model="selectedPeriod" :options="periods" optionLabel="label" optionValue="value" class="mb-4" size="small" />
+              <div class="flex items-center justify-between mb-4 text-[#252525]">
+                <div class="text-sm font-bold">{{ $t('assetTrend') }}</div>
+                <div class="flex items-center gap-3 select-none">
+                  <Button
+                    v-for="tab in periods"
+                    :key="tab.label"
+                    :label="tab.label"
+                    text
+                    rounded
+                    unstyled
+                    @click="selectedPeriod = tab.value"
+                    :class="[
+                      'px-3 py-1 text-sm rounded-full transition-colors duration-150 cursor-pointer',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2',
+                      selectedPeriod === tab.value
+                        ? 'bg-blue-100 text-blue-600 font-semibold'
+                        : 'text-slate-500 hover:text-slate-900'
+                    ]"
+                  />
+                </div>
               </div>
               <div class="flex items-center justify-end mb-2">
-                  <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
-                    <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                      <span v-if="growthRate >= 0">+</span>
-                      <span v-else>-</span>
-                      <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }} USD</span>
-                      （
-                      <span v-if="growthRate >= 0">+</span>
-                      <!-- <span v-else>▼</span> -->
-                      <span class="font-semibold">{{ growthRate }}%</span>
-                      ）
-                    </div>
-                  </Tag>
+                <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
+                  <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                    <span v-if="growthRate >= 0">+</span>
+                    <span v-else>-</span>
+                    <span class="font-semibold mr-2">${{ Math.abs(change.toFixed(2)) }}</span>
+                    （
+                    <span v-if="growthRate >= 0">+</span>
+                    <span class="font-semibold">{{ growthRate }}%</span>
+                    ）
+                  </div>
+                </Tag>
               </div>
             </template>
             <template #content>
@@ -119,8 +129,9 @@
               />
             </template>
           </Card>
+        </div>
       </div>
-      </div>
+
       <!-- 右半邊 圓餅圖 -->
       <div class="w-2/5">
         <Card class="w-full">
@@ -128,36 +139,27 @@
           <template #title>
             <div class="flex items-center justify-between mb-4">
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
-               <Button
+              <Button
                 unstyled
-                label="前往設定目標"
+                :label="$t('goSetTargets')"
                 icon="pi pi-bullseye"
                 @click="$router.push('allocation')"
                 :pt="{
                   root: {
                     class:
-                      // 尺寸/外觀
                       'inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' +
-                      // 文字
                       'text-sm font-medium text-slate-700 ' +
-                      // 陰影/互動
                       'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' +
-                      // 無障礙
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' +
-                      // 動畫
                       'transition' + ' cursor-pointer'
                   },
-                  icon: {
-                    // 使用 primeicons，靠字級控制大小
-                    class: 'order-0 mr-0 text-slate-600 text-[18px]'
-                  },
-                  label: {
-                    class: 'order-1'
-                  }
+                  icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' },
+                  label: { class: 'order-1' }
                 }"
               />
             </div>
           </template>
+
           <!-- Pie -->
           <template #content>
             <div v-if="holdingsStore.list.length > 0" class="flex justify-between items-center mb-4">
@@ -179,24 +181,24 @@
                 <img class="w-80 h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
                 <!-- 標題 -->
                 <h2 class="text-xl sm:text-2xl font-semibold text-slate-800">
-                  這個投資組合還沒有投資項目
+                  {{ $t('portfolioNoHoldingsTitle') }}
                 </h2>
-
                 <!-- 說明文字 -->
                 <p class="text-sm sm:text-base text-slate-500">
-                  新增投資項目，即可查看成效及管理資產
+                  {{ $t('portfolioNoHoldingsDesc') }}
                 </p>
               </div>
             </div>
           </template>
+
           <!-- Footer -->
           <template #footer>
             <div v-if="holdingsStore.list.length > 0" class="w-full max-w-md rounded-2xl border border-slate-200 p-4 shadow-sm">
               <div class="mb-2 grid grid-cols-2">
-                <div class="text-[13px] font-medium text-slate-600">與目標的差值（需調整）</div>
-                <div class="text-right text-[13px] text-slate-500">正數 = 買入 | 負數 = 賣出</div>
+                <div class="text-[13px] font-medium text-slate-600">{{ $t('diffFromTargetTitle') }}</div>
+                <div class="text-right text-[13px] text-slate-500">{{ $t('diffLegend') }}</div>
               </div>
-  
+
               <div class="divide-y divide-slate-100">
                 <div v-for="r in rebalanceRows" :key="r.symbol" class="grid grid-cols-2 items-center py-2">
                   <div class="flex items-center gap-3">
@@ -221,7 +223,7 @@
     <Card class="mb-8 mt-8 p-4">
       <template #content>
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
-          <Column field="name" header="現在資產">
+          <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md">
                 <StockIcon :symbol="data.symbol" class="mr-8" />
@@ -233,21 +235,21 @@
             </template>
           </Column>
 
-          <Column field="shares" header="持有股數" />
-          <Column field="totalCost" header="交易成本">
+          <Column field="shares" :header="$t('shares')" />
+          <Column field="totalCost" :header="$t('totalCost')">
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              <div class="text-[#b5b5c3]">{{ data.avgCost.toFixed(2) }} / 股</div>
+              <div class="text-[#b5b5c3]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
             </template>
           </Column>
 
-          <Column field="currentPrice" header="股價">
+          <Column field="currentPrice" :header="$t('currentPrice')">
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.currentPrice.toFixed(2) }}</span>
             </template>
           </Column>
 
-          <Column field="currentValue" header="總價值" sortable>
+          <Column field="currentValue" :header="$t('totalValue')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
               <div :class="{ 'text-[#5cd59b]': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
@@ -260,7 +262,7 @@
             </template>
           </Column>
 
-          <Column field="target" header="配置比例">
+          <Column field="target" :header="$t('allocationRatio')">
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
               <div class="text-[#b5b5c3]">{{ data.target || 0 }}%</div>
@@ -268,9 +270,7 @@
           </Column>
 
           <template #empty>
-            <div class="p-4 text-center text-gray-500">
-              <i class="pi pi-info-circle mr-2" /> 現在並無資料。
-            </div>
+            <NoData />
           </template>
         </DataTable>
       </template>
@@ -288,13 +288,15 @@ import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
 import xirr from 'xirr'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
+import NoData from '@/components/NoData.vue'
 
-const transactionsStore = useTransactionsStore();
-
+const { t } = useI18n()
+const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
@@ -311,23 +313,23 @@ const totalValue = ref(0)
 const totalProfit = ref(0)
 
 const selectedPieType = ref('actual')
-const pieChartType = [
-  { label: '實際配置', value: 'actual' },
-  { label: '目標配置', value: 'target' }
-]
+const pieChartType = computed(() => ([
+  { label: t('actualAllocation'), value: 'actual' },
+  { label: t('targetAllocation'), value: 'target' }
+]))
 
 const selectedPeriod = ref('')
-const periods = [
-  { label: '7天', value: '7d' },
-  { label: '1個月', value: '1mo' },
-  { label: '3個月', value: '3mo' },
-  { label: '6個月', value: '6mo' },
-  { label: 'YTD', value: 'ytd' },
-  { label: '1年', value: '1y' },
-  { label: '5年 ', value: '5y' }
-]
+const periods = computed(() => ([
+  { label: t('period7d'), value: '7d' },
+  { label: t('period1mo'), value: '1mo' },
+  { label: t('period3mo'), value: '3mo' },
+  { label: t('period6mo'), value: '6mo' },
+  { label: t('periodYTD'), value: 'ytd' },
+  { label: t('period1y'), value: '1y' },
+  { label: t('period5y'), value: '5y' }
+]))
 
-const chartSeries = ref([{ name: '收盤價', data: [] }])
+const chartSeries = ref([{ name: t('closePrice'), data: [] }])
 const growthRate = ref(null)
 const change = ref(0)
 
@@ -374,7 +376,6 @@ function getPeriodRange(range) {
 /* =========================
  *  Setters (transform API -> view model)
  * =======================*/
-
 function setDividends(data) {
   dividends.value = data.map(item => ({
     id: item.id,
@@ -395,7 +396,6 @@ function setOverviewValue() {
 /* =========================
  *  API Calls
  * =======================*/
-
 async function getAllocation() {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return
@@ -421,14 +421,12 @@ async function loadData() {
     if (holdingsStore.list.length === 0) {
       totalValue.value = 0
       totalProfit.value = 0
-      chartSeries.value = [{ name: '收盤價', data: [] }]
+      chartSeries.value = [{ name: t('closePrice'), data: [] }]
       return
     }
     await transactionsStore.fetchTransactions()
     await getAllocation()
     await getDividends()
-    console.log('Transactions:', transactionsStore.list)
-    console.log('Holdings:', holdingsStore.list)
     setOverviewValue()
     fetchChartData()
   } catch (e) {
@@ -555,7 +553,7 @@ async function fetchChartData() {
   try {
     const data = await api.get(`http://localhost:3000/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
     const lineData = data.map(item => ({ x: new Date(item.date), y: item.close }))
-    chartSeries.value = [{ name: '收盤價', data: lineData }]
+    chartSeries.value = [{ name: t('closePrice'), data: lineData }]
     calculateGrowthRate()
   } catch (e) {
     console.error('Error fetching total value chart data:', e)
@@ -566,9 +564,7 @@ async function fetchChartData() {
  *  Watchers & Init
  * =======================*/
 watch(selectedPeriod, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
-    fetchChartData()
-  }
+  if (newVal !== oldVal) fetchChartData()
 })
 watch(
   () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],

@@ -29,10 +29,12 @@
                     <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
                       <span v-if="growthRate >= 0">+</span>
                       <span v-else>-</span>
-                      <span class="ml-1 font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
-                      <span v-if="growthRate >= 0">▲</span>
-                      <span v-else>▼</span>
-                        <span class="ml-1 font-semibold">{{ growthRate }}%</span>
+                      <span class="font-semibold mr-2">${{ Math.abs(change.toFixed(2)) }}</span>
+                      （
+                      <span v-if="growthRate >= 0">+</span>
+                      <!-- <span v-else>▼</span> -->
+                      <span class="font-semibold">{{ growthRate }}%</span>
+                      ）
                     </div>
                   </Tag>
               </div>
@@ -72,24 +74,51 @@
             </div>
 
             <!-- 時段區塊 -->
-            <div class="flex justify-between items-center mt-4">
+            <div class="flex items-center gap-3 mt-4 select-none">
+              <Button
+                v-for="tab in rangeOptions"
+                :key="tab.label"
+                :label="tab.label"
+                text
+                rounded
+                unstyled
+                @click="currentRange = tab.value"
+                :class="[
+                  'px-3 py-1 text-sm rounded-full transition-colors duration-150 cursor-pointer',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2',
+                  currentRange === tab.value
+                    ? 'bg-blue-100 text-blue-600 font-semibold'
+                    : 'text-slate-500 hover:text-slate-900'
+                ]"
+              />
+            </div>
 
+            <!-- <div class="flex justify-between items-center mt-4">
                   <Tabs 
                     v-model:value="currentRange"
                     >
                       <TabList
                         :pt="{
+                          root: { style: { backgroundColor: '#ff5ff5' } },
                           tabList: { style: { borderWidth: '0px' } },
                           content: { style: { borderWidth: '0px' } },
-                          // activeBar: { style: { backgroundColor: '#5b9ef5', height: '2px' } },
                         }"
                       >
-                          <Tab v-for="tab in rangeOptions" :key="tab.label" :value="tab.value">{{ tab.label }}</Tab>
+                          <Tab 
+                            v-for="tab in rangeOptions" 
+                            :key="tab.label" 
+                            :value="tab.value"
+                            :pt="{
+                              root: { style: { backgroundColor: '#f9f9f9', padding: '10px 16px', fontSize: '.875rem' } },
+                            }"
+                            >
+                            {{ tab.label }}
+                          </Tab>
                       </TabList>
                   </Tabs>
 
                 <span class="text-[#5f6368] text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
-            </div>
+            </div> -->
 
             <!-- 圖表區 -->
             <div>
@@ -99,6 +128,7 @@
                 type="area"
                 :options="chartOptions"
                 :series="chartSeries"
+                height="350"
               />
 
               <apexchart
@@ -107,6 +137,7 @@
                 type="candlestick"
                 :options="candleOptions"
                 :series="candleSeries"
+                height="350"
               />
             </div>
           </div>
@@ -503,16 +534,4 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-</style>
-<style>
-/* .p-tab {
-  font-size: small;
-  border-width: 0!important;
-  padding: 1rem!important;
-}
-
-.p-tab-active {
-  color: #5b9ef5!important;
-  font-weight: 600!important;
-} */
 </style>

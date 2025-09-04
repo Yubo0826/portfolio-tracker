@@ -2,10 +2,9 @@
   <div>
     <div class="flex justify-end mb-8">
       <Button
-        :label="$t('refresh')"
         @click="refreshDividends"
         icon="pi pi-refresh"
-        class="mr-2"
+        class="p-button-rounded p-button-text mr-2"
         size="small"
       />
     </div>

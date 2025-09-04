@@ -87,7 +87,7 @@
     </div>
 
     <div>
-      <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" rounded class="mr-2" />
+      <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
       <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
     </div>
     
