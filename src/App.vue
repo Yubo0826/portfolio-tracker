@@ -53,7 +53,7 @@
 
   <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
     <div>
-      <a @click="$router.push('/portfolios')">
+      <a class="font-bold" @click="$router.push('/portfolios')">
         {{ $t('allPortfolios') }}
       </a>
         / 
@@ -87,7 +87,8 @@
     </div>
 
     <div>
-      <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" rounded class="mr-2" />
+      <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
+      <Button @click="importDataDialogVisible = true" type="button" :label="$t('import')" icon="pi pi-file-import" class="mr-2"></Button>
       <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
     </div>
     
@@ -105,6 +106,10 @@
         ></SearchBox>
     </template>
   </Dialog>
+
+  <ImportDataDialog 
+      v-model="importDataDialogVisible"
+      />
 
   <TransactionDialog
       v-model="transctionDialogVisible"
@@ -132,8 +137,10 @@ import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
 import HeaderNav from './components/HeaderNav.vue'
 import Footer from './components/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
+import ImportDataDialog from './components/ImportDataDialog.vue'
 
 const dialogVisible = ref(false);
+const importDataDialogVisible = ref(false);
 
 const route = useRoute();
 const router = useRouter()

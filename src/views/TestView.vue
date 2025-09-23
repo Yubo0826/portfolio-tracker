@@ -1,78 +1,77 @@
+<template>
+  <div
+    class="border-2 border-dashed border-purple-400 rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-purple-50"
+    @dragover.prevent
+    @drop.prevent="handleDrop"
+    @click="triggerFileInput"
+  >
+    <i class="pi pi-cloud-upload text-purple-500 text-5xl mb-4"></i>
+    <p class="text-xl font-semibold text-purple-600">Import your files</p>
+    <p class="text-gray-500">Drag or click to upload</p>
+    <input
+      ref="fileInput"
+      type="file"
+      class="hidden"
+      @change="handleFileChange"
+      accept=".csv, xlsx, .xls"
+    />
+  </div>
+</template>
+
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
+import Papa from 'papaparse'
+import * as XLSX from 'xlsx'
 
-const openDropdown = ref(null);
+const fileInput = ref(null)
 
-const toggleDropdown = (menu) => {
-  console.log('Toggling menu:', menu);
-  openDropdown.value = openDropdown.value === menu ? null : menu;
-};
+function triggerFileInput() {
+  fileInput.value.click()
+}
 
-const closeDropdown = () => {
-  openDropdown.value = null;
-};
+function handleFileChange(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const ext = file.name.split('.').pop().toLowerCase()
+
+  if (ext === 'csv') {
+    readCSV(file)
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    readExcel(file)
+  } else {
+    console.warn('不支援的檔案格式:', ext)
+  }
+}
+
+function readCSV(file) {
+  Papa.parse(file, {
+    header: true, // 會自動用第一列當 key
+    skipEmptyLines: true,
+    complete: (results) => {
+      console.log('CSV content:', results.data)
+      // results.data 是陣列 [{col1: 'xx', col2: 'yy'}...]
+    },
+    error: (err) => {
+      console.error('CSV 解析錯誤:', err)
+    },
+  })
+}
+
+function readExcel(file) {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const data = new Uint8Array(e.target.result)
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheetName = workbook.SheetNames[0]
+    const sheet = workbook.Sheets[sheetName]
+    const json = XLSX.utils.sheet_to_json(sheet)
+    console.log('Excel content:', json)
+    // json 也是 [{col1: 'xx', col2: 'yy'}...]
+  }
+  reader.readAsArrayBuffer(file)
+}
 </script>
 
-<template>
-  <header class="bg-white shadow">
-    <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-8">
-        <a href="#" class="text-gray-800 hover:text-indigo-600 font-medium">Home</a>
-
-        <div class="relative">
-          <button @mouseenter="toggleDropdown('products')" @mouseleave="closeDropdown" class="flex items-center space-x-1 text-gray-800 hover:text-indigo-600 font-medium focus:outline-none">
-            <span>Products</span>
-            <svg class="h-4 w-4 transform transition-transform duration-300" :class="{ 'rotate-180': openDropdown === 'products' }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          
-          <transition 
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
-          >
-            <div v-show="openDropdown === 'products'" @mouseleave="closeDropdown" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-              <div class="py-1">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Product A</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Product B</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Product C</a>
-              </div>
-            </div>
-          </transition>
-        </div>
-
-        <div class="relative">
-          <button @mouseenter="toggleDropdown('resources')" @mouseleave="closeDropdown" class="flex items-center space-x-1 text-gray-800 hover:text-indigo-600 font-medium focus:outline-none">
-            <span>Resources</span>
-            <svg class="h-4 w-4 transform transition-transform duration-300" :class="{ 'rotate-180': openDropdown === 'resources' }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-
-          <transition 
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
-          >
-            <div v-show="openDropdown === 'resources'" @mouseleave="closeDropdown" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-              <div class="py-1">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Resource 1</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Resource 2</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Resource 3</a>
-              </div>
-            </div>
-          </transition>
-        </div>
-
-        <a href="#" class="text-gray-800 hover:text-indigo-600 font-medium">Pricing</a>
-      </div>
-    </nav>
-  </header>
-</template>
+<style scoped>
+</style>

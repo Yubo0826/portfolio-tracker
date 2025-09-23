@@ -6,15 +6,15 @@
         @click="onDelete"
         icon="pi pi-trash"
         class="mr-2"
-        severity="danger"
+        severity="secondary"
         size="small"
       />
-      <Button
-        :label="$t('add')"
+      <!-- <Button
         @click="openCreate"
         icon="pi pi-plus"
+        class="p-button-rounded p-button-text mr-2"
         size="small"
-      />
+      /> -->
       <TransactionDialog
         v-model="dialogVisible"
         :editingId="editingId"

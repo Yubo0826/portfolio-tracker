@@ -2,10 +2,11 @@
   <Dialog v-model:visible="localVisible" @hide="onHide" modal :style="{ width: '30rem' }">
     <template #header>
       <div class="inline-flex items-center justify-center gap-2">
+        <!-- 標題 -->
         <span v-if="editingId" class="font-bold whitespace-nowrap">更新交易明細</span>
+        <!-- 選擇投資組合 -->
         <span class="font-bold" v-else>
           新增交易至
-          <!-- 選擇投資組合 -->
           <Select 
             v-model="selectedPortfolio"
             size="small" ref="PortfolioSelect" 
@@ -23,6 +24,7 @@
             </template>
           </Select>
         </span>
+
       </div>
     </template>
 
@@ -109,7 +111,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, toRefs } from 'vue';
+import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -250,7 +252,8 @@ const onSave = async (saveAnother = false) => {
   }
 
   try {
-    const result = await store.saveTransaction({ id: props.editingId, form: form.value, portfolioId: selectedPortfolio.value });
+    console.log('現在的portfolio id:', selectedPortfolio.value.id)
+    const result = await store.saveTransaction({ id: props.editingId, form: form.value, portfolioId: selectedPortfolio.value.id });
     toast.add({
       severity: 'success',
       summary: 'Success',

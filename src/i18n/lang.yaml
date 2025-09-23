@@ -126,7 +126,7 @@ portfolioDeletedConfirm:
   zh: 確定要刪除選取的投資組合嗎？此操作無法復原。
 allPortfolios:
   en: All Portfolios
-  zh: 所有投資組合
+  zh: 所有組合
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
@@ -151,3 +151,93 @@ dividends:
 allocation:
   en: Allocation
   zh: 資產配置
+# 卡片/摘要
+baseCurrency:
+  en: Base currency {code}
+  zh: 基準貨幣：{code}
+totalProfitHint:
+  en: Total Profit = Market Value − Total Cost
+  zh: 總收益＝總市值－總成本
+roi:
+  en: Return on Investment
+  zh: 投資報酬率：
+irr:
+  en: IRR
+  zh: IRR
+xirrHint:
+  en: Annualized return using XIRR, considering buy/sell/dividend dates and current market value.
+  zh: 使用 XIRR 計算的年化投資報酬率，考慮買進、賣出、股息發放時間與金額，以及目前市值。
+
+# 走勢區塊
+assetTrend:
+  en: Asset Trend
+  zh: 資產走勢
+closePrice:
+  en: Close Price
+  zh: 收盤價
+period7d:
+  en: 7D
+  zh: 7天
+period1mo:
+  en: 1M
+  zh: 1個月
+period3mo:
+  en: 3M
+  zh: 3個月
+period6mo:
+  en: 6M
+  zh: 6個月
+periodYTD:
+  en: YTD
+  zh: 今年以來
+period1y:
+  en: 1Y
+  zh: 1年
+period5y:
+  en: 5Y
+  zh: 5年
+
+# 圓餅圖/配置
+actualAllocation:
+  en: Actual Allocation
+  zh: 實際配置
+targetAllocation:
+  en: Target Allocation
+  zh: 目標配置
+goSetTargets:
+  en: Set Targets
+  zh: 前往設定目標
+portfolioNoHoldingsTitle:
+  en: This portfolio has no holdings yet
+  zh: 這個投資組合還沒有投資項目
+portfolioNoHoldingsDesc:
+  en: Add holdings to see performance and manage assets.
+  zh: 新增投資項目，即可查看成效及管理資產
+diffFromTargetTitle:
+  en: Difference from target (needs adjustment)
+  zh: 與目標的差值（需調整）
+diffLegend:
+  en: Positive = Buy | Negative = Sell
+  zh: 正數 = 買入 | 負數 = 賣出
+
+# 資產表
+currentAsset:
+  en: Asset
+  zh: 現在資產
+allocationRatio:
+  en: Allocation %
+  zh: 配置比例
+perShare:
+  en: / share
+  zh: / 股
+
+# 匯入交易
+import:
+  en: Import
+  zh: 匯入
+InvalidDateString:
+  en: Invalid date string
+  zh: 日期格式錯誤
+importedSuccess:
+  en: Transactions imported successfully
+  zh: 交易明細匯入成功

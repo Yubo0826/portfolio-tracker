@@ -71,14 +71,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return list.value.find((t) => t.id === id) || null;
   };
 
-  const saveTransaction = async ({ id = null, form, p_id = portfolioId.value }) => {
-    if (!uid.value || !p_id) {
+  const saveTransaction = async ({ id = null, form, portfolioId = portfolioId.value }) => {
+    if (!uid.value || !portfolioId) {
       throw new Error('No user or portfolio selected');
     }
 
     const payload = {
       uid: uid.value,
-      portfolio_id: p_id,
+      portfolio_id: portfolioId,
       symbol: String(form.symbol || '').toUpperCase(),
       name: form.name || '',
       asset_type: form.assetType || '',
@@ -90,6 +90,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
         ? form.date.toISOString().split('T')[0]
         : form.date, // 允許事先就是 'YYYY-MM-DD'
     };
+
+    console.log('saveTransaction payload', payload);
 
     let result;
     if (id) {
@@ -104,6 +106,40 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     return result;
   };
+
+  const saveTransactionBulk = async (transactions = [], portfolioId = portfolioId.value) => {
+    console.log('saveTransactionBulk', transactions, portfolioId);
+    if (!transactions.length || !uid.value || !portfolioId) {
+      throw new Error('No user or portfolio selected');
+    }
+
+    const payload = {
+      uid: uid.value,
+      portfolio_id: portfolioId,
+      transactions: transactions.map((form) => ({
+        symbol: String(form.symbol || '').toUpperCase(),
+        name: form.name || '',
+        asset_type: form.assetType || '',
+        shares: Number(form.shares) || 0,
+        fee: Number(form.fee) || 0,
+        price: Number(form.price),
+        transaction_type: form.transactionType, // 'buy' | 'sell'
+        transaction_date: form.date instanceof Date
+          ? form.date.toISOString().split('T')[0]
+          : form.date, // 允許事先就是 'YYYY-MM-DD'
+      })),
+    };
+
+    console.log('saveTransactionBulk payload', payload);
+
+    const result = await api.post(`http://localhost:3000/api/transactions/bulk`, payload);
+
+    // 後端回傳最新 transactions / holdings
+    if (result?.transactions) setTransactions(result.transactions);
+    holdingsStore.fetchHoldings();
+
+    return result;
+  }
 
   const searchPrice = async (symbol, dateYYYYMMDD) => {
     if (!symbol || !dateYYYYMMDD) return null;
@@ -136,6 +172,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     fetchTransactions,
     deleteTransactions,
     saveTransaction,
+    saveTransactionBulk,
     searchPrice,
   };
 });
