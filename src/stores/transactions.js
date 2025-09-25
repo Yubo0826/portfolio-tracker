@@ -71,6 +71,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return list.value.find((t) => t.id === id) || null;
   };
 
+  // 儲存單一交易紀錄
   const saveTransaction = async ({ id = null, form, portfolioId = portfolioId.value }) => {
     if (!uid.value || !portfolioId) {
       throw new Error('No user or portfolio selected');
@@ -107,6 +108,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return result;
   };
 
+  // 儲存多筆(批次匯入)交易紀錄
   const saveTransactionBulk = async (transactions = [], portfolioId = portfolioId.value) => {
     console.log('saveTransactionBulk', transactions, portfolioId);
     if (!transactions.length || !uid.value || !portfolioId) {

@@ -241,3 +241,12 @@ InvalidDateString:
 importedSuccess:
   en: Transactions imported successfully
   zh: 交易明細匯入成功
+# symbolsNotFound:
+#   en: "The following symbols were not found: {symbols}"
+#   zh: "找不到以下代號：{symbols}"
+symbolsNotFound:
+  en: "The following symbols were not found, please check the import content again: {symbols}"
+  zh: "找不到以下代號，請再檢查匯入內容："
+importError:
+  en: Import error
+  zh: 匯入錯誤

@@ -91,15 +91,17 @@
     
 <script setup>
 import { ref, watch, computed } from 'vue'
+import * as toast from '@/composables/toast';
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import Papa from 'papaparse'
+import api from '@/utils/api'
 import * as XLSX from 'xlsx'
 import Message from 'primevue/message'
 import Paginator from 'primevue/paginator'
 import { $t } from '@primeuix/themes'
 import { usePortfolioStore } from '@/stores/portfolio';
-import { useToast } from 'primevue/usetoast';
 import { useTransactionsStore } from '@/stores/transactions';
-const toast = useToast();
 const store = useTransactionsStore();
 
 const props = defineProps({
@@ -221,13 +223,8 @@ function toDate(dateStr) {
     return d.toISOString().split('T')[0];
   }
 
-    // throw new Error("Invalid date string: " + dateStr);
-  toast.add({
-    severity: 'error',
-    summary: 'Error',
-    detail: $t('InvalidDateString') + dateStr,
-    life: 3000
-  });
+  toast.error($t('InvalidDateString') + dateStr, '');
+
 }
 
 
@@ -291,16 +288,28 @@ function closeDialog() {
 }
 
 async function confirmImport() {
-    const result = await store.saveTransactionBulk(previewData.value, selectedPortfolio.value.id);
-    console.log('Bulk import result:', result);
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: $t('importSuccess'),
-      life: 3000,
-    });
-    closeDialog()
+    // 檢查代碼是否真實存在
+    const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))];
 
+    let nonexistentSymbols = []
+    for (const symbol of symbolList) {
+      const query = await api.get('http://localhost:3000/api/yahoo/symbol?query=' + symbol)
+      if (query.length === 0) {
+        nonexistentSymbols.push(symbol)
+      }
+    }
+
+    console.log('Nonexistent symbols:', nonexistentSymbols);
+    console.log(t('symbolsNotFound', { symbols: nonexistentSymbols.join(', ') }))
+
+    if (nonexistentSymbols.length > 0) {
+      toast.error(t('symbolsNotFound'), nonexistentSymbols.join(', '))
+      return
+    }
+
+    const result = await store.saveTransactionBulk(previewData.value, selectedPortfolio.value.id)
+    console.log('Bulk import result:', result)
+    toast.success(t('importSuccess'), '')
+    closeDialog()
 }
 </script>
-    

@@ -35,8 +35,6 @@
           size="small"
         />
 
-        
-
         <!-- 有登入 -->
         <template v-if="auth.user">
           <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />

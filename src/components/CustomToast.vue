@@ -1,4 +1,3 @@
-<!-- components/CustomToast.vue -->
 <template>
   <Toast position="bottom-center" group="standard">
     <template #container="{ message, closeCallback  }">
