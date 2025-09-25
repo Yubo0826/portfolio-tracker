@@ -307,6 +307,7 @@ async function confirmImport() {
       return
     }
 
+    // 沒問題的話就批次匯入
     const result = await store.saveTransactionBulk(previewData.value, selectedPortfolio.value.id)
     console.log('Bulk import result:', result)
     toast.success(t('importSuccess'), '')

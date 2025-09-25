@@ -84,7 +84,7 @@
       </Select>
     </div>
 
-    <div>
+    <div v-if="$route.name !== 'portfolios'">
       <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
       <Button @click="importDataDialogVisible = true" type="button" :label="$t('import')" icon="pi pi-file-import" class="mr-2"></Button>
       <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->

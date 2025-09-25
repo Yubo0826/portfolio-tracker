@@ -56,29 +56,63 @@ const updateSelectedPortfolios = (id) => {
   dialogVisible.value = true
 }
 
-const confirm2 = () => {
-    confirm.require({
-        message: t('portfolioDeletedConfirm'),
-        header: t('warn'),
-        icon: 'pi pi-info-circle',
-        rejectLabel: t('cancel'),
-        rejectProps: {
-            label: t('cancel'),
-            severity: 'secondary',
-            outlined: true
-        },
-        acceptProps: {
-            label: t('delete'),
-            severity: 'danger'
-        },
-        accept: () => {
-            portfolioStore.removePortfolio(selectedPortfolios.value.map(p => p.id))
-            toast.success(`${t('portfolioDeleted')}`)
-        },
-        // reject: () => {
-        //     toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
-        // }
-    });
+const showDeleteConfirm = () => {
+    let countdown = 5;
+    let interval;
+
+    const confirmDialog = () => {
+        confirm.require({
+            message: t('portfolioDeletedConfirm'),
+            header: t('warn'),
+            icon: 'pi pi-info-circle',
+            rejectProps: {
+                label: t('cancel'),
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptProps: {
+                label: `${t('delete')} (${countdown})`,
+                severity: 'danger',
+                disabled: true // 一開始 disable
+            },
+            accept: () => {
+                portfolioStore.removePortfolio(
+                    selectedPortfolios.value.map(p => p.id)
+                );
+                toast.success(`${t('portfolioDeleted')}`);
+                clearInterval(interval);
+            },
+            reject: () => {
+                clearInterval(interval);
+            }
+        });
+    };
+
+    confirmDialog();
+
+    interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            // 更新按鈕的 label
+            confirm.update({
+                acceptProps: {
+                    label: `${t('delete')} (${countdown})`,
+                    severity: 'danger',
+                    disabled: true
+                }
+            });
+        } else {
+            clearInterval(interval);
+            // 啟用按鈕
+            confirm.update({
+                acceptProps: {
+                    label: t('delete'),
+                    severity: 'danger',
+                    disabled: false
+                }
+            });
+        }
+    }, 1000);
 };
 
 </script>
@@ -87,8 +121,25 @@ const confirm2 = () => {
   <div>
       <ConfirmDialog></ConfirmDialog>
       <div class="flex justify-end mb-8 mt-8">
-          <Button icon="pi pi-plus" class="p-button-rounded p-button-text mr-2" @click="dialogVisible = true" size="small" />
-          <Button @click="confirm2" :disabled="selectedPortfolios.length === 0" icon="pi pi-trash" class="p-button-rounded p-button-text mr-2" size="small" severity="danger" />
+          <Button
+            :label="$t('addPortfolio')"
+            @click="dialogVisible = true"
+            class="mr-2"
+            icon="pi pi-plus"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            :label="$t('delete')"
+            @click="showDeleteConfirm"
+            :disabled="selectedPortfolios.length === 0"
+            class="mr-2"
+            icon="pi pi-trash"
+            severity="secondary"
+            size="small"
+          />
+          <!-- <Button icon="pi pi-plus" class="p-button-rounded p-button-text mr-2" @click="dialogVisible = true" size="small" />
+          <Button @click="confirm2" :disabled="selectedPortfolios.length === 0" icon="pi pi-trash" class="p-button-rounded p-button-text mr-2" size="small" severity="danger" /> -->
       </div>
 
       <PortfolioFormDialog 
