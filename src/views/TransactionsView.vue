@@ -78,6 +78,7 @@
 import { ref, watch, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 import TransactionDialog from '@/components/TransactionDialog.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
@@ -88,7 +89,6 @@ const store = useTransactionsStore();
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 const toast = useToast();
-const { t } = useI18n();
 
 const dialogVisible = ref(false);
 const editingId = ref(null);

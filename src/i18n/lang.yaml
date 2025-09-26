@@ -250,3 +250,14 @@ symbolsNotFound:
 importError:
   en: Import error
   zh: 匯入錯誤
+
+# 再平衡
+deposit:
+  en: Deposit
+  zh: 存入
+withdraw:
+  en: Withdraw
+  zh: 提取
+amountGreaterThanZero:
+  en: Amount must be greater than 0
+  zh: 金額必須大於 0
