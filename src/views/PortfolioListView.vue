@@ -6,10 +6,9 @@ const { t } = useI18n()
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 
-import { useConfirm } from "primevue/useconfirm";
-
 import PortfolioFormDialog from '@/components/PortfolioFormDialog.vue'
 
+import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
 
 const portfolioStore = usePortfolioStore()

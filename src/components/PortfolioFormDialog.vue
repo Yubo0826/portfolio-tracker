@@ -3,10 +3,14 @@ import { ref, computed, watch, defineProps, defineEmits } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
 import FloatLabel from 'primevue/floatlabel'
+import { useConfirm } from "primevue/useconfirm";
+const confirm = useConfirm();
+
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 import * as toast from '@/composables/toast'
+import { set } from 'lodash';
 
 const props = defineProps({
   visible: Boolean,
@@ -60,6 +64,9 @@ const addPortfolio = async () => {
     await portfolioStore.addPortfolio({ name, description })
     newPortfolio.value = { name: '', description: '' }
     toast.success(`${t('portfolioAdded')}「${name}」`, '')
+    setTimeout(() => {
+      confirmDialog()
+    }, 1000)
   } catch (error) {
     console.error('Error adding portfolio:', error)
     toast.error(t('errorOccurred'), error.message || '')
@@ -68,6 +75,34 @@ const addPortfolio = async () => {
     emit('update:visible', false)
   }
 }
+
+// 建立完成後詢問使用者是否切換到新建立的投資組合
+const confirmDialog = () => {
+    confirm.require({
+        message: '切換到新建立的投資組合？',
+        header: 'Confirmation',
+        icon: 'pi pi-info-circle',
+        rejectProps: {
+            label: t('cancel'),
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Yes',
+        },
+        accept: () => {
+            portfolioStore.setCurrentPortfolio(
+                portfolioStore.portfolios[portfolioStore.portfolios.length - 1]
+            );
+            emit('clear:editPortfolio');
+            newPortfolio.value = { name: '', description: '' };
+            emit('update:visible', false);
+        },
+        // reject: () => {
+        //     clearInterval(interval);
+        // }
+    });
+};
 
 const updatePortfolio = async () => {
   const { name, description } = newPortfolio.value

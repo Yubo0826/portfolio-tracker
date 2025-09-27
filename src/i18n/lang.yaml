@@ -41,6 +41,9 @@ refresh:
 holding:
   en: Holding
   zh: 標的
+Notification:
+  en: Notification
+  zh: 通知
 
 # 股利頁欄位（更精準）
 dividendPerShare:
