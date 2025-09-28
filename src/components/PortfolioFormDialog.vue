@@ -2,6 +2,7 @@
 import { ref, computed, watch, defineProps, defineEmits } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
+import ToggleSwitch from 'primevue/toggleswitch';
 import FloatLabel from 'primevue/floatlabel'
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
@@ -57,6 +58,9 @@ const clickSave = () => {
   }
 }
 
+// 新增新的portfolio後立即套用
+const isApplyNewPortfolio = ref(true);
+
 const addPortfolio = async () => {
   const { name, description } = newPortfolio.value
 
@@ -64,9 +68,15 @@ const addPortfolio = async () => {
     await portfolioStore.addPortfolio({ name, description })
     newPortfolio.value = { name: '', description: '' }
     toast.success(`${t('portfolioAdded')}「${name}」`, '')
-    setTimeout(() => {
-      confirmDialog()
-    }, 1000)
+    if (isApplyNewPortfolio.value) {
+      const portfolios = await portfolioStore.fetchPortfolios()
+      if (portfolios.length > 0) {
+        const latestPortfolio = portfolios[portfolios.length - 1];
+        emit('update:loading', true)
+        await portfolioStore.setCurrentPortfolio(latestPortfolio.id);
+        toast.success(t('portfolioSwitched', { name: latestPortfolio.name }), '')
+      }
+    }
   } catch (error) {
     console.error('Error adding portfolio:', error)
     toast.error(t('errorOccurred'), error.message || '')
@@ -75,34 +85,6 @@ const addPortfolio = async () => {
     emit('update:visible', false)
   }
 }
-
-// 建立完成後詢問使用者是否切換到新建立的投資組合
-const confirmDialog = () => {
-    confirm.require({
-        message: '切換到新建立的投資組合？',
-        header: 'Confirmation',
-        icon: 'pi pi-info-circle',
-        rejectProps: {
-            label: t('cancel'),
-            severity: 'secondary',
-            outlined: true
-        },
-        acceptProps: {
-            label: 'Yes',
-        },
-        accept: () => {
-            portfolioStore.setCurrentPortfolio(
-                portfolioStore.portfolios[portfolioStore.portfolios.length - 1]
-            );
-            emit('clear:editPortfolio');
-            newPortfolio.value = { name: '', description: '' };
-            emit('update:visible', false);
-        },
-        // reject: () => {
-        //     clearInterval(interval);
-        // }
-    });
-};
 
 const updatePortfolio = async () => {
   const { name, description } = newPortfolio.value
@@ -157,6 +139,11 @@ const saveDisabled = computed(() => {
           style="resize: none"
         />
       </FloatLabel>
+    </div>
+
+    <div class="flex items-center gap-4 mb-8">
+      <label for="applyNewPortfolio">{{ $t('applyNewPortfolioImmediately') }}</label>
+      <ToggleSwitch id="applyNewPortfolio" v-model="isApplyNewPortfolio" />
     </div>
 
     <div class="flex justify-end gap-2">

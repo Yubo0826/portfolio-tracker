@@ -170,6 +170,9 @@ irr:
 xirrHint:
   en: Annualized return using XIRR, considering buy/sell/dividend dates and current market value.
   zh: 使用 XIRR 計算的年化投資報酬率，考慮買進、賣出、股息發放時間與金額，以及目前市值。
+applyNewPortfolioImmediately:
+  en: Apply new portfolio immediately
+  zh: 新增投資組合後立即套用
 
 # 走勢區塊
 assetTrend:
