@@ -67,16 +67,21 @@ const addPortfolio = async () => {
   try {
     await portfolioStore.addPortfolio({ name, description })
     newPortfolio.value = { name: '', description: '' }
-    toast.success(`${t('portfolioAdded')}「${name}」`, '')
+
+    // 立即套用新建立的投資組合
     if (isApplyNewPortfolio.value) {
-      const portfolios = await portfolioStore.fetchPortfolios()
+      const portfolios = portfolioStore.portfolios
       if (portfolios.length > 0) {
-        const latestPortfolio = portfolios[portfolios.length - 1];
+        const latestPortfolio = portfolios[portfolios.length - 1]
         emit('update:loading', true)
-        await portfolioStore.setCurrentPortfolio(latestPortfolio.id);
-        toast.success(t('portfolioSwitched', { name: latestPortfolio.name }), '')
+        portfolioStore.setCurrentPortfolio(latestPortfolio)
+        toast.success(t('portfolioSwitched', { name: latestPortfolio.name }))
+        return
       }
     }
+    
+    // 沒有立即套用新建立的投資組合 的訊息
+    toast.success(t('portfolioAdded', { name }))
   } catch (error) {
     console.error('Error adding portfolio:', error)
     toast.error(t('errorOccurred'), error.message || '')
@@ -119,7 +124,7 @@ const saveDisabled = computed(() => {
     :style="{ width: '30rem' }"
   >
     <span class="text-surface-500 dark:text-surface-400 block mb-8">
-      {{ $t('updateYourInfo') }}
+      <!-- {{ $t('updateYourInfo') }} -->
     </span>
 
     <div class="flex items-center gap-4 mb-4">

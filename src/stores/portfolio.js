@@ -15,12 +15,12 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         return;
     }
     try {
-
         const data = await api.get(`http://localhost:3000/api/portfolio?uid=${auth.user.uid}`);
         console.log('Fetched portfolios:', data);
         portfolios.value = data.portfolios;
         if (data.portfolios.length > 0) {
             const localStoragePortfolio = JSON.parse(localStorage.getItem('currentPortfolio'));
+            console.log('Local storage portfolio:', localStoragePortfolio);
             currentPortfolio.value = localStoragePortfolio || data.portfolios[0];
         } else {
             currentPortfolio.value = null;
@@ -96,7 +96,12 @@ export const usePortfolioStore = defineStore('portfolio', () => {
           uid: auth.user.uid,
           ids,
       });
-        portfolios.value = portfolios.value.filter(p => !ids.includes(p.id));
+      portfolios.value = portfolios.value.filter(p => !ids.includes(p.id));
+      // 如果刪除的是當前投資組合，則切換到第一個或 null
+      if (currentPortfolio.value && ids.includes(currentPortfolio.value.id)) {
+          currentPortfolio.value = portfolios.value.length > 0 ? portfolios.value[0] : null;
+          localStorage.setItem('currentPortfolio', JSON.stringify(currentPortfolio.value));
+      }
     } catch (error) {
         console.error('Error removing portfolio:', error);
     }

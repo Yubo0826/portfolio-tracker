@@ -116,8 +116,11 @@ errorOccurred:
   en: An error occurred
   zh: 發生錯誤
 portfolioAdded:
-  en: Portfolio added
-  zh: 已新增投資組合
+  en: Portfolio "{name}" added
+  zh: 投資組合「{name}」已新增
+portfolioSwitched:
+  en: Added and switched to portfolio "{name}
+  zh: 已新增並切換到投資組合「{name}」
 portfolioModified:
   en: Portfolio modified
   zh: 投資組合已修改
@@ -172,7 +175,7 @@ xirrHint:
   zh: 使用 XIRR 計算的年化投資報酬率，考慮買進、賣出、股息發放時間與金額，以及目前市值。
 applyNewPortfolioImmediately:
   en: Apply new portfolio immediately
-  zh: 新增投資組合後立即套用
+  zh: 新增後立即套用
 
 # 走勢區塊
 assetTrend:

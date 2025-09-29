@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
@@ -55,64 +55,90 @@ const updateSelectedPortfolios = (id) => {
   dialogVisible.value = true
 }
 
+// 刪除確認倒數計時
+
+const countdown = ref(5);
+const disabled = ref(true);
+let interval;
+
 const showDeleteConfirm = () => {
-    let countdown = 5;
-    let interval;
+    countdown.value = 5;
+    disabled.value = true;
 
-    const confirmDialog = () => {
-        confirm.require({
-            message: t('portfolioDeletedConfirm'),
-            header: t('warn'),
-            icon: 'pi pi-info-circle',
-            rejectProps: {
-                label: t('cancel'),
-                severity: 'secondary',
-                outlined: true
-            },
-            acceptProps: {
-                label: `${t('delete')} (${countdown})`,
-                severity: 'danger',
-                disabled: true // 一開始 disable
-            },
-            accept: () => {
-                portfolioStore.removePortfolio(
-                    selectedPortfolios.value.map(p => p.id)
-                );
-                toast.success(`${t('portfolioDeleted')}`);
-                clearInterval(interval);
-            },
-            reject: () => {
-                clearInterval(interval);
-            }
-        });
-    };
-
-    confirmDialog();
+    confirm.require({
+        message: t('portfolioDeletedConfirm'),
+        header: t('warn'),
+        icon: 'pi pi-info-circle',
+        rejectProps: {
+            label: t('cancel'),
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: `${t('delete')} (${countdown.value})`,
+            severity: 'danger',
+            disabled: disabled.value
+        },
+        reject: () => {
+            clearInterval(interval);
+        }
+    });
 
     interval = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-            // 更新按鈕的 label
-            confirm.update({
+        countdown.value--;
+        if (countdown.value > 0) {
+            // 每秒更新 label
+            confirm.require({
+                message: t('portfolioDeletedConfirm'),
+                header: t('warn'),
+                icon: 'pi pi-info-circle',
+                rejectProps: {
+                    label: t('cancel'),
+                    severity: 'secondary',
+                    outlined: true
+                },
                 acceptProps: {
-                    label: `${t('delete')} (${countdown})`,
+                    label: `${t('delete')} (${countdown.value})`,
                     severity: 'danger',
                     disabled: true
+                },
+                reject: () => {
+                    clearInterval(interval);
                 }
             });
         } else {
             clearInterval(interval);
-            // 啟用按鈕
-            confirm.update({
+            disabled.value = false;
+            confirm.require({
+                message: t('portfolioDeletedConfirm'),
+                header: t('warn'),
+                icon: 'pi pi-info-circle',
+                rejectProps: {
+                    label: t('cancel'),
+                    severity: 'secondary',
+                    outlined: true
+                },
                 acceptProps: {
                     label: t('delete'),
                     severity: 'danger',
                     disabled: false
+                },
+                accept: () => {
+                    portfolioStore.removePortfolio(selectedPortfolios.value.map(p => p.id));
+                    toast.success(t('portfolioDeleted'));
+                    clearInterval(interval);
+                },
+                reject: () => {
+                    clearInterval(interval);
                 }
             });
         }
     }, 1000);
 };
+
+onUnmounted(() => {
+    clearInterval(interval);
+});
 
 </script>
 
