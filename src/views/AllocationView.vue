@@ -1,3 +1,81 @@
+<template>
+  <div>
+    <div class="flex justify-end mb-4">
+        <Button
+          :label="$t('save')"
+          @click="saveAllocation"
+          :disabled="saveButtonDisabled"
+          class="mr-2"
+          icon="pi pi-check"
+          severity="secondary"
+          size="small"
+        />
+    </div>
+    {{ newAssetRow }}
+    <DataTable :value="assets" editMode="row" dataKey="symbol">
+        <!-- Name -->
+        <Column field="name" header="Asset" style="width: 40%">
+            <template #body="{ data }">
+                <div>
+                    <!-- <img :src="data.icon" class="w-5 h-5 mr-2" /> -->
+                    <span class="font-bold mr-4">{{ data.symbol }}</span>
+                    <div class="">{{ data.name }}</div>
+                </div>
+            </template>
+
+            <template #footer>
+                <div v-if="!inputVisible">
+                    <Button icon="pi pi-plus" text label="Add Asset" @click="inputVisible = true" />
+                </div>
+                <div v-else class="flex flex-col gap-2">
+                    <SymbolAutoComplete 
+                      v-model="selectedSymbol"
+                      @update="({ symbol, name, assetType }) => {
+                          newAssetRow = {
+                              symbol,
+                              name,
+                              assetType
+                          };
+                      }"
+                    />
+                </div>
+            </template>
+        </Column>
+
+        <!-- Target -->
+        <Column field="target" header="" style="width: 20%">
+            <template #body="{ data }">
+                <InputNumber v-model="data.target" suffix="%" showButtons :min="0" :max="100" />
+            </template>
+
+            <template #header>
+                <span v-if="totalTarget === 100" class="font-semibold  p-1">Target: 100%</span>
+                <span v-else class="text-gray-500 bg-orange-300 rounded-md p-1 font-semibold">Total: {{ totalTarget }}%</span>
+            </template>
+
+            <template #footer v-if="inputVisible && newAssetRow">
+                <InputNumber v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
+            </template>
+        </Column>
+
+        <!-- Action -->
+        <Column style="width: 20%">
+            <template #body="{ data }">
+                <div class="flex justify-end">
+                    <Button icon="pi pi-times" text severity="danger" @click="removeAsset(data)" />
+                </div>
+            </template>
+
+            <template #footer v-if="inputVisible">
+                <div class="flex justify-end items-center">
+                    <Button v-if="newAssetRow && newTarget" icon="pi pi-check" variant="text" rounded aria-label="Filter" @click="confirmAddAsset" />
+                    <Button icon="pi pi-times" text severity="danger" @click="close" />
+                </div>
+            </template>
+        </Column>
+    </DataTable>
+  </div>
+</template>
 <script setup>
 import { computed, ref, watch } from 'vue';
 import api from '@/utils/api';
@@ -140,72 +218,3 @@ const close = () => {
 
 </script>
 
-<template>
-  <div>
-    <div class="flex justify-end mb-4">
-        <Button label="Save" @click="saveAllocation" :disabled="saveButtonDisabled" />
-    </div>
-    <DataTable :value="assets" editMode="row" dataKey="symbol">
-        <!-- Name -->
-        <Column field="name" header="Asset" style="width: 40%">
-            <template #body="{ data }">
-                <div>
-                    <!-- <img :src="data.icon" class="w-5 h-5 mr-2" /> -->
-                    <span class="font-bold mr-4">{{ data.symbol }}</span>
-                    <div class="">{{ data.name }}</div>
-                </div>
-            </template>
-
-            <template #footer>
-                <div v-if="!inputVisible">
-                    <Button icon="pi pi-plus" text label="Add Asset" @click="inputVisible = true" />
-                </div>
-                <div v-else class="flex flex-col gap-2">
-                    <SymbolAutoComplete 
-                      v-model="selectedSymbol"
-                      @update="({ symbol, name, assetType }) => {
-                          newAssetRow = {
-                              symbol,
-                              name,
-                              assetType
-                          };
-                      }"
-                    />
-                </div>
-            </template>
-        </Column>
-
-        <!-- Target -->
-        <Column field="target" header="" style="width: 20%">
-            <template #body="{ data }">
-                <InputNumber v-model="data.target" suffix="%" showButtons :min="0" :max="100" />
-            </template>
-
-            <template #header>
-                <span v-if="totalTarget === 100" class="font-semibold  p-1">Target: 100%</span>
-                <span v-else class="text-gray-500 bg-orange-300 rounded-md p-1 font-semibold">Total: {{ totalTarget }}%</span>
-            </template>
-
-            <template #footer v-if="inputVisible && newAssetRow">
-                <InputNumber v-model="newTarget" suffix="%" showButtons :min="0" :max="100" />
-            </template>
-        </Column>
-
-        <!-- Action -->
-        <Column style="width: 20%">
-            <template #body="{ data }">
-                <div class="flex justify-end">
-                    <Button icon="pi pi-times" text severity="danger" @click="removeAsset(data)" />
-                </div>
-            </template>
-
-            <template #footer v-if="inputVisible">
-                <div class="flex justify-end items-center">
-                    <Button v-if="newAssetRow && newTarget" icon="pi pi-check" variant="text" rounded aria-label="Filter" @click="confirmAddAsset" />
-                    <Button icon="pi pi-times" text severity="danger" @click="close" />
-                </div>
-            </template>
-        </Column>
-    </DataTable>
-  </div>
-</template>

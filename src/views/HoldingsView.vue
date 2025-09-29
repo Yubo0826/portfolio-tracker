@@ -63,13 +63,15 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { useHoldingsStore } from '@/stores/holdings';
-import { useAuthStore } from '@/stores/auth';
-import { usePortfolioStore } from '@/stores/portfolio';
 import NoData from '@/components/NoData.vue';
 
+import { useHoldingsStore } from '@/stores/holdings';
 const store = useHoldingsStore();
+
+import { useAuthStore } from '@/stores/auth';
 const auth = useAuthStore();
+
+import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore();
 
 const selectedHoldings = ref([]);

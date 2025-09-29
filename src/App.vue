@@ -150,23 +150,23 @@ const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const transctionDialogVisible = ref(false)
 
-// 如果有用戶登入，則設定 uid
-if (auth.user) {
-    getPortfolios()
-    console.log('User is logged in:', auth.user);
-} else {
-    console.log('No user is logged in');
-}
+import { useHoldingsStore } from '@/stores/holdings';
+const holdingsStore = useHoldingsStore();
+
+import { useTransactionsStore } from '@/stores/transactions';
+const transactionsStore = useTransactionsStore();
 
 /*
-    1. 監聽 auth.user 的變化，如果有用戶登入則取得交易資料
-    2. 如果已在登入狀態下刷新瀏覽器 auth.user 會自動重新登入
+    1. 如果已在登入狀態下刷新瀏覽器，auth.user 會自動重新登入
+    2. 監聽 auth.user 的變化，如果有用戶登入則取得資料
 */
 
-watch(() => auth.user, (newUser) => {
+watch(() => auth.user, async (newUser) => {
   if (newUser) {
     console.log('User is logged in:', newUser);
-    getPortfolios();
+    await getPortfolios();
+    holdingsStore.fetchHoldings();
+    transactionsStore.fetchTransactions();
   }
 })
 
@@ -187,10 +187,6 @@ watch(selectedPortfolio, (newVal) => {
 })
 
 async function getPortfolios() {
-    if (!auth.user?.uid) {
-        console.warn('No user ID found, cannot fetch portfolios');
-        return;
-    }
     try {
         await portfolioStore.fetchPortfolios();
         selectedPortfolio.value = portfolioStore.currentPortfolio;

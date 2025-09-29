@@ -270,3 +270,6 @@ withdraw:
 amountGreaterThanZero:
   en: Amount must be greater than 0
   zh: 金額必須大於 0
+in_allocation:
+  en: Already in allocation
+  zh: 已在配置中

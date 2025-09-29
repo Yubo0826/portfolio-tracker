@@ -30,6 +30,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     }
   }
 
+  // 直接設定整個 portfolios 陣列
   function setPortfolios(portfoliosList) {
     if (!Array.isArray(portfoliosList)) {
       console.error('Invalid portfolios list:', portfoliosList);
@@ -38,6 +39,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     portfolios.value = portfoliosList;
   }
 
+  // 設定目前使用的投資組合
   function setCurrentPortfolio(portfolio) {
     currentPortfolio.value = portfolio
     localStorage.setItem('currentPortfolio', JSON.stringify(portfolio))
