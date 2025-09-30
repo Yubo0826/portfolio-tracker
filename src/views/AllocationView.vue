@@ -11,7 +11,6 @@
           size="small"
         />
     </div>
-    {{ newAssetRow }}
     <DataTable :value="assets" editMode="row" dataKey="symbol">
         <!-- Name -->
         <Column field="name" header="Asset" style="width: 40%">

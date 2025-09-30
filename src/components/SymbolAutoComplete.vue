@@ -8,8 +8,8 @@
         :disabled="disabled"
         @item-select="onItemSelect"
         placeholder="Search symbol"
-        forceSelection
-    >
+        >
+        <!-- forceSelection -->
         <template #option="slotProps">
             <div class="flex flex-col">
                 <span class="text-base font-semibold">{{ slotProps.option.symbol }}</span>

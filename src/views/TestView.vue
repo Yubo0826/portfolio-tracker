@@ -2,7 +2,8 @@
   <div class="flex gap-6">
     <!-- Draggable 1: Holdings -->
     <div class="w-1/3">
-      <h3 class="font-bold mb-3 text-gray-700">{{ $t('holdings') }}</h3>
+      <h3 class="font-bold mb-2 text-gray-700">{{ $t('holdings') }}</h3>
+      <p class="text-sm mb-3 text-gray-500">可拖曳到右方快速新增</p>
       <draggable
         class="space-y-2"
         :list="list1"
@@ -16,6 +17,7 @@
             class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
             :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
           >
+            <i class="fa-solid fa-grip-vertical"></i>
             <div class="font-medium text-gray-800">
               {{ element.symbol }}
               <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span>
@@ -36,24 +38,23 @@
       <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
       <draggable
         class="space-y-3 p-2 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px] flex align-center flex-col"
-        :class="{ 'bg-green-50 border-green-300 border-2': isOver }"
         :list="assets"
         group="assets"
         item-key="symbol"
+        move="(evt) => false"
         @add="onDrop"
-        @start="isOver = true"
-        @end="isOver = false"
       >
         <!-- 當沒有項目時顯示提示 -->
-        <template #footer>
+        <template #header>
           <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
             將左側的 <span class="font-medium text-gray-600">持有資產</span> 拖曳到此處<br />
-            以建立你的資產配置
+            或手動新增以建立你的資產配置
           </div>
         </template>
 
         <template #item="{ element, index }">
           <div
+            v-if="!element.editable"
             class="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition"
           >
             <div>
@@ -77,6 +78,48 @@
                 @click="removeAsset(index)"
               />
             </div>
+          </div>
+
+          <!-- 編輯模式 -->
+           <div
+              v-else
+              class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+            >
+            <div class="font-medium text-gray-800">
+              <SymbolAutoComplete 
+                v-model="selectedSymbol"
+                @update="({ symbol, name, assetType }) => {
+                    element.symbol = symbol;
+                    element.name = name;
+                    element.assetType = assetType;
+                    element.editable = false; // 完成後關閉編輯模式
+                }"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <InputNumber
+                v-model="element.target"
+                suffix="%"
+                :min="0"
+                :max="100"
+                size="small"
+                input-class="text-right"
+              />
+              <Button
+                icon="pi pi-times"
+                text
+                severity="danger"
+                size="small"
+                @click="removeAsset(index)"
+              />
+            </div>
+          </div>
+        </template>
+
+        <!-- 自行新增 -->
+         <template #footer>
+          <div class="text-center text-gray-400 text-sm p-4 m-auto">
+            <Button @click="addAsset" icon="pi pi-plus" text label="Add Asset" />
           </div>
         </template>
       </draggable>
@@ -107,6 +150,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import draggable from "vuedraggable";
+import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
 import { usePortfolioStore } from "@/stores/portfolio";
@@ -121,7 +165,9 @@ const holdingsStore = useHoldingsStore();
 const list1 = ref(holdingsStore.list); // holdings
 const assets = ref([]); // allocation
 const oldAssets = ref([]);
-const isOver = ref(false); // highlight 狀態
+const selectedSymbol = ref("");
+const newAssetRow = ref(null);
+
 
 watch(
   () => holdingsStore.list,
@@ -205,6 +251,17 @@ const totalTarget = computed(() =>
 const saveButtonDisabled = computed(
   () => JSON.stringify(assets.value) === JSON.stringify(oldAssets.value)
 );
+
+// 新增資產
+const addAsset = () => {
+  assets.value.push({
+    symbol: "",
+    name: "",
+    assetType: "stock",
+    target: 0,
+    editable: true, // 標記為可編輯
+  });
+};
 
 // 儲存
 const saveAllocation = async () => {
