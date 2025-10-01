@@ -45,6 +45,13 @@ export const useHoldingsStore = defineStore('holdings', () => {
         profitPercentage,
       };
     });
+
+    // 計算總市值
+    list.value.totalValue = list.value.reduce((sum, h) => sum + h.currentValue, 0);
+    // 計算各持股的實際比例
+    list.value.forEach(h => {
+      h.actualRatio = list.value.totalValue ? ((h.currentValue / list.value.totalValue) * 100).toFixed(2) : '0.00';
+    });
   };
 
   // 取得 holdings

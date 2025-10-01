@@ -17,10 +17,10 @@
             class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
             :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
           >
-            <i class="fa-solid fa-grip-vertical"></i>
             <div class="font-medium text-gray-800">
               {{ element.symbol }}
-              <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span>
+              <!-- <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span> -->
+              <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
             </div>
             <span
               v-if="existsInAllocation(element.symbol)"
@@ -35,7 +35,17 @@
 
     <!-- Draggable 2: Allocation -->
     <div class="flex-1">
-      <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
+
+        <!-- Total target -->
+        <div class="text-sm font-semibold text-gray-700">
+          Total:
+          <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
+            {{ totalTarget }}%
+          </span>
+        </div>
+      </div>
       <draggable
         class="space-y-3 p-2 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px] flex align-center flex-col"
         :list="assets"
@@ -59,7 +69,7 @@
           >
             <div>
               <span class="font-bold text-gray-800 mr-2">{{ element.symbol }}</span>
-              <span class="text-gray-500">{{ element.name }}</span>
+              <!-- <span class="text-gray-500">{{ element.name }}</span> -->
             </div>
             <div class="flex items-center gap-2">
               <InputNumber
@@ -88,12 +98,7 @@
             <div class="font-medium text-gray-800">
               <SymbolAutoComplete 
                 v-model="selectedSymbol"
-                @update="({ symbol, name, assetType }) => {
-                    element.symbol = symbol;
-                    element.name = name;
-                    element.assetType = assetType;
-                    element.editable = false; // 完成後關閉編輯模式
-                }"
+                @update="updateElement(element, $event)"
               />
             </div>
             <div class="flex items-center gap-2">
@@ -124,13 +129,7 @@
         </template>
       </draggable>
 
-      <!-- Total target -->
-      <div class="mt-4 text-sm font-semibold text-gray-700">
-        Total:
-        <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
-          {{ totalTarget }}%
-        </span>
-      </div>
+      
 
       <!-- Save button -->
       <div class="flex justify-end mt-4">
@@ -150,14 +149,13 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import draggable from "vuedraggable";
+import * as toast from '@/composables/toast';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
-import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
 import { usePortfolioStore } from "@/stores/portfolio";
 import { useHoldingsStore } from "@/stores/holdings";
 import api from "@/utils/api";
 
-const toast = useToast();
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 const holdingsStore = useHoldingsStore();
@@ -166,8 +164,6 @@ const list1 = ref(holdingsStore.list); // holdings
 const assets = ref([]); // allocation
 const oldAssets = ref([]);
 const selectedSymbol = ref("");
-const newAssetRow = ref(null);
-
 
 watch(
   () => holdingsStore.list,
@@ -209,34 +205,18 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
 });
 
 // clone item
-const cloneItem = (item) => ({ ...item });
+const cloneItem = (item) => {
+  return {
+    symbol: item.symbol,
+    name: item.name,
+    assetType: item.assetType,
+    target: 0
+  };
+};
 
 // 檢查是否已存在 allocation
 const existsInAllocation = (symbol) =>
   assets.value.some((a) => a.symbol === symbol);
-
-// 當 item 被拖到 allocation
-const onDrop = (evt) => {
-  const item = evt.item._underlying_vm_;
-  if (!item) return;
-
-  if (existsInAllocation(item.symbol)) {
-    toast.add({
-      severity: "warn",
-      summary: "Already exists",
-      detail: `${item.symbol} 已在配置中`,
-      life: 2000,
-    });
-    return;
-  }
-
-  assets.value.push({
-    symbol: item.symbol,
-    name: item.name,
-    assetType: item.assetType,
-    target: 0,
-  });
-};
 
 // 移除資產
 const removeAsset = (index) => {
@@ -252,7 +232,7 @@ const saveButtonDisabled = computed(
   () => JSON.stringify(assets.value) === JSON.stringify(oldAssets.value)
 );
 
-// 新增資產
+// 手動新增資產
 const addAsset = () => {
   assets.value.push({
     symbol: "",
@@ -263,16 +243,30 @@ const addAsset = () => {
   });
 };
 
+// 更新資產資料
+const updateElement = (element, { symbol, name, assetType }) => {
+  if (existsInAllocation(symbol)) {
+    toast.error(`${symbol} 已在配置中`);
+    return;
+  }
+  element.symbol = symbol;
+  element.name = name;
+  element.assetType = assetType;
+  element.editable = false; // 完成後關閉編輯模式
+};
+
 // 儲存
 const saveAllocation = async () => {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
+  // 檢查比例總和是否為 100%
   if (assets.value.length > 0 && totalTarget.value !== 100) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Total target must equal 100%",
-      life: 3000,
-    });
+    toast.error("Total target must equal 100%");
+    return;
+  }
+  // 檢查是否有未完成編輯的項目
+  const incompleteItem = assets.value.find(a => a.editable);
+  if (incompleteItem) {
+    toast.error("Please complete all editable items");
     return;
   }
   await api.post("http://localhost:3000/api/allocation/", {
@@ -281,11 +275,6 @@ const saveAllocation = async () => {
     assets: assets.value,
   });
   oldAssets.value = JSON.parse(JSON.stringify(assets.value));
-  toast.add({
-    severity: "success",
-    summary: "Success",
-    detail: "Allocation saved",
-    life: 2000,
-  });
+  toast.success("Allocation saved");
 };
 </script>
