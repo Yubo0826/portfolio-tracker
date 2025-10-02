@@ -87,7 +87,7 @@
               <div class="flex items-center justify-between mb-4 text-[#252525]">
                 <div class="text-sm font-bold">{{ $t('assetTrend') }}</div>
 
-                <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
+                <!-- <Tag :severity="growthRate >=0 ? 'success' : 'danger'"> -->
                   <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
                     <span v-if="growthRate >= 0">+</span>
                     <span v-else>-</span>
@@ -97,7 +97,7 @@
                     <span class="font-semibold">{{ growthRate }}%</span>
                     ）
                   </div>
-                </Tag>
+                <!-- </Tag> -->
                 
                 <!-- <div class="flex items-center gap-3 select-none">
                   <Button
@@ -256,17 +256,17 @@
             </template>
           </Column>
 
+          <Column field="currentPrice" :header="$t('currentPrice')">
+            <template #body="{ data }">
+              <span class="font-bold mr-4">${{ data.currentPrice.toFixed(2) }}</span>
+            </template>
+          </Column>
+
           <Column field="shares" :header="$t('shares')" />
           <Column field="totalCost" :header="$t('totalCost')">
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
               <div class="text-[#b5b5c3]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
-            </template>
-          </Column>
-
-          <Column field="currentPrice" :header="$t('currentPrice')">
-            <template #body="{ data }">
-              <span class="font-bold mr-4">${{ data.currentPrice.toFixed(2) }}</span>
             </template>
           </Column>
 

@@ -34,6 +34,7 @@ const navItems = ref([
     children: [
       { label: t('rebalance'), to: '/rebalancing' },
       { label: t('allocation'), to: '/allocation' },
+      { label: t('backtesting'), to: '/backtesting' }
     ],
   },
 ]);

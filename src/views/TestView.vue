@@ -17,7 +17,8 @@
             class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
             :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
           >
-            <div class="font-medium text-gray-800">
+          <div class="font-medium text-gray-800">
+              <i class="fa-solid fa-grip-vertical mr-4"></i>
               {{ element.symbol }}
               <!-- <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span> -->
               <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>

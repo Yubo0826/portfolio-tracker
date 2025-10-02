@@ -57,6 +57,11 @@ const router = createRouter({
       component: () => import('../views/RebalancingView.vue'),
     },
     {
+      path: '/backtesting',
+      name: 'backtesting',
+      component: () => import('../views/BacktestingView.vue'),
+    },
+    {
       path: '/dividends',
       name: 'dividends',
       component: () => import('../views/DividendsView.vue'),
