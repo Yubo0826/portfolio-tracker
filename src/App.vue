@@ -84,7 +84,7 @@
       </Select>
     </div>
 
-    <div v-if="$route.name !== 'portfolios'">
+    <div v-if="noShowAddInvestmentButton">
       <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
       <Button @click="importDataDialogVisible = true" type="button" :label="$t('import')" icon="pi pi-file-import" class="mr-2"></Button>
       <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
@@ -209,6 +209,11 @@ const toggleDarkMode = () => {
     localStorage.setItem('theme', 'light');
   }
 };
+
+const noShowAddInvestmentButton = computed(() => {
+  const hideOnRoutes = ['portfolios', 'allocation', 'backtesting', 'rebalancing'];
+  return !hideOnRoutes.includes(route.name);
+});
 
 // 初始載入：套用 localStorage 的偏好
 onMounted(() => {

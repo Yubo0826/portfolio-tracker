@@ -30,7 +30,7 @@ const navItems = ref([
     key: 'rebalance',
     label: t('rebalance'),
     to: '/rebalancing',
-    matchPath: ['/rebalancing', '/allocation'],
+    matchPath: ['/rebalancing', '/allocation', '/backtesting'],
     children: [
       { label: t('rebalance'), to: '/rebalancing' },
       { label: t('allocation'), to: '/allocation' },
