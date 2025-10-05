@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h2 class="text-xl font-bold mb-4">投資組合再平衡</h2>
     <!-- 存入 / 提取 + 金額輸入 -->
     <div class="flex justify-center items-center mb-4 gap-4">
       <SelectButton v-model="cashAction" :options="cashActionOptions" optionLabel="name" optionValue="code" />
