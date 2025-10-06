@@ -71,7 +71,14 @@
           </div>
         </div>
 
-        <!-- 資產走勢圖 -->
+      </template>
+    </Card>
+    
+    <!-- 資產走勢圖 -->
+    <Card class="my-6" v-if="chartSeries.length">
+      <template #title>資產走勢圖</template>
+      <template #content>
+        <p class="text-sm text-gray-500 mb-2">藍線代表投資組合總價值</p>
         <apexchart
           width="100%"
           height="400"
@@ -79,19 +86,24 @@
           :options="chartOptions"
           :series="chartSeries"
         />
+      </template>
+    </Card>
 
-        <!-- 年度報酬率圖 -->
+    <!-- 年度報酬率圖 -->
+    <Card class="my-6" v-if="annualChartSeries.length">
+      <template #title>年度報酬率</template>
+      <template #content>
+        <p class="text-sm text-gray-500 mb-2">藍色代表正報酬，紅色代表負報酬</p>
         <apexchart
-          v-if="annualChartSeries.length"
+          width="100%"
+          height="400"
           type="bar"
-          height="350"
           :options="annualChartOptions"
           :series="annualChartSeries"
         />
       </template>
     </Card>
 
-    
   </div>
 </template>
 
