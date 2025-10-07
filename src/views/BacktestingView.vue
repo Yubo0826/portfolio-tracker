@@ -118,8 +118,8 @@ const portfolioStore = usePortfolioStore();
 
 const form = ref({
   startDate: new Date("2020-01-01"),
-  endDate: new Date("2025-01-01"),
-  initialCapital: 100000,
+  endDate: new Date("2024-12-25"),
+  initialCapital: 10000,
   rebalance: "quarterly",
 });
 
@@ -211,69 +211,71 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
     return { portfolioValues: [], dates: [] };
   }
 
-  const allDates = new Set();
-  for (let symbol in prices) prices[symbol].forEach((p) => allDates.add(p.date));
-  const sortedDates = Array.from(allDates).sort(
-    (a, b) => new Date(a) - new Date(b)
+  /** ✅ 1. 只取所有資產的共同日期 (intersection) */
+  const assetDates = Object.values(prices).map(arr => arr.map(p => p.date));
+  const commonDates = assetDates.reduce((acc, dates) =>
+    acc.filter((d) => dates.includes(d))
   );
 
+  const sortedDates = commonDates.sort((a, b) => new Date(a) - new Date(b));
+
+  /** 建立對齊後價格資料 */
   const alignedPrices = {};
   for (let symbol in prices) {
     const dailyMap = new Map(prices[symbol].map((p) => [p.date, p.close]));
-    let lastPrice = prices[symbol][0].close;
     alignedPrices[symbol] = sortedDates.map((date) => {
-      if (dailyMap.has(date)) lastPrice = dailyMap.get(date);
-      return { date, close: lastPrice };
+      const price = dailyMap.get(date);
+      return { date, close: price };
     });
   }
 
-  let portfolioValues = [];
+  /** 初始化持倉 */
   let holdings = {};
-
+  const firstDate = sortedDates[0];
   for (let asset of validAssets) {
+    const startPrice =
+      alignedPrices[asset.symbol].find((p) => p.date === firstDate)?.close || 1;
     const weight = asset.target / 100;
-    const startPrice = alignedPrices[asset.symbol][0].close;
     holdings[asset.symbol] = (initialCapital * weight) / startPrice;
   }
 
+  const portfolioValues = [];
+
+  /** 主模擬迴圈 */
   sortedDates.forEach((dateStr, i) => {
     const date = new Date(dateStr);
     let total = 0;
 
+    // 計算當日總價值
     for (let asset of validAssets) {
       const price = alignedPrices[asset.symbol][i].close;
       total += holdings[asset.symbol] * price;
     }
     portfolioValues.push(total);
 
-    const doRebalance =
-      (rebalance === "monthly" && date.getDate() === 1) ||
-      (rebalance === "quarterly" &&
-        date.getMonth() % 3 === 0 &&
-        date.getDate() === 1) ||
-      (rebalance === "yearly" &&
-        date.getMonth() === 0 &&
-        date.getDate() === 1);
+    /** ✅ 2. 月末、季末、年末 再平衡判斷 */
+    const nextDate = sortedDates[i + 1] ? new Date(sortedDates[i + 1]) : null;
+    const isMonthEnd =
+      !nextDate || date.getMonth() !== nextDate.getMonth();
+    const isQuarterEnd = isMonthEnd && (date.getMonth() + 1) % 3 === 0;
+    const isYearEnd = isMonthEnd && date.getMonth() === 11;
 
-    if (rebalance === "threshold") {
-      const weightsNow = {};
+    const doRebalance =
+      (rebalance === "monthly" && isMonthEnd) ||
+      (rebalance === "quarterly" && isQuarterEnd) ||
+      (rebalance === "yearly" && isYearEnd);
+
+    if (doRebalance && i < sortedDates.length - 1) {
       for (let asset of validAssets) {
         const price = alignedPrices[asset.symbol][i].close;
-        weightsNow[asset.symbol] = (holdings[asset.symbol] * price) / total;
+        holdings[asset.symbol] = (total * (asset.target / 100)) / price;
       }
-      const needRebalance = validAssets.some(
-        (asset) =>
-          Math.abs(weightsNow[asset.symbol] - asset.target / 100) > 0.05
-      );
-      if (needRebalance)
-        rebalancePortfolio(validAssets, holdings, alignedPrices, i, total);
-    } else if (doRebalance) {
-      rebalancePortfolio(validAssets, holdings, alignedPrices, i, total);
     }
   });
 
   return { portfolioValues, dates: sortedDates };
 }
+
 
 /** 執行回測 */
 
@@ -341,6 +343,8 @@ async function runBacktest() {
     const allocation = await api.get(
       `http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
     );
+
+    // 取得價格(adjClose)資料
     const prices = await api.get(
       `http://localhost:3000/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${form.value.startDate
         .toISOString()
@@ -358,8 +362,8 @@ async function runBacktest() {
     const initial = portfolioValues[0];
     const final = portfolioValues[portfolioValues.length - 1];
     const cumulativeReturn = (final - initial) / initial;
-    const annualizedReturn =
-      Math.pow(1 + cumulativeReturn, 252 / portfolioValues.length) - 1;
+    const totalDays = (new Date(form.value.endDate) - new Date(form.value.startDate)) / (1000 * 60 * 60 * 24);
+    const annualizedReturn = Math.pow(1 + cumulativeReturn, 365 / totalDays) - 1;
     const sharpeRatio = calculateSharpeRatio(portfolioValues);
     const maxDrawdown = calculateMaxDrawdown(portfolioValues);
     const volatility = calculateVolatility(portfolioValues);
