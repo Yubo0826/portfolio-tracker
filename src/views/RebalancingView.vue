@@ -1,19 +1,20 @@
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">投資組合再平衡</h2>
+  <div class="min-h-90">
+    <h2 class="text-xl font-bold mb-4">{{ $t('rebalanceTitle') }}</h2>
+
     <!-- 存入 / 提取 + 金額輸入 -->
     <div class="flex justify-center items-center mb-4 gap-4">
       <SelectButton v-model="cashAction" :options="cashActionOptions" optionLabel="name" optionValue="code" />
       <FloatLabel variant="on">
         <InputNumber v-model="depositAmount" prefix="$" />
-        <label for="on_label">金額</label>
+        <label for="on_label">{{ $t('amountLabel') }}</label>
       </FloatLabel>
-      <Button label="Rebalance" @click="clickRebalance" />
+      <Button :label="$t('rebalanceBtn')" @click="clickRebalance" />
     </div>
 
     <!-- 再平衡結果表格 -->
-    <DataTable :value="rebalanceResult" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-      <Column field="symbol" header="Symbol">
+    <DataTable v-if="isRebalancing" :value="rebalanceResult" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+      <Column field="symbol" :header="$t('symbol')">
         <template #body="slotProps">
           <div :class="slotProps.data.executed ? 'bg-gray-100 p-1 rounded flex items-center' : ''">
             {{ slotProps.data.symbol }}
@@ -21,22 +22,24 @@
           </div>
         </template>
       </Column>
-      <Column field="name" header="Name"></Column>
-      <Column field="shares" header="Current Shares"></Column>
-      <Column field="target" header="Target (%)">
+      <Column field="name" :header="$t('name')"></Column>
+      <Column field="shares" :header="$t('currentShares')"></Column>
+      <Column field="target" :header="$t('targetPct')">
         <template #body="slotProps">
           <div>
             <span>{{ (slotProps.data.actualPctBefore * 100).toFixed(2) }}</span>
             <i v-if="isRebalancing" class="pi pi-arrow-right mx-2" />
             <span v-if="isRebalancing">{{ (Number(slotProps.data.actualPctAfter) * 100).toFixed(2) }}</span>
             <br />
-            <span class="text-xs text-gray-500">(Target: {{ slotProps.data.target }})</span>
+            <span class="text-xs text-gray-500">
+              ({{ $t('target') }}: {{ slotProps.data.target }})
+            </span>
           </div>
         </template>
       </Column>
-      <Column field="amount" header="Amount ($)"></Column>
-      <Column field="sharesToBuy" header="Buy"></Column>
-      <Column field="sharesToSell" header="Sell"></Column>
+      <Column field="amount" :header="$t('amount')"></Column>
+      <Column field="sharesToBuy" :header="$t('buy')"></Column>
+      <Column field="sharesToSell" :header="$t('sell')"></Column>
 
       <!-- 動作按鈕 -->
       <Column header="">
@@ -47,7 +50,7 @@
               icon="pi pi-plus"
               class="p-button-rounded p-button-text"
               severity="success"
-              v-tooltip.bottom="'買入'"
+              v-tooltip.bottom="$t('buy')"
               @click="addTransaction(slotProps.data, slotProps.index)"
             />
             <Button
@@ -55,7 +58,7 @@
               icon="pi pi-minus"
               class="p-button-rounded p-button-text"
               severity="danger"
-              v-tooltip.bottom="'賣出'"
+              v-tooltip.bottom="$t('sell')"
               @click="addTransaction(slotProps.data, slotProps.index)"
             />
           </div>
@@ -64,13 +67,13 @@
     </DataTable>
 
     <!-- Unused Cash & Execute All -->
-    <div class="mt-4 flex justify-between items-center">
+    <div v-if="isRebalancing" class="mt-4 flex justify-between items-center">
       <div class="text-sm text-gray-600">
-        💰 Unused Cash:
-        <span class="font-semibold text-black">$ {{ leftoverCash.toFixed(2) }}</span>
+        {{ $t('unusedCash') }}：
+        <span class="font-semibold">${{ leftoverCash.toFixed(2) }}</span>
       </div>
       <Button
-        label="Execute All"
+        :label="$t('rebalance.executeAll')"
         icon="pi pi-check"
         severity="info"
         @click="executeAllTransactions"
@@ -172,7 +175,7 @@ const setData = (data) => {
     return sum + currentValue;
   }, 0);
 
-  // ➤ 預設顯示目前持有 (尚未 Rebalance)
+  // 預設顯示目前持有 (尚未 Rebalance)
   rebalanceResult.value = allocation.value.map((a) => {
     const currentValue = (a.currentPrice || 0) * (a.shares || 0);
     const actualPct = currentValue / totalValue.value || 0;
@@ -247,7 +250,7 @@ function rebalanceAllocate() {
     cashPool -= depositAmount.value;
 
     if (cashPool < 0) {
-      console.warn("⚠️ 提取金額超過資金池，將強制賣出更多資產！");
+      console.warn("提取金額超過資金池，將強制賣出更多資產！");
     }
   }
 
@@ -343,42 +346,6 @@ const addTransaction = (data, index) => {
   transactionDialog.value = true;
 };
 
-const hasError = computed(() => {
-  return !newTransaction.value.symbol || !newTransaction.value.shares || !newTransaction.value.price;
-});
-
-const saveTransaction = async () => {
-  const payload = {
-    uid: auth.user.uid,
-    portfolio_id: portfolioStore.currentPortfolio.id,
-    symbol: newTransaction.value.symbol,
-    shares: newTransaction.value.shares,
-    name: newTransaction.value.name,
-    asset_type: newTransaction.value.asset_type,
-    fee: newTransaction.value.fee || 0,
-    price: newTransaction.value.price,
-    transaction_type: newTransaction.value.type,
-    transaction_date: newTransaction.value.date.toISOString().split('T')[0]
-  };
-
-  try {
-    await api.post('http://localhost:3000/api/transactions', payload);
-    if (newTransaction.value.rowIndex !== null) {
-      rebalanceResult.value[newTransaction.value.rowIndex].executed = true;
-    }
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Transaction added successfully.', life: 3000 });
-  } catch (err) {
-    toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Error saving transaction', life: 3000 });
-  } finally {
-    transactionDialog.value = false;
-  }
-};
-
-const resetDialog = () => {
-  newTransaction.value = { symbol: '', shares: 0, price: 0, fee: 0, date: new Date(), type: 'buy', rowIndex: null };
-  transactionDialog.value = false;
-};
-
 const executeAllTransactions = async () => {
   for (let i = 0; i < rebalanceResult.value.length; i++) {
     const item = rebalanceResult.value[i];
@@ -408,9 +375,5 @@ const executeAllTransactions = async () => {
   toast.add({ severity: 'success', summary: 'Success', detail: 'All transactions executed.', life: 3000 });
 };
 
-const transactionType = ref([
-  { name: 'Buy', code: 'buy' },
-  { name: 'Sell', code: 'sell' }
-]);
 
 </script>

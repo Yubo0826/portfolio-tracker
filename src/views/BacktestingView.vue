@@ -1,11 +1,11 @@
 <template>
   <div class="p-6">
-    <h2 class="text-xl font-bold mb-4">投資組合回測設定</h2>
+    <h2 class="text-xl font-bold mb-4">{{ $t('backtestTitle') }}</h2>
 
     <!-- 設定表單 -->
     <div class="grid gap-4 mb-6 md:grid-cols-2">
       <div>
-        <label class="font-semibold block mb-1">Start Date</label>
+        <label class="font-semibold block mb-1">{{ $t('startDate') }}</label>
         <DatePicker
           v-model="form.startDate"
           :maxDate="new Date()"
@@ -13,11 +13,11 @@
           fluid
           iconDisplay="input"
           class="flex-auto"
-          placeholder="交易的日期"
+          :placeholder="$t('selectDatePlaceholder')"
         />
       </div>
       <div>
-        <label class="font-semibold block mb-1">End Date</label>
+        <label class="font-semibold block mb-1">{{ $t('endDate') }}</label>
         <DatePicker
           v-model="form.endDate"
           :maxDate="new Date()"
@@ -25,11 +25,11 @@
           fluid
           iconDisplay="input"
           class="flex-auto"
-          placeholder="交易的日期"
+          :placeholder="$t('selectDatePlaceholder')"
         />
       </div>
       <div>
-        <label class="font-semibold block mb-1">Initial Capital</label>
+        <label class="font-semibold block mb-1">{{ $t('initialCapital') }}</label>
         <InputNumber
           v-model="form.initialCapital"
           mode="currency"
@@ -39,46 +39,77 @@
         />
       </div>
       <div>
-        <label class="font-semibold block mb-1">Rebalance</label>
+        <label class="font-semibold block mb-1">{{ $t('rebalanceStrategy') }}</label>
         <Select 
           v-model="form.rebalance" 
           :options="rebalanceOptions" 
           optionLabel="label" 
           optionValue="value"
-          placeholder="Select a strategy" 
+          :placeholder="$t('selectStrategy')" 
           class="w-full md:w-56" 
         />
       </div>
     </div>
 
     <!-- 執行按鈕 -->
-    <Button label="開始回測" @click="runBacktest" :loading="isLoading" class="mb-4" />
+    <div class="flex justify-center my-16">
+      <Button :label="$t('runBacktest')" @click="runBacktest" :loading="isLoading" size="large" class="mb-4" />
+    </div>
 
     <!-- 結果 -->
     <Card v-if="result">
-      <template #title>回測結果</template>
+      <template #title>{{ $t('resultTitle') }}</template>
       <template #content>
         <div class="grid md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <p><strong>累積報酬率:</strong> {{ (result.cumulativeReturn * 100).toFixed(2) }}%</p>
-            <p><strong>年化報酬率:</strong> {{ (result.annualizedReturn * 100).toFixed(2) }}%</p>
-            <p><strong>Sharpe Ratio:</strong> {{ result.sharpeRatio.toFixed(2) }}</p>
+          <div class="result">
+            <p>
+              <span>{{ $t('cumulativeReturn') }}</span>
+              {{ (result.cumulativeReturn * 100).toFixed(2) }}%
+            </p>
+            <p>
+              <span>{{ $t('annualizedReturn') }}</span>
+              {{ (result.annualizedReturn * 100).toFixed(2) }}%
+            </p>
+            <p>
+              <span>
+                Sharpe Ratio 
+                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('sharpeRatioHint')"></i>
+              </span>
+              {{ result.sharpeRatio.toFixed(2) }}
+            </p>
           </div>
-          <div>
-            <p><strong>最大回撤:</strong> {{ (result.maxDrawdown * 100).toFixed(2) }}%</p>
-            <p><strong>波動率:</strong> {{ (result.volatility * 100).toFixed(2) }}%</p>
-            <p><strong>勝率:</strong> {{ (result.winRate * 100).toFixed(2) }}%</p>
+          <div class="result">
+            <p>
+              <span>
+                {{ $t('maxDrawdown') }}
+                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('maxDrawdownHint')"></i>
+              </span>
+              {{ (result.maxDrawdown * 100).toFixed(2) }}%
+            </p>
+            <p>
+              <span>
+                {{ $t('volatility') }}
+                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('volatilityHint')"></i>
+              </span>
+              {{ (result.volatility * 100).toFixed(2) }}%
+            </p>
+            <p>
+              <span>
+                {{ $t('winRate') }}
+                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('winRateHint')"></i>
+              </span>
+              {{ (result.winRate * 100).toFixed(2) }}%
+            </p>
           </div>
         </div>
-
       </template>
     </Card>
-    
+
     <!-- 資產走勢圖 -->
     <Card class="my-6" v-if="chartSeries.length">
-      <template #title>資產走勢圖</template>
+      <template #title>{{ $t('chartTitle') }}</template>
       <template #content>
-        <p class="text-sm text-gray-500 mb-2">藍線代表投資組合總價值</p>
+        <p class="text-sm text-gray-500 mb-2">{{ $t('chartSubtitle') }}</p>
         <apexchart
           width="100%"
           height="400"
@@ -91,9 +122,9 @@
 
     <!-- 年度報酬率圖 -->
     <Card class="my-6" v-if="annualChartSeries.length">
-      <template #title>年度報酬率</template>
+      <template #title>{{ $t('annualReturnChart') }}</template>
       <template #content>
-        <p class="text-sm text-gray-500 mb-2">藍色代表正報酬，紅色代表負報酬</p>
+        <p class="text-sm text-gray-500 mb-2">{{ $t('annualReturnHint') }}</p>
         <apexchart
           width="100%"
           height="400"
@@ -103,13 +134,15 @@
         />
       </template>
     </Card>
-
   </div>
 </template>
+
 
 <script setup>
 import { ref } from "vue";
 import api from "@/utils/api";
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { useAuthStore } from "@/stores/auth";
 import { usePortfolioStore } from "@/stores/portfolio";
 
@@ -124,10 +157,10 @@ const form = ref({
 });
 
 const rebalanceOptions = [
-  { label: "Monthly", value: "monthly" },
-  { label: "Quarterly", value: "quarterly" },
-  { label: "Yearly", value: "yearly" },
-  { label: "Threshold (5%)", value: "threshold" },
+  { label: t('monthly'), value: "monthly" },
+  { label: t('quarterly'), value: "quarterly" },
+  { label: t('yearly'), value: "yearly" },
+  { label: t('threshold'), value: "threshold" },
 ];
 
 const result = ref(null);
@@ -407,3 +440,30 @@ async function runBacktest() {
   }
 }
 </script>
+<style scoped>
+.result > p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 4px solid #6ce6b6;
+  /* box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.result > p > span {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.result > p > span i {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-left: 0.25rem;
+}
+</style>

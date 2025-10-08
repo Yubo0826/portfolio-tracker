@@ -27,13 +27,13 @@ const navItems = ref([
 
   {
     type: 'menu',
-    key: 'rebalance',
-    label: t('rebalance'),
-    to: '/rebalancing',
+    key: 'tool',
+    label: t('tool'),
+    to: '/allocation',
     matchPath: ['/rebalancing', '/allocation', '/backtesting'],
     children: [
+      { label: t('allocation'), to: '/allocation', special: true },
       { label: t('rebalance'), to: '/rebalancing' },
-      { label: t('allocation'), to: '/allocation' },
       { label: t('backtesting'), to: '/backtesting' }
     ],
   },
@@ -116,6 +116,7 @@ const cancelClose = () => {
                 @click="$router.push(child.to), openDropdown = null, closeTimer = null;"
                 class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
+              <i v-if="child.special" class="pi pi-cog"></i>
                 {{ child.label }}
               </div>
             </div>

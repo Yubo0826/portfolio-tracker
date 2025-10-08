@@ -85,6 +85,9 @@ error:
 warn:
   en: Warn
   zh: 警告
+tool:
+  en: Tool
+  zh: 工具
 transactionsDeleteSuccess:
   en: Transactions deleted successfully.
   zh: 已刪除交易明細。
@@ -273,3 +276,123 @@ amountGreaterThanZero:
 in_allocation:
   en: Already in allocation
   zh: 已在配置中
+
+rebalanceTitle:
+  en: Portfolio Rebalancing
+  zh: 投資組合再平衡
+amountLabel:
+  en: Amount
+  zh: 金額
+rebalanceBtn:
+  en: Rebalance
+  zh: 再平衡
+currentShares:
+  en: Current Shares
+  zh: 持有股數
+targetPct:
+  en: Target (%)
+  zh: 目標配置 (%)
+target:
+  en: Target
+  zh: 目標
+amount:
+  en: Amount ($)
+  zh: 金額 ($)
+unusedCash:
+  en: Unused Cash
+  zh: 未使用現金
+rebalance.executeAll:
+  en: Execute All
+  zh: 執行全部交易
+
+
+# 回測頁面
+backtest:
+  en: Backtest
+  zh: 回測
+backtesting:
+  en: Backtesting
+  zh: 回測
+backtestTitle:
+  en: Portfolio Backtest Settings
+  zh: 投資組合回測設定
+startDate:
+  en: Start Date
+  zh: 開始日期
+endDate:
+  en: End Date
+  zh: 結束日期
+initialCapital:
+  en: Initial Capital
+  zh: 初始資金
+rebalanceStrategy:
+  en: Rebalance Strategy
+  zh: 再平衡策略
+selectDatePlaceholder:
+  en: Select trading date
+  zh: 選擇交易日期
+selectStrategy:
+  en: Select a strategy
+  zh: 選擇策略
+monthly:
+  en: Monthly
+  zh: 每月
+quarterly:
+  en: Quarterly
+  zh: 每季
+yearly:
+  en: Yearly
+  zh: 每年
+threshold:
+  en: Threshold (5%)
+  zh: 閾值（5%）
+runBacktest:
+  en: Run Backtest
+  zh: 開始回測
+# 回測結果
+resultTitle:
+  en: Backtest Results
+  zh: 回測結果
+cumulativeReturn:
+  en: Cumulative Return
+  zh: 累積報酬率
+annualizedReturn:
+  en: Annualized Return
+  zh: 年化報酬率
+sharpeRatio:
+  en: Sharpe Ratio
+  zh: 夏普比率
+sharpeRatioHint:
+  en: Sharpe Ratio = (Average Portfolio Return − Risk-Free Rate) / Portfolio Standard Deviation
+  zh: 夏普比率＝（投資組合平均報酬率－無風險利率）／投資組合標準差
+maxDrawdown:
+  en: Max Drawdown
+  zh: 最大回撤
+maxDrawdownHint:
+  en: Max Drawdown = (Peak Value − Trough Value) / Peak Value. Measures the largest drop from peak to trough during the backtest period.
+  zh: 最大回撤＝（高峰值－低谷值）／高峰值。衡量投資組合在回測期間從高點到低點的最大跌幅。
+volatility:
+  en: Volatility
+  zh: 波動率
+volatilityHint:
+  en: Volatility = Standard Deviation of Portfolio Returns, representing price fluctuation. Higher annualized volatility indicates less stable returns and higher risk; lower indicates greater stability.
+  zh: 波動率＝投資組合報酬率的標準差，代表價格的變動幅度。年化波動率越高，表示投資報酬越不穩定、風險越大；越低則表示穩定性較高。
+winRate:
+  en: Win Rate
+  zh: 勝率
+winRateHint:
+  en: Win Rate = Number of Positive Return Days / Total Trading Days
+  zh: 勝率＝正報酬天數／總交易天數
+# 圖表部分
+chartTitle:
+  en: Portfolio Value Trend
+  zh: 資產走勢圖
+chartSubtitle:
+  en: The blue line represents the total portfolio value.
+  zh: 藍線代表投資組合總價值。
+annualReturnChart:
+  en: Annual Return
+  zh: 年度報酬率
+annualReturnHint:
+  en: Blue bars indicate positive returns, red bars indicate negative returns.
+  zh: 藍色代表正報酬，紅色代表負報酬。

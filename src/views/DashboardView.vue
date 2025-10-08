@@ -313,13 +313,13 @@ import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
 import xirr from 'xirr'
 import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import NoData from '@/components/NoData.vue'
 
-const { t } = useI18n()
 const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
