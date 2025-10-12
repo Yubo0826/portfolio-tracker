@@ -42,7 +42,7 @@
           <div>
             <span
               v-if="slotProps.data.transactionType === 'buy'"
-              class="bg-green-400 rounded-full px-4 py-1.5 text-white font-bold text-xs whitespace-nowrap"
+              class="bg-[#10b981] rounded-full px-4 py-1.5 text-white font-bold text-xs whitespace-nowrap"
             >
               {{ $t('buy') }}
             </span>

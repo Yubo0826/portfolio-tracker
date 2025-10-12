@@ -17,6 +17,7 @@ const navItems = ref([
     key: 'portfolio',
     label: t('portfolio'),
     to: '/portfolio',
+    icon: true,
     matchPath: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends'],
     children: [
       { label: t('holdings'), to: '/portfolio/holdings' },
@@ -28,11 +29,12 @@ const navItems = ref([
   {
     type: 'menu',
     key: 'tool',
-    label: t('tool'),
+    label: t('allocation'),
     to: '/allocation',
+    icon: true,
     matchPath: ['/rebalancing', '/allocation', '/backtesting'],
     children: [
-      { label: t('allocation'), to: '/allocation', special: true },
+      { label: t('allocationSettings'), to: '/allocation', special: true },
       { label: t('rebalance'), to: '/rebalancing' },
       { label: t('backtesting'), to: '/backtesting' }
     ],
@@ -82,6 +84,8 @@ const cancelClose = () => {
         <RouterLink :to="item.to">
           <Button
             :label="item.label"
+            :icon="item.icon ? 'pi pi-chevron-down' : null"
+            iconPos="right"
             severity="secondary"
             variant="text"
             class="m-1"
@@ -116,7 +120,7 @@ const cancelClose = () => {
                 @click="$router.push(child.to), openDropdown = null, closeTimer = null;"
                 class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
-              <i v-if="child.special" class="pi pi-cog"></i>
+              <i v-if="child.special" class="pi pi-cog mr-2"></i>
                 {{ child.label }}
               </div>
             </div>

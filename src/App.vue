@@ -1,100 +1,107 @@
 <template>
   <CustomToast />
 
-  <header>
-    <div class="flex justify-between items-center mb-8">
-      <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer">
-        <span class="text-gray-500">Stock</span><span class="green">Bar</span>
-      </div>
-
-      <HeaderNav />
-      
-
-      <div class="flex justify-center items-center">
-        <Button
-          class="p-button-rounded p-button-text"
-          aria-label="Search"
-          icon="pi pi-search"
-          @click="searchBoxVisible = true"
-        />
-        
-
-        <Button
-          :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-          @click="toggleDarkMode"
-          class="p-button-rounded p-button-text"
-          aria-label="Toggle Dark Mode"
-          size="small"
-        />
-
-        <Button
-          @click="$i18n.locale = $i18n.locale === 'en' ? 'zh-TW' : 'en'"
-          class="p-button-rounded p-button-text"
-          icon="pi pi-language"
-          aria-label="Language"
-          size="small"
-        />
-
-        <!-- 有登入 -->
-        <template v-if="auth.user">
-          <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
-          <Menu ref="menu" :model="menuItems" :popup="true" />
-        </template>
-        <!-- 沒登入 -->
-        <template v-else>
-          <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" />
-        </template>
-
-      </div>
-    </div>
-  </header>
-
-  <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
-    <div>
-      <a class="font-bold" @click="$router.push('/portfolios')">
-        {{ $t('allPortfolios') }}
-      </a>
-        / 
-      <!-- 選擇投資組合 -->
-      <Select 
-        v-model="selectedPortfolio" 
-        size="small" ref="PortfolioSelect" 
-        :options="portfolioStore.portfolios" optionLabel="name" checkmark 
-        :highlightOnSelect="false" class="m-2"
-        :pt="{
-          root: { 
-            style: { border: '1px solid transparent', boxShadow: 'none' },
-            class: 'custom-select-root' 
-          }
-        }"
-        >
-        <template #header>
-            <div class="p-3">
-                <span class="font-bold">{{ $t('selectPortfolio') }}</span>
-            </div>
-        </template>
-        <template #dropdownicon>
-          <i class="pi pi-chevron-down" style="font-size: .75rem"></i>
-        </template>
-        <template #footer>
-            <div class="p-3 border-t-1 border-gray-200">
-                <Button :label="$t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
-            </div>
-        </template>
-      </Select>
-    </div>
-
-    <div v-if="noShowAddInvestmentButton">
-      <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
-      <Button @click="importDataDialogVisible = true" type="button" :label="$t('import')" icon="pi pi-file-import" class="mr-2"></Button>
-      <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
-    </div>
+  <div class="flex flex-col min-h-screen">
+    <!-- Main content -->
+    <div class="container flex-grow mx-auto p-4">
+      <header>
+        <div class="flex justify-between items-center mb-8">
+          <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer">
+            <span class="text-gray-500">Stock</span>
+            <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+          </div>
     
+          <HeaderNav />
+          
+    
+          <div class="flex justify-center items-center">
+            <Button
+              class="p-button-rounded p-button-text"
+              aria-label="Search"
+              icon="pi pi-search"
+              @click="searchBoxVisible = true"
+            />
+            
+    
+            <Button
+              :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+              @click="toggleDarkMode"
+              class="p-button-rounded p-button-text"
+              aria-label="Toggle Dark Mode"
+              size="small"
+            />
+    
+            <Button
+              @click="$i18n.locale = $i18n.locale === 'en' ? 'zh-TW' : 'en'"
+              class="p-button-rounded p-button-text"
+              icon="pi pi-language"
+              aria-label="Language"
+              size="small"
+            />
+    
+            <!-- 有登入 -->
+            <template v-if="auth.user">
+              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
+              <Menu ref="menu" :model="menuItems" :popup="true" />
+            </template>
+            <!-- 沒登入 -->
+            <template v-else>
+              <Avatar  @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" />
+            </template>
+    
+          </div>
+        </div>
+      </header>
+    
+      <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
+        <div>
+          <a class="font-bold" @click="$router.push('/portfolios')" :style="{ color: 'var(--p-primary-color)' }">
+            {{ $t('allPortfolios') }}
+          </a>
+            / 
+          <!-- 選擇投資組合 -->
+          <Select 
+            v-model="selectedPortfolio" 
+            size="small" ref="PortfolioSelect" 
+            :options="portfolioStore.portfolios" optionLabel="name" checkmark 
+            :highlightOnSelect="false" class="m-2"
+            :pt="{
+              root: { 
+                style: { border: '1px solid transparent', boxShadow: 'none' },
+                class: 'custom-select-root' 
+              }
+            }"
+            >
+            <template #header>
+                <div class="p-3">
+                    <span class="font-bold">{{ $t('selectPortfolio') }}</span>
+                </div>
+            </template>
+            <template #dropdownicon>
+              <i class="pi pi-chevron-down" style="font-size: .75rem"></i>
+            </template>
+            <template #footer>
+                <div class="p-3 border-t-1 border-gray-200">
+                    <Button :label="$t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
+                </div>
+            </template>
+          </Select>
+        </div>
+    
+        <div v-if="noShowAddInvestmentButton">
+          <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
+          <Button @click="importDataDialogVisible = true" type="button" :label="$t('import')" icon="pi pi-file-import" class="mr-2"></Button>
+          <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
+        </div>
+        
+      </div>
+    
+      <RouterView />
+    </div>
+  
+    <Footer></Footer>
   </div>
 
-  <RouterView />
-
-  <Footer></Footer>
 
 
   <Dialog v-model:visible="searchBoxVisible" modal dismissableMask position="top" :style="{ width: '25rem', top: '5rem' }" :closeOnEscape="true" :showHeader="false">

@@ -18,7 +18,7 @@ name:
   zh: 名稱
 shares:
   en: Shares
-  zh: 股數
+  zh: 持股
 totalCost:
   en: Total Cost
   zh: 總成本
@@ -40,7 +40,7 @@ refresh:
   zh: 重新整理
 holding:
   en: Holding
-  zh: 標的
+  zh: 持有資產
 Notification:
   en: Notification
   zh: 通知
@@ -160,6 +160,9 @@ dividends:
 allocation:
   en: Allocation
   zh: 資產配置
+allocationSettings:
+  en: Allocation Settings
+  zh: 配置設定
 # 卡片/摘要
 baseCurrency:
   en: Base currency {code}

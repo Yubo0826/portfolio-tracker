@@ -19,10 +19,10 @@
       dataKey="id"
       tableStyle="min-width: 50rem"
     >
-      <Column field="" :header="$t('holding')" style="width: 40%">
+      <Column field="" :header="$t('symbol')" style="width: 40%">
         <template #body="{ data }">
           <div>
-            <span class="font-bold mr-4">{{ data.symbol }}</span>
+            <span class="mr-4">{{ data.symbol }}</span>
             <div>{{ data.name }}</div>
           </div>
         </template>
