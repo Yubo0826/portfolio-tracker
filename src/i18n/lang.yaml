@@ -34,6 +34,9 @@ totalProfit:
 noData:
   en: No data Found
   zh: 目前沒有資料
+myAssets:
+  en: My Assets
+  zh: 我的持股
 # 通用
 refresh:
   en: Refresh

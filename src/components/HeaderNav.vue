@@ -15,9 +15,8 @@ const navItems = ref([
   {
     type: 'menu',
     key: 'portfolio',
-    label: t('portfolio'),
+    label: t('myAssets'),
     to: '/portfolio',
-    icon: true,
     matchPath: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends'],
     children: [
       { label: t('holdings'), to: '/portfolio/holdings' },
@@ -71,13 +70,17 @@ const cancelClose = () => {
       <!-- 單純連結 -->
       <RouterLink v-if="item.type === 'link'" :to="item.to">
         <Button 
-          :pt="{
+          :style="{ color: item.matchPath.includes($router.currentRoute.value.path) ? 'var(--p-primary-color)' : '' }"
+          :label="item.label" severity="secondary" variant="text" class="font-bold m-1" />
+      </RouterLink>
+
+      <!-- 
+      :pt="{
             label: {
               class: item.matchPath.includes($router.currentRoute.value.path) ? 'text-[#10b981]' : ''
             }
           }"
-          :label="item.label" severity="secondary" variant="text" class="font-bold m-1" />
-      </RouterLink>
+       -->
 
       <!-- 下拉選單 -->
       <div v-else class="relative inline-block">
@@ -89,11 +92,7 @@ const cancelClose = () => {
             severity="secondary"
             variant="text"
             class="m-1"
-            :pt="{
-              label: {
-                class: item.matchPath.includes($router.currentRoute.value.path) ? 'text-[#10b981]' : ''
-              }
-            }"
+            :style="{ color: item.matchPath.includes($router.currentRoute.value.path) ? 'var(--p-primary-color)' : '' }"
             @mouseenter="cancelClose(); toggleDropdown(item.key)"
             @mouseleave="closeDropdown(180)"
           />
