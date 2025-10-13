@@ -28,7 +28,7 @@ export default definePreset(Aura, {
           activeColor: '{indigo.200}'
         },
         surface: {
-          background: '{zinc.900}',
+          background: '#282832',
           textColor: '{zinc.100}'
         }
       }
@@ -49,5 +49,33 @@ export default definePreset(Aura, {
         }
       }
     },
+    card: {
+      colorScheme: {
+        light: {
+          background: '{surface.background}',
+          color: '{surface.textColor}'
+        },
+        dark: {
+          background: '{surface.background}',
+          color: '{surface.textColor}'
+        }
+      }
+    },
+    datatable: {
+      colorScheme: {
+        light: {
+          background: '{surface.background}',
+          headerBackground: '{indigo.100}',
+          headerColor: '{zinc.800}',
+          rowHoverBackground: '{indigo.50}'
+        },
+        dark: {
+          background: '{surface.background}',
+          headerBackground: '{indigo.900}',
+          headerColor: '{zinc.100}',
+          rowHoverBackground: '{indigo.800}'
+        }
+      }
+    }
   }
 })

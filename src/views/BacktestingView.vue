@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <h2 class="text-xl font-bold mb-4">{{ $t('backtestTitle') }}</h2>
+    <h2 class="text-xl font-semibold mb-4">{{ $t('backtestTitle') }}</h2>
 
     <!-- 設定表單 -->
     <div class="grid gap-4 mb-6 md:grid-cols-2">

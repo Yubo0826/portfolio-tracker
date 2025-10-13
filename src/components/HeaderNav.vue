@@ -1,68 +1,3 @@
-<script setup>
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-
-const openDropdown = ref(null);
-
-// 關閉延遲計時器
-const closeTimer = ref(null);
-
-// 這裡維護導覽列資料
-const navItems = ref([
-  { type: 'link', label: t('dashboard'), to: '/dashboard', matchPath: ['/dashboard'] },
-
-  {
-    type: 'menu',
-    key: 'portfolio',
-    label: t('myAssets'),
-    to: '/portfolio',
-    matchPath: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends'],
-    children: [
-      { label: t('holdings'), to: '/portfolio/holdings' },
-      { label: t('transactions'), to: '/portfolio/transactions' },
-      { label: t('dividends'), to: '/portfolio/dividends' },
-    ],
-  },
-
-  {
-    type: 'menu',
-    key: 'tool',
-    label: t('allocation'),
-    to: '/allocation',
-    icon: true,
-    matchPath: ['/rebalancing', '/allocation', '/backtesting'],
-    children: [
-      { label: t('allocationSettings'), to: '/allocation', special: true },
-      { label: t('rebalance'), to: '/rebalancing' },
-      { label: t('backtesting'), to: '/backtesting' }
-    ],
-  },
-]);
-
-const toggleDropdown = (menuKey) => {
-  cancelClose();
-  openDropdown.value = openDropdown.value === menuKey ? null : menuKey;
-};
-
-// 延遲關閉（預設 180ms）
-const closeDropdown = (delay = 180) => {
-  if (closeTimer.value) clearTimeout(closeTimer.value);
-  closeTimer.value = setTimeout(() => {
-    openDropdown.value = null;
-    closeTimer.value = null;
-  }, delay);
-};
-
-// 取消延遲關閉（滑回到按鈕或面板時呼叫）
-const cancelClose = () => {
-  if (closeTimer.value) {
-    clearTimeout(closeTimer.value);
-    closeTimer.value = null;
-  }
-};
-</script>
-
 <template>
   <nav>
     <!-- 迴圈渲染 nav items -->
@@ -129,3 +64,68 @@ const cancelClose = () => {
     </template>
   </nav>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+
+const openDropdown = ref(null);
+
+// 關閉延遲計時器
+const closeTimer = ref(null);
+
+// 這裡維護導覽列資料
+const navItems = ref([
+  { type: 'link', label: t('dashboard'), to: '/dashboard', matchPath: ['/dashboard'] },
+
+  {
+    type: 'menu',
+    key: 'portfolio',
+    label: t('myAssets'),
+    to: '/portfolio',
+    matchPath: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends'],
+    children: [
+      { label: t('holdings'), to: '/portfolio/holdings' },
+      { label: t('transactions'), to: '/portfolio/transactions' },
+      { label: t('dividends'), to: '/portfolio/dividends' },
+    ],
+  },
+
+  {
+    type: 'menu',
+    key: 'tool',
+    label: t('allocation'),
+    to: '/allocation',
+    icon: true,
+    matchPath: ['/rebalancing', '/allocation', '/backtesting'],
+    children: [
+      { label: t('allocationSettings'), to: '/allocation', special: true },
+      { label: t('rebalance'), to: '/rebalancing' },
+      { label: t('backtesting'), to: '/backtesting' }
+    ],
+  },
+]);
+
+const toggleDropdown = (menuKey) => {
+  cancelClose();
+  openDropdown.value = openDropdown.value === menuKey ? null : menuKey;
+};
+
+// 延遲關閉（預設 180ms）
+const closeDropdown = (delay = 180) => {
+  if (closeTimer.value) clearTimeout(closeTimer.value);
+  closeTimer.value = setTimeout(() => {
+    openDropdown.value = null;
+    closeTimer.value = null;
+  }, delay);
+};
+
+// 取消延遲關閉（滑回到按鈕或面板時呼叫）
+const cancelClose = () => {
+  if (closeTimer.value) {
+    clearTimeout(closeTimer.value);
+    closeTimer.value = null;
+  }
+};
+</script>

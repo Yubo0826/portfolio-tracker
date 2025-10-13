@@ -1,3 +1,48 @@
+<template>
+  <div>
+    <!-- <div class="flex mb-2 gap-2 justify-start relative top-[50px]">
+      <Button @click="tab = 'holdings'" rounded label="持有資產" class="" size="small" :outlined="tab !== 'holdings'" />
+      <Button @click="tab = 'transactions'" rounded label="交易紀錄" class="" size="small" :outlined="tab !== 'transactions'" />
+      <Button @click="tab = 'dividends'" rounded label="利息紀錄" class="" size="small" :outlined="tab !== 'dividends'" />
+    </div>
+
+    <div>
+      <div v-if="tab === 'holdings'" class="mt-4"><HoldingsView /></div>
+      <div v-else-if="tab === 'transactions'" class="mt-4"><TransactionsView /></div>
+      <div v-else class="mt-4"><DividendsView /></div>
+    </div> -->
+
+    <!-- 用 v-model:value 綁定目前分頁 -->
+    <div class="bg-black" :style="{ backgroundColor: 'var(--p-primary-color)' }">
+      <Tabs v-model:value="tab">
+        <TabList>
+          <Tab value="holdings">
+            <div class="flex items-center">
+              <span>持有資產</span>
+            </div>
+          </Tab>
+          <Tab value="transactions">
+            <div class="flex items-center">
+              <span>交易紀錄</span>
+            </div>
+          </Tab>
+          <Tab value="dividends">
+            <div class="flex items-center">
+              <span>利息紀錄</span>
+            </div>
+          </Tab>
+        </TabList>
+  
+        <TabPanels :pt="{ root: { style: { padding: 0, paddingTop: '1rem' }}}">
+          <TabPanel value="holdings"><div class="mt-4"><HoldingsView /></div></TabPanel>
+          <TabPanel value="transactions"><div class="mt-4"><TransactionsView /></div></TabPanel>
+          <TabPanel value="dividends"><div class="mt-4"><DividendsView /></div></TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -39,45 +84,3 @@ watch(tab, (t) => {
 })
 </script>
 
-<template>
-  <div>
-    <!-- <div class="flex mb-2 gap-2 justify-start relative top-[50px]">
-      <Button @click="tab = 'holdings'" rounded label="持有資產" class="" size="small" :outlined="tab !== 'holdings'" />
-      <Button @click="tab = 'transactions'" rounded label="交易紀錄" class="" size="small" :outlined="tab !== 'transactions'" />
-      <Button @click="tab = 'dividends'" rounded label="利息紀錄" class="" size="small" :outlined="tab !== 'dividends'" />
-    </div>
-
-    <div>
-      <div v-if="tab === 'holdings'" class="mt-4"><HoldingsView /></div>
-      <div v-else-if="tab === 'transactions'" class="mt-4"><TransactionsView /></div>
-      <div v-else class="mt-4"><DividendsView /></div>
-    </div> -->
-
-    <!-- 用 v-model:value 綁定目前分頁 -->
-    <Tabs v-model:value="tab">
-      <TabList>
-        <Tab value="holdings">
-          <div class="flex items-center">
-            <span>持有資產</span>
-          </div>
-        </Tab>
-        <Tab value="transactions">
-          <div class="flex items-center">
-            <span>交易紀錄</span>
-          </div>
-        </Tab>
-        <Tab value="dividends">
-          <div class="flex items-center">
-            <span>利息紀錄</span>
-          </div>
-        </Tab>
-      </TabList>
-
-      <TabPanels :pt="{ root: { style: { padding: 0, paddingTop: '1rem' }}}">
-        <TabPanel value="holdings"><div class="mt-4"><HoldingsView /></div></TabPanel>
-        <TabPanel value="transactions"><div class="mt-4"><TransactionsView /></div></TabPanel>
-        <TabPanel value="dividends"><div class="mt-4"><DividendsView /></div></TabPanel>
-      </TabPanels>
-    </Tabs>
-  </div>
-</template>

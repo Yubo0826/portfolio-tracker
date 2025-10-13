@@ -53,7 +53,7 @@
         </div>
       </header>
     
-      <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4">
+      <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4 p-4">
         <div>
           <a class="font-bold" @click="$router.push('/portfolios')" :style="{ color: 'var(--p-primary-color)' }">
             {{ $t('allPortfolios') }}

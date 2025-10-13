@@ -1,146 +1,153 @@
 <template>
-  <div class="flex gap-6">
-    <!-- Draggable 1: Holdings -->
-    <div class="w-1/3">
-      <h3 class="font-bold mb-2 text-gray-700">{{ $t('holdings') }}</h3>
-      <p class="text-sm mb-3 text-gray-500">可拖曳到右方快速新增</p>
-      <draggable
-        class="space-y-2"
-        :list="list1"
-        :group="{ name: 'assets', pull: 'clone', put: false }"
-        :clone="cloneItem"
-        :move="(evt) => !existsInAllocation(evt.draggedContext.element.symbol)"
-        item-key="symbol"
-      >
-        <template #item="{ element }">
-          <div
-            class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
-            :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
-          >
-          <div class="font-medium text-gray-800">
-              <i class="fa-solid fa-bars mr-4"></i>
-              {{ element.symbol }}
-              <!-- <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span> -->
-              <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
-            </div>
-            <span
-              v-if="existsInAllocation(element.symbol)"
-              class="text-xs text-gray-400"
-            >
-              {{ $t('in_allocation') }}
-            </span>
-          </div>
-        </template>
-      </draggable>
+  <div class="p-6">
+    <div>
+      <h1 class="text-2xl font-bold border-b-2 pb-2 border-indigo-500" :style="{ color: 'var(--p-primary-color)' }">{{ $t('allocationSettings') }}</h1>
     </div>
-
-    <!-- Draggable 2: Allocation -->
-    <div class="flex-1">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
-
-        <!-- Total target -->
-        <div class="text-sm font-semibold text-gray-700">
-          Total:
-          <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
-            {{ totalTarget }}%
-          </span>
+    <div class="flex gap-6 mt-6">
+      <!-- Draggable 1: Holdings -->
+      <div class="w-1/3">
+        <div class="mb-4">
+          <h3 class="font-bold mr-2 text-gray-700">{{ $t('holdings') }}</h3>
+          <p class="text-sm mt-2 text-gray-500">可拖曳到右方快速新增</p>
         </div>
-      </div>
-      <draggable
-        class="space-y-3 p-2 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px] flex align-center flex-col"
-        :list="assets"
-        group="assets"
-        item-key="symbol"
-        move="(evt) => false"
-        @add="onDrop"
-      >
-        <!-- 當沒有項目時顯示提示 -->
-        <template #header>
-          <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
-            將左側的 <span class="font-medium text-gray-600">持有資產</span> 拖曳到此處<br />
-            或手動新增以建立你的資產配置
-          </div>
-        </template>
-
-        <template #item="{ element, index }">
-          <div
-            v-if="!element.editable"
-            class="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition"
-          >
-            <div>
-              <span class="font-bold text-gray-800 mr-2">{{ element.symbol }}</span>
-              <!-- <span class="text-gray-500">{{ element.name }}</span> -->
-            </div>
-            <div class="flex items-center gap-2">
-              <InputNumber
-                v-model="element.target"
-                suffix="%"
-                :min="0"
-                :max="100"
-                size="small"
-                input-class="text-right"
-              />
-              <Button
-                icon="pi pi-times"
-                text
-                severity="danger"
-                size="small"
-                @click="removeAsset(index)"
-              />
-            </div>
-          </div>
-
-          <!-- 編輯模式 -->
-           <div
-              v-else
+        <draggable
+          class="space-y-2"
+          :list="list1"
+          :group="{ name: 'assets', pull: 'clone', put: false }"
+          :clone="cloneItem"
+          :move="(evt) => !existsInAllocation(evt.draggedContext.element.symbol)"
+          item-key="symbol"
+        >
+          <template #item="{ element }">
+            <div
               class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+              :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
             >
             <div class="font-medium text-gray-800">
-              <SymbolAutoComplete 
-                v-model="selectedSymbol"
-                @update="updateElement(element, $event)"
-              />
+                <i class="fa-solid fa-bars mr-4"></i>
+                {{ element.symbol }}
+                <!-- <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span> -->
+                <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
+              </div>
+              <span
+                v-if="existsInAllocation(element.symbol)"
+                class="text-xs text-gray-400"
+              >
+                {{ $t('in_allocation') }}
+              </span>
             </div>
-            <div class="flex items-center gap-2">
-              <InputNumber
-                v-model="element.target"
-                suffix="%"
-                :min="0"
-                :max="100"
-                size="small"
-                input-class="text-right"
-              />
-              <Button
-                icon="pi pi-times"
-                text
-                severity="danger"
-                size="small"
-                @click="removeAsset(index)"
-              />
+          </template>
+        </draggable>
+      </div>
+  
+      <!-- Draggable 2: Allocation -->
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
+  
+          <!-- Total target -->
+          <div class="text-sm font-semibold text-gray-700">
+            Total:
+            <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
+              {{ totalTarget }}%
+            </span>
+          </div>
+        </div>
+        <draggable
+          class="space-y-3 p-2 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px] flex align-center flex-col"
+          :list="assets"
+          group="assets"
+          item-key="symbol"
+          move="(evt) => false"
+          @add="onDrop"
+        >
+          <!-- 當沒有項目時顯示提示 -->
+          <template #header>
+            <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
+              將左側的 <span class="font-medium text-gray-600">持有資產</span> 拖曳到此處<br />
+              或手動新增以建立你的資產配置
             </div>
-          </div>
-        </template>
-
-        <!-- 自行新增 -->
-         <template #footer>
-          <div class="text-center text-gray-400 text-sm p-4 m-auto">
-            <Button @click="addAsset" icon="pi pi-plus" text label="Add Asset" />
-          </div>
-        </template>
-      </draggable>
-
-      
-
-      <!-- Save button -->
-      <div class="flex justify-end mt-4">
-        <Button
-          :label="$t('save')"
-          icon="pi pi-check"
-          size="small"
-          :disabled="saveButtonDisabled"
-          @click="saveAllocation"
-        />
+          </template>
+  
+          <template #item="{ element, index }">
+            <div
+              v-if="!element.editable"
+              class="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition"
+            >
+              <div>
+                <span class="font-bold text-gray-800 mr-2">{{ element.symbol }}</span>
+                <!-- <span class="text-gray-500">{{ element.name }}</span> -->
+              </div>
+              <div class="flex items-center gap-2">
+                <InputNumber
+                  v-model="element.target"
+                  suffix="%"
+                  :min="0"
+                  :max="100"
+                  size="small"
+                  input-class="text-right"
+                />
+                <Button
+                  icon="pi pi-times"
+                  text
+                  severity="danger"
+                  size="small"
+                  @click="removeAsset(index)"
+                />
+              </div>
+            </div>
+  
+            <!-- 編輯模式 -->
+             <div
+                v-else
+                class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+              >
+              <div class="font-medium text-gray-800">
+                <SymbolAutoComplete 
+                  v-model="selectedSymbol"
+                  @update="updateElement(element, $event)"
+                />
+              </div>
+              <div class="flex items-center gap-2">
+                <InputNumber
+                  v-model="element.target"
+                  suffix="%"
+                  :min="0"
+                  :max="100"
+                  size="small"
+                  input-class="text-right"
+                />
+                <Button
+                  icon="pi pi-times"
+                  text
+                  severity="danger"
+                  size="small"
+                  @click="removeAsset(index)"
+                />
+              </div>
+            </div>
+          </template>
+  
+          <!-- 自行新增 -->
+           <template #footer>
+            <div class="text-center text-gray-400 text-sm p-4 m-auto">
+              <Button @click="addAsset" icon="pi pi-plus" text label="Add Asset" />
+            </div>
+          </template>
+        </draggable>
+  
+        
+  
+        <!-- Save button -->
+        <div class="flex justify-end mt-4">
+          <Button
+            :label="$t('save')"
+            icon="pi pi-check"
+            size="small"
+            :disabled="saveButtonDisabled"
+            @click="saveAllocation"
+          />
+        </div>
       </div>
     </div>
   </div>
