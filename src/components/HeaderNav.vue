@@ -5,7 +5,7 @@
       <!-- 單純連結 -->
       <RouterLink v-if="item.type === 'link'" :to="item.to">
         <Button 
-          :style="{ color: item.matchPath.includes($router.currentRoute.value.path) ? 'var(--p-primary-color)' : '' }"
+          :style="{ color: item.matchPath.includes($router.currentRoute.value.path) ? 'var(--p-primary-color)' : 'var(--p-surface-textColor)' }"
           :label="item.label" severity="secondary" variant="text" class="font-bold m-1" />
       </RouterLink>
 

@@ -69,7 +69,7 @@ const router = createRouter({
     {
       path: '/asset/:symbol',
       name: 'asset',
-      component: () => import('../views/AssetView.vue'),
+      component: () => import('../views/AssetProfileView.vue'),
     },
     {
       path: '/test',

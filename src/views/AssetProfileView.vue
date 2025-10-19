@@ -14,9 +14,9 @@
         </template>
     </Breadcrumb>
 
-    <div class="pl-4">
+    <div class="pl-4 pr-4 mt-4">
       <div class="flex items-center">
-        <h1 class="text-2xl">{{ info.fullName }}</h1>
+        <h1 class="text-xl">{{ info.fullName }}</h1>
       </div>
       <div class="chart-container">
         <div class="grid grid-cols-3 gap-16">
@@ -27,12 +27,19 @@
                   <div class="text-3xl font-semibold mr-4">${{ info.regularMarketPrice }}</div>
                   <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
                     <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                      <span v-if="growthRate >= 0">+</span>
+                      <!-- 變化%數 -->
+                      <span v-if="growthRate >= 0">
+                        <i class="fas fa-arrow-right -rotate-45"></i>
+                      </span>
+                      <span v-else>
+                        <i class="fas fa-arrow-right rotate-45"></i>
+                      </span>
+                      <span class="font-semibold ml-1 mr-4">{{  Math.abs(growthRate) }}%</span>
+
+                      <!-- 變化數值 -->
+                      (<span v-if="growthRate >= 0">+</span>
                       <span v-else>-</span>
-                      <span class="ml-1 font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
-                      <span v-if="growthRate >= 0">▲</span>
-                      <span v-else>▼</span>
-                        <span class="ml-1 font-semibold">{{ growthRate }}%</span>
+                      <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
                     </div>
                   </Tag>
               </div>
@@ -87,7 +94,7 @@
                       </TabList>
                   </Tabs>
 
-                <span class="text-[#5f6368] text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
+                <span class="text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
             </div>
 
             <!-- 圖表區 -->

@@ -4,10 +4,12 @@
       <!-- 左半邊 -->
       <div class="w-3/5">
         <div class="flex flex-col sm:flex-row w-full gap-4 mb-8">
+
+
           <!-- Total Value Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center text-[#475569]">
+              <div class="flex items-center" :style="{ color: 'var(--p-surface-textColor)' }">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
               </div>
@@ -17,20 +19,21 @@
                 <div v-if="totalValue" class="text-2xl font-bold">
                   ${{ totalValue.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
-                <div v-else class="text-2xl font-bold text-gray-400">--</div>
+                <div v-else class="text-2xl font-bold">--</div>
               </div>
             </template>
             <template #footer>
-              <div class="text-sm text-gray-500 mt-4">
+              <div class="text-sm mt-4">
                 {{ $t('baseCurrency', { code: 'USD' }) }}
               </div>
             </template>
           </Card>
 
+
           <!-- Total Profit Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center text-[#475569]">
+              <div class="flex items-center" :style="{ color: 'var(--p-surface-textColor)' }">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('totalProfit') }}
@@ -43,24 +46,25 @@
                 <div v-if="totalProfit" class="text-2xl font-bold">
                   ${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                 </div>
-                <div v-else class="text-2xl font-bold text-gray-400">--</div>
+                <div v-else class="text-2xl font-bold">--</div>
               </div>
             </template>
             <template #footer>
-              <div class="text-sm text-gray-500 mt-4">
+              <div class="text-sm mt-4">
                 {{ $t('roi') }}
                 <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ annualReturn.toFixed(2) }}%
                 </span>
-                <span v-else class="text-gray-400">--</span>
+                <span v-else>--</span>
               </div>
             </template>
           </Card>
+          
 
           <!-- XIRR Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center text-[#475569]">
+              <div class="flex items-center" :style="{ color: 'var(--p-surface-textColor)' }">
                 <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('irr') }}
@@ -84,22 +88,30 @@
         <div>
           <Card>
             <template #title>
-              <div class="flex items-center justify-between mb-4 text-[#252525]">
-                <div class="text-sm font-bold">{{ $t('assetTrend') }}</div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="text-sm">{{ $t('assetTrend') }}</div>
 
-                <!-- <Tag :severity="growthRate >=0 ? 'success' : 'danger'"> -->
-                  <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                    <span v-if="growthRate >= 0">+</span>
-                    <span v-else>-</span>
-                    <span class="font-semibold mr-2">${{ Math.abs(change.toFixed(2)) }}</span>
-                    （
-                    <span v-if="growthRate >= 0">+</span>
-                    <span class="font-semibold">{{ growthRate }}%</span>
-                    ）
-                  </div>
-                <!-- </Tag> -->
+                <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
+                    <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                      <!-- 變化%數 -->
+                      <span v-if="growthRate >= 0">
+                        <i class="fas fa-arrow-right -rotate-45"></i>
+                      </span>
+                      <span v-else>
+                        <i class="fas fa-arrow-right rotate-45"></i>
+                      </span>
+                      <span class="font-semibold ml-1 mr-2">{{  Math.abs(growthRate) }}%</span>
+
+                      <!-- 變化數值 -->
+                      (<span v-if="growthRate >= 0">+</span>
+                      <span v-else>-</span>
+                      <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
+                    </div>
+                  </Tag>
                 
-                <!-- <div class="flex items-center gap-3 select-none">
+                </div>
+
+                <div class="flex items-center gap-2 mt-4 select-none">
                   <Button
                     v-for="tab in periods"
                     :key="tab.label"
@@ -109,17 +121,16 @@
                     unstyled
                     @click="selectedPeriod = tab.value"
                     :class="[
-                      'px-3 py-1 text-sm rounded-full transition-colors duration-150 cursor-pointer',
+                      'px-4 py-2.5 text-xs rounded-lg cursor-pointer',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2',
                       selectedPeriod === tab.value
-                        ? 'bg-blue-100 text-blue-600 font-semibold'
+                        ? 'bg-[#e9ebf0] font-semibold'
                         : 'text-slate-500 hover:text-slate-900'
                     ]"
                   />
-                </div> -->
-              </div>
+                </div>
 
-              <div class="flex justify-between items-center mt-4 text-sm">
+              <!-- <div class="flex justify-between items-center mt-4 text-sm">
                 <Tabs 
                   v-model:value="selectedPeriod"
                   >
@@ -134,7 +145,7 @@
                 </Tabs>
 
                 <span class="text-[#5f6368] text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
-              </div>
+              </div> -->
 
               <div class="flex items-center justify-end mb-2">
                 
@@ -201,11 +212,11 @@
               <div class="flex flex-col items-center text-center gap-3 py-8">
                 <img class="w-80 h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
                 <!-- 標題 -->
-                <h2 class="text-xl sm:text-2xl font-semibold text-slate-800">
+                <h2 class="text-xl sm:text-2xl font-semibold">
                   {{ $t('portfolioNoHoldingsTitle') }}
                 </h2>
                 <!-- 說明文字 -->
-                <p class="text-sm sm:text-base text-slate-500">
+                <p class="text-sm sm:text-base">
                   {{ $t('portfolioNoHoldingsDesc') }}
                 </p>
               </div>
@@ -216,20 +227,23 @@
           <template #footer>
             <div v-if="holdingsStore.list.length > 0" class="w-full max-w-md rounded-2xl border border-slate-200 p-4 shadow-sm">
               <div class="mb-2 grid grid-cols-2">
-                <div class="text-[13px] font-medium text-slate-600">{{ $t('diffFromTargetTitle') }}</div>
-                <div class="text-right text-[13px] text-slate-500">{{ $t('diffLegend') }}</div>
+                <div class="text-[13px] font-medium">{{ $t('diffFromTargetTitle') }}</div>
+                <div class="text-right text-[13px]">{{ $t('diffLegend') }}</div>
               </div>
 
               <div class="divide-y divide-slate-100">
                 <div v-for="r in rebalanceRows" :key="r.symbol" class="grid grid-cols-2 items-center py-2">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 shrink-0 text-slate-700">{{ r.symbol }}</div>
+                    <div class="w-10 shrink-0">{{ r.symbol }}</div>
                     <span :class="['inline-flex items-center gap-1.5 font-medium', r.change > 0 ? 'text-emerald-600' : 'text-rose-600']">
-                      <span class="leading-none text-sm">{{ r.change > 0 ? '↗' : '↘' }}</span>
+                      <span class="leading-none text-sm">
+                        <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45"></i>
+                        <i v-else class="fas fa-arrow-right rotate-45"></i>
+                      </span>
                       <span class="tabular-nums">{{ Math.abs(r.change).toFixed(1) }}%</span>
                     </span>
                   </div>
-                  <div class="text-right tabular-nums font-medium text-slate-700">
+                  <div class="text-right tabular-nums font-medium">
                     {{ formatUSD(r.amount) }}
                   </div>
                 </div>
@@ -343,14 +357,25 @@ const pieChartType = computed(() => ([
 ]))
 
 const selectedPeriod = ref('')
+
+// const periods = computed(() => ([
+//   { label: t('period7d'), value: '7d' },
+//   { label: t('period1mo'), value: '1mo' },
+//   { label: t('period3mo'), value: '3mo' },
+//   { label: t('period6mo'), value: '6mo' },
+//   { label: t('periodYTD'), value: 'ytd' },
+//   { label: t('period1y'), value: '1y' },
+//   { label: t('period5y'), value: '5y' }
+// ]))
+
 const periods = computed(() => ([
-  { label: t('period7d'), value: '7d' },
-  { label: t('period1mo'), value: '1mo' },
-  { label: t('period3mo'), value: '3mo' },
-  { label: t('period6mo'), value: '6mo' },
-  { label: t('periodYTD'), value: 'ytd' },
-  { label: t('period1y'), value: '1y' },
-  { label: t('period5y'), value: '5y' }
+  { label: '7D', value: '7d' },
+  { label: '1M', value: '1mo' },
+  { label: '3M', value: '3mo' },
+  { label: '6M', value: '6mo' },
+  { label: 'YTD', value: 'ytd' },
+  { label: '1Y', value: '1y' },
+  { label: '5Y', value: '5y' }
 ]))
 
 const chartSeries = ref([{ name: t('closePrice'), data: [] }])

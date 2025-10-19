@@ -16,8 +16,8 @@ export default definePreset(Aura, {
           activeColor: '{indigo.700}'
         },
         surface: {
-          background: '{zinc.50}',
-          textColor: '{zinc.800}'
+          background: '#ffffff',
+          textColor: '{slate.600}'
         }
       },
       dark: {
@@ -63,19 +63,14 @@ export default definePreset(Aura, {
     },
     datatable: {
       colorScheme: {
-        light: {
-          background: '{surface.background}',
-          headerBackground: '{indigo.100}',
-          headerColor: '{zinc.800}',
-          rowHoverBackground: '{indigo.50}'
-        },
-        dark: {
-          background: '{surface.background}',
-          headerBackground: '{indigo.900}',
-          headerColor: '{zinc.100}',
-          rowHoverBackground: '{indigo.800}'
-        }
+        background: '{surface.background}',
+        headerBackground: '{surface.background}',
+        headerCellBackground: '{surface.background}',
+        headerCellBorderColor: '{zinc.200}',
+        headerColor: '{zinc.800}',
+        rowBackground: '{surface.background}',
+        rowHoverBackground: '{indigo.50}',
       }
-    }
+    },
   }
 })
