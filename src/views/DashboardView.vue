@@ -9,7 +9,7 @@
           <!-- Total Value Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center" :style="{ color: 'var(--p-surface-textColor)' }">
+              <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
               </div>
@@ -33,7 +33,7 @@
           <!-- Total Profit Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center" :style="{ color: 'var(--p-surface-textColor)' }">
+              <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('totalProfit') }}
@@ -64,7 +64,7 @@
           <!-- XIRR Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center" :style="{ color: 'var(--p-surface-textColor)' }">
+              <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
                 <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('irr') }}
@@ -120,9 +120,10 @@
                     rounded
                     unstyled
                     @click="selectedPeriod = tab.value"
+                    :style="{ color: 'var(--p-surface-text)' }"
+                    class="px-4 py-2.5 text-xs rounded-lg cursor-pointer
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
                     :class="[
-                      'px-4 py-2.5 text-xs rounded-lg cursor-pointer',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2',
                       selectedPeriod === tab.value
                         ? 'bg-[#e9ebf0] font-semibold'
                         : 'text-slate-500 hover:text-slate-900'
@@ -260,11 +261,13 @@
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
-              <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })" class="flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md">
-                <StockIcon :symbol="data.symbol" class="mr-8" />
-                <div>
-                  <span class="font-bold mr-4">{{ data.symbol }}</span>
-                  <div class="truncate">{{ data.name }}</div>
+              <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
+                  class="flex items-center cursor-pointer p-2 rounded-md truncate"
+                  :style="{ width: '300px', minWidth: '250px' }">
+                <StockIcon :symbol="data.symbol" class="mr-2" />
+                <div class="truncate">
+                  <span class="font-bold mx-2">{{ data.symbol }}</span>
+                  <span class="truncate text-sm">{{ data.name }}</span>
                 </div>
               </div>
             </template>

@@ -42,7 +42,7 @@ refresh:
   en: Refresh
   zh: 重新整理
 holding:
-  en: Holding
+  en: Holdings
   zh: 持有資產
 Notification:
   en: Notification
@@ -159,7 +159,7 @@ transactions:
   zh: 交易紀錄
 dividends:
   en: Dividends
-  zh: 股利
+  zh: 股息
 allocation:
   en: Allocation
   zh: 資產配置

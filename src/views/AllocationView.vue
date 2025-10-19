@@ -6,35 +6,43 @@
     <div class="flex gap-6 mt-6">
       <!-- Draggable 1: Holdings -->
       <div class="w-1/3">
-        <div class="mb-4">
-          <h3 class="font-bold mr-2 text-gray-700">{{ $t('holdings') }}</h3>
-          <p class="text-sm mt-2 text-gray-500">可拖曳到右方快速新增</p>
-        </div>
+        
         <draggable
-          class="space-y-2"
-          :list="list1"
+          class="space-y-2 p-4 rounded-xl border border-gray-200 bg-gray-50"
+          :list="sortedHoldings"
           :group="{ name: 'assets', pull: 'clone', put: false }"
           :clone="cloneItem"
           :move="(evt) => !existsInAllocation(evt.draggedContext.element.symbol)"
           item-key="symbol"
         >
+          <template #header>
+            <div class="mb-4">
+              <h3 class="font-bold mr-2 text-gray-700">{{ $t('holdings') }}</h3>
+              <!-- <p class="text-sm mt-2 text-gray-500">可拖曳到右方快速新增</p> -->
+            </div>
+          </template>
           <template #item="{ element }">
             <div
-              class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+              class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md cursor-move"
               :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
-            >
-            <div class="font-medium text-gray-800">
-                <i class="fa-solid fa-bars mr-4"></i>
-                {{ element.symbol }}
-                <!-- <span class="ml-2 text-sm text-gray-500">{{ element.name }}</span> -->
-                <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
-              </div>
-              <span
-                v-if="existsInAllocation(element.symbol)"
-                class="text-xs text-gray-400"
               >
-                {{ $t('in_allocation') }}
-              </span>
+              <!-- 拖曳圖示 + symbol -->
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h.01M8 15h.01M12 9h.01M12 15h.01M16 9h.01M16 15h.01" />
+                </svg>
+                <span class="mx-2">
+                  {{ element.symbol }}
+                </span>
+                <span v-if="existsInAllocation(element.symbol)" class="text-xs">
+                  （{{ $t('in_allocation') }}）
+                </span>
+              </div>
+              <!-- 比例 -->
+              <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
+
+              
             </div>
           </template>
         </draggable>
@@ -42,19 +50,9 @@
   
       <!-- Draggable 2: Allocation -->
       <div class="flex-1">
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
-  
-          <!-- Total target -->
-          <div class="text-sm font-semibold text-gray-700">
-            Total:
-            <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
-              {{ totalTarget }}%
-            </span>
-          </div>
-        </div>
+        
         <draggable
-          class="space-y-3 p-2 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px] flex align-center flex-col"
+          class="space-y-3 p-4 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px]"
           :list="assets"
           group="assets"
           item-key="symbol"
@@ -63,6 +61,19 @@
         >
           <!-- 當沒有項目時顯示提示 -->
           <template #header>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
+      
+              <!-- Total target -->
+              <div class="text-sm font-semibold text-gray-700">
+                Total:
+                <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
+                  {{ totalTarget }}%
+                </span>
+              </div>
+            </div>
+
+            
             <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
               將左側的 <span class="font-medium text-gray-600">持有資產</span> 拖曳到此處<br />
               或手動新增以建立你的資產配置
@@ -179,6 +190,13 @@ watch(
     list1.value = newVal;
   }
 );
+
+// 排序後的清單：未配置的排前面，已配置的排後面
+const sortedHoldings = computed(() => {
+  const unallocated = list1.value.filter(item => !existsInAllocation(item.symbol));
+  const allocated = list1.value.filter(item => existsInAllocation(item.symbol));
+  return [...unallocated, ...allocated];
+});
 
 const getAllocation = async () => {
   try {
