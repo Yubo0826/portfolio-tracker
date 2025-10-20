@@ -13,7 +13,7 @@
     </div>
 
     <!-- 用 v-model:value 綁定目前分頁 -->
-    <div class="bg-black" :style="{ backgroundColor: 'var(--p-primary-color)' }">
+    <!-- <div class="bg-black" :style="{ backgroundColor: 'var(--p-primary-color)' }">
       <Tabs v-model:value="tab">
         <TabList>
           <Tab value="holdings">
@@ -39,7 +39,7 @@
           <TabPanel value="dividends"><div class="mt-4"><DividendsView /></div></TabPanel>
         </TabPanels>
       </Tabs>
-    </div>
+    </div> -->
   </div>
 </template>
 

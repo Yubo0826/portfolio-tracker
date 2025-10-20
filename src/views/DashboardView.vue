@@ -7,7 +7,7 @@
 
 
           <!-- Total Value Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+          <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
             <template #title>
               <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
@@ -31,7 +31,7 @@
 
 
           <!-- Total Profit Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+          <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
             <template #title>
               <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
@@ -62,7 +62,7 @@
           
 
           <!-- XIRR Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+          <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
             <template #title>
               <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
                 <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
@@ -86,7 +86,7 @@
 
         <!-- 資產走勢圖 -->
         <div>
-          <Card>
+          <Card :style="{ backgroundColor: 'var(--p-surface-background)' }">
             <template #title>
               <div class="flex items-center justify-between mb-4">
                 <div class="text-sm">{{ $t('assetTrend') }}</div>
@@ -167,7 +167,7 @@
 
       <!-- 右半邊 圓餅圖 -->
       <div class="w-2/5">
-        <Card class="w-full">
+        <Card class="w-full" :style="{ backgroundColor: 'var(--p-surface-background)' }">
           <!-- title -->
           <template #title>
             <div class="flex items-center justify-between mb-4">
@@ -256,10 +256,10 @@
     </div>
 
     <!-- Holdings Table -->
-    <Card class="mb-8 mt-8 p-4">
+    <Card class="mb-8 mt-8 p-4" :style="{ backgroundColor: 'var(--p-surface-background)' }">
       <template #content>
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
-          <Column field="name" :header="$t('currentAsset')">
+          <Column field="name" :header="$t('currentAsset')" >
             <template #body="{ data }">
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
                   class="flex items-center cursor-pointer p-2 rounded-md truncate"

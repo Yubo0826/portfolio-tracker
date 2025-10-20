@@ -57,7 +57,7 @@ export default definePreset(Aura, {
             activeColor: '{indigo.200}'
           },
           surface: {
-            // background: '#282832',
+            background: '#282832',
             0: '#ffffff',
             50: '{slate.50}',
             100: '{slate.100}',
@@ -76,7 +76,6 @@ export default definePreset(Aura, {
         }
       }
     },
-
     // 可以進一步針對特定元件覆寫樣式
     components: {
       button: {
@@ -88,19 +87,20 @@ export default definePreset(Aura, {
           }
         }
       },
-      // card: {
-      //   colorScheme: {
-      //     light: {
-      //       background: '{surface.background}',
-      //       color: '{surface.textColor}'
-      //     },
-      //     dark: {
-      //       background: '{surface.background}',
-      //       color: '{surface.textColor}'
-      //     }
-      //   }
-      // },
-      datatable: {
+      card: {
+        background: '{surface.background}',
+        colorScheme: {
+          light: {
+            background: '{surface.background}',
+            color: '{surface.textColor}'
+          },
+          dark: {
+            background: '{surface.background}',
+            color: '{surface.textColor}'
+          }
+        }
+      },
+      dataTable: {
         colorScheme: {
           background: '{surface.background}',
           headerBackground: '{surface.background}',
