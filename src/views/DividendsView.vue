@@ -18,6 +18,8 @@
       :loading="isLoading"
       dataKey="id"
       tableStyle="min-width: 50rem"
+      stripedRows 
+      paginator :rows="15"
     >
       <Column field="" :header="$t('symbol')" style="width: 40%">
         <template #body="{ data }">

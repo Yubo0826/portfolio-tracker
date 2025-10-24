@@ -63,9 +63,9 @@ app.directive('tooltip', Tooltip);
 app.use(PrimeVue, {
     theme: {
         preset: customPreset,
-        // options: {
-        //     darkModeSelector: '.my-app-dark',
-        // }
+        options: {
+            darkModeSelector: '.my-app-dark',
+        }
     }
  });
 

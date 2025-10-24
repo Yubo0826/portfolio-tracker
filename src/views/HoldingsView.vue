@@ -26,6 +26,7 @@
       :loading="store.isLoading"
       dataKey="id"
       tableStyle="min-width: 50rem"
+      stripedRows 
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
       <Column field="symbol" :header="$t('symbol')" />

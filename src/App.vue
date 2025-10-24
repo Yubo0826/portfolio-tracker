@@ -218,7 +218,7 @@ const toggleDarkMode = () => {
 };
 
 const noShowAddInvestmentButton = computed(() => {
-  const hideOnRoutes = ['portfolios', 'allocation', 'backtesting', 'rebalancing'];
+  const hideOnRoutes = ['portfolios', 'backtesting', 'rebalancing'];
   return !hideOnRoutes.includes(route.name);
 });
 
