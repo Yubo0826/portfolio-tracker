@@ -262,7 +262,7 @@
     <Card class="mb-8 mt-8 p-4" :style="{ backgroundColor: 'var(--p-surface-background)' }">
       <template #content>
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
-          <Column field="name" :header="$t('currentAsset')" >
+          <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
                   class="flex items-center cursor-pointer p-2 rounded-md truncate"
@@ -276,17 +276,17 @@
             </template>
           </Column>
 
-          <Column field="currentPrice" :header="$t('currentPrice')">
+          <Column field="currentPrice" :header="$t('currentPrice')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.currentPrice.toFixed(2) }}</span>
             </template>
           </Column>
 
-          <Column field="shares" :header="$t('shares')" />
-          <Column field="totalCost" :header="$t('totalCost')">
+          <Column field="shares" :header="$t('shares')" sortable />
+          <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              <div class="text-[#b5b5c3]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
+              <div class="text-sm">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
             </template>
           </Column>
 
@@ -294,19 +294,24 @@
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
               <div :class="{ 'text-[#5cd59b]': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
-                <div class="flex items-center gap-2">
-                  <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-                  <i v-else class="pi pi-sort-down-fill"></i>
-                  <span>{{ data.profitPercentage }}%</span>
+                <div class="flex items-center gap-1">
+                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                  <i v-else class="pi pi-sort-down-fill"></i> -->
+                  
+                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+                  <i v-else class="fas fa-arrow-right rotate-90"></i>
+                  <span class="font-bold text-sm">{{ data.profitPercentage }}%</span>
+
                 </div>
               </div>
             </template>
           </Column>
 
-          <Column field="target" :header="$t('allocationRatio')">
+          <Column field="target" :header="$t('allocationRatio')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
-              <div class="text-[#b5b5c3]">{{ data.target || 0 }}%</div>
+              <div class="text-sm">{{ data.target || 0 }}%</div>
+              <!-- class="text-[#b5b5c3]" -->
             </template>
           </Column>
 
@@ -460,7 +465,7 @@ function setOverviewValue() {
 async function getAllocation() {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return
-    const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
+    const data = await api.get(`/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
     allocation.value = data
   } catch (e) {
     console.error('Error fetching allocation:', e)
@@ -469,7 +474,7 @@ async function getAllocation() {
 
 async function getDividends() {
   try {
-    const data = await api.get(`http://localhost:3000/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
+    const data = await api.get(`/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
     setDividends(data)
   } catch (e) {
     console.error('Error fetching dividends:', e)
@@ -612,7 +617,7 @@ function calculateGrowthRate() {
 async function fetchChartData() {
   const { period1, period2 } = getPeriodRange(selectedPeriod.value)
   try {
-    const data = await api.get(`http://localhost:3000/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
+    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
     const lineData = data.map(item => ({ x: new Date(item.date), y: item.close }))
     chartSeries.value = [{ name: t('closePrice'), data: lineData }]
     calculateGrowthRate()

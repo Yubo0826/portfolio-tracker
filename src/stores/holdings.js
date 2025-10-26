@@ -60,7 +60,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
     try {
       isLoading.value = true;
       const data = await api.get(
-        `http://localhost:3000/api/holdings?uid=${uid.value}&portfolio_id=${portfolioId.value}`
+        `/api/holdings?uid=${uid.value}&portfolio_id=${portfolioId.value}`
       );
       setHoldings(data);
     } finally {
@@ -78,7 +78,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
         portfolio_id: portfolioId.value,
         ids,
       };
-      await api.delete(`http://localhost:3000/api/holdings?uid=${uid.value}`, payload);
+      await api.delete(`/api/holdings?uid=${uid.value}`, payload);
       // 刪除後重新抓取
       await fetchHoldings();
     } finally {
@@ -95,7 +95,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
         uid: uid.value,
         portfolio_id: portfolioId.value,
       };
-      const data = await api.post(`http://localhost:3000/api/holdings/refresh-prices`, payload);
+      const data = await api.post(`/api/holdings/refresh-prices`, payload);
       // 後端若回傳 holdings，直接覆蓋；否則再 fetch 一次
       if (data?.holdings) {
         setHoldings(data.holdings);

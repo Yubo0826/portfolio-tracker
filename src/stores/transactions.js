@@ -36,7 +36,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     try {
       isLoading.value = true;
       const data = await api.get(
-        `http://localhost:3000/api/transactions?uid=${uid.value}&portfolio_id=${portfolioId.value}`
+        `/api/transactions?uid=${uid.value}&portfolio_id=${portfolioId.value}`
       );
       setTransactions(data.transactions);
       holdingsStore.fetchHoldings();
@@ -52,7 +52,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       portfolio_id: portfolioId.value,
       ids,
     };
-    const result = await api.delete(`http://localhost:3000/api/transactions`, payload);
+    const result = await api.delete(`/api/transactions`, payload);
     // 後端回傳最新清單時，直接覆蓋；若沒有就本地移除
     if (result?.transactions) {
       setTransactions(result.transactions);
@@ -96,9 +96,9 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     let result;
     if (id) {
-      result = await api.put(`http://localhost:3000/api/transactions/${id}`, payload);
+      result = await api.put(`/api/transactions/${id}`, payload);
     } else {
-      result = await api.post(`http://localhost:3000/api/transactions`, payload);
+      result = await api.post(`/api/transactions`, payload);
     }
 
     // 後端回傳最新 transactions / holdings
@@ -134,7 +134,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     console.log('saveTransactionBulk payload', payload);
 
-    const result = await api.post(`http://localhost:3000/api/transactions/bulk`, payload);
+    const result = await api.post(`/api/transactions/bulk`, payload);
 
     // 後端回傳最新 transactions / holdings
     if (result?.transactions) setTransactions(result.transactions);
@@ -150,7 +150,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       .split('T')[0];
     try {
       const data = await api.get(
-        `http://localhost:3000/api/yahoo/chart/?symbol=${symbol}&period1=${dateYYYYMMDD}&period2=${nextDay}`
+        `/api/yahoo/chart/?symbol=${symbol}&period1=${dateYYYYMMDD}&period2=${nextDay}`
       );
       if (data?.quotes?.length > 0) {
         return Number(data.quotes[0].close.toFixed(2));

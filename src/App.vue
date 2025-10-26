@@ -1,5 +1,6 @@
 <template>
   <CustomToast />
+  <GlobalLoading />
 
   <div class="flex flex-col min-h-screen">
     <!-- Main content -->
@@ -53,7 +54,7 @@
         </div>
       </header>
     
-      <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4 p-4">
+      <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4 py-4">
         <div>
           <a class="font-bold" @click="$router.push('/portfolios')" :style="{ color: 'var(--p-primary-color)' }">
             {{ $t('allPortfolios') }}
@@ -62,7 +63,7 @@
           <!-- 選擇投資組合 -->
           <Select 
             v-model="selectedPortfolio" 
-            size="small" ref="PortfolioSelect" 
+            size="middle" ref="PortfolioSelect" 
             :options="portfolioStore.portfolios" optionLabel="name" checkmark 
             :highlightOnSelect="false" class="m-2"
             :pt="{
@@ -143,6 +144,7 @@ import HeaderNav from './components/HeaderNav.vue'
 import Footer from './components/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
+import GlobalLoading from "@/components/GlobalLoading.vue";
 
 const dialogVisible = ref(false);
 const importDataDialogVisible = ref(false);
@@ -168,12 +170,16 @@ const transactionsStore = useTransactionsStore();
     2. 監聽 auth.user 的變化，如果有用戶登入則取得資料
 */
 
+import { showLoading, hideLoading } from "@/composables/loading.js";
+
 watch(() => auth.user, async (newUser) => {
   if (newUser) {
+    showLoading('Loading user data...');
     console.log('User is logged in:', newUser);
     await getPortfolios();
-    holdingsStore.fetchHoldings();
-    transactionsStore.fetchTransactions();
+    await holdingsStore.fetchHoldings();
+    await transactionsStore.fetchTransactions();
+    hideLoading();
   }
 })
 
@@ -181,6 +187,7 @@ const selectedPortfolio = ref(null);
 
 // Pinia → Local v-model 同步
 watch(() => portfolioStore.currentPortfolio, (newVal) => {
+  console.log(1)
   if (newVal?.id !== selectedPortfolio.value?.id) {
     selectedPortfolio.value = newVal
   }

@@ -112,7 +112,7 @@ async function fetchChartData() {
 
   try {
     const res = await api.get(
-      `http://localhost:3000/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`
+      `/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`
     )
     const quotes = res.quotes || []
 

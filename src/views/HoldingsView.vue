@@ -1,21 +1,21 @@
 <template>
+  <ConfirmDialog></ConfirmDialog>
   <div>
     <div class="flex justify-end mb-8">
       <!-- p-button-rounded p-button-text -->
       <Button
         :label="$t('delete')"
-        @click="onDelete"
+        @click="deleteConfirm"
+        :disabled="selectedHoldings.length === 0"
         class="mr-2"
         icon="pi pi-trash"
         severity="secondary"
-        size="small"
       />
       <Button
         :label="$t('refresh')"
         @click="store.refreshPrices"
         icon="pi pi-refresh"
         class="mr-2"
-        size="small"
         severity="secondary"
       />
     </div>
@@ -29,13 +29,13 @@
       stripedRows 
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
-      <Column field="symbol" :header="$t('symbol')" />
-      <Column field="name" :header="$t('name')" />
-      <Column field="shares" :header="$t('shares')" />
-      <Column field="totalCost" :header="$t('totalCost')" />
-      <Column field="currentPrice" :header="$t('currentPrice')" />
-      <Column field="currentValue" :header="$t('currentValue')" />
-      <Column field="totalProfit" :header="$t('totalProfit')">
+      <Column field="symbol" sortable :header="$t('symbol')" />
+      <Column field="name" sortable :header="$t('name')" />
+      <Column field="shares" sortable :header="$t('shares')" />
+      <Column field="totalCost" sortable :header="$t('totalCost')" />
+      <Column field="currentPrice" sortable :header="$t('currentPrice')" />
+      <Column field="currentValue" sortable :header="$t('currentValue')" />
+      <Column field="totalProfit" sortable :header="$t('totalProfit')">
         <template #body="{ data }">
           <div
             :class="{
@@ -44,12 +44,12 @@
             }"
           >
             <span class="font-bold mr-4 whitespace-nowrap">
-              {{ data.totalProfit > 0 ? '+' : '-' }}${{ Math.abs(data.totalProfit).toFixed(2) }}
+              {{ data.totalProfit > 0 ? '+' : '-' }} {{ Math.abs(data.totalProfit).toFixed(2) }}
             </span>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1">
               <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
               <i v-else class="pi pi-sort-down-fill"></i>
-              <span>{{ Math.abs(data.profitPercentage) }}%</span>
+              <span class="font-bold">{{ Math.abs(data.profitPercentage) }}%</span>
             </div>
           </div>
         </template>
@@ -101,5 +101,29 @@ const onDelete = async () => {
   const ids = selectedHoldings.value.map((h) => h.id);
   await store.deleteHoldings(ids);
   selectedHoldings.value = [];
+};
+
+import { useConfirm } from "primevue/useconfirm";
+const confirm = useConfirm();
+
+const deleteConfirm = () => {
+    confirm.require({
+        message: 'Do you want to delete this record?',
+        header: 'Warning',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            onDelete();
+        }
+    });
 };
 </script>

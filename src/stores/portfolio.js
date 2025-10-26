@@ -15,7 +15,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         return;
     }
     try {
-        const data = await api.get(`http://localhost:3000/api/portfolio?uid=${auth.user.uid}`);
+        const data = await api.get(`/api/portfolio?uid=${auth.user.uid}`);
         console.log('Fetched portfolios:', data);
         portfolios.value = data.portfolios;
         if (data.portfolios.length > 0) {
@@ -54,7 +54,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         return;
     }
     try {
-        const data = await api.post('http://localhost:3000/api/portfolio', {
+        const data = await api.post('/api/portfolio', {
             uid: auth.user.uid,
             name,
             description,
@@ -72,7 +72,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         return;
     }
     try {
-        const data = await api.put(`http://localhost:3000/api/portfolio/`, {
+        const data = await api.put(`/api/portfolio/`, {
             uid: auth.user.uid,
             id: portfolioId,
             name,
@@ -94,7 +94,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     }
     try {
       console.log('Removing portfolios with IDs:', ids);
-        await api.delete(`http://localhost:3000/api/portfolio`, {
+        await api.delete(`/api/portfolio`, {
           uid: auth.user.uid,
           ids,
       });

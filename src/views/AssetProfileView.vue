@@ -416,7 +416,7 @@ async function fetchChartData(symbol) {
   endDate.value = formatStrDate(period2)
 
   try {
-    const data = await api.get(`http://localhost:3000/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
+    const data = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
     console.log('Chart data:', data)
     const quotes = data.quotes || []
 

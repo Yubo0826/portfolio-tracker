@@ -7,7 +7,6 @@
         icon="pi pi-trash"
         class="mr-2"
         severity="secondary"
-        size="small"
       />
       <!-- <Button
         @click="openCreate"

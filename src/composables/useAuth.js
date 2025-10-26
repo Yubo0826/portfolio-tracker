@@ -54,7 +54,7 @@ const saveUserData = () => {
       displayName: user.value.displayName,
     };
 
-    api.post('http://localhost:3000/api/user', userData)
+    api.post('/api/user', userData)
       .then(response => {
         console.log("User data saved successfully:", response);
       })

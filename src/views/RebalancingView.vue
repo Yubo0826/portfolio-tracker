@@ -119,7 +119,7 @@ const getData = async () => {
     isLoading.value = true;
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
     const allocationData  = await api.get(
-      `http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
+      `/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
     );
     allocation.value = allocationData.map(item => ({
       symbol: item.symbol,
@@ -143,7 +143,7 @@ const getHoldings = async () => {
       uid: auth.user?.uid,
       portfolio_id: portfolioStore.currentPortfolio?.id
     };
-    const data = await api.post(`http://localhost:3000/api/holdings/refresh-prices`, payload);
+    const data = await api.post(`/api/holdings/refresh-prices`, payload);
     holdings.value = data.holdings.map(item => ({
       id: item.id,
       symbol: item.symbol,
@@ -364,7 +364,7 @@ const executeAllTransactions = async () => {
     };
 
     try {
-      await api.post('http://localhost:3000/api/transactions', payload);
+      await api.post('/api/transactions', payload);
       rebalanceResult.value[i].executed = true;
     } catch (err) {
       console.error(`Failed to execute ${item.symbol}`, err);

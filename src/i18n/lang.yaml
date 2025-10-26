@@ -21,7 +21,7 @@ shares:
   zh: 持股
 totalCost:
   en: Total Cost
-  zh: 總成本
+  zh: 總花費
 currentPrice:
   en: Current Price
   zh: 現價
@@ -37,6 +37,9 @@ noData:
 myAssets:
   en: My Assets
   zh: 我的持股
+searchPlaceholder:
+  en: Enter stock/ETF symbol or name
+  zh: 輸入股票、ETF代號或名稱
 # 通用
 refresh:
   en: Refresh
@@ -51,10 +54,10 @@ Notification:
 # 股利頁欄位（更精準）
 dividendPerShare:
   en: Dividend/Share
-  zh: 每股股利
+  zh: 每股股息
 dividendTotal:
   en: Total Dividend
-  zh: 總股利
+  zh: 總股息
 date:
   en: Date
   zh: 日期
@@ -241,7 +244,7 @@ diffLegend:
 # 資產表
 currentAsset:
   en: Asset
-  zh: 現在資產
+  zh: 持有資產
 allocationRatio:
   en: Allocation %
   zh: 配置比例

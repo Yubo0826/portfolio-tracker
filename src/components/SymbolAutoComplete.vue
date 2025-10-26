@@ -43,7 +43,7 @@ const filteredSymbols = ref([]);
 const search = async (event) => {
     if (!event.query.trim().length) return;
     try {
-        const data = await api.get('http://localhost:3000/api/yahoo/symbol?query=' + event.query);
+        const data = await api.get('/api/yahoo/symbol?query=' + event.query);
         console.log('Search results:', data);
         filteredSymbols.value = data.map(item => ({
             symbol: item.symbol,

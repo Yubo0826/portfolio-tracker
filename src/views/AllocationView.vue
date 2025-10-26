@@ -201,7 +201,7 @@ const sortedHoldings = computed(() => {
 const getAllocation = async () => {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
-    const data = await api.get(`http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    const data = await api.get(`/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
     console.log('Fetched allocation:', data);
     assets.value = data;
     oldAssets.value = JSON.parse(JSON.stringify(data));
@@ -295,7 +295,7 @@ const saveAllocation = async () => {
     toast.error("Please complete all editable items");
     return;
   }
-  await api.post("http://localhost:3000/api/allocation/", {
+  await api.post("/api/allocation/", {
     uid: auth.user.uid,
     portfolio_id: portfolioStore.currentPortfolio.id,
     assets: assets.value,

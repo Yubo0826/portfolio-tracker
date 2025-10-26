@@ -6,7 +6,6 @@
         @click="refreshDividends"
         icon="pi pi-refresh"
         class="mr-2"
-        size="small"
         severity="secondary"
       />
     </div>
@@ -21,17 +20,17 @@
       stripedRows 
       paginator :rows="15"
     >
-      <Column field="" :header="$t('symbol')" style="width: 40%">
+      <Column field="" :header="$t('symbol')" style="width: 40%" sortable sortField="symbol">
         <template #body="{ data }">
           <div>
-            <span class="mr-4">{{ data.symbol }}</span>
-            <div>{{ data.name }}</div>
+            <span class="font-bold mr-4">{{ data.symbol }}</span>
+            <div class="text-sm">{{ data.name }}</div>
           </div>
         </template>
       </Column>
-      <Column field="shares" :header="$t('shares')" />
-      <Column field="amount" :header="$t('dividendPerShare')" />
-      <Column field="totalAmount" :header="$t('dividendTotal')" />
+      <Column field="shares" sortable :header="$t('shares')" />
+      <Column field="amount" sortable :header="$t('dividendPerShare')" />
+      <Column field="totalAmount" sortable :header="$t('dividendTotal')" />
       <Column field="date" sortable :header="$t('date')" />
 
       <template #empty>
@@ -59,7 +58,7 @@ const getDividends = async () => {
   isLoading.value = true;
   try {
     console.log('Fetching dividends for user:', auth.user?.uid, 'and portfolio:', portfolioStore.currentPortfolio?.id);
-    const data = await api.get(`http://localhost:3000/api/dividends?uid=${auth.user.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    const data = await api.get(`/api/dividends?uid=${auth.user.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
     console.log('Dividends data:', data);
     setDividends(data);
   } catch (error) {
@@ -90,7 +89,7 @@ const refreshDividends = async () => {
       uid: auth.user?.uid,
       portfolio_id: portfolioStore.currentPortfolio?.id
     };
-    const data = await api.post(`http://localhost:3000/api/dividends/sync`, payload);
+    const data = await api.post(`/api/dividends/sync`, payload);
     console.log('Dividends sync response:', data);
     setDividends(data.dividends);
   } catch (error) {

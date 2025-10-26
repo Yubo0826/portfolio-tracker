@@ -374,12 +374,12 @@ async function runBacktest() {
   isLoading.value = true;
   try {
     const allocation = await api.get(
-      `http://localhost:3000/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
+      `/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
     );
 
     // 取得價格(adjClose)資料
     const prices = await api.get(
-      `http://localhost:3000/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${form.value.startDate
+      `/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${form.value.startDate
         .toISOString()
         .split("T")[0]}&period2=${form.value.endDate
         .toISOString()

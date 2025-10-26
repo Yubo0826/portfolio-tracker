@@ -293,7 +293,7 @@ async function confirmImport() {
 
     let nonexistentSymbols = []
     for (const symbol of symbolList) {
-      const query = await api.get('http://localhost:3000/api/yahoo/symbol?query=' + symbol)
+      const query = await api.get('/api/yahoo/symbol?query=' + symbol)
       if (query.length === 0) {
         nonexistentSymbols.push(symbol)
       }

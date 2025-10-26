@@ -1,4 +1,11 @@
+const getAPIBaseURL = () => {
+  if (window.location.hostname === 'localhost') {
+    return 'http://localhost:3000';
+  }
+  return import.meta.env.VITE_API_URL_BASE || '';
+}
 const request = async (url, method = 'GET', data = null, headers = {}) => {
+    const apiURL = getAPIBaseURL() + url;
     const config = {
       method,
       headers: {
@@ -12,7 +19,7 @@ const request = async (url, method = 'GET', data = null, headers = {}) => {
     }
   
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(apiURL, config);
       const contentType = response.headers.get('content-type');
       const isJSON = contentType && contentType.includes('application/json');
       const result = isJSON ? await response.json() : await response.text();

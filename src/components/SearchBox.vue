@@ -22,7 +22,7 @@
         @input="onInput"
         id="searchInput"
         type="text"
-        placeholder="輸入股票、ETF代號或名稱"
+        :placeholder="$t('searchPlaceholder')"
         class="w-full bg-transparent placeholder-neutral-500 px-12 py-4 outline-none"
         autocomplete="off"
         aria-autocomplete="list"
@@ -110,7 +110,7 @@ const search = async () => {
 
   loading.value = true
   try {
-    const data = await api.get('http://localhost:3000/api/yahoo/symbol?query=' + q)
+    const data = await api.get('/api/yahoo/symbol?query=' + q)
     results.value = data.map(item => ({
       symbol: item.symbol,
       name: item.longname,
