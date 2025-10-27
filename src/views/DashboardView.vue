@@ -5,7 +5,6 @@
       <div class="w-3/5">
         <div class="flex flex-col sm:flex-row w-full gap-4 mb-8">
 
-
           <!-- Total Value Card -->
           <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
             <template #title>

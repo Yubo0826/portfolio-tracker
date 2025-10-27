@@ -66,13 +66,13 @@
             size="middle" ref="PortfolioSelect" 
             :options="portfolioStore.portfolios" optionLabel="name" checkmark 
             :highlightOnSelect="false" class="m-2"
-            :pt="{
+            >
+            <!-- :pt="{
               root: { 
                 style: { border: '1px solid transparent', boxShadow: 'none' },
                 class: 'custom-select-root' 
               }
-            }"
-            >
+            }" -->
             <template #header>
                 <div class="p-3">
                     <span class="font-bold">{{ $t('selectPortfolio') }}</span>

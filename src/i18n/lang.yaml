@@ -140,8 +140,8 @@ portfolioDeletedConfirm:
   en: Are you sure you want to delete the selected portfolios? This action cannot be undone.
   zh: 確定要刪除選取的投資組合嗎？此操作無法復原。
 allPortfolios:
-  en: All Portfolios
-  zh: 所有組合
+  en: Portfolio List
+  zh: 投資組合列表
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
