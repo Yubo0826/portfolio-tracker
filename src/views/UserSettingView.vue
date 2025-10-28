@@ -29,13 +29,14 @@
           <!-- 儲存按鈕 -->
           <Button
             label="儲存設定"
-            icon="pi pi-save"
             class="w-full mt-4"
             @click="saveSettings"
           />
         </div>
       </template>
     </Card>
+
+    <Button @click="sendEmail">發送測試郵件</Button>
   </div>
 </template>
 
@@ -75,6 +76,17 @@ const saveSettings = async () => {
   } catch (e) {
     toast.error(t('saveSettingsError'));
   }
+};
+
+const sendEmail = async () => {
+    try {
+        await api.post('/api/user/send-test-email', {
+          to: auth.user?.email
+        });
+        toast.success(t('testEmailSent'));
+    } catch (e) {
+        toast.error(t('testEmailError'));
+    }
 };
 
 // 如果有用戶登入
