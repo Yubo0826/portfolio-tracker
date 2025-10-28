@@ -405,3 +405,11 @@ annualReturnChart:
 annualReturnHint:
   en: Blue bars indicate positive returns, red bars indicate negative returns.
   zh: 藍色代表正報酬，紅色代表負報酬。
+
+# 帳戶頁面
+settingsSaved:
+  en: Settings saved successfully.
+  zh: 設定已成功儲存。
+saveSettingsError:
+  en: Error saving settings.
+  zh: 儲存設定時發生錯誤。

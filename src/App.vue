@@ -152,7 +152,7 @@ const importDataDialogVisible = ref(false);
 const route = useRoute();
 const router = useRouter()
 
-const isAssetRoute = computed(() => route.name === 'asset');
+const isAssetRoute = computed(() => route.name === 'asset' || route.name === 'account');
 
 const auth = useAuthStore()
 
@@ -251,7 +251,7 @@ const menuItems = [
     label: '個人頁面',
     icon: 'pi pi-user',
     command: () => {
-      router.push('/profile');
+      router.push('/account');
     },
   },
   {

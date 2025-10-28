@@ -285,7 +285,7 @@
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              <div class="text-sm">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
+              <div class="text-sm text-[#9B9B9B]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
             </template>
           </Column>
 
@@ -293,14 +293,15 @@
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
               <div :class="{ 'text-[#5cd59b]': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 font-bold text-sm">
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
                   <i v-else class="pi pi-sort-down-fill"></i> -->
                   
-                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-                  <i v-else class="fas fa-arrow-right rotate-90"></i>
-                  <span class="font-bold text-sm">{{ data.profitPercentage }}%</span>
-
+                  <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+                  <i v-else class="fas fa-arrow-right rotate-90"></i> -->
+                  <span v-if="data.profitPercentage >= 0">+</span>
+                  <span v-else>-</span>
+                  <span>{{ data.profitPercentage }}%</span>
                 </div>
               </div>
             </template>
@@ -309,8 +310,9 @@
           <Column field="target" :header="$t('allocationRatio')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
-              <div class="text-sm">{{ data.target || 0 }}%</div>
-              <!-- class="text-[#b5b5c3]" -->
+              <div class="text-sm text-[#9B9B9B]">
+                🎯
+                {{ data.target || 0 }}%</div>
             </template>
           </Column>
 
@@ -329,9 +331,6 @@
  * =======================*/
 import { ref, watch, computed } from 'vue'
 import SelectButton from 'primevue/selectbutton'
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
