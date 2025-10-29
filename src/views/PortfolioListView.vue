@@ -1,5 +1,74 @@
+
+<template>
+  <div>
+      <ConfirmDialog></ConfirmDialog>
+      <div class="flex justify-end mb-8 mt-8">
+          <Button
+            :label="$t('addPortfolio')"
+            @click="dialogVisible = true"
+            class="mr-2"
+            icon="pi pi-plus"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            :label="$t('delete')"
+            @click="showDeleteConfirm"
+            :disabled="selectedPortfolios.length === 0"
+            class="mr-2"
+            icon="pi pi-trash"
+            severity="secondary"
+            size="small"
+          />
+          <!-- <Button icon="pi pi-plus" class="p-button-rounded p-button-text mr-2" @click="dialogVisible = true" size="small" />
+          <Button @click="confirm2" :disabled="selectedPortfolios.length === 0" icon="pi pi-trash" class="p-button-rounded p-button-text mr-2" size="small" severity="danger" /> -->
+      </div>
+
+      <PortfolioFormDialog 
+          :visible="dialogVisible"
+          :editPortfolio="editPortfolio"
+          @update:loading="isLoading = $event"
+          @update:visible="dialogVisible = $event"
+          @clear:editPortfolio="editPortfolio = { id: null, name: '', description: '' }"
+          />
+
+      <DataTable v-model:selection="selectedPortfolios" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+          <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+          <Column field="name" :header="$t('name')"></Column>
+          <Column field="description" :header="$t('description')"></Column>
+          <Column field="drift_threshold" :header="$t('driftThreshold')">
+            <template #body="slotProps">
+              {{ (slotProps.data.drift_threshold) }}
+            </template>
+          </Column>
+          <Column field="enable_email_alert">
+            <template #header>
+              {{ $t('emailAlert') }}
+              <i class="pi pi-info-circle ml-1"  v-tooltip.bottom="$t('emailAlertHint')" />
+            </template>
+            <template #body="slotProps">
+              {{ slotProps.data.enable_email_alert ? $t('enabled') : $t('disabled') }}
+            </template>
+          </Column>
+          <Column field="" :header="$t('action')">
+              <template #body="slotProps">
+                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
+              </template>  
+          </Column>
+
+          <template #empty>
+              <div class="p-4 text-center text-gray-500">
+              <i class="pi pi-info-circle mr-2" />
+                {{ $t('noData') }}
+              </div>
+          </template>
+
+      </DataTable>
+  </div>
+</template>
+
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
@@ -22,6 +91,8 @@ const editPortfolio = ref({
     id: null,
     name: '',
     description: '',
+    drift_threshold: 5,
+    enable_email_alert: true
 })
 
 const getPortfolios = async () => {
@@ -51,6 +122,8 @@ const updateSelectedPortfolios = (id) => {
     id: p.id,
     name: p.name,
     description: p.description,
+    drift_threshold: p.drift_threshold,
+    enable_email_alert: p.enable_email_alert
   }
   dialogVisible.value = true
 }
@@ -141,57 +214,3 @@ onUnmounted(() => {
 });
 
 </script>
-
-<template>
-  <div>
-      <ConfirmDialog></ConfirmDialog>
-      <div class="flex justify-end mb-8 mt-8">
-          <Button
-            :label="$t('addPortfolio')"
-            @click="dialogVisible = true"
-            class="mr-2"
-            icon="pi pi-plus"
-            severity="secondary"
-            size="small"
-          />
-          <Button
-            :label="$t('delete')"
-            @click="showDeleteConfirm"
-            :disabled="selectedPortfolios.length === 0"
-            class="mr-2"
-            icon="pi pi-trash"
-            severity="secondary"
-            size="small"
-          />
-          <!-- <Button icon="pi pi-plus" class="p-button-rounded p-button-text mr-2" @click="dialogVisible = true" size="small" />
-          <Button @click="confirm2" :disabled="selectedPortfolios.length === 0" icon="pi pi-trash" class="p-button-rounded p-button-text mr-2" size="small" severity="danger" /> -->
-      </div>
-
-      <PortfolioFormDialog 
-          :visible="dialogVisible"
-          :editPortfolio="editPortfolio"
-          @update:loading="isLoading = $event"
-          @update:visible="dialogVisible = $event"
-          @clear:editPortfolio="editPortfolio = { id: null, name: '', description: '' }"
-          />
-
-      <DataTable v-model:selection="selectedPortfolios" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
-          <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-          <Column field="name" :header="$t('name')"></Column>
-          <Column field="description" :header="$t('description')"></Column>
-          <Column field="" :header="$t('action')">
-              <template #body="slotProps">
-                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
-              </template>  
-          </Column>
-
-          <template #empty>
-              <div class="p-4 text-center text-gray-500">
-              <i class="pi pi-info-circle mr-2" />
-                {{ $t('noData') }}
-              </div>
-          </template>
-
-      </DataTable>
-  </div>
-</template>

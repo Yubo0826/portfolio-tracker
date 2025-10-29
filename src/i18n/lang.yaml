@@ -188,7 +188,21 @@ xirrHint:
 applyNewPortfolioImmediately:
   en: Apply new portfolio immediately
   zh: 新增後立即套用
-
+driftThreshold:
+  en: Drift Threshold (%)
+  zh: 偏離閾值（%）
+emailAlert:
+  en: Email Alert
+  zh: 電子郵件通知
+emailAlertHint:
+  en: Send email alerts when portfolio allocation drifts beyond the set threshold.
+  zh: 當投資組合配置偏離設定的閾值時，發送電子郵件通知。
+enabled:
+  en: Enabled
+  zh: 已啟用
+disabled:
+  en: Disabled
+  zh: 已停用
 # 走勢區塊
 assetTrend:
   en: Asset Trend

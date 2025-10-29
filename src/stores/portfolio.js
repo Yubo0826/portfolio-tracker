@@ -48,7 +48,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   
   // 之後後端or前端可能要卡重複名稱
   async function addPortfolio(newPortfolio) {
-    const { name, description } = newPortfolio;
+    const { name, description, drift_threshold, enable_email_alert } = newPortfolio;
     if (!name) {
         console.warn('Name are required to add a portfolio');
         return;
@@ -58,6 +58,8 @@ export const usePortfolioStore = defineStore('portfolio', () => {
             uid: auth.user.uid,
             name,
             description,
+            drift_threshold,
+            enable_email_alert
         });
         portfolios.value.push(data.portfolio);
     } catch (error) {
@@ -66,7 +68,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   }
 
   async function editPortfolio(portfolioId, updatedPortfolio) {
-    const { name, description } = updatedPortfolio;
+    const { name, description, drift_threshold, enable_email_alert } = updatedPortfolio;
     if (!name) {
         console.warn('Name is required to edit a portfolio');
         return;
@@ -77,6 +79,8 @@ export const usePortfolioStore = defineStore('portfolio', () => {
             id: portfolioId,
             name,
             description,
+            drift_threshold,
+            enable_email_alert
         });
         const index = portfolios.value.findIndex(p => p.id === portfolioId);
         if (index !== -1) {

@@ -37,6 +37,7 @@
     </Card>
 
     <Button @click="sendEmail">發送測試郵件</Button>
+    <Button @click="checkPortfolioDrift">投資組合偏移檢查測試</Button>
   </div>
 </template>
 
@@ -77,6 +78,16 @@ const saveSettings = async () => {
     toast.error(t('saveSettingsError'));
   }
 };
+
+// 測試投資組合偏移檢查
+const checkPortfolioDrift = async () => {
+    try {
+        await api.post('/api/user/send-drift-alert-test');
+        toast.success('Portfolio drift check email sent.');
+    } catch (e) {
+        toast.error('Error sending portfolio drift check email.');
+    }
+};  
 
 const sendEmail = async () => {
     try {

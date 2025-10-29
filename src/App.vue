@@ -187,7 +187,6 @@ const selectedPortfolio = ref(null);
 
 // Pinia → Local v-model 同步
 watch(() => portfolioStore.currentPortfolio, (newVal) => {
-  console.log(1)
   if (newVal?.id !== selectedPortfolio.value?.id) {
     selectedPortfolio.value = newVal
   }
