@@ -30,8 +30,11 @@
     </div>
 
     <div class="flex items-center gap-4 mb-8">
-      <label for="driftThreshold" class="font-semibold w-24">{{ $t('driftThreshold') }}</label>
-      <InputNumber id="driftThreshold" class="flex-auto" autocomplete="off" max="100" min="0" v-model="newPortfolio.drift_threshold" />
+      <label for="driftThreshold" class="font-semibold w-24">
+        {{ $t('driftThreshold') }}
+        <i class="pi pi-info-circle ml-1"  v-tooltip.bottom="$t('emailAlertHint')" />
+      </label>
+      <InputNumber id="driftThreshold" class="flex-auto" autocomplete="off" max="100" min="0" suffix="%" v-model="newPortfolio.drift_threshold" />
     </div>
 
     <div class="flex items-center gap-4 mb-8">

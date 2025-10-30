@@ -75,7 +75,7 @@
             }" -->
             <template #header>
                 <div class="p-3">
-                    <span class="font-bold">{{ $t('selectPortfolio') }}</span>
+                    <span class="font-bold">{{ $t('currentPortfolio') }}</span>
                 </div>
             </template>
             <template #dropdownicon>
@@ -152,7 +152,7 @@ const importDataDialogVisible = ref(false);
 const route = useRoute();
 const router = useRouter()
 
-const isAssetRoute = computed(() => route.name === 'asset' || route.name === 'user-settings');
+const isAssetRoute = computed(() => route.name === 'asset' || route.name === 'user-settings' || route.name === 'portfolios' );
 
 const auth = useAuthStore()
 

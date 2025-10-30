@@ -83,11 +83,12 @@ import TransactionDialog from '@/components/TransactionDialog.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
+const portfolioStore = usePortfolioStore();
+
 import NoData from '@/components/NoData.vue';
 
 const store = useTransactionsStore();
 const auth = useAuthStore();
-const portfolioStore = usePortfolioStore();
 const toast = useToast();
 
 const dialogVisible = ref(false);

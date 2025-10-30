@@ -1,6 +1,6 @@
 <template>
   <div class="p-6 min-h-90">
-    <h2 class="text-xl font-semibold mb-4">{{ $t('rebalanceTitle') }}</h2>
+    <h2 class="text-xl font-semibold mb-16">{{ $t('rebalanceTitle') }}</h2>
 
     <!-- 存入 / 提取 + 金額輸入 -->
     <div class="flex justify-center items-center mb-4 gap-4">

@@ -1,6 +1,9 @@
 portfolio:
   en: Portfolio
   zh: 投資組合
+portfolios:
+  en: Portfolios
+  zh: 投資組合列表
 totalValue:
   en: Total Value
   zh: 總價值
@@ -142,6 +145,9 @@ portfolioDeletedConfirm:
 allPortfolios:
   en: Portfolio List
   zh: 投資組合列表
+currentPortfolio:
+  en: "Current Portfolio :"
+  zh: "目前投資組合 :"
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
@@ -168,7 +174,7 @@ allocation:
   zh: 資產配置
 allocationSettings:
   en: Allocation Settings
-  zh: 配置設定
+  zh: 設定配置
 # 卡片/摘要
 baseCurrency:
   en: Base currency {code}
@@ -189,8 +195,8 @@ applyNewPortfolioImmediately:
   en: Apply new portfolio immediately
   zh: 新增後立即套用
 driftThreshold:
-  en: Drift Threshold (%)
-  zh: 偏離閾值（%）
+  en: Drift Threshold
+  zh: 偏離閾值
 emailAlert:
   en: Email Alert
   zh: 電子郵件通知

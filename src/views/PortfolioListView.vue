@@ -2,7 +2,12 @@
 <template>
   <div>
       <ConfirmDialog></ConfirmDialog>
-      <div class="flex justify-end mb-8 mt-8">
+
+      <div class="text-xl font-semibold mt-16" style="color: var(--p-text-color)">
+        {{ t('portfolios') }}
+      </div>
+
+      <div class="flex justify-end mb-8 mt-4">
           <Button
             :label="$t('addPortfolio')"
             @click="dialogVisible = true"
@@ -36,7 +41,7 @@
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
           <Column field="name" :header="$t('name')"></Column>
           <Column field="description" :header="$t('description')"></Column>
-          <Column field="drift_threshold" :header="$t('driftThreshold')">
+          <Column field="drift_threshold" :header="$t('driftThreshold') + ' (%)'">
             <template #body="slotProps">
               {{ (slotProps.data.drift_threshold) }}
             </template>
