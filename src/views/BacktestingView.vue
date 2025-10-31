@@ -172,6 +172,7 @@ const chartOptions = ref({
     zoom: { enabled: false },
     toolbar: { show: false },
   },
+  
   stroke: { curve: "smooth", width: 2 },
   xaxis: { type: "datetime", labels: { datetimeUTC: false } },
   yaxis: { labels: { formatter: (val) => `$${val.toFixed(0)}` } },

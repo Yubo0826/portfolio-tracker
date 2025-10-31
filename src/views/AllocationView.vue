@@ -1,14 +1,14 @@
 <template>
   <div class="p-6">
     <div>
-      <h1 class="text-2xl font-bold border-b-2 pb-2 border-indigo-500" :style="{ color: 'var(--p-primary-color)' }">{{ $t('allocationSettings') }}</h1>
+      <h1 class="text-xl font-semibold pb-2">{{ $t('allocationSettings') }}</h1>
     </div>
     <div class="flex gap-6 mt-6">
       <!-- Draggable 1: Holdings -->
       <div class="w-1/3">
         
         <draggable
-          class="space-y-2 p-4 rounded-xl border border-gray-200 bg-gray-50"
+          class="g-group space-y-2 p-4 rounded-xl border"
           :list="sortedHoldings"
           :group="{ name: 'assets', pull: 'clone', put: false }"
           :clone="cloneItem"
@@ -17,13 +17,13 @@
         >
           <template #header>
             <div class="mb-4">
-              <h3 class="font-bold mr-2 text-gray-700">{{ $t('holdings') }}</h3>
-              <!-- <p class="text-sm mt-2 text-gray-500">可拖曳到右方快速新增</p> -->
+              <h3 class="font-bold mr-2">{{ $t('holdings') }}</h3>
+              <p class="text-sm mt-2" :style="{ color: 'var(--p-textSecondaryColor)' }">可拖曳到右方快速新增</p>
             </div>
           </template>
           <template #item="{ element }">
             <div
-              class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md cursor-move"
+              class="g-group-item flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md cursor-move"
               :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
               >
               <!-- 拖曳圖示 + symbol -->
@@ -52,7 +52,7 @@
       <div class="flex-1">
         
         <draggable
-          class="space-y-3 p-4 rounded-xl border border-gray-200 bg-gray-50 min-h-[220px]"
+          class="g-group space-y-3 p-4 rounded-xl min-h-[220px]"
           :list="assets"
           group="assets"
           item-key="symbol"
@@ -62,10 +62,10 @@
           <!-- 當沒有項目時顯示提示 -->
           <template #header>
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold mb-3 text-gray-700">{{ $t('allocation') }}</h3>
+              <h3 class="font-bold mb-3">{{ $t('allocation') }}</h3>
       
               <!-- Total target -->
-              <div class="text-sm font-semibold text-gray-700">
+              <div class="text-sm font-semibold">
                 Total:
                 <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
                   {{ totalTarget }}%
@@ -75,7 +75,7 @@
 
             
             <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
-              將左側的 <span class="font-medium text-gray-600">持有資產</span> 拖曳到此處<br />
+              將左側的持有資產拖曳到此處<br />
               或手動新增以建立你的資產配置
             </div>
           </template>
@@ -83,10 +83,10 @@
           <template #item="{ element, index }">
             <div
               v-if="!element.editable"
-              class="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition"
+              class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-sm hover:shadow-md transition"
             >
               <div>
-                <span class="font-bold text-gray-800 mr-2">{{ element.symbol }}</span>
+                <span class="font-bold mr-2">{{ element.symbol }}</span>
                 <!-- <span class="text-gray-500">{{ element.name }}</span> -->
               </div>
               <div class="flex items-center gap-2">
@@ -111,10 +111,10 @@
             <!-- 編輯模式 -->
              <div
                 v-else
-                class="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+                class="g-group-item flex justify-between items-center p-3 rounded-xl shadow-sm transition hover:shadow-md"
               >
-              <div class="font-medium text-gray-800">
-                <SymbolAutoComplete 
+              <div class="font-medium">
+                <SymbolAutoComplete
                   v-model="selectedSymbol"
                   @update="updateElement(element, $event)"
                 />
@@ -141,7 +141,7 @@
   
           <!-- 自行新增 -->
            <template #footer>
-            <div class="text-center text-gray-400 text-sm p-4 m-auto">
+            <div class="text-center text-sm p-4 m-auto">
               <Button @click="addAsset" icon="pi pi-plus" text label="Add Asset" />
             </div>
           </template>
@@ -304,3 +304,18 @@ const saveAllocation = async () => {
   toast.success("Allocation saved");
 };
 </script>
+<style scoped>
+.g-group {
+  background-color: var(--p-surface-card);
+  border: 1px solid var(--p-select-border-color);
+  color: var(--p-content-color);
+  transition: color 0.2s;
+}
+
+.g-group-item {
+  background-color: var(--p-surface-card);
+  border: 1px solid var(--p-select-border-color);
+  color: var(--p-content-color);
+  transition: color 0.2s;
+}
+</style>

@@ -274,10 +274,10 @@ header {
 </style>
 
 <style>
-  .p-card {
+  /* .p-card {
     border: 1px solid #d1d1d1;
     box-shadow: none!important;
-  }
+  } */
 
   .custom-select-root:hover {
     border: 1px solid rgb(121, 121, 121)!important;

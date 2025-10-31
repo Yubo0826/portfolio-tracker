@@ -39,29 +39,47 @@
           v-show="openDropdown === 'portfolio'"
           @mouseenter="cancelClose"
           @mouseleave="closeDropdown(180)"
-          class="absolute left-0 mt-2 w-48 rounded-md shadow bg-white ring-1 ring-[#ececec] ring-opacity-5 focus:outline-none z-10"
+          class="nav-menu absolute left-0 mt-2 w-48 rounded-md focus:outline-none z-10 transition-colors duration-200"
         >
           <div class="py-1 cursor-pointer">
-            <div @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 border-b border-gray-200 hover:bg-gray-100">
+            <!-- Portfolio link -->
+            <div
+              @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
+              class="nav-menu-item block text-left px-4 py-2 border-b transition-colors duration-150"
+              :style="{
+                borderColor: 'var(--p-select-border-color)',
+              }"
+            >
               <i class="pi pi-folder mr-2"></i>{{ t('portfolios') }}
             </div>
 
-            <!-- <div class="px-4 py-2 text-gray-500 border-b border-gray-200 cursor-default">
-              {{ portfolioStore.currentPortfolio.name }}
-            </div> -->
-
-            <div @click="$router.push('/portfolio/holdings'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+            <!-- Holdings -->
+            <div
+              @click="$router.push('/portfolio/holdings'); openDropdown = null; closeTimer = null;"
+              class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"
+            >
               {{ t('holdings') }}
             </div>
-            <div @click="$router.push('/portfolio/transactions'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+
+            <!-- Transactions -->
+            <div
+              @click="$router.push('/portfolio/transactions'); openDropdown = null; closeTimer = null;"
+              class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"
+            >
               {{ t('transactions') }}
             </div>
-            <div @click="$router.push('/portfolio/dividends'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+
+            <!-- Dividends -->
+            <div
+              @click="$router.push('/portfolio/dividends'); openDropdown = null; closeTimer = null;"
+              class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"
+            >
               {{ t('dividends') }}
             </div>
           </div>
         </div>
       </transition>
+
     </div>
 
     <!-- Allocation -->
@@ -93,18 +111,27 @@
           v-show="openDropdown === 'tool'"
           @mouseenter="cancelClose"
           @mouseleave="closeDropdown(180)"
-          class="absolute left-0 mt-2 w-48 rounded-md shadow bg-white ring-1 ring-[#ececec] ring-opacity-5 focus:outline-none z-10"
-        >
+          class="nav-menu absolute left-0 mt-2 w-48 rounded-md focus:outline-none z-10 transition-colors duration-200"
+          >
           <div class="py-1 cursor-pointer">
-            <div @click="$router.push('/allocation'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 border-b border-gray-200 hover:bg-gray-100">
+            <div @click="$router.push('/allocation'); openDropdown = null; closeTimer = null;" 
+              class="nav-menu-item block text-left px-4 py-2 border-b transition-colors duration-150"
+                :style="{
+                  borderColor: 'var(--p-select-border-color)',
+                }"
+              >
               <i class="pi pi-bullseye mr-2"></i>
               <!-- <i class="pi pi-cog mr-2"></i> -->
               {{ t('allocationSettings') }}
             </div>
-            <div @click="$router.push('/rebalancing'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+            <div @click="$router.push('/rebalancing'); openDropdown = null; closeTimer = null;" 
+              class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"
+              >
               {{ t('rebalance') }}
             </div>
-            <div @click="$router.push('/backtesting'); openDropdown = null; closeTimer = null;" class="block text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+            <div @click="$router.push('/backtesting'); openDropdown = null; closeTimer = null;" 
+              class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"
+              >
               {{ t('backtesting') }}
             </div>
           </div>
@@ -146,3 +173,21 @@ const cancelClose = () => {
   }
 }
 </script>
+
+<style>
+.nav-menu {
+  background-color: var(--p-surface-card);
+  color: var(--p-surface-400);
+  border: 1px solid var(--p-select-border-color);
+  transition: color 0.2s;
+}
+
+.nav-menu-item {
+  color: var(--p-content-color);
+  transition: color 0.2s;
+}
+
+.nav-menu-item:hover {
+  color: var(--p-primary-color);
+}
+</style>

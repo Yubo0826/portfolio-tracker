@@ -3,7 +3,7 @@
   <div>
       <ConfirmDialog></ConfirmDialog>
 
-      <div class="text-xl font-semibold mt-16" style="color: var(--p-text-color)">
+      <div class="text-xl font-semibold mt-16">
         {{ t('portfolios') }}
       </div>
 

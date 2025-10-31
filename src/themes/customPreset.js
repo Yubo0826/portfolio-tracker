@@ -4,17 +4,17 @@ import Aura from '@primeuix/themes/aura';
 export default definePreset(Aura, {
     semantic: {
       primary: {
-        50: '{indigo.50}',
-        100: '{indigo.100}',
-        200: '{indigo.200}',
-        300: '{indigo.300}',
-        400: '{indigo.400}',
-        500: '{indigo.500}',
-        600: '{indigo.600}',
-        700: '{indigo.700}',
-        800: '{indigo.800}',
-        900: '{indigo.900}',
-        950: '{indigo.950}'
+        50:  '{emerald.50}',
+        100: '{emerald.100}',
+        200: '{emerald.200}',
+        300: '{emerald.300}',
+        400: '{emerald.400}',
+        500: '{emerald.500}',
+        600: '{emerald.600}',
+        700: '{emerald.700}',
+        800: '{emerald.800}',
+        900: '{emerald.900}',
+        950: '{emerald.950}'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -23,41 +23,55 @@ export default definePreset(Aura, {
       colorScheme: {
         light: {
           primary: {
-            color: '{indigo.500}',
+            color: '{primary.500}',
             contrastColor: '#ffffff',
-            hoverColor: '{indigo.600}',
-            activeColor: '{indigo.700}'
+            hoverColor: '{primary.600}',
+            activeColor: '{primary.700}'
+          },
+          content: {
+            background: '{zinc.50}',
+            focusBackground: '{zinc.700}',
+            color: '{zinc.900}',
+            focusColor: '{zinc.900}'
           },
           surface: {
+              background: '#ffffff',
+              card: '#ffffff',
+              border: `1px solid var(--p-surface-borderColor)`,
               0: '#ffffff',
-              50: '{slate.50}',
-              100: '{slate.100}',
-              200: '{slate.200}',
-              300: '{slate.300}',
-              400: '{slate.400}',
-              500: '{slate.500}',
-              600: '{slate.600}',
-              700: '{slate.700}',
-              800: '{slate.800}',
-              900: '{slate.900}',
-              950: '{slate.950}'
+              50: '{zinc.50}',
+              100: '{zinc.100}',
+              200: '{zinc.200}',
+              300: '{zinc.300}',
+              400: '{zinc.400}',
+              500: '{zinc.500}',
+              600: '{zinc.600}',
+              700: '{zinc.700}',
+              800: '{zinc.800}',
+              900: '{zinc.900}',
+              950: '{zinc.950}'
           },
-          text: {
-            color: '{slate.600}',
-          },
-          custom: {
-            // 可以在這裡定義自訂的token
-          }
         },
         dark: {
           primary: {
-            color: '{indigo.400}',
+            color: '{primary.500}',
             contrastColor: '#ffffff',
-            hoverColor: '{indigo.300}',
-            activeColor: '{indigo.200}'
+            hoverColor: '{primary.300}',
+            activeColor: '{primary.200}'
+          },
+          content: {
+            // background: '#32323e',
+            background: '#242424',
+            focusBackground: 'rgba(250, 250, 250, .24)',
+            color: 'rgba(255,255,255,.87)',
+            focusColor: 'rgba(255,255,255,.87)'
           },
           surface: {
-            background: '#282832',
+            // background: '#272732',
+            // background: '#282832',
+            background: '#09090b',
+            // background: '#1a1a1e',
+            card: '#1a1a1e',
             0: '#ffffff',
             50: '{slate.50}',
             100: '{slate.100}',
@@ -71,46 +85,41 @@ export default definePreset(Aura, {
             900: '{slate.900}',
             950: '{slate.950}'
           },
-          text: {
-            color: '{zinc.100}',
         }
-      }
-    },
-    // 可以進一步針對特定元件覆寫樣式
+      },
+    // 可以進一步針對特定元件覆寫樣式，但失效目前找不到原因
     components: {
       button: {
         background: '{primary.color}',
-        color: '{primary.contrastColor}',
+        color:      '{primary.contrastColor}',
+        hoverBackground: '{primary.hoverColor}',
         outlined: {
           border: {
             color: '{primary.color}'
-          }
+          },
+          hoverBorderColor: '{primary.hoverColor}'
         }
       },
       card: {
-        background: '{surface.background}',
         colorScheme: {
           light: {
-            background: '{surface.background}',
-            color: '{surface.textColor}'
+            root: {
+              background: '{surface.card}',
+              color:      '{text.color}',
+              borderColor: '{border.color}',
+              shadow:     '{custom.shadow}'
+            }
           },
           dark: {
-            background: '{surface.background}',
-            color: '{surface.textColor}'
+            root: {
+              background: '{surface.card}',
+              color:      '{text.color}',
+              borderColor: '{border.color}',
+              shadow:     '{custom.shadow}'
+            }
           }
         }
-      },
-      dataTable: {
-        colorScheme: {
-          background: '{surface.background}',
-          headerBackground: '{surface.background}',
-          headerCellBackground: '{surface.background}',
-          headerCellBorderColor: '{zinc.200}',
-          headerColor: '{zinc.800}',
-          rowBackground: '{surface.background}',
-          rowHoverBackground: '{primary.hoverColor}',
-        }
-      },
+      }
     }
   }
 })

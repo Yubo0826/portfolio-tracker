@@ -6,9 +6,10 @@
         <div class="flex flex-col sm:flex-row w-full gap-4 mb-8">
 
           <!-- Total Value Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
+           <!-- :style="{ backgroundColor: 'var(--p-surface-background)' }" -->
+          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
+              <div class="flex items-center">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
               </div>
@@ -30,9 +31,9 @@
 
 
           <!-- Total Profit Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
+          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
+              <div class="flex items-center">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('totalProfit') }}
@@ -61,9 +62,9 @@
           
 
           <!-- XIRR Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md" :style="{ backgroundColor: 'var(--p-surface-background)' }">
+          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
             <template #title>
-              <div class="flex items-center" :style="{ color: 'var(--p-text-color)' }">
+              <div class="flex items-center">
                 <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('irr') }}
@@ -85,7 +86,7 @@
 
         <!-- 資產走勢圖 -->
         <div>
-          <Card :style="{ backgroundColor: 'var(--p-surface-background)' }">
+          <Card>
             <template #title>
               <div class="flex items-center justify-between mb-4">
                 <div class="text-sm">{{ $t('assetTrend') }}</div>
@@ -169,7 +170,7 @@
 
       <!-- 右半邊 圓餅圖 -->
       <div class="w-2/5">
-        <Card class="w-full" :style="{ backgroundColor: 'var(--p-surface-background)' }">
+        <Card class="w-full">
           <!-- title -->
           <template #title>
             <div class="flex items-center justify-between mb-4">
@@ -258,7 +259,7 @@
     </div>
 
     <!-- Holdings Table -->
-    <Card class="mb-8 mt-8 p-4" :style="{ backgroundColor: 'var(--p-surface-background)' }">
+    <Card class="mb-8 mt-8 p-4">
       <template #content>
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
           <Column field="name" :header="$t('currentAsset')">
