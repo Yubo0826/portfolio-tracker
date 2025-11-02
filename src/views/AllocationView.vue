@@ -1,12 +1,21 @@
 <template>
-  <div class="p-6">
-    <div>
+  <div>
+    <div class="flex justify-between">
       <h1 class="text-xl font-semibold pb-2">{{ $t('allocationSettings') }}</h1>
+      <!-- Save button -->
+      <div>
+          <Button
+            :label="$t('save')"
+            icon="pi pi-check"
+            size="small"
+            :disabled="saveButtonDisabled"
+            @click="saveAllocation"
+          />
+        </div>
     </div>
     <div class="flex gap-6 mt-6">
       <!-- Draggable 1: Holdings -->
       <div class="w-1/3">
-        
         <draggable
           class="g-group space-y-2 p-4 rounded-xl border"
           :list="sortedHoldings"
@@ -146,19 +155,6 @@
             </div>
           </template>
         </draggable>
-  
-        
-  
-        <!-- Save button -->
-        <div class="flex justify-end mt-4">
-          <Button
-            :label="$t('save')"
-            icon="pi pi-check"
-            size="small"
-            :disabled="saveButtonDisabled"
-            @click="saveAllocation"
-          />
-        </div>
       </div>
     </div>
   </div>

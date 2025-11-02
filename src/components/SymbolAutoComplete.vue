@@ -7,7 +7,7 @@
         @complete="debouncedSearch"
         :disabled="disabled"
         @item-select="onItemSelect"
-        placeholder="Search symbol"
+        :placeholder="$t('inputSymbol')"
         >
         <!-- forceSelection -->
         <template #option="slotProps">

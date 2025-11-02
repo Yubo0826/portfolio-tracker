@@ -10,6 +10,7 @@
         class="mr-2"
         icon="pi pi-trash"
         severity="secondary"
+        size="small"
       />
       <Button
         :label="$t('refresh')"
@@ -17,6 +18,7 @@
         icon="pi pi-refresh"
         class="mr-2"
         severity="secondary"
+        size="small"
       />
     </div>
 
@@ -26,7 +28,6 @@
       :loading="store.isLoading"
       dataKey="id"
       tableStyle="min-width: 50rem"
-      stripedRows 
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
       <Column field="symbol" sortable :header="$t('symbol')" />

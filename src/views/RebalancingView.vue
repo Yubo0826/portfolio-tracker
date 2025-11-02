@@ -68,7 +68,7 @@
 
     <!-- Unused Cash & Execute All -->
     <div v-if="isRebalancing" class="mt-4 flex justify-between items-center">
-      <div class="text-sm text-gray-600">
+      <div class="text-sm">
         {{ $t('unusedCash') }}：
         <span class="font-semibold">${{ leftoverCash.toFixed(2) }}</span>
       </div>

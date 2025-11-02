@@ -134,12 +134,13 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     console.log('saveTransactionBulk payload', payload);
 
+    isLoading.value = true;
     const result = await api.post(`/api/transactions/bulk`, payload);
 
     // 後端回傳最新 transactions / holdings
     if (result?.transactions) setTransactions(result.transactions);
     holdingsStore.fetchHoldings();
-
+    toast.success(t('importedSuccess'));
     return result;
   }
 

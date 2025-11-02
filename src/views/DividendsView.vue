@@ -7,6 +7,7 @@
         icon="pi pi-refresh"
         class="mr-2"
         severity="secondary"
+        size="small"
       />
     </div>
 

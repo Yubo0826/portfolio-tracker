@@ -3,10 +3,10 @@
     <template #header>
       <div class="inline-flex items-center justify-center gap-2">
         <!-- 標題 -->
-        <span v-if="editingId" class="font-bold whitespace-nowrap">更新交易明細</span>
+        <span v-if="editingId" class="font-bold whitespace-nowrap">{{ $t('editTransaction') }}</span>
         <!-- 選擇投資組合 -->
         <span class="font-bold" v-else>
-          新增交易至
+          {{ $t('addTransactionTo') }}
           <Select 
             v-model="selectedPortfolio"
             size="small" ref="PortfolioSelect" 
@@ -30,7 +30,7 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        代號 <span style="color:#f27362">*</span>
+        {{ $t('symbol') }} <span style="color:#f27362">*</span>
       </label>
       <SymbolAutoComplete
         v-model="form.symbol"
@@ -41,7 +41,7 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        購買日期 <span style="color:#f27362">*</span>
+        {{ $t('transactionDate') }} <span style="color:#f27362">*</span>
       </label>
       <DatePicker
         v-model="form.date"
@@ -57,7 +57,7 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        股數 <span style="color:#f27362">*</span>
+        {{ $t('share') }} <span style="color:#f27362">*</span>
       </label>
       <InputNumber v-model="form.shares" class="flex-auto" showButtons autocomplete="off" />
     </div>
@@ -71,40 +71,40 @@
 
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
-        購買價格 <span style="color:#f27362">*</span>
+        {{ $t('price') }} <span style="color:#f27362">*</span>
       </label>
-      <InputText v-model="form.price" class="flex-auto" autocomplete="off" placeholder="請輸入交易當時的價格" />
+      <InputText v-model="form.price" class="flex-auto" autocomplete="off" :placeholder="$t('pleaseInputPrice')" />
     </div>
 
     <div class="flex items-center gap-4 mb-8">
-      <label class="w-24">手續費</label>
+      <label class="w-24">{{ $t('fee') }}</label>
       <InputNumber v-model="form.fee" class="flex-auto" showButtons autocomplete="off" />
     </div>
 
     <div class="flex items-center gap-4 mb-8">
-      <label class="w-24">類型</label>
+      <label class="w-24">{{ $t('type') }}</label>
       <SelectButton v-model="form.operation" :options="transactionType" optionLabel="name" optionValue="code" />
     </div>
 
     <div style="border: .5px solid #eeee;"></div>
 
     <div class="flex items-center gap-4 my-8">
-      <label class="w-24">總和</label>
+      <label class="w-24">{{ $t('total') }}</label>
       ${{ totalPrice }} USD
     </div>
 
     <div class="flex justify-end gap-2">
-      <Button type="button" label="取消" severity="secondary" @click="close" />
+      <Button type="button" :label="$t('cancel')" severity="secondary" @click="close" />
       
       <!-- 儲存並新增額外項目 -->
       <span v-if="!editingId">
-        <Button v-if="hasError" type="button" label="儲存並新增額外" v-tooltip.bottom="'請填入完整信息'" disabled />
-        <Button v-else type="button" label="儲存並新增額外" @click="onSave(true)" />
+        <Button v-if="hasError" type="button" :label="$t('saveAndAddAnother')" v-tooltip.bottom="$t('completeInfo')" disabled />
+        <Button v-else type="button" :label="$t('saveAndAddAnother')" @click="onSave(true)" />
       </span>
 
       <!-- 儲存後關閉視窗 -->
-      <Button v-if="hasError" type="button" label="儲存" v-tooltip.bottom="'請填入完整信息'" disabled />
-      <Button v-else type="button" label="儲存" @click="onSave(false)" />
+      <Button v-if="hasError" type="button" :label="$t('save')" v-tooltip.bottom="$t('completeInfo')" disabled />
+      <Button v-else type="button" :label="$t('save')" @click="onSave(false)" />
 
     </div>
   </Dialog>
@@ -118,6 +118,9 @@ import { usePortfolioStore } from '@/stores/portfolio';
 import { useToast } from 'primevue/usetoast';
 const toast = useToast();
 
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+
 const props = defineProps({
     modelValue: { type: Boolean, default: false }, // 控制顯示
     editingId: { type: [Number, String, null], default: null }, // 若有值＝編輯
@@ -129,8 +132,8 @@ const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
 
 const transactionType = ref([
-  { name: '買入', code: 'buy' },
-  { name: '賣出', code: 'sell' },
+  { name: t('buy'), code: 'buy' },
+  { name: t('sell'), code: 'sell' },
 ]);
 
 const selectedPortfolio = ref(null);
@@ -263,13 +266,14 @@ const onSave = async (saveAnother = false) => {
     emit('saved', result);
     console.log('Transaction saved:', result);
     console.log('saveAnother:', saveAnother);
+    toast.success(props.editingId ? t('addTransactionSuccess') : t('editTransactionSuccess'));
     if (saveAnother) {
       form.value = emptyForm();
     } else {
       close();
     }
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Error saving transaction', life: 3000 });
+    toast.error(err.message || 'Error saving transaction')
   }
 };
 

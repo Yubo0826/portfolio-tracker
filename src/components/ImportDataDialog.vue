@@ -2,7 +2,7 @@
     <Dialog v-model:visible="localVisible" modal :style="{ width: '40rem' }">
       <template #header>
         <div class="inline-flex items-center gap-2">
-          <i class="pi pi-upload text-purple-500"></i>
+          <i class="pi pi-upload text-[var(--p-primary-500)]"></i>
           <span class="font-bold">匯入交易資料至</span>
 
           <!-- 選擇投資組合 -->
@@ -29,28 +29,33 @@
     
       <!-- 拖拉區 -->
       <div
-        class="border-2 border-dashed border-purple-400 rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-purple-50"
+        class="border-2 border-dashed rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-[var(--p-primary-50)]"
+        :style="{ borderColor: 'var(--p-primary-400)' }"
         @dragover.prevent
         @drop.prevent="handleDrop"
         @click="triggerFileInput"
       >
-        <i class="pi pi-cloud-upload text-purple-500 text-5xl mb-4"></i>
-        <p class="text-xl font-semibold text-purple-600">匯入檔案</p>
+        <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
+        <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">匯入檔案</p>
         <p class="text-gray-500">拖曳或點擊以上傳 CSV / Excel</p>
         <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
       </div>
     
       <!-- 格式說明 -->
       <Message severity="info" class="mt-4">
-        檔案需包含以下欄位：
-        <strong>date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)</strong>
-        <!-- 下載範例 CSV -->
-        <button
-            @click="downloadSampleCSV"
-            class="ml-4 px-3 py-1 border rounded bg-purple-100 hover:bg-purple-200 text-purple-700 text-sm"
-        >
-            下載範例 CSV
-        </button>
+        <div class="flex justify-between">
+          <span>
+            檔案需包含以下欄位：
+            <strong>date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)</strong>
+          </span>
+          <!-- 下載範例 CSV -->
+          <button
+              @click="downloadSampleCSV"
+              class="ml-4 px-3 py-1 border rounded border-[var(--p-primary-400)] bg-[var(--p-primary-100)] hover:bg-[var(--p-primary-200)] text-[var(--p-primary-700)] text-sm"
+          >
+              下載範例 CSV
+          </button>
+        </div>
       </Message>
     
       <!-- 預覽區 (匯入後才顯示) -->
@@ -59,12 +64,14 @@
             <h3 class="font-semibold">預覽資料：</h3>
 
             <Paginator 
-                :rows="rowsPerPage"
-                :totalRecords="previewData.length" 
-                template=" PrevPageLink CurrentPageReport NextPageLink "
-                currentPageReportTemplate="{first} - {last} ({totalRecords})"
+              :rows="rowsPerPage"
+              :totalRecords="previewData.length" 
+              :first="first"
+              @page="onPage"
+              template=" PrevPageLink CurrentPageReport NextPageLink "
+              currentPageReportTemplate="{first} to {last} of {totalRecords}"
             />
-            
+
         </div>
         <DataTable
             :value="paginatedData" 
@@ -288,29 +295,79 @@ function closeDialog() {
 }
 
 async function confirmImport() {
-    // 檢查代碼是否真實存在
-    const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))];
+  if (!selectedPortfolio.value) {
+    toast.error('請選擇投資組合', '');
+    return;
+  }
 
-    let nonexistentSymbols = []
-    for (const symbol of symbolList) {
-      const query = await api.get('/api/yahoo/symbol?query=' + symbol)
-      if (query.length === 0) {
-        nonexistentSymbols.push(symbol)
+  const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))];
+  let nonexistentSymbols = [];
+  const symbolDetails = {};
+
+  for (const symbol of symbolList) {
+    try {
+      const query = await api.get('/api/yahoo/symbol?query=' + symbol);
+
+      if (!query || query.length === 0) {
+        nonexistentSymbols.push(symbol);
+        continue;
       }
+
+      // 找出最合適的那一筆（優先 NMS/NASDAQ、quoteType: EQUITY）
+      const matched =
+        query.find(q => q.exchange === 'NMS' && q.quoteType === 'EQUITY') ||
+        query.find(q => q.quoteType === 'EQUITY') ||
+        query[0];
+
+      symbolDetails[symbol] = {
+        name: matched.longname || matched.shortname || '',
+        assetType: matched.quoteType || '',
+      };
+    } catch (err) {
+      console.error('查詢 symbol 錯誤:', symbol, err);
+      nonexistentSymbols.push(symbol);
     }
+  }
 
-    console.log('Nonexistent symbols:', nonexistentSymbols);
-    console.log(t('symbolsNotFound', { symbols: nonexistentSymbols.join(', ') }))
+  // 若有不存在的代號
+  if (nonexistentSymbols.length > 0) {
+    toast.error(
+      t('symbolsNotFound'),
+      nonexistentSymbols.join(', ')
+    );
+    return;
+  }
 
-    if (nonexistentSymbols.length > 0) {
-      toast.error(t('symbolsNotFound'), nonexistentSymbols.join(', '))
-      return
+  // 補齊 previewData 的 name 和 assetType
+  previewData.value = previewData.value.map(trade => {
+    const details = symbolDetails[trade.symbol];
+    if (details) {
+      return {
+        ...trade,
+        name: details.name,
+        assetType: details.assetType,
+      };
     }
+    return trade;
+  });
 
-    // 沒問題的話就批次匯入
-    const result = await store.saveTransactionBulk(previewData.value, selectedPortfolio.value.id)
-    console.log('Bulk import result:', result)
-    toast.success(t('importSuccess'), '')
-    closeDialog()
+  // 執行批次匯入
+  try {
+    const result = await store.saveTransactionBulk(
+      previewData.value,
+      selectedPortfolio.value.id
+    );
+  
+    console.log('Bulk import result:', result);
+    toast.success(t('importSuccess'), '');
+    closeDialog();
+  } catch (e) {
+    toast.error(t('importFailed'), e.message || '');
+  }
+}
+
+function onPage(event) {
+  first.value = event.first
+  rowsPerPage.value = event.rows
 }
 </script>

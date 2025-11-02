@@ -3,10 +3,10 @@
   <GlobalLoading />
 
   <div class="flex flex-col min-h-screen">
-    <!-- Main content -->
-    <div class="container flex-grow mx-auto p-4">
-      <header>
-        <div class="flex justify-between items-center mb-8">
+    <div class="w-full flex-grow mx-auto p-4">
+      <!-- Header -->
+      <header class="px-4">
+        <div class="flex justify-between items-center">
           <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer">
             <span class="text-gray-500">Stock</span>
             <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
@@ -33,7 +33,7 @@
             />
     
             <Button
-              @click="$i18n.locale = $i18n.locale === 'en' ? 'zh-TW' : 'en'"
+              @click="toggleLanguage"
               class="p-button-rounded p-button-text"
               icon="pi pi-language"
               aria-label="Language"
@@ -53,51 +53,58 @@
           </div>
         </div>
       </header>
-    
-      <div v-if="!isAssetRoute" class="flex items-center justify-between mb-4 py-4">
-        <div>
-          <a class="font-bold" @click="$router.push('/portfolios')" :style="{ color: 'var(--p-primary-color)' }">
-            {{ $t('allPortfolios') }}
-          </a>
-            / 
-          <!-- 選擇投資組合 -->
-          <Select 
-            v-model="selectedPortfolio" 
-            size="middle" ref="PortfolioSelect" 
-            :options="portfolioStore.portfolios" optionLabel="name" checkmark 
-            :highlightOnSelect="false" class="m-2"
-            >
-            <!-- :pt="{
-              root: { 
-                style: { border: '1px solid transparent', boxShadow: 'none' },
-                class: 'custom-select-root' 
-              }
-            }" -->
-            <template #header>
-                <div class="p-3">
-                    <span class="font-bold">{{ $t('currentPortfolio') }}</span>
-                </div>
-            </template>
-            <template #dropdownicon>
-              <i class="pi pi-chevron-down" style="font-size: .75rem"></i>
-            </template>
-            <template #footer>
-                <div class="p-3 border-t-1 border-gray-200">
-                    <Button :label="$t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
-                </div>
-            </template>
-          </Select>
+      
+      <!-- Main Content -->
+      <div class="px-4">
+        <!-- portfolios drop select ＋ buttons bar -->
+        <div v-if="!isAssetRoute" class="flex items-center justify-between py-4">
+          <div>
+            <!-- <a class="font-bold" @click="$router.push('/portfolios')" :style="{ color: 'var(--p-primary-color)' }">
+              {{ $t('allPortfolios') }}
+            </a>
+              /  -->
+            
+            {{ $t('currentPortfolio') }}
+
+            <!-- 選擇投資組合 -->
+            <Select 
+              v-model="selectedPortfolio" 
+              size="small" ref="PortfolioSelect" 
+              :options="portfolioStore.portfolios" optionLabel="name" checkmark 
+              :highlightOnSelect="false" class="m-2"
+              >
+              <!-- :pt="{
+                root: { 
+                  style: { border: '1px solid transparent', boxShadow: 'none' },
+                  class: 'custom-select-root' 
+                }
+              }" -->
+              <template #header>
+                  <div class="p-3">
+                      <span class="font-bold">{{ $t('currentPortfolio') }}</span>
+                  </div>
+              </template>
+              <template #dropdownicon>
+                <i class="pi pi-chevron-down" style="font-size: .75rem"></i>
+              </template>
+              <template #footer>
+                  <div class="p-3 border-t-1 border-gray-200">
+                      <Button :label="$t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid severity="secondary" text size="small" />
+                  </div>
+              </template>
+            </Select>
+          </div>
+      
+          <div v-if="noShowAddInvestmentButton">
+            <Button @click="transctionDialogVisible = true" type="button" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+            <Button @click="importDataDialogVisible = true" type="button" size="small" :label="$t('import')" icon="pi pi-file-import" class="ml-2"></Button>
+            <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
+          </div>
+          
         </div>
-    
-        <div v-if="noShowAddInvestmentButton">
-          <Button @click="transctionDialogVisible = true" type="button" :label="$t('addInvestment')" icon="pi pi-plus" class="mr-2" />
-          <Button @click="importDataDialogVisible = true" type="button" :label="$t('import')" icon="pi pi-file-import" class="mr-2"></Button>
-          <!-- <Button type="button" :label="$t('rebalance')" @click="$router.push('/rebalancing')" icon="pi pi-building-columns" rounded /> -->
-        </div>
-        
+
+        <RouterView />
       </div>
-    
-      <RouterView />
     </div>
   
     <Footer></Footer>
@@ -145,6 +152,9 @@ import Footer from './components/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
 import GlobalLoading from "@/components/GlobalLoading.vue";
+
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
 
 const dialogVisible = ref(false);
 const importDataDialogVisible = ref(false);
@@ -223,17 +233,31 @@ const toggleDarkMode = () => {
   }
 };
 
+const toggleLanguage = () => {
+  const newLocale = locale.value === 'en' ? 'zh-TW' : 'en';
+  locale.value = newLocale;
+  localStorage.setItem('locale', newLocale);
+};
+
 const noShowAddInvestmentButton = computed(() => {
   const hideOnRoutes = ['portfolios', 'backtesting', 'rebalancing'];
   return !hideOnRoutes.includes(route.name);
 });
 
-// 初始載入：套用 localStorage 的偏好
+// 初始載入：
 onMounted(() => {
+  // 套用 localStorage 的主題偏好
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'dark') {
     isDark.value = true;
     document.documentElement.classList.add('my-app-dark');
+  }
+
+  // 套用 localStorage 的語系偏好
+  console.log('locale', locale.value);
+  const savedLocale = localStorage.getItem('locale');
+  if (savedLocale && savedLocale !== locale.value) {
+    locale.value = savedLocale;
   }
 });
 
@@ -274,11 +298,6 @@ header {
 </style>
 
 <style>
-  /* .p-card {
-    border: 1px solid #d1d1d1;
-    box-shadow: none!important;
-  } */
-
   .custom-select-root:hover {
     border: 1px solid rgb(121, 121, 121)!important;
   }
