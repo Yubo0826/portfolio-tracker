@@ -3,6 +3,7 @@
   <GlobalLoading />
 
   <div class="flex flex-col min-h-screen">
+    <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
     <div class="w-full flex-grow mx-auto p-4 max-w-screen-xl">
       <!-- Header -->
       <header class="px-4 mb-4">

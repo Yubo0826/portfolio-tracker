@@ -1,5 +1,6 @@
 <template>
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+  <!-- px-4 sm:px-6 lg:px-8 -->
+  <div class="container mx-auto mt-4">
     <!-- 左右兩欄：桌機並排，小螢幕上下堆疊 -->
     <div class="flex flex-col lg:flex-row gap-6">
 
@@ -78,6 +79,11 @@
               </div>
               <div v-else class="text-2xl font-bold text-gray-400 mt-2">--</div>
             </template>
+            <template #footer>
+              <div class="text-sm mt-2 sm:mt-4 opacity-0">
+                1
+              </div>
+            </template>
           </Card>
         </div>
 
@@ -134,7 +140,12 @@
           <template #title>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
-              <Button unstyled :label="$t('goSetTargets')" icon="pi pi-cog" @click="$router.push('allocation')" :pt="{ root: { class: 'inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" />
+              <Button 
+                unstyled 
+                :label="$t('goSetTargets')" 
+                icon="pi pi-cog"
+                 @click="$router.push('allocation')" 
+                 :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" />
             </div>
           </template>
 
@@ -453,11 +464,17 @@ const allocationSeries = computed(() => allocation.value.map(a => a.target))
 const holdingsChart = computed(() => ({
   chart: { type: 'donut' },
   labels: holdingsStore.list.map(h => h.symbol),
+  legend: {
+    labels: { colors: 'var(--p-content-color)' },
+  },
   responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }]
 }))
 const allocationChart = computed(() => ({
   chart: { type: 'donut' },
   labels: allocation.value.map(a => a.symbol),
+  legend: {
+    labels: { colors: 'var(--p-content-color)' },
+  },
   responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }]
 }))
 

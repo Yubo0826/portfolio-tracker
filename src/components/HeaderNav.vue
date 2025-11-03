@@ -41,11 +41,11 @@
           @mouseleave="closeDropdown(180)"
           class="nav-menu absolute left-0 mt-2 w-48 rounded-md focus:outline-none z-10 transition-colors duration-200"
         >
-          <div class="py-1 cursor-pointer">
+          <div class="cursor-pointer">
             <!-- Portfolio link -->
             <div
               @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
-              class="nav-menu-item block text-left px-4 py-2 border-b transition-colors duration-150"
+              class="nav-menu-item block text-left px-4 py-3 border-b transition-colors duration-150"
               :style="{
                 borderColor: 'var(--p-select-border-color)',
               }"
@@ -113,16 +113,17 @@
           @mouseleave="closeDropdown(180)"
           class="nav-menu absolute left-0 mt-2 w-48 rounded-md focus:outline-none z-10 transition-colors duration-200"
           >
-          <div class="py-1 cursor-pointer">
+          <div class="cursor-pointer">
             <div @click="$router.push('/allocation'); openDropdown = null; closeTimer = null;" 
-              class="nav-menu-item block text-left px-4 py-2 border-b transition-colors duration-150"
+              class="nav-menu-item text-left px-4 py-3 border-b transition-colors duration-150 flex items-center"
                 :style="{
                   borderColor: 'var(--p-select-border-color)',
                 }"
               >
-              <i class="pi pi-bullseye mr-2"></i>
-              <!-- <i class="pi pi-cog mr-2"></i> -->
-              {{ t('allocationSettings') }}
+              <!-- <i class="pi pi-bullseye mr-2"></i> -->
+              <i class="pi pi-cog mr-2"></i>
+              <!-- {{ t('allocationSettings') }} -->
+                {{ t('goSetTargets') }}
             </div>
             <div @click="$router.push('/rebalancing'); openDropdown = null; closeTimer = null;" 
               class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"
