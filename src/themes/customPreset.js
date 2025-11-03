@@ -16,6 +16,7 @@ export default definePreset(Aura, {
         900: '{teal.900}',
         950: '{teal.950}'
       },
+      textSecondaryColor: '{zinc.600}',
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
           https://primevue.org/theming/styled/#colors
@@ -61,7 +62,8 @@ export default definePreset(Aura, {
           },
           content: {
             // background: '#32323e',
-            background: '#242424',
+            // background: '#242424',
+            background: '#141f34',
             focusBackground: 'rgba(250, 250, 250, .24)',
             color: 'rgba(255,255,255,.87)',
             focusColor: 'rgba(255,255,255,.87)'

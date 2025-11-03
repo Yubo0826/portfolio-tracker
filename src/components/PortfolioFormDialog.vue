@@ -38,7 +38,7 @@
     </div>
 
     <div class="flex items-center gap-4 mb-8">
-      <label for="enableEmailAlert">Email通知</label>
+      <label for="enableEmailAlert">{{ $t('emailAlert') }}</label>
       <ToggleSwitch id="enableEmailAlert" v-model="newPortfolio.enable_email_alert" />
     </div>
 

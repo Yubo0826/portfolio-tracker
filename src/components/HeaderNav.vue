@@ -86,7 +86,7 @@
     <div class="relative inline-block">
       <!-- icon="pi pi-chevron-down" -->
        <!-- to="/allocation" -->
-      <RouterLink>
+      <RouterLink to="/allocation">
         <Button
           :label="t('allocation')"
           iconPos="right"

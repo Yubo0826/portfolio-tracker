@@ -1,13 +1,15 @@
 <template>
-  <div>
-    <div class="flex gap-4">
-      <!-- 左半邊 -->
-      <div class="w-3/5">
-        <div class="flex flex-col sm:flex-row w-full gap-4 mb-8">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- 左右兩欄：桌機並排，小螢幕上下堆疊 -->
+    <div class="flex flex-col lg:flex-row gap-6">
 
-          <!-- Total Value Card -->
-           <!-- :style="{ backgroundColor: 'var(--p-surface-background)' }" -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+      <!-- 左半邊（統計卡 + 走勢圖） -->
+      <div class="w-full lg:w-3/5 flex flex-col gap-6">
+        
+        <!-- 三張統計卡 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Total Value -->
+          <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
                 <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
@@ -23,15 +25,14 @@
               </div>
             </template>
             <template #footer>
-              <div class="text-sm mt-4">
+              <div class="text-sm mt-2 sm:mt-4">
                 {{ $t('baseCurrency', { code: 'USD' }) }}
               </div>
             </template>
           </Card>
 
-
-          <!-- Total Profit Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+          <!-- Total Profit -->
+          <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
                 <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
@@ -50,7 +51,7 @@
               </div>
             </template>
             <template #footer>
-              <div class="text-sm mt-4">
+              <div class="text-sm mt-2 sm:mt-4">
                 {{ $t('roi') }}
                 <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                   {{ annualReturn.toFixed(2) }}%
@@ -59,19 +60,15 @@
               </div>
             </template>
           </Card>
-          
 
-          <!-- XIRR Card -->
-          <Card class="w-full md:w-1/2 rounded-xl shadow-md">
+          <!-- XIRR -->
+          <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
                 <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('irr') }}
-                  <i
-                    class="pi pi-question-circle"
-                    v-tooltip.bottom="$t('xirrHint')"
-                  />
+                  <i class="pi pi-question-circle" v-tooltip.bottom="$t('xirrHint')" />
                 </div>
               </div>
             </template>
@@ -85,169 +82,114 @@
         </div>
 
         <!-- 資產走勢圖 -->
-        <div>
-          <Card>
-            <template #title>
-              <div class="flex items-center justify-between mb-4">
-                <div class="text-sm">{{ $t('assetTrend') }}</div>
-
-                <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
-                    <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                      <!-- 變化%數 -->
-                      <span v-if="growthRate >= 0">
-                        <i class="fas fa-arrow-right -rotate-45"></i>
-                      </span>
-                      <span v-else>
-                        <i class="fas fa-arrow-right rotate-45"></i>
-                      </span>
-                      <span class="font-semibold ml-1 mr-2">{{  Math.abs(growthRate) }}%</span>
-
-                      <!-- 變化數值 -->
-                      (<span v-if="growthRate >= 0">+</span>
-                      <span v-else>-</span>
-                      <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
-                    </div>
-                  </Tag>
-                
-                </div>
-
-                <div class="flex items-center gap-2 mt-4 select-none">
-                  <Button
-                    v-for="tab in periods"
-                    :key="tab.label"
-                    :label="tab.label"
-                    text
-                    rounded
-                    unstyled
-                    @click="selectedPeriod = tab.value"
-                    class="px-4 py-2.5 text-xs rounded-lg cursor-pointer
-                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
-                    :style="{
-                      backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
-                      fontWeight: selectedPeriod === tab.value ? '600' : '400'
-                    }"
-                  />
-                    <!-- :class="[
-                      selectedPeriod === tab.value
-                        ? 'bg-[#e9ebf0] font-semibold'
-                        : 'text-slate-500 hover:text-slate-900'
-                    ]" -->
-                </div>
-
-              <!-- <div class="flex justify-between items-center mt-4 text-sm">
-                <Tabs 
-                  v-model:value="selectedPeriod"
-                  >
-                    <TabList
-                      :pt="{
-                        tabList: { style: { borderWidth: '0px' } },
-                        content: { style: { borderWidth: '0px' } },
-                      }"
-                    >
-                        <Tab v-for="tab in periods" :key="tab.label" :value="tab.value">{{ tab.label }}</Tab>
-                    </TabList>
-                </Tabs>
-
-                <span class="text-[#5f6368] text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
-              </div> -->
-
-              <div class="flex items-center justify-end mb-2">
-                
-              </div>
-            </template>
-            <template #content>
-              <StockChart
-                type="area"
-                :options="chartOptions"
-                :series="chartSeries"
-                @update:date="fetchChartData"
-                height="300"
-              />
-            </template>
-          </Card>
-        </div>
-      </div>
-
-      <!-- 右半邊 圓餅圖 -->
-      <div class="w-2/5">
-        <Card class="w-full">
-          <!-- title -->
+        <Card>
           <template #title>
-            <div class="flex items-center justify-between mb-4">
-              <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
+              <div class="text-sm">{{ $t('assetTrend') }}</div>
+
+              <Tag :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
+                <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                  <i v-if="growthRate >= 0" class="fas fa-arrow-right -rotate-45"></i>
+                  <i v-else class="fas fa-arrow-right rotate-45"></i>
+                  <span class="font-semibold ml-1 mr-2">{{ Math.abs(growthRate) }}%</span>
+                  (<span v-if="growthRate >= 0">+</span><span v-else>-</span>
+                  <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
+                </div>
+              </Tag>
+            </div>
+
+            <!-- 切換期間按鈕 -->
+            <div class="flex flex-wrap justify-center sm:justify-start gap-2">
               <Button
+                v-for="tab in periods"
+                :key="tab.label"
+                :label="tab.label"
+                text
+                rounded
                 unstyled
-                :label="$t('goSetTargets')"
-                icon="pi pi-bullseye"
-                @click="$router.push('allocation')"
-                :pt="{
-                  root: {
-                    class:
-                      'inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' +
-                      'text-sm font-medium text-slate-700 ' +
-                      'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' +
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' +
-                      'transition' + ' cursor-pointer'
-                  },
-                  icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' },
-                  label: { class: 'order-1' }
+                @click="selectedPeriod = tab.value"
+                class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
+                :style="{
+                  backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
+                  fontWeight: selectedPeriod === tab.value ? '600' : '400'
                 }"
               />
             </div>
           </template>
 
-          <!-- Pie -->
           <template #content>
-            <div v-if="holdingsStore.list.length > 0" class="flex justify-between items-center mb-4">
-              <apexchart
-                v-if="selectedPieType === 'actual'"
-                width="380"
-                type="donut"
-                :options="holdingsChart"
-                :series="holdingsSeries" />
-              <apexchart
-                v-else
-                width="380"
-                type="donut"
-                :options="allocationChart"
-                :series="allocationSeries" />
-            </div>
-            <div v-else>
-              <div class="flex flex-col items-center text-center gap-3 py-8">
-                <img class="w-80 h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
-                <!-- 標題 -->
-                <h2 class="text-xl sm:text-2xl font-semibold">
-                  {{ $t('portfolioNoHoldingsTitle') }}
-                </h2>
-                <!-- 說明文字 -->
-                <p class="text-sm sm:text-base">
-                  {{ $t('portfolioNoHoldingsDesc') }}
-                </p>
-              </div>
+            <StockChart
+              type="area"
+              :options="chartOptions"
+              :series="chartSeries"
+              height="300"
+            />
+          </template>
+        </Card>
+      </div>
+
+      <!-- 右半邊圓餅圖（縮小會掉到下方） -->
+      <div class="w-full lg:w-2/5">
+        <Card class="w-full">
+          <template #title>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
+              <Button unstyled :label="$t('goSetTargets')" icon="pi pi-cog" @click="$router.push('allocation')" :pt="{ root: { class: 'inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" />
             </div>
           </template>
 
-          <!-- Footer -->
+          <template #content>
+            <div v-if="holdingsStore.list.length > 0" class="flex justify-center items-center py-4">
+              <apexchart
+                v-if="selectedPieType === 'actual'"
+                width="100%"
+                height="280"
+                type="donut"
+                :options="holdingsChart"
+                :series="holdingsSeries"
+              />
+              <apexchart
+                v-else
+                width="100%"
+                height="280"
+                type="donut"
+                :options="allocationChart"
+                :series="allocationSeries"
+              />
+            </div>
+
+            <div v-else class="flex flex-col items-center text-center gap-3 py-8">
+              <img class="w-60 h-60 sm:w-80 sm:h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
+              <h2 class="text-lg sm:text-xl font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
+              <p class="text-sm sm:text-base text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
+            </div>
+          </template>
+
           <template #footer>
-            <div v-if="holdingsStore.list.length > 0" class="w-full max-w-md rounded-2xl border border-slate-200 p-4 shadow-sm">
-              <div class="mb-2 grid grid-cols-2">
-                <div class="text-[13px] font-medium">{{ $t('diffFromTargetTitle') }}</div>
-                <div class="text-right text-[13px]">{{ $t('diffLegend') }}</div>
+            <div
+              v-if="holdingsStore.list.length > 0"
+              class="w-full max-w-md mx-auto rounded-2xl border border-slate-200 p-4 shadow-sm"
+            >
+              <div class="mb-2 grid grid-cols-2 text-[13px] font-medium">
+                <div>{{ $t('diffFromTargetTitle') }}</div>
+                <div class="text-right">{{ $t('diffLegend') }}</div>
               </div>
 
               <div class="divide-y divide-slate-100">
-                <div v-for="r in rebalanceRows" :key="r.symbol" class="grid grid-cols-2 items-center py-2">
+                <div
+                  v-for="r in rebalanceRows"
+                  :key="r.symbol"
+                  class="grid grid-cols-2 items-center py-2 text-sm"
+                >
                   <div class="flex items-center gap-3">
-                    <div class="w-10 shrink-0">{{ r.symbol }}</div>
-                    <span :class="['inline-flex items-center gap-1.5 font-medium', r.change > 0 ? 'text-emerald-600' : 'text-rose-600']">
-                      <span class="leading-none text-sm">
-                        <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45"></i>
-                        <i v-else class="fas fa-arrow-right rotate-45"></i>
-                      </span>
-                      <span class="tabular-nums">{{ Math.abs(r.change).toFixed(1) }}%</span>
+                    <div class="w-10 shrink-0 font-medium">{{ r.symbol }}</div>
+                    <span :class="r.change > 0 ? 'text-emerald-600' : 'text-rose-600'">
+                      <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45"></i>
+                      <i v-else class="fas fa-arrow-right rotate-45"></i>
+                      <span class="ml-1">{{ Math.abs(r.change).toFixed(1) }}%</span>
                     </span>
                   </div>
-                  <div class="text-right tabular-nums font-medium">
+                  <div class="text-right font-medium">
                     {{ formatUSD(r.amount) }}
                   </div>
                 </div>
@@ -325,6 +267,7 @@
     </Card>
   </div>
 </template>
+
 
 <script setup>
 /* =========================

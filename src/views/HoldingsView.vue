@@ -30,8 +30,15 @@
       tableStyle="min-width: 50rem"
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
-      <Column field="symbol" sortable :header="$t('symbol')" />
-      <Column field="name" sortable :header="$t('name')" />
+      <Column field="symbol" sortable :header="$t('symbol')">
+        <template #body="{ data }">
+          <div>
+            <span class="font-medium">{{ data.symbol }}</span>
+            <div class="text-sm text-[var(--p-surface-400)] mt-1">{{ data.name }}</div>
+          </div>
+        </template>
+      </Column>
+      <!-- <Column field="name" sortable :header="$t('name')" /> -->
       <Column field="shares" sortable :header="$t('shares')" />
       <Column field="totalCost" sortable :header="$t('totalCost')" />
       <Column field="currentPrice" sortable :header="$t('currentPrice')" />

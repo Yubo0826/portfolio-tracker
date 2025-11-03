@@ -27,7 +27,7 @@
           <template #header>
             <div class="mb-4">
               <h3 class="font-bold mr-2">{{ $t('holdings') }}</h3>
-              <p class="text-sm mt-2" :style="{ color: 'var(--p-textSecondaryColor)' }">可拖曳到右方快速新增</p>
+              <p class="text-sm mt-1 text-gray-400">{{ $t('dragAndDropHint') }}</p>
             </div>
           </template>
           <template #item="{ element }">
@@ -36,22 +36,20 @@
               :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
               >
               <!-- 拖曳圖示 + symbol -->
-              <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+              <div>
+                <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h.01M8 15h.01M12 9h.01M12 15h.01M16 9h.01M16 15h.01" />
-                </svg>
-                <span class="mx-2">
+                </svg> -->
+                <div class="mx-2 mb-1">
                   {{ element.symbol }}
-                </span>
-                <span v-if="existsInAllocation(element.symbol)" class="text-xs">
+                </div>
+                <div v-if="existsInAllocation(element.symbol)" class="text-xs">
                   （{{ $t('in_allocation') }}）
-                </span>
+                </div>
               </div>
               <!-- 比例 -->
               <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
-
-              
             </div>
           </template>
         </draggable>
@@ -67,46 +65,53 @@
           item-key="symbol"
           move="(evt) => false"
           @add="onDrop"
+          draggable="false"
         >
           <!-- 當沒有項目時顯示提示 -->
           <template #header>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold mb-3">{{ $t('allocation') }}</h3>
-      
-              <!-- Total target -->
-              <div class="text-sm font-semibold">
-                Total:
-                <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
-                  {{ totalTarget }}%
-                </span>
+            <div class="mb-4">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold">{{ $t('allocation') }}</h3>
+                    <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
+                  {{ $t('dragAndDropHint2') }}
+                </div>
+                
+                <!-- Total target -->
+                <div class="text-sm font-semibold">
+                  {{ $t('total') }}:
+                  <span :class="totalTarget === 100 ? 'text-green-600' : 'text-red-600'">
+                    {{ totalTarget }}%
+                  </span>
+                </div>
               </div>
-            </div>
-
-            
-            <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
-              將左側的持有資產拖曳到此處<br />
-              或手動新增以建立你的資產配置
+  
+              <p class="text-sm mt-1 text-gray-400">{{ $t('dragAndDropHint3') }}</p>
             </div>
           </template>
   
           <template #item="{ element, index }">
-            <div
-              v-if="!element.editable"
-              class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-sm hover:shadow-md transition"
-            >
+            <div v-if="!element.editable" class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-sm hover:shadow-md transition">
+              <!-- 股票名字 -->
               <div>
                 <span class="font-bold mr-2">{{ element.symbol }}</span>
-                <!-- <span class="text-gray-500">{{ element.name }}</span> -->
               </div>
-              <div class="flex items-center gap-2">
-                <InputNumber
-                  v-model="element.target"
-                  suffix="%"
-                  :min="0"
-                  :max="100"
-                  size="small"
-                  input-class="text-right"
-                />
+
+              <!-- 比例 -->
+              <div class="flex items-center gap-8">
+                <div class="flex justify-center">
+                    <div class="w-40 mr-2">
+                      <!-- suffix="%" -->
+                        <InputNumber
+                          v-model="element.target"
+                          :min="0"
+                          :max="100"
+                          size="small"
+                          class="w-full"
+                        />
+                        <Slider v-model="element.target" class="w-full mt-4" />
+                    </div>
+                </div>
+                
                 <Button
                   icon="pi pi-times"
                   text
@@ -151,7 +156,7 @@
           <!-- 自行新增 -->
            <template #footer>
             <div class="text-center text-sm p-4 m-auto">
-              <Button @click="addAsset" icon="pi pi-plus" text label="Add Asset" />
+              <Button @click="addAsset" icon="pi pi-plus" text :label="$t('addAsset')" />
             </div>
           </template>
         </draggable>
@@ -163,6 +168,7 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import Slider from "primevue/slider";
 import draggable from "vuedraggable";
 import * as toast from '@/composables/toast';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
@@ -309,7 +315,7 @@ const saveAllocation = async () => {
 }
 
 .g-group-item {
-  background-color: var(--p-surface-card);
+  background-color: var(--p-content-background);
   border: 1px solid var(--p-select-border-color);
   color: var(--p-content-color);
   transition: color 0.2s;

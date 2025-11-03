@@ -184,6 +184,19 @@ allocation:
 allocationSettings:
   en: Allocation Settings
   zh: 設定配置
+dragAndDropHint:
+  en: Drag and drop to quickly add
+  zh: 可拖曳到右方快速新增
+dragAndDropHint2:
+  en: Drag holdings from the left here, or add manually to create your portfolio allocation
+  zh: 將左側的持有資產拖曳到此處，或手動新增以建立你的資產配置
+dragAndDropHint3:
+  en: Set target allocation for each asset
+  zh: 為每個資產設定目標配置比例
+addAsset:
+  en: Add Asset
+  zh: 新增資產
+
 # 卡片/摘要
 baseCurrency:
   en: Base currency {code}
@@ -247,6 +260,7 @@ saveAndAddAnother:
 completeInfo:
   en: Please complete all required information.
   zh: 請填寫所有必填資訊
+
 # 走勢區塊
 assetTrend:
   en: Asset Trend
@@ -285,7 +299,7 @@ targetAllocation:
   zh: 目標配置
 goSetTargets:
   en: Set Targets
-  zh: 前往配置設定
+  zh: 配置設定
 portfolioNoHoldingsTitle:
   en: This portfolio has no holdings yet
   zh: 這個投資組合還沒有投資項目
