@@ -104,7 +104,6 @@
         </div>
       </template>
     </Card>
-
     <!-- 資產走勢圖 -->
     <Card class="my-6" v-if="chartSeries.length">
       <template #title>{{ $t('chartTitle') }}</template>
@@ -116,6 +115,7 @@
           type="line"
           :options="chartOptions"
           :series="chartSeries"
+          :key="isDark"
         />
       </template>
     </Card>
@@ -131,6 +131,7 @@
           type="bar"
           :options="annualChartOptions"
           :series="annualChartSeries"
+          :key="isDark"
         />
       </template>
     </Card>
@@ -139,12 +140,15 @@
 
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import api from "@/utils/api";
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 import { useAuthStore } from "@/stores/auth";
 import { usePortfolioStore } from "@/stores/portfolio";
+
+import { useTheme } from '@/composables/useTheme.js'
+const { isDark } = useTheme()
 
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
@@ -166,23 +170,25 @@ const rebalanceOptions = [
 const result = ref(null);
 const isLoading = ref(false);
 const chartSeries = ref([]);
-const chartOptions = ref({
-  chart: {
-    type: "line",
-    zoom: { enabled: false },
-    toolbar: { show: false },
-    background: 'transparent'
-  },
-  
-  stroke: { curve: "smooth", width: 2 },
-  xaxis: { type: "datetime", labels: { datetimeUTC: false } },
-  yaxis: { labels: { formatter: (val) => `$${val.toFixed(0)}` } },
-  tooltip: { x: { format: "yyyy-MM-dd" } },
-  colors: ["#3B82F6", "#EF4444"],
-  theme: {
-    mode: document.documentElement.classList.contains('my-app-dark') ? 'dark' : 'light' // 一鍵套用深色主題
-  },
-});
+const chartOptions = computed(() => {
+  return {
+    chart: {
+      type: "line",
+      zoom: { enabled: false },
+      toolbar: { show: false },
+      background: 'transparent'
+    },
+    
+    stroke: { curve: "smooth", width: 2 },
+    xaxis: { type: "datetime", labels: { datetimeUTC: false } },
+    yaxis: { labels: { formatter: (val) => `$${val.toFixed(0)}` } },
+    tooltip: { x: { format: "yyyy-MM-dd" } },
+    colors: ["#3B82F6", "#EF4444"],
+    theme: {
+      mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+    },
+  };
+})
 
 /** 📊 Sharpe Ratio */
 function calculateSharpeRatio(portfolioValues, riskFreeRate = 0) {
@@ -319,41 +325,43 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
 
 // 🔵 年度報酬率圖表設定（含負報酬顏色）
 const annualChartSeries = ref([]);
-const annualChartOptions = ref({
-  chart: { 
-    type: "bar", 
-    height: 350, 
-    toolbar: { show: false },
-    background: 'transparent'
-  },
-  plotOptions: {
-    bar: {
-      borderRadius: 4,
-      horizontal: false,
-      columnWidth: "55%",
-      distributed: true, // 讓每個柱子能自訂顏色
+const annualChartOptions = computed(() => {
+  return {
+    chart: { 
+      type: "bar", 
+      height: 350, 
+      toolbar: { show: false },
+      background: 'transparent'
     },
-  },
-  dataLabels: { enabled: false },
-  xaxis: {
-    title: { text: "Year" },
-    categories: [],
-    labels: { style: { fontWeight: 600 } },
-  },
-  yaxis: {
-    labels: {
-      formatter: (val) => `${(val * 100).toFixed(1)}%`,
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        horizontal: false,
+        columnWidth: "55%",
+        distributed: true, // 讓每個柱子能自訂顏色
+      },
     },
-    title: { text: "Annual Return" },
-  },
-  tooltip: {
-    y: {
-      formatter: (val) => `${(val * 100).toFixed(2)}%`,
+    dataLabels: { enabled: false },
+    xaxis: {
+      title: { text: "Year" },
+      categories: [],
+      labels: { style: { fontWeight: 600 } },
     },
-  },
-  theme: {
-    mode: document.documentElement.classList.contains('my-app-dark') ? 'dark' : 'light' // 一鍵套用深色主題
-  },
+    yaxis: {
+      labels: {
+        formatter: (val) => `${(val * 100).toFixed(1)}%`,
+      },
+      title: { text: "Annual Return" },
+    },
+    tooltip: {
+      y: {
+        formatter: (val) => `${(val * 100).toFixed(2)}%`,
+      },
+    },
+    theme: {
+      mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+    },
+  };
 });
 
 

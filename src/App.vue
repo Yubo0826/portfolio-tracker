@@ -30,7 +30,7 @@
 
             <Button
               :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-              @click="toggleDarkMode"
+              @click="toggleTheme"
               class="p-button-rounded p-button-text"
               aria-label="Toggle Dark Mode"
               size="small"
@@ -158,6 +158,9 @@ const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
 const transactionsStore = useTransactionsStore()
 
+import { useTheme } from '@/composables/useTheme.js'
+const { isDark, toggleTheme } = useTheme()
+
 watch(() => auth.user, async (newUser) => {
   if (newUser) {
     showLoading('Loading user data...')
@@ -185,13 +188,7 @@ async function getPortfolios() {
   }
 }
 
-const isDark = ref(false)
 const searchBoxVisible = ref(false)
-const toggleDarkMode = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('my-app-dark', isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-}
 
 const toggleLanguage = () => {
   const newLocale = locale.value === 'en' ? 'zh-TW' : 'en'
