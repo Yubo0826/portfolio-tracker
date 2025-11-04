@@ -171,6 +171,7 @@ const chartOptions = ref({
     type: "line",
     zoom: { enabled: false },
     toolbar: { show: false },
+    background: 'transparent'
   },
   
   stroke: { curve: "smooth", width: 2 },
@@ -178,6 +179,9 @@ const chartOptions = ref({
   yaxis: { labels: { formatter: (val) => `$${val.toFixed(0)}` } },
   tooltip: { x: { format: "yyyy-MM-dd" } },
   colors: ["#3B82F6", "#EF4444"],
+  theme: {
+    mode: document.documentElement.classList.contains('my-app-dark') ? 'dark' : 'light' // 一鍵套用深色主題
+  },
 });
 
 /** 📊 Sharpe Ratio */
@@ -316,7 +320,12 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
 // 🔵 年度報酬率圖表設定（含負報酬顏色）
 const annualChartSeries = ref([]);
 const annualChartOptions = ref({
-  chart: { type: "bar", height: 350, toolbar: { show: false } },
+  chart: { 
+    type: "bar", 
+    height: 350, 
+    toolbar: { show: false },
+    background: 'transparent'
+  },
   plotOptions: {
     bar: {
       borderRadius: 4,
@@ -341,6 +350,9 @@ const annualChartOptions = ref({
     y: {
       formatter: (val) => `${(val * 100).toFixed(2)}%`,
     },
+  },
+  theme: {
+    mode: document.documentElement.classList.contains('my-app-dark') ? 'dark' : 'light' // 一鍵套用深色主題
   },
 });
 

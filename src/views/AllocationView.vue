@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="flex justify-between">
-      <h1 class="text-xl font-semibold pb-2">{{ $t('allocationSettings') }}</h1>
+    <div class="flex justify-between mt-8">
+      <h1 class="text-xl font-semibold pb-2">{{ $t('setTargets') }}</h1>
       <!-- Save button -->
       <div>
           <Button
@@ -27,7 +27,11 @@
           <template #header>
             <div class="mb-4">
               <h3 class="font-bold mr-2">{{ $t('holdings') }}</h3>
-              <p class="text-sm mt-1 text-gray-400">{{ $t('dragAndDropHint') }}</p>
+              <p class="text-sm mt-1 text-gray-500">{{ $t('dragAndDropHint') }}</p>
+            </div>
+            <div class="mt-4 flex justify-between text-xs px-4 border rounded-2xl py-2 text-gray-500">
+              <span>{{ $t('symbol') }}</span>
+              <span>{{ $t('actualPercentage') }}</span>
             </div>
           </template>
           <template #item="{ element }">
@@ -67,15 +71,10 @@
           @add="onDrop"
           draggable="false"
         >
-          <!-- 當沒有項目時顯示提示 -->
           <template #header>
             <div class="mb-4">
               <div class="flex items-center justify-between">
-                <h3 class="font-bold">{{ $t('allocation') }}</h3>
-                    <div v-if="assets.length === 0" class="text-center text-gray-400 text-sm p-4 m-auto">
-                  {{ $t('dragAndDropHint2') }}
-                </div>
-                
+                <h3 class="font-bold">{{ $t('portfolio') }}</h3>
                 <!-- Total target -->
                 <div class="text-sm font-semibold">
                   {{ $t('total') }}:
@@ -84,8 +83,14 @@
                   </span>
                 </div>
               </div>
-  
-              <p class="text-sm mt-1 text-gray-400">{{ $t('dragAndDropHint3') }}</p>
+               
+              <p class="text-sm mt-1 text-gray-500">{{ $t('dragAndDropHint3') }}</p>
+            </div>
+
+            <!-- 當沒有項目時顯示提示 -->
+            <div v-if="assets.length === 0" class="text-center text-gray-500 text-sm p-4 py-16 m-auto">
+              <!-- 將左側的持有資產拖曳到此處，或手動新增以建立你的資產配置 -->
+              {{ $t('dragAndDropHint2') }}
             </div>
           </template>
   
@@ -177,6 +182,9 @@ import { usePortfolioStore } from "@/stores/portfolio";
 import { useHoldingsStore } from "@/stores/holdings";
 import api from "@/utils/api";
 
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 const holdingsStore = useHoldingsStore();
@@ -207,6 +215,8 @@ const getAllocation = async () => {
     console.log('Fetched allocation:', data);
     assets.value = data;
     oldAssets.value = JSON.parse(JSON.stringify(data));
+
+    sortedAssets();
   } catch (error) {
     console.error('Error fetching allocation:', error);
   }
@@ -274,7 +284,7 @@ const addAsset = () => {
 // 更新資產資料
 const updateElement = (element, { symbol, name, assetType }) => {
   if (existsInAllocation(symbol)) {
-    toast.error(`${symbol} 已在配置中`);
+    toast.error(t('symbolhavebeenexisted', { symbol }));
     return;
   }
   element.symbol = symbol;
@@ -288,13 +298,13 @@ const saveAllocation = async () => {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
   // 檢查比例總和是否為 100%
   if (assets.value.length > 0 && totalTarget.value !== 100) {
-    toast.error("Total target must equal 100%");
+    toast.error(t('totalTargetError'));
     return;
   }
   // 檢查是否有未完成編輯的項目
   const incompleteItem = assets.value.find(a => a.editable);
   if (incompleteItem) {
-    toast.error("Please complete all editable items");
+    toast.error(t('completeEditableItemsError'));
     return;
   }
   await api.post("/api/allocation/", {
@@ -303,15 +313,24 @@ const saveAllocation = async () => {
     assets: assets.value,
   });
   oldAssets.value = JSON.parse(JSON.stringify(assets.value));
-  toast.success("Allocation saved");
+  sortedAssets();
+  toast.success(t('allocationSaved'));
+};
+
+
+// 排序 assets by target percentage descending
+const sortedAssets = () => {
+  assets.value = [...assets.value].sort((a, b) => b.target - a.target);
 };
 </script>
 <style scoped>
 .g-group {
-  background-color: var(--p-surface-card);
+  background-color: var(--p-overlay-modal-background);
   border: 1px solid var(--p-select-border-color);
   color: var(--p-content-color);
   transition: color 0.2s;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .g-group-item {

@@ -177,7 +177,7 @@ transactions:
   zh: 交易紀錄
 dividends:
   en: Dividends
-  zh: 股息紀錄
+  zh: 配息紀錄
 allocation:
   en: Allocation
   zh: 資產配置
@@ -186,7 +186,7 @@ allocationSettings:
   zh: 設定配置
 dragAndDropHint:
   en: Drag and drop to quickly add
-  zh: 可拖曳到右方快速新增
+  zh: 拖曳到右方快速新增
 dragAndDropHint2:
   en: Drag holdings from the left here, or add manually to create your portfolio allocation
   zh: 將左側的持有資產拖曳到此處，或手動新增以建立你的資產配置
@@ -297,9 +297,12 @@ actualAllocation:
 targetAllocation:
   en: Target Allocation
   zh: 目標配置
-goSetTargets:
+setTargets:
   en: Set Targets
   zh: 設定目標
+actualPercentage:
+  en: Actual %
+  zh: 實際比例
 portfolioNoHoldingsTitle:
   en: This portfolio has no holdings yet
   zh: 這個投資組合還沒有投資項目
@@ -383,8 +386,8 @@ unusedCash:
   en: Unused Cash
   zh: 未使用現金
 rebalance.executeAll:
-  en: Execute All Transactions
-  zh: 執行全部交易
+  en: Add All Suggested Trades
+  zh: 新增所有建議交易
 
 
 # 回測頁面
@@ -485,3 +488,26 @@ settingsSaved:
 saveSettingsError:
   en: Error saving settings.
   zh: 儲存設定時發生錯誤。
+
+# Toast messages
+totalTargetError:
+  en: Total target must equal 100%.
+  zh: 總目標比例必須等於 100%。
+completeEditableItemsError:
+  en: Please complete all editable items.
+  zh: 請完成所有正在編輯的項目。
+allocationSaved:
+  en: Allocation saved successfully.
+  zh: 配置已成功儲存。
+noUserLoggedIn:
+  en: No user is logged in.
+  zh: 尚未登入使用者。
+fetchedAllocationLog:
+  en: "Fetched allocation:"
+  zh: "已取得資產配置："
+fetchAllocationErrorLog:
+  en: "Error fetching allocation:"
+  zh: "取得資產配置時發生錯誤："
+symbolhavebeenexisted:
+  en: "The symbol '{symbol}' has already been added."
+  zh: "代號「{symbol}」已經被新增過了。"

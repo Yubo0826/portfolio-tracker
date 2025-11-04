@@ -7,7 +7,7 @@
       <SelectButton v-model="cashAction" :options="cashActionOptions" optionLabel="name" optionValue="code" />
       <FloatLabel variant="on">
         <InputNumber v-model="depositAmount" prefix="$" />
-        <label for="on_label">{{ $t('amountLabel') }}</label>
+        <label for="on_label">USD</label>
       </FloatLabel>
       <Button :label="$t('rebalanceBtn')" @click="clickRebalance" />
     </div>
@@ -82,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import api from '@/utils/api';
 import * as toast from '@/composables/toast';
 import FloatLabel from 'primevue/floatlabel'

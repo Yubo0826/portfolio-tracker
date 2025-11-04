@@ -142,7 +142,7 @@
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
               <Button 
                 unstyled 
-                :label="$t('goSetTargets')" 
+                :label="$t('setTargets')" 
                 icon="pi pi-cog"
                  @click="$router.push('allocation')" 
                  :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" />
@@ -255,7 +255,7 @@
                   <i v-else class="fas fa-arrow-right rotate-90"></i> -->
                   <span v-if="data.profitPercentage >= 0">+</span>
                   <span v-else>-</span>
-                  <span>{{ data.profitPercentage }}%</span>
+                  <span>{{ Math.abs(data.profitPercentage) }}%</span>
                 </div>
               </div>
             </template>

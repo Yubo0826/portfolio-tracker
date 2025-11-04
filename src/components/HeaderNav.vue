@@ -123,7 +123,7 @@
               <!-- <i class="pi pi-bullseye mr-2"></i> -->
               <i class="pi pi-cog mr-2"></i>
               <!-- {{ t('allocationSettings') }} -->
-                {{ t('goSetTargets') }}
+                {{ t('setTargets') }}
             </div>
             <div @click="$router.push('/rebalancing'); openDropdown = null; closeTimer = null;" 
               class="nav-menu-item block text-left px-4 py-2 transition-colors duration-150"

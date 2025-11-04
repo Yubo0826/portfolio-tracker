@@ -32,7 +32,7 @@ export default definePreset(Aura, {
             background: '{zinc.50}',
             focusBackground: '{zinc.700}',
             color: '{zinc.900}',
-            focusColor: '{zinc.900}'
+            focusColor: '{zinc.900}',
           },
           surface: {
               background: '#ffffff',
