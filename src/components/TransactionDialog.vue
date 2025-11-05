@@ -55,7 +55,7 @@
         fluid
         iconDisplay="input"
         class="flex-auto"
-        placeholder="交易的日期"
+        :placeholder="$t('pleaseSelectDate')"
       />
     </div>
 
@@ -114,6 +114,7 @@ import { useI18n } from 'vue-i18n';
 
 const toast = useToast();
 const { t } = useI18n();
+
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   editingId: { type: [Number, String, null], default: null },

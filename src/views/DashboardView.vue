@@ -94,13 +94,13 @@
               <div class="text-sm">{{ $t('assetTrend') }}</div>
 
               <Tag :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
-                <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
                   <!-- 變化數值 -->
                   <span class="mr-2">                          
                     <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
                     <i v-else class="pi pi-sort-down-fill"></i>
                   </span>
-                  <span class="font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
+                  <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }}</span>
                   (
                     <!-- 變化%數 -->
                     <span v-if="growthRate >= 0">+</span>
@@ -122,15 +122,16 @@
                   rounded
                   unstyled
                   @click="selectedPeriod = tab.value"
-                  class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
+                  class="px-3 py-2 text-xs rounded-lg cursor-pointer transition-all"
                   :style="{
                     backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-500)' : 'transparent',
-                    fontWeight: selectedPeriod === tab.value ? '600' : '400'
+                    fontWeight: selectedPeriod === tab.value ? '600' : '400',
+                    color: selectedPeriod === tab.value ? 'var(--p-surface-0)' : 'var(--p-text-color)'
                   }"
                 />
               </div>
-  
-              <span class="text-xs ml-4">{{ startDate }} ~ {{ endDate }}</span>
+
+              <span class="text-xs ml-4 text-[var(--p-text-color)]">{{ startDate }} ~ {{ endDate }}</span>
             </div>
           </template>
 
@@ -224,7 +225,7 @@
     <!-- Holdings Table -->
     <Card class="mb-8 mt-8 p-4">
       <template #content>
-        <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem">
+        <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
@@ -256,15 +257,16 @@
           <Column field="currentValue" :header="$t('totalValue')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              <div :class="{ 'text-[#5cd59b]': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
+              <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
                 <div class="flex items-center gap-1 font-bold text-sm">
-                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-                  <i v-else class="pi pi-sort-down-fill"></i> -->
+                  <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                  <i v-else class="pi pi-sort-down-fill"></i>
                   
                   <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
                   <i v-else class="fas fa-arrow-right rotate-90"></i> -->
-                  <span v-if="data.profitPercentage >= 0">+</span>
-                  <span v-else>-</span>
+
+                  <!-- <span v-if="data.profitPercentage >= 0">+</span>
+                  <span v-else>-</span> -->
                   <span>{{ Math.abs(data.profitPercentage) }}%</span>
                 </div>
               </div>

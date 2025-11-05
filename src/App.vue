@@ -91,6 +91,17 @@
                     size="small"
                   />
                 </div>
+
+                <div class="p-3 pt-0">
+                  <Button
+                    :label="$t('portfolios')"
+                    icon="pi pi-folder"
+                    @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
+                    fluid
+                    text
+                    size="small"
+                  />
+                </div>
               </template>
             </Select>
           </div>
@@ -135,6 +146,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
+const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
@@ -154,14 +166,13 @@ import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
 import { showLoading, hideLoading } from "@/composables/loading.js"
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const dialogVisible = ref(false)
 const importDataDialogVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
 const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios'].includes(route.name))
 const auth = useAuthStore()
-const portfolioStore = usePortfolioStore()
 const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
 const transactionsStore = useTransactionsStore()
@@ -227,9 +238,9 @@ onMounted(() => {
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
 const menuItems = [
-  { label: '設定', icon: 'pi pi-cog', command: () => router.push('/user-settings') },
-  { separator: true },
-  { label: '登出', icon: 'pi pi-sign-out', command: () => auth.logout() },
+  // { label: '設定', icon: 'pi pi-cog', command: () => router.push('/user-settings') },
+  // { separator: true },
+  { label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() },
 ]
 </script>
 

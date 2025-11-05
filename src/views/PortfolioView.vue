@@ -1,26 +1,28 @@
 <template>
-  <div>
-    <!-- top-[60px] -->
-    <div class="flex mb-2 mt-8 gap-2 justify-center relative">
-      <SelectButton
-        v-model="tab"
-        :options="options"
-        optionLabel="label"
-        optionValue="value"
-        :allowEmpty="false"
-      />
-      <!-- <Button @click="tab = 'holdings'" rounded label="持有資產" class="" size="middle" :outlined="tab !== 'holdings'" />
-      <Button @click="tab = 'transactions'" rounded label="交易紀錄" class="" size="middle" :outlined="tab !== 'transactions'" />
-      <Button @click="tab = 'dividends'" rounded label="利息紀錄" class="" size="middle" :outlined="tab !== 'dividends'" /> -->
-    </div>
+  <Card class="mt-4">
+    <template #content>
+      <!-- top-[60px] -->
+      <div class="flex mb-2 mt-6 gap-2 justify-center relative">
+        <SelectButton
+          v-model="tab"
+          :options="options"
+          optionLabel="label"
+          optionValue="value"
+          :allowEmpty="false"
+        />
+        <!-- <Button @click="tab = 'holdings'" rounded label="持有資產" class="" size="middle" :outlined="tab !== 'holdings'" />
+        <Button @click="tab = 'transactions'" rounded label="交易紀錄" class="" size="middle" :outlined="tab !== 'transactions'" />
+        <Button @click="tab = 'dividends'" rounded label="利息紀錄" class="" size="middle" :outlined="tab !== 'dividends'" /> -->
+      </div>
+  
+      <div class="mt-4">
+        <div v-if="tab === 'holdings'"><HoldingsView /></div>
+        <div v-else-if="tab === 'transactions'"><TransactionsView /></div>
+        <div v-else><DividendsView /></div>
+      </div>
+    </template>
 
-    <div class="mt-4">
-      <div v-if="tab === 'holdings'"><HoldingsView /></div>
-      <div v-else-if="tab === 'transactions'"><TransactionsView /></div>
-      <div v-else><DividendsView /></div>
-    </div>
-
-  </div>
+  </Card>
 </template>
 
 <script setup>
