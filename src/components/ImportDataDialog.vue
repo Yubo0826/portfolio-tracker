@@ -1,184 +1,170 @@
 <template>
-    <Dialog v-model:visible="localVisible" modal :style="{ width: '40rem' }">
-      <template #header>
-        <div class="inline-flex items-center gap-2">
-          <i class="pi pi-upload text-[var(--p-primary-500)]"></i>
-          <span class="font-bold">匯入交易資料至</span>
+  <Dialog v-model:visible="localVisible" modal :style="{ width: '40rem' }">
+    <template #header>
+      <div class="inline-flex items-center gap-2">
+        <i class="pi pi-upload text-[var(--p-primary-500)]"></i>
+        <span class="font-bold">匯入交易資料至</span>
 
-          <!-- 選擇投資組合 -->
+        <!-- 選擇投資組合 -->
         <span class="font-bold">
-          <Select 
-            v-model="selectedPortfolio"
-            size="small" ref="PortfolioSelect" 
-            :options="portfolioStore.portfolios" optionLabel="name" checkmark 
-            :highlightOnSelect="false" class="m-2 font-normal"
+          <Select
+            v-model="selectedPortfolioId"
+            size="small"
+            ref="PortfolioSelect"
+            :options="portfolioStore.portfolios"
+            optionLabel="name"
+            optionValue="id"
+            checkmark
+            :highlightOnSelect="false"
+            class="m-2 font-normal"
             :pt="{
-              root: { 
+              root: {
                 style: { border: '1px solid transparent', boxShadow: 'none' },
-                class: 'custom-select-root' 
+                class: 'custom-select-root'
               }
             }"
-            >
+          >
             <template #dropdownicon>
               <i class="pi pi-pencil" style="font-size: .75rem"></i>
             </template>
           </Select>
         </span>
-        </div>
-      </template>
-    
-      <!-- 拖拉區 -->
-      <div
-        class="border-2 border-dashed rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-[var(--p-primary-50)]"
-        :style="{ borderColor: 'var(--p-primary-400)' }"
-        @dragover.prevent
-        @drop.prevent="handleDrop"
-        @click="triggerFileInput"
-      >
-        <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
-        <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">匯入檔案</p>
-        <p class="text-gray-500">拖曳或點擊以上傳 CSV / Excel</p>
-        <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
       </div>
-    
-      <!-- 格式說明 -->
-      <Message severity="info" class="mt-4">
-        <div class="flex justify-between">
-          <span>
-            檔案需包含以下欄位：
-            <strong>date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)</strong>
-          </span>
-          <!-- 下載範例 CSV -->
-          <button
-              @click="downloadSampleCSV"
-              class="ml-4 px-3 py-1 border rounded border-[var(--p-primary-400)] bg-[var(--p-primary-100)] hover:bg-[var(--p-primary-200)] text-[var(--p-primary-700)] text-sm"
-          >
-              下載範例 CSV
-          </button>
-        </div>
-      </Message>
-    
-      <!-- 預覽區 (匯入後才顯示) -->
-      <div v-if="previewData.length" class="mt-6">
-        <div class="flex items-center justify-between mb-2">
-            <h3 class="font-semibold">預覽資料：</h3>
-
-            <Paginator 
-              :rows="rowsPerPage"
-              :totalRecords="previewData.length" 
-              :first="first"
-              @page="onPage"
-              template=" PrevPageLink CurrentPageReport NextPageLink "
-              currentPageReportTemplate="{first} to {last} of {totalRecords}"
-            />
-
-        </div>
-        <DataTable
-            :value="paginatedData" 
-            size="small" 
-            responsiveLayout="scroll"
-        >
-          <Column field="date" header="日期"></Column>
-          <Column field="symbol" header="代號"></Column>
-          <Column field="shares" header="股數"></Column>
-          <Column field="price" header="價格"></Column>
-          <Column field="fee" header="手續費"></Column>
-          <Column field="totalCost" header="總和"></Column>
-          <Column field="transactionType" header="類型"></Column>
-        </DataTable>
-      </div>
-    
-      <!-- Footer -->
-      <template #footer>
-        <Button label="取消" severity="secondary" @click="closeDialog" />
-        <Button label="匯入" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
-      </template>
-    </Dialog>
     </template>
-    
+
+    <!-- 拖拉區 -->
+    <div
+      class="border-2 border-dashed rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-[var(--p-primary-50)]"
+      :style="{ borderColor: 'var(--p-primary-400)' }"
+      @dragover.prevent
+      @drop.prevent="handleDrop"
+      @click="triggerFileInput"
+    >
+      <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
+      <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">匯入檔案</p>
+      <p class="text-gray-500">拖曳或點擊以上傳 CSV / Excel</p>
+      <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
+    </div>
+
+    <!-- 格式說明 -->
+    <Message severity="info" class="mt-4">
+      <div class="flex justify-between">
+        <span>
+          檔案需包含以下欄位：
+          <strong>date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)</strong>
+        </span>
+        <button
+          @click="downloadSampleCSV"
+          class="ml-4 px-3 py-1 border rounded border-[var(--p-primary-400)] bg-[var(--p-primary-100)] hover:bg-[var(--p-primary-200)] text-[var(--p-primary-700)] text-sm"
+        >
+          下載範例 CSV
+        </button>
+      </div>
+    </Message>
+
+    <!-- 預覽區 -->
+    <div v-if="previewData.length" class="mt-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold">預覽資料：</h3>
+
+        <Paginator
+          :rows="rowsPerPage"
+          :totalRecords="previewData.length"
+          :first="first"
+          @page="onPage"
+          template=" PrevPageLink CurrentPageReport NextPageLink "
+          currentPageReportTemplate="{first} to {last} of {totalRecords}"
+        />
+      </div>
+
+      <DataTable :value="paginatedData" size="small" responsiveLayout="scroll">
+        <Column field="date" header="日期"></Column>
+        <Column field="symbol" header="代號"></Column>
+        <Column field="shares" header="股數"></Column>
+        <Column field="price" header="價格"></Column>
+        <Column field="fee" header="手續費"></Column>
+        <Column field="totalCost" header="總和"></Column>
+        <Column field="transactionType" header="類型"></Column>
+      </DataTable>
+    </div>
+
+    <template #footer>
+      <Button label="取消" severity="secondary" @click="closeDialog" />
+      <Button label="匯入" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
+    </template>
+  </Dialog>
+</template>
+
 <script setup>
 import { ref, watch, computed } from 'vue'
-import * as toast from '@/composables/toast';
+import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
 import Papa from 'papaparse'
 import api from '@/utils/api'
 import * as XLSX from 'xlsx'
 import Message from 'primevue/message'
 import Paginator from 'primevue/paginator'
 import { $t } from '@primeuix/themes'
-import { usePortfolioStore } from '@/stores/portfolio';
-import { useTransactionsStore } from '@/stores/transactions';
-const store = useTransactionsStore();
+import { usePortfolioStore } from '@/stores/portfolio'
+import { useTransactionsStore } from '@/stores/transactions'
+
+const { t } = useI18n()
+const store = useTransactionsStore()
+const portfolioStore = usePortfolioStore()
 
 const props = defineProps({
-    modelValue: {
-    type: Boolean,
-    required: true,
-    },
+  modelValue: { type: Boolean, required: true },
 })
 
 const emit = defineEmits(['update:modelValue', 'import'])
-
 const localVisible = ref(false)
-watch(
-    () => props.modelValue,
-    (v) => (localVisible.value = v),
-    { immediate: true }
-)
-watch(localVisible, (v) => emit('update:modelValue', v))
+watch(() => props.modelValue, v => (localVisible.value = v), { immediate: true })
+watch(localVisible, v => emit('update:modelValue', v))
 
 const fileInput = ref(null)
 const previewData = ref([])
 
-// 選擇投資組合
-const portfolioStore = usePortfolioStore();
-const selectedPortfolio = ref(null);
+// 改為 ID 模式
+const selectedPortfolioId = ref(null)
 
-watch(() => portfolioStore.currentPortfolio, (newVal) => {
-  if (newVal?.id !== selectedPortfolio.value?.id) {
-    selectedPortfolio.value = newVal
-  }
-})
+watch(
+  () => portfolioStore.currentPortfolio,
+  newVal => {
+    if (newVal?.id !== selectedPortfolioId.value) {
+      selectedPortfolioId.value = newVal?.id || null
+    }
+  },
+  { immediate: true }
+)
 
 // 分頁邏輯
-const first = ref(0)          // 當前頁面起始 index
-const rowsPerPage = ref(5)    // 每頁筆數
-
-// 計算目前頁要顯示的資料
-const paginatedData = computed(() => {
-  return previewData.value.slice(first.value, first.value + rowsPerPage.value)
-})
+const first = ref(0)
+const rowsPerPage = ref(5)
+const paginatedData = computed(() => previewData.value.slice(first.value, first.value + rowsPerPage.value))
 
 function triggerFileInput() {
-    fileInput.value.click()
+  fileInput.value.click()
 }
 
 function handleFileChange(event) {
-    const file = event.target.files[0]
-    if (!file) return
-    parseFile(file)
+  const file = event.target.files[0]
+  if (file) parseFile(file)
 }
 
 function handleDrop(event) {
-    const file = event.dataTransfer.files[0]
-    if (!file) return
-    parseFile(file)
+  const file = event.dataTransfer.files[0]
+  if (file) parseFile(file)
 }
 
 function parseFile(file) {
-    const ext = file.name.split('.').pop().toLowerCase()
-    if (ext === 'csv') {
-    readCSV(file)
-    } else if (ext === 'xlsx' || ext === 'xls') {
-    readExcel(file)
-    } else {
-    console.warn('不支援的檔案格式:', ext)
-    }
+  const ext = file.name.split('.').pop().toLowerCase()
+  if (ext === 'csv') readCSV(file)
+  else if (ext === 'xlsx' || ext === 'xls') readExcel(file)
+  else console.warn('不支援的檔案格式:', ext)
 }
 
 function normalizeData(rows) {
-  return rows.map((item) => {
+  return rows.map(item => {
     const {
       date,
       symbol = '',
@@ -190,12 +176,9 @@ function normalizeData(rows) {
       type = '',
     } = item
 
-    // 將 shares, price, fee 強制轉數字，非數字則為 0
     const numShares = Number(shares) || 0
     const numPrice = Number(price) || 0
     const numFee = Number(fee) || 0
-
-    // date 安全轉換
     const normalizedDate = toDate(date)
 
     return {
@@ -207,61 +190,45 @@ function normalizeData(rows) {
       price: numPrice,
       fee: numFee,
       totalCost: +(numShares * numPrice + numFee).toFixed(2),
-      transactionType: type.toLowerCase() === 'buy' ? 'buy' : 'sell', // 強制轉小寫，非 buy 則為 sell
+      transactionType: type.toLowerCase() === 'buy' ? 'buy' : 'sell',
     }
   })
 }
 
-
 function toDate(dateStr) {
-  // 正規表示式檢查 YYYY-MM-DD
-  const regex = /^\d{4}-\d{2}-\d{2}$/;
-
+  const regex = /^\d{4}-\d{2}-\d{2}$/
   if (regex.test(dateStr)) {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    // new Date(year, monthIndex, day) 會依本地時間建立，避免 UTC 偏移
-    const result = new Date(year, month - 1, day);
-    return result.toISOString().split('T')[0];
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day).toISOString().split('T')[0]
   }
 
-  // 其他格式交給 Date 物件自己解析
-  const d = new Date(dateStr);
-  if (!isNaN(d)) {
-    return d.toISOString().split('T')[0];
-  }
-
-  toast.error($t('InvalidDateString') + dateStr, '');
-
+  const d = new Date(dateStr)
+  if (!isNaN(d)) return d.toISOString().split('T')[0]
+  toast.error($t('InvalidDateString') + dateStr, '')
 }
 
-
 function readCSV(file) {
-    Papa.parse(file, {
+  Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: (header) => header.toLowerCase().trim(), // 自動轉小寫
-    complete: (results) => {
-        console.log('CSV content:', results.data)
-        previewData.value = normalizeData(results.data)
-        console.log('Normalized data:', previewData.value)
+    transformHeader: h => h.toLowerCase().trim(),
+    complete: results => {
+      previewData.value = normalizeData(results.data)
     },
-    error: (err) => {
-        console.error('CSV 解析錯誤:', err)
-    },
-    })
+    error: err => console.error('CSV 解析錯誤:', err),
+  })
 }
 
 function readExcel(file) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
+  const reader = new FileReader()
+  reader.onload = e => {
     const data = new Uint8Array(e.target.result)
     const workbook = XLSX.read(data, { type: 'array' })
-    const sheetName = workbook.SheetNames[0]
-    const sheet = workbook.Sheets[sheetName]
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const json = XLSX.utils.sheet_to_json(sheet)
     previewData.value = normalizeData(json)
-    }
-    reader.readAsArrayBuffer(file)
+  }
+  reader.readAsArrayBuffer(file)
 }
 
 function downloadSampleCSV() {
@@ -271,14 +238,7 @@ function downloadSampleCSV() {
     ['2025/01/21', 'TSLA', 5, 120, 0.5, 'buy'],
     ['2025/02/21', 'TSLA', 15, 135, 0.5, 'buy'],
   ]
-
-  // 將 headers + data 轉成 CSV 字串
-  const csvContent = [
-    headers.join(','),
-    ...sampleData.map((row) => row.join(',')),
-  ].join('\n')
-
-  // 生成 blob 並下載
+  const csvContent = [headers.join(','), ...sampleData.map(r => r.join(','))].join('\n')
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -288,81 +248,62 @@ function downloadSampleCSV() {
   URL.revokeObjectURL(url)
 }
 
-
 function closeDialog() {
-    localVisible.value = false
-    previewData.value = []
+  localVisible.value = false
+  previewData.value = []
 }
 
 async function confirmImport() {
-  if (!selectedPortfolio.value) {
-    toast.error('請選擇投資組合', '');
-    return;
+  if (!selectedPortfolioId.value) {
+    toast.error('請選擇投資組合', '')
+    return
   }
 
-  const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))];
-  let nonexistentSymbols = [];
-  const symbolDetails = {};
+  const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))]
+  let nonexistentSymbols = []
+  const symbolDetails = {}
 
   for (const symbol of symbolList) {
     try {
-      const query = await api.get('/api/yahoo/symbol?query=' + symbol);
-
+      const query = await api.get('/api/yahoo/symbol?query=' + symbol)
       if (!query || query.length === 0) {
-        nonexistentSymbols.push(symbol);
-        continue;
+        nonexistentSymbols.push(symbol)
+        continue
       }
-
-      // 找出最合適的那一筆（優先 NMS/NASDAQ、quoteType: EQUITY）
       const matched =
         query.find(q => q.exchange === 'NMS' && q.quoteType === 'EQUITY') ||
         query.find(q => q.quoteType === 'EQUITY') ||
-        query[0];
+        query[0]
 
       symbolDetails[symbol] = {
         name: matched.longname || matched.shortname || '',
         assetType: matched.quoteType || '',
-      };
+      }
     } catch (err) {
-      console.error('查詢 symbol 錯誤:', symbol, err);
-      nonexistentSymbols.push(symbol);
+      console.error('查詢 symbol 錯誤:', symbol, err)
+      nonexistentSymbols.push(symbol)
     }
   }
 
-  // 若有不存在的代號
   if (nonexistentSymbols.length > 0) {
-    toast.error(
-      t('symbolsNotFound'),
-      nonexistentSymbols.join(', ')
-    );
-    return;
+    toast.error(t('symbolsNotFound'), nonexistentSymbols.join(', '))
+    return
   }
 
-  // 補齊 previewData 的 name 和 assetType
   previewData.value = previewData.value.map(trade => {
-    const details = symbolDetails[trade.symbol];
-    if (details) {
-      return {
-        ...trade,
-        name: details.name,
-        assetType: details.assetType,
-      };
-    }
-    return trade;
-  });
+    const details = symbolDetails[trade.symbol]
+    return details
+      ? { ...trade, name: details.name, assetType: details.assetType }
+      : trade
+  })
 
-  // 執行批次匯入
   try {
-    const result = await store.saveTransactionBulk(
-      previewData.value,
-      selectedPortfolio.value.id
-    );
-  
-    console.log('Bulk import result:', result);
-    toast.success(t('importSuccess'), '');
-    closeDialog();
+    const result = await store.saveTransactionBulk(previewData.value, selectedPortfolioId.value)
+    console.log('Bulk import result:', result)
+    toast.success(t('importSuccess'), '')
+    closeDialog()
   } catch (e) {
-    toast.error(t('importFailed'), e.message || '');
+    toast.error(t('importFailed'), e.message || '')
   }
 }
 

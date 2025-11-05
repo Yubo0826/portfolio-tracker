@@ -7,24 +7,28 @@
         <!-- 選擇投資組合 -->
         <span class="font-bold" v-else>
           {{ $t('addTransactionTo') }}
-          <Select 
-            v-model="selectedPortfolio"
-            size="small" ref="PortfolioSelect" 
-            :options="portfolioStore.portfolios" optionLabel="name" checkmark 
-            :highlightOnSelect="false" class="m-2 font-normal"
+          <Select
+            v-model="selectedPortfolioId"
+            size="small"
+            ref="PortfolioSelect"
+            :options="portfolioStore.portfolios"
+            optionLabel="name"
+            optionValue="id"
+            checkmark
+            :highlightOnSelect="false"
+            class="m-2 font-normal"
             :pt="{
-              root: { 
+              root: {
                 style: { border: '1px solid transparent', boxShadow: 'none' },
-                class: 'custom-select-root' 
+                class: 'custom-select-root'
               }
             }"
-            >
+          >
             <template #dropdownicon>
               <i class="pi pi-pencil" style="font-size: .75rem"></i>
             </template>
           </Select>
         </span>
-
       </div>
     </template>
 
@@ -62,13 +66,6 @@
       <InputNumber v-model="form.shares" class="flex-auto" showButtons autocomplete="off" />
     </div>
 
-    <!-- <div class="flex items-center gap-2 mb-4 p-2 text-xs">
-      <label class="font-semibold w-24"></label>
-      <Button @click="addShare(100)" label="+100" severity="secondary" rounded />
-      <Button @click="addShare(500)" label="+500" severity="secondary" rounded />
-      <Button @click="addShare(1000)" label="+1000" severity="secondary" rounded />
-    </div> -->
-
     <div class="flex items-center gap-4 mb-4">
       <label class="w-24">
         {{ $t('price') }} <span style="color:#f27362">*</span>
@@ -95,17 +92,14 @@
 
     <div class="flex justify-end gap-2">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="close" />
-      
-      <!-- 儲存並新增額外項目 -->
+
       <span v-if="!editingId">
         <Button v-if="hasError" type="button" :label="$t('saveAndAddAnother')" v-tooltip.bottom="$t('completeInfo')" disabled />
         <Button v-else type="button" :label="$t('saveAndAddAnother')" @click="onSave(true)" />
       </span>
 
-      <!-- 儲存後關閉視窗 -->
       <Button v-if="hasError" type="button" :label="$t('save')" v-tooltip.bottom="$t('completeInfo')" disabled />
       <Button v-else type="button" :label="$t('save')" @click="onSave(false)" />
-
     </div>
   </Dialog>
 </template>
@@ -116,17 +110,15 @@ import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
 import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
+
 const toast = useToast();
-
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-
+const { t } = useI18n();
 const props = defineProps({
-    modelValue: { type: Boolean, default: false }, // 控制顯示
-    editingId: { type: [Number, String, null], default: null }, // 若有值＝編輯
+  modelValue: { type: Boolean, default: false },
+  editingId: { type: [Number, String, null], default: null },
 });
-
-const emit = defineEmits(['update:modelValue', 'saved']); // saved(result)
+const emit = defineEmits(['update:modelValue', 'saved']);
 
 const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
@@ -136,13 +128,17 @@ const transactionType = ref([
   { name: t('sell'), code: 'sell' },
 ]);
 
-const selectedPortfolio = ref(null);
+const selectedPortfolioId = ref(null);
 
-watch(() => portfolioStore.currentPortfolio, (newVal) => {
-  if (newVal?.id !== selectedPortfolio.value?.id) {
-    selectedPortfolio.value = newVal
-  }
-})
+watch(
+  () => portfolioStore.currentPortfolio,
+  (newVal) => {
+    if (newVal?.id !== selectedPortfolioId.value) {
+      selectedPortfolioId.value = newVal?.id || null;
+    }
+  },
+  { immediate: true }
+);
 
 const localVisible = ref(false);
 watch(
@@ -164,8 +160,6 @@ const emptyForm = () => ({
 
 const form = ref(emptyForm());
 
-const dialogHeader = computed(() => (props.editingId ? 'Update Transaction' : 'New Transaction'));
-
 const hasError = computed(() => {
   const e = {
     date: !form.value.date,
@@ -183,13 +177,7 @@ const totalPrice = computed(() => {
   return Number((s * p).toFixed(2)) || 0;
 });
 
-const addShare = (amount) => {
-  if (!form.value.shares) form.value.shares = 0;
-  form.value.shares += amount;
-};
-
 const onSymbolSelected = ({ symbol, name, assetType }) => {
-  console.log('Selected symbol:', symbol, name, assetType);
   form.value.name = name;
   form.value.assetType = assetType;
   const date = form.value.date?.toISOString().split('T')[0];
@@ -240,7 +228,6 @@ const onSave = async (saveAnother = false) => {
     return;
   }
 
-  // 賣出數量檢查
   if (form.value.operation === 'sell') {
     const ok = store.canSell(form.value.symbol, form.value.shares);
     if (!ok) {
@@ -255,8 +242,12 @@ const onSave = async (saveAnother = false) => {
   }
 
   try {
-    console.log('現在的portfolio id:', selectedPortfolio.value.id)
-    const result = await store.saveTransaction({ id: props.editingId, form: form.value, portfolioId: selectedPortfolio.value.id });
+    console.log('現在的 portfolio id:', selectedPortfolioId.value);
+    const result = await store.saveTransaction({
+      id: props.editingId,
+      form: form.value,
+      portfolioId: selectedPortfolioId.value,
+    });
     toast.add({
       severity: 'success',
       summary: 'Success',
@@ -264,21 +255,14 @@ const onSave = async (saveAnother = false) => {
       life: 3000,
     });
     emit('saved', result);
-    console.log('Transaction saved:', result);
-    console.log('saveAnother:', saveAnother);
-    toast.success(props.editingId ? t('addTransactionSuccess') : t('editTransactionSuccess'));
-    if (saveAnother) {
-      form.value = emptyForm();
-    } else {
-      close();
-    }
+    if (saveAnother) form.value = emptyForm();
+    else close();
   } catch (err) {
-    toast.error(err.message || 'Error saving transaction')
+    toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Error saving transaction', life: 3000 });
   }
 };
 
 const onHide = () => {
-  // Dialog 關閉時重置表單（由外部控制 visible 時不會觸發 close）
   emit('update:modelValue', false);
   form.value = emptyForm();
 };
@@ -286,7 +270,6 @@ const onHide = () => {
 const close = () => {
   emit('update:modelValue', false);
 };
-
 </script>
 
 <style scoped>

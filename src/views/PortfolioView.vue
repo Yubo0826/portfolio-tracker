@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- top-[60px] -->
-    <div class="flex mb-2 gap-2 justify-center relative">
+    <div class="flex mb-2 mt-8 gap-2 justify-center relative">
       <SelectButton
         v-model="tab"
         :options="options"
@@ -14,7 +14,7 @@
       <Button @click="tab = 'dividends'" rounded label="利息紀錄" class="" size="middle" :outlined="tab !== 'dividends'" /> -->
     </div>
 
-    <div class="mt-8">
+    <div class="mt-4">
       <div v-if="tab === 'holdings'"><HoldingsView /></div>
       <div v-else-if="tab === 'transactions'"><TransactionsView /></div>
       <div v-else><DividendsView /></div>

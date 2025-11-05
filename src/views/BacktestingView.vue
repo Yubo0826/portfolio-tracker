@@ -115,7 +115,6 @@
           type="line"
           :options="chartOptions"
           :series="chartSeries"
-          :key="isDark"
         />
       </template>
     </Card>
@@ -131,7 +130,6 @@
           type="bar"
           :options="annualChartOptions"
           :series="annualChartSeries"
-          :key="isDark"
         />
       </template>
     </Card>

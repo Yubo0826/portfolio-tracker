@@ -237,22 +237,22 @@ inputSymbol:
   en: Input symbol
   zh: 輸入股票代號
 addTransactionSuccess:
-  en: Transaction added successfully
+  en: Trade added successfully
   zh: 成功新增一筆交易明細
 editTransactionSuccess:
-  en: Transaction updated successfully
+  en: Trade updated successfully
   zh: 成功更新一筆交易明細
 editTransaction:
-  en: Edit Transaction
+  en: Edit Trade
   zh: 編輯交易明細
 addTransactionTo:
-  en: Add Transaction to 
+  en: Add Trade to 
   zh: 新增交易到
 transactionDate:
-  en: Transaction Date
+  en: Trade Date
   zh: 交易日期
 pleaseInputPrice:
-  en: The price at the time of transaction
+  en: The price at the time of trade
   zh: 當時的價格
 saveAndAddAnother:
   en: Save and Add Another

@@ -64,11 +64,12 @@
             <div class="text-sm font-medium">{{ $t('currentPortfolio') }}</div>
 
             <Select
-              v-model="selectedPortfolio"
+              v-model="selectedPortfolioId"
               size="small"
               ref="PortfolioSelect"
               :options="portfolioStore.portfolios"
               optionLabel="name"
+              optionValue="id"
               checkmark
               :highlightOnSelect="false"
               class="min-w-[180px]"
@@ -81,7 +82,14 @@
               </template>
               <template #footer>
                 <div class="p-3 border-t border-gray-200">
-                  <Button :label="$t('addPortfolio')" icon="pi pi-plus" @click="dialogVisible = true" fluid text size="small" />
+                  <Button
+                    :label="$t('addPortfolio')"
+                    icon="pi pi-plus"
+                    @click="dialogVisible = true"
+                    fluid
+                    text
+                    size="small"
+                  />
                 </div>
               </template>
             </Select>
@@ -171,18 +179,26 @@ watch(() => auth.user, async (newUser) => {
   }
 })
 
-const selectedPortfolio = ref(null)
-watch(() => portfolioStore.currentPortfolio, (newVal) => {
-  if (newVal?.id !== selectedPortfolio.value?.id) selectedPortfolio.value = newVal
-})
-watch(selectedPortfolio, (newVal) => {
-  if (newVal?.id !== portfolioStore.currentPortfolio?.id) portfolioStore.setCurrentPortfolio(newVal)
+const selectedPortfolioId = ref(null)
+
+watch(
+  () => portfolioStore.currentPortfolio,
+  (newVal) => {
+    if (newVal?.id !== selectedPortfolioId.value)
+      selectedPortfolioId.value = newVal?.id
+  }
+)
+
+watch(selectedPortfolioId, (newId) => {
+  const matchedPortfolio = portfolioStore.portfolios.find(p => p.id === newId)
+  if (matchedPortfolio && matchedPortfolio.id !== portfolioStore.currentPortfolio?.id)
+    portfolioStore.setCurrentPortfolio(matchedPortfolio)
 })
 
 async function getPortfolios() {
   try {
     await portfolioStore.fetchPortfolios()
-    selectedPortfolio.value = portfolioStore.currentPortfolio
+    selectedPortfolioId.value = portfolioStore.currentPortfolio?.id
   } catch (error) {
     console.error('Error fetching portfolios:', error)
   }

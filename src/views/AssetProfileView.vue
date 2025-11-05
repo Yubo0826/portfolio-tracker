@@ -19,104 +19,117 @@
         <h1 class="text-xl">{{ info.fullName }}</h1>
       </div>
       <div class="chart-container">
-        <div class="grid grid-cols-3 gap-16">
+        <div class="grid grid-cols-3 gap-8">
           <!-- 左邊 -->
-          <div class="col-span-2">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center mb-2">
-                  <div class="text-3xl font-semibold mr-4">${{ info.regularMarketPrice }}</div>
-                  <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
-                    <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                      <!-- 變化%數 -->
-                      <span v-if="growthRate >= 0">
-                        <i class="fas fa-arrow-right -rotate-45"></i>
-                      </span>
-                      <span v-else>
-                        <i class="fas fa-arrow-right rotate-45"></i>
-                      </span>
-                      <span class="font-semibold ml-1 mr-4">{{  Math.abs(growthRate) }}%</span>
-
-                      <!-- 變化數值 -->
-                      (<span v-if="growthRate >= 0">+</span>
-                      <span v-else>-</span>
-                      <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
-                    </div>
-                  </Tag>
-              </div>
-
-              <!-- 選擇圖表類型 -->
-              <div class="flex items-center space-x-2">
-                <Button
-                  v-if="chartType === 'area'"
-                  :class="[
-                    'p-button-text p-button-rounded',
-                    chartType === 'area' ? 'bg-blue-100 text-blue-500' : 'text-gray-400'
-                  ]"
-                  icon="pi pi-chart-line"
-                  @click="changeChartType('candlestick')"
-                  aria-label="面積圖"
-                />
-
-                <Button
-                  v-else-if="chartType === 'candlestick'"
-                  :class="[
-                    'p-button-text p-button-rounded',
-                    chartType === 'candlestick' ? 'bg-blue-100 text-blue-500' : 'text-gray-400'
-                  ]"
-                  icon="pi pi-chart-bar"
-                  @click="changeChartType('area')"
-                  aria-label="K 線圖"
-                />
-              </div>
-
-
-            </div>
-            
-            <!-- 收盤時間 -->
-            <div class="flex justify-between text-[#5f6368] text-xs ">
-                <span>已收盤：{{ formatUTC8(info.regularMarketTime) }}</span>
-                
-            </div>
-
-            <!-- 時段區塊 -->
-            <div class="flex justify-between items-center mt-4">
-
-                  <Tabs 
-                    v-model:value="currentRange"
+          <Card class="w-full col-span-2">
+            <template #content>
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center mb-2">
+                      <div class="text-3xl font-semibold mr-4">${{ info.regularMarketPrice }}</div>
+                      <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
+                        <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                          <!-- 變化%數 -->
+                          <span v-if="growthRate >= 0">
+                            <i class="fas fa-arrow-right -rotate-45"></i>
+                          </span>
+                          <span v-else>
+                            <i class="fas fa-arrow-right rotate-45"></i>
+                          </span>
+                          <span class="font-semibold ml-1 mr-4">{{  Math.abs(growthRate) }}%</span>
+    
+                          <!-- 變化數值 -->
+                          (<span v-if="growthRate >= 0">+</span>
+                          <span v-else>-</span>
+                          <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
+                        </div>
+                      </Tag>
+                  </div>
+    
+                  <!-- 選擇圖表類型 -->
+                  <div class="flex items-center space-x-2">
+                    <SelectButton
+                      v-model="chartType"
+                      :options="chartTypeOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      class="text-sm"
                     >
-                      <TabList
-                        :pt="{
-                          tabList: { style: { borderWidth: '0px' } },
-                          content: { style: { borderWidth: '0px' } },
-                        }"
-                      >
-                          <Tab v-for="tab in rangeOptions" :key="tab.label" :value="tab.value">{{ tab.label }}</Tab>
-                      </TabList>
-                  </Tabs>
-
-                <span class="text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
-            </div>
-
-            <!-- 圖表區 -->
-            <div>
-              <apexchart
-                v-if="chartType === 'area'"
-                width="100%"
-                type="area"
-                :options="chartOptions"
-                :series="chartSeries"
-                height="300"
-              />
-
-              <apexchart
-                v-else-if="chartType === 'candlestick'"
-                width="100%"
-                type="candlestick"
-                :options="candleOptions"
-                :series="candleSeries"
-              />
-            </div>
-          </div>
+                      <template #option="slotProps">
+                        <div class="flex items-center space-x-2">
+                          <i :class="slotProps.option.icon"></i>
+                          <!-- <span>{{ slotProps.option.label }}</span> -->
+                        </div>
+                      </template>
+                    </SelectButton>
+                  </div>
+                </div>
+                
+                <!-- 收盤時間 -->
+                <div class="flex justify-between text-[#5f6368] text-xs ">
+                    <span>已收盤：{{ formatUTC8(info.regularMarketTime) }}</span>
+                    
+                </div>
+    
+                <!-- 時段區塊 -->
+                <!-- <div class="flex justify-between items-center mt-4">
+    
+                      <Tabs 
+                        v-model:value="currentRange"
+                        >
+                          <TabList
+                            :pt="{
+                              tabList: { style: { borderWidth: '0px' } },
+                              content: { style: { borderWidth: '0px' } },
+                            }"
+                          >
+                              <Tab v-for="tab in rangeOptions" :key="tab.label" :value="tab.value">{{ tab.label }}</Tab>
+                          </TabList>
+                      </Tabs>
+    
+                    <span class="text-xs ml-4">{{ startDate }} - {{ endDate }}</span>
+                </div> -->
+                
+                <!-- 切換期間按鈕 -->
+                <div class="flex flex-wrap justify-center sm:justify-start gap-2 py-4">
+                  <Button
+                    v-for="tab in rangeOptions"
+                    :key="tab.label"
+                    :label="tab.label"
+                    text
+                    rounded
+                    unstyled
+                    @click="currentRange = tab.value"
+                    class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
+                    :style="{
+                      backgroundColor: currentRange === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
+                      fontWeight: currentRange === tab.value ? '600' : '400'
+                    }"
+                  />
+                </div>
+    
+                <!-- 圖表區 -->
+                <div>
+                  <apexchart
+                    v-if="chartType === 'area'"
+                    width="100%"
+                    type="area"
+                    :options="chartOptions"
+                    :series="chartSeries"
+                    height="300"
+                  />
+    
+                  <apexchart
+                    v-else-if="chartType === 'candlestick'"
+                    width="100%"
+                    type="candlestick"
+                    :options="candleOptions"
+                    :series="candleSeries"
+                  />
+                </div>
+              </div>
+            </template>
+          </Card>
 
           <!-- 右邊 -->
           <div>
@@ -162,9 +175,13 @@ import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
+import SelectButton from 'primevue/selectbutton'
 import api from '@/utils/api'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
+
+import { useTheme } from '@/composables/useTheme.js'
+const { isDark } = useTheme()
 
 const route  = useRoute()
 const symbol = computed(() => route.params.symbol)
@@ -178,24 +195,27 @@ onBeforeRouteUpdate((to, from) => {
 
 const chartType = ref('area');
 
-function changeChartType(type) {
-  if (chartType.value !== type) {
-    chartType.value = type
-    fetchChartData(symbol.value)
-  }
-}
+const chartTypeOptions = [
+  { label: '面積圖', value: 'area', icon: 'pi pi-chart-line' },
+  { label: 'K線圖', value: 'candlestick', icon: 'pi pi-chart-bar' }
+]
+
+// 偵測切換
+watch(chartType, (newType) => {
+  fetchChartData(symbol.value)
+})
 
 const currentRange = ref('3mo')
 
-const rangeOptions = [
-  { label: '7天', value: '7d' },
-  { label: '1個月', value: '1mo' },
-  { label: '3個月', value: '3mo' },
-  { label: '6個月', value: '6mo' },
+const rangeOptions = computed(() => ([
+  { label: '7D', value: '7d' },
+  { label: '1M', value: '1mo' },
+  { label: '3M', value: '3mo' },
+  { label: '6M', value: '6mo' },
   { label: 'YTD', value: 'ytd' },
-  { label: '1年', value: '1y' },
-  { label: '5年 ', value: '5y' },
-]
+  { label: '1Y', value: '1y' },
+  { label: '5Y', value: '5y' }
+]))
 
 const chartOptions = computed(() => ({
   chart: {
@@ -203,6 +223,7 @@ const chartOptions = computed(() => ({
     type: 'area',
     zoom: { enabled: false },
     toolbar: { show: false },
+    background: 'transparent'
   },
   stroke: {
     curve: 'smooth',
@@ -256,7 +277,10 @@ const chartOptions = computed(() => ({
     show: true,
     borderColor: '#eee',
     strokeDashArray: 5,
-  }
+  },
+  theme: {
+    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  },
 }))
 
 const chartSeries = ref([
@@ -276,13 +300,14 @@ const candleSeries = ref([
 const candleOptions = ref({
   chart: {
     type: 'candlestick',
-    height: 400,
+    // height: 400,
     toolbar: {
-      show: true
+      show: false
     },
     zoom: {
       enabled: true
-    }
+    },
+    background: 'transparent'
   },
   // title: {
   //   text: `${symbol} · K 線圖`,
@@ -303,7 +328,10 @@ const candleOptions = ref({
     x: {
       format: 'yyyy/MM/dd'
     }
-  }
+  },
+  theme: {
+    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  },
 })
 
 
@@ -510,16 +538,8 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-</style>
-<style>
-/* .p-tab {
-  font-size: small;
-  border-width: 0!important;
-  padding: 1rem!important;
+.p-breadcrumb {
+  background: var(--p-surface-background);
 }
 
-.p-tab-active {
-  color: #5b9ef5!important;
-  font-weight: 600!important;
-} */
 </style>
