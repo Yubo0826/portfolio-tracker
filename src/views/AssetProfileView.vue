@@ -26,22 +26,21 @@
               <div>
                 <div class="flex items-center justify-between">
                   <div class="flex items-center mb-2">
-                      <div class="text-3xl font-semibold mr-4">${{ info.regularMarketPrice }}</div>
+                      <div class="text-3xl font-bold mr-4">${{ info.regularMarketPrice }}</div>
                       <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
-                        <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                          <!-- 變化%數 -->
-                          <span v-if="growthRate >= 0">
-                            <i class="fas fa-arrow-right -rotate-45"></i>
-                          </span>
-                          <span v-else>
-                            <i class="fas fa-arrow-right rotate-45"></i>
-                          </span>
-                          <span class="font-semibold ml-1 mr-4">{{  Math.abs(growthRate) }}%</span>
-    
+                        <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center text-lg">
                           <!-- 變化數值 -->
-                          (<span v-if="growthRate >= 0">+</span>
-                          <span v-else>-</span>
-                          <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
+                          <span class="mr-2">                          
+                            <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
+                            <i v-else class="pi pi-sort-down-fill"></i>
+                          </span>
+                          <span class="font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
+                          (
+                            <!-- 變化%數 -->
+                            <span v-if="growthRate >= 0">+</span>
+                            <span v-else>-</span>
+                            <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
+                          )
                         </div>
                       </Tag>
                   </div>
@@ -91,21 +90,27 @@
                 </div> -->
                 
                 <!-- 切換期間按鈕 -->
-                <div class="flex flex-wrap justify-center sm:justify-start gap-2 py-4">
-                  <Button
-                    v-for="tab in rangeOptions"
-                    :key="tab.label"
-                    :label="tab.label"
-                    text
-                    rounded
-                    unstyled
-                    @click="currentRange = tab.value"
-                    class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
-                    :style="{
-                      backgroundColor: currentRange === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
-                      fontWeight: currentRange === tab.value ? '600' : '400'
-                    }"
-                  />
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">                
+                  <div class="flex flex-wrap justify-center sm:justify-start gap-2 py-4">
+                    <Button
+                      v-for="tab in rangeOptions"
+                      :key="tab.label"
+                      :label="tab.label"
+                      text
+                      rounded
+                      unstyled
+                      @click="currentRange = tab.value"
+                      class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
+                      :style="{
+                        backgroundColor: currentRange === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
+                        fontWeight: currentRange === tab.value ? '600' : '400'
+                      }"
+                    />
+                  </div>
+  
+                  <div>
+                    <span class="text-xs ml-4">{{ startDate }} ~ {{ endDate }}</span>
+                  </div>
                 </div>
     
                 <!-- 圖表區 -->
@@ -440,8 +445,8 @@ const endDate = ref('')
 async function fetchChartData(symbol) {
   const { period1, period2 } = getPeriodRange(currentRange.value)
 
-  startDate.value = formatStrDate(period1)
-  endDate.value = formatStrDate(period2)
+  startDate.value = period1 // formatStrDate(period1)
+  endDate.value = period2 // formatStrDate(period2)
 
   try {
     const data = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)

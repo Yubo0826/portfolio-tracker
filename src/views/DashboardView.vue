@@ -95,31 +95,42 @@
 
               <Tag :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
                 <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                  <i v-if="growthRate >= 0" class="fas fa-arrow-right -rotate-45"></i>
-                  <i v-else class="fas fa-arrow-right rotate-45"></i>
-                  <span class="font-semibold ml-1 mr-2">{{ Math.abs(growthRate) }}%</span>
-                  (<span v-if="growthRate >= 0">+</span><span v-else>-</span>
-                  <span class="font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>)
+                  <!-- 變化數值 -->
+                  <span class="mr-2">                          
+                    <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
+                    <i v-else class="pi pi-sort-down-fill"></i>
+                  </span>
+                  <span class="font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
+                  (
+                    <!-- 變化%數 -->
+                    <span v-if="growthRate >= 0">+</span>
+                    <span v-else>-</span>
+                    <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
+                  )
                 </div>
               </Tag>
             </div>
 
             <!-- 切換期間按鈕 -->
-            <div class="flex flex-wrap justify-center sm:justify-start gap-2">
-              <Button
-                v-for="tab in periods"
-                :key="tab.label"
-                :label="tab.label"
-                text
-                rounded
-                unstyled
-                @click="selectedPeriod = tab.value"
-                class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
-                :style="{
-                  backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
-                  fontWeight: selectedPeriod === tab.value ? '600' : '400'
-                }"
-              />
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">            
+              <div class="flex flex-wrap justify-center sm:justify-start gap-2">
+                <Button
+                  v-for="tab in periods"
+                  :key="tab.label"
+                  :label="tab.label"
+                  text
+                  rounded
+                  unstyled
+                  @click="selectedPeriod = tab.value"
+                  class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
+                  :style="{
+                    backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-500)' : 'transparent',
+                    fontWeight: selectedPeriod === tab.value ? '600' : '400'
+                  }"
+                />
+              </div>
+  
+              <span class="text-xs ml-4">{{ startDate }} ~ {{ endDate }}</span>
             </div>
           </template>
 
@@ -136,7 +147,7 @@
 
       <!-- 右半邊圓餅圖（縮小會掉到下方） -->
       <div class="w-full lg:w-2/5">
-        <Card class="w-full">
+        <Card class="w-full h-full">
           <template #title>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
@@ -151,10 +162,10 @@
 
           <template #content>
             <div v-if="holdingsStore.list.length > 0" class="flex justify-center items-center py-4">
+              <!-- height="280" -->
               <apexchart
                 v-if="selectedPieType === 'actual'"
                 width="100%"
-                height="280"
                 type="donut"
                 :options="holdingsChart"
                 :series="holdingsSeries"
@@ -162,7 +173,6 @@
               <apexchart
                 v-else
                 width="100%"
-                height="280"
                 type="donut"
                 :options="allocationChart"
                 :series="allocationSeries"
@@ -298,6 +308,9 @@ import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import NoData from '@/components/NoData.vue'
 
+import { useTheme } from '@/composables/useTheme.js'
+const { isDark } = useTheme()
+
 const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
@@ -387,8 +400,8 @@ function getPeriodRange(range) {
   const days = daysMap[range] || 30
   const start = new Date()
   start.setDate(start.getDate() - days)
-  startDate.value = formatStrDate(formatDate(start))
-  endDate.value = formatStrDate(e)
+  startDate.value = formatDate(start) // formatStrDate(formatDate(start))
+  endDate.value = e // formatStrDate(e)
   return { period1: formatDate(start), period2: e }
 }
 
@@ -459,23 +472,56 @@ async function loadData() {
  *  Computed (derived data)
  * =======================*/
 const holdingsSeries = computed(() => holdingsStore.list.map(h => h.currentValue))
-const allocationSeries = computed(() => allocation.value.map(a => a.target))
+const allocationSeries = computed(() => sortedAllocation.value.map(a => a.target))
+
+/*
+  為了讓圓餅圖顏色一致:
+  allocationSeries 排序根據 holdingsStore
+  順序規則：allocationSeries 依照 holdingsStore 順序排列。
+  若有 allocationSeries 沒出現在 holdingsStore，會放最後。
+
+*/
+
+const sortedAllocation = computed(() => {
+  const holdingSymbols = holdingsStore.list.map(h => h.symbol)
+  const allocationList = allocation.value || []
+
+  return [...allocationList].sort((a, b) => {
+    const indexA = holdingSymbols.indexOf(a.symbol)
+    const indexB = holdingSymbols.indexOf(b.symbol)
+
+    // 不在 holdings 裡的放後面
+    if (indexA === -1 && indexB === -1) return 0
+    if (indexA === -1) return 1
+    if (indexB === -1) return -1
+
+    // 依 holdings 順序排序
+    return indexA - indexB
+  })
+})
 
 const holdingsChart = computed(() => ({
-  chart: { type: 'donut' },
+  chart: { type: 'donut', background: 'transparent' },
   labels: holdingsStore.list.map(h => h.symbol),
   legend: {
     labels: { colors: 'var(--p-content-color)' },
   },
-  responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }]
+  responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }],
+  theme: {
+    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  },
 }))
+
 const allocationChart = computed(() => ({
-  chart: { type: 'donut' },
-  labels: allocation.value.map(a => a.symbol),
+  chart: { type: 'donut', background: 'transparent' },
+  labels: sortedAllocation.value.map(a => a.symbol),
   legend: {
     labels: { colors: 'var(--p-content-color)' },
   },
-  responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }]
+  responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }],
+  theme: {
+    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  },
 }))
 
 const annualReturn = computed(() => {
@@ -542,7 +588,7 @@ const rebalanceRows = computed(() => {
  *  Charts (options & helpers)
  * =======================*/
 const chartOptions = {
-  chart: { id: 'chart', type: 'area', zoom: { enabled: false }, toolbar: { show: false } },
+  chart: { id: 'chart', type: 'area', zoom: { enabled: false }, toolbar: { show: false }, background: 'transparent' },
   stroke: { curve: 'smooth', width: 2 },
   dataLabels: { enabled: false },
   fill: {
@@ -563,7 +609,10 @@ const chartOptions = {
     title: { style: { fontSize: '14px' } }
   },
   tooltip: { x: { format: 'yyyy/MM/dd' } },
-  grid: { show: true, borderColor: '#eee', strokeDashArray: 5 }
+  grid: { show: true, borderColor: '#eee', strokeDashArray: 5 },
+  theme: {
+    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  }
 }
 
 function calculateGrowthRate() {

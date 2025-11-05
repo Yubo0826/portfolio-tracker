@@ -18,14 +18,14 @@
       :loading="isLoading"
       dataKey="id"
       tableStyle="min-width: 50rem"
-      stripedRows 
+      rowHover 
       paginator :rows="15"
     >
-      <Column field="" :header="$t('symbol')" style="width: 40%" sortable sortField="symbol">
+      <Column field="symbol" sortable :header="$t('symbol')">
         <template #body="{ data }">
           <div>
-            <span class="font-bold mr-4">{{ data.symbol }}</span>
-            <div class="text-sm">{{ data.name }}</div>
+            <span class="font-medium">{{ data.symbol }}</span>
+            <div class="text-sm text-[var(--p-surface-400)] mt-1">{{ data.name }}</div>
           </div>
         </template>
       </Column>

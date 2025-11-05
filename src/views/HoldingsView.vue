@@ -28,6 +28,7 @@
       :loading="store.isLoading"
       dataKey="id"
       tableStyle="min-width: 50rem"
+      rowHover
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
       <Column field="symbol" sortable :header="$t('symbol')">
