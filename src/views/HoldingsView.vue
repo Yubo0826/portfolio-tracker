@@ -48,7 +48,7 @@
         <template #body="{ data }">
           <div
             :class="{
-              'text-[#5cd59b]': data.totalProfit >= 0,
+              'text-emerald-600': data.totalProfit >= 0,
               'text-[#f27362]': data.totalProfit < 0
             }"
           >

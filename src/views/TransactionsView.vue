@@ -24,6 +24,7 @@
       :loading="store.isLoading"
       dataKey="id"
       tableStyle="min-width: 50rem"
+      paginator :rows="15"
       rowHover 
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem" />
@@ -35,7 +36,7 @@
           </div>
         </template>
       </Column>
-      <Column field="name" sortable :header="$t('name')" />
+      <!-- <Column field="name" sortable :header="$t('name')" /> -->
       <Column field="shares" sortable :header="$t('shares')" />
       <Column field="price" sortable :header="$t('price')" />
       <Column field="fee" sortable :header="$t('fee')" />
