@@ -102,8 +102,9 @@
                       @click="currentRange = tab.value"
                       class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
                       :style="{
-                        backgroundColor: currentRange === tab.value ? 'var(--p-primary-color-light)' : 'transparent',
-                        fontWeight: currentRange === tab.value ? '600' : '400'
+                        backgroundColor: currentRange === tab.value ? 'var(--p-primary-500)' : 'transparent',
+                        fontWeight: currentRange === tab.value ? '600' : '400',
+                        color: currentRange === tab.value ? 'var(--p-surface-0)' : 'var(--p-text-color)'
                       }"
                     />
                   </div>

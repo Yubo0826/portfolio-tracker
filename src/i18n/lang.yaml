@@ -21,7 +21,7 @@ name:
   zh: 名稱
 shares:
   en: Shares
-  zh: 持股
+  zh: 股數
 totalCost:
   en: Total Cost
   zh: 總花費
@@ -237,6 +237,9 @@ enabled:
 disabled:
   en: Disabled
   zh: 已停用
+functions:
+  en: Functions
+  zh: 功能
 
 # 新增/編輯交易視窗
 inputSymbol:

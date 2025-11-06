@@ -229,7 +229,7 @@
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
-                  class="flex items-center cursor-pointer p-2 rounded-md truncate"
+                  class="flex items-center cursor-pointer p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
                   :style="{ width: '300px', minWidth: '250px' }">
                 <StockIcon :symbol="data.symbol" class="mr-2" />
                 <div class="truncate">

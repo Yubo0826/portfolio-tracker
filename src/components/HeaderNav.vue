@@ -65,7 +65,7 @@
           <Button
             :label="$t('setTargets')"
             icon="pi pi-cog "
-            @click="$router.push('/rebalancing'); openDropdown = null; closeTimer = null;"
+            @click="$router.push('/allocation'); openDropdown = null; closeTimer = null;"
             fluid
             text
             size="small"
@@ -74,7 +74,7 @@
       </template>
     </Menu>
     <Button
-      :label="t('allocation')"
+      :label="t('functions')"
       icon="pi pi-chevron-down"
       iconPos="right"
       severity="secondary"
