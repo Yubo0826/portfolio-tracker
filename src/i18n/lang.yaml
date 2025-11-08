@@ -243,8 +243,8 @@ functions:
 
 # 新增/編輯交易視窗
 inputSymbol:
-  en: Input symbol
-  zh: 輸入股票代號
+  en: Search symbol
+  zh: 輸入代號搜尋
 addTransactionSuccess:
   en: Trade added successfully
   zh: 成功新增一筆交易明細

@@ -11,182 +11,164 @@
     />
 
     <!-- Portfolio Menu -->
-    <Menu
-      ref="portfolioMenu"
-      :model="portfolioItems"
-      popup
-      class="custom-menu"
+    <div
+      class="relative"
+      @mouseenter="openHoverMenu('portfolioMenu', $event)"
+      @mouseleave="closeHoverMenu('portfolioMenu')"
     >
-      <template #item="{ item, props }">
-          <a v-ripple :href="item.url" :target="item.target" v-bind="props.action">
-              <span :class="item.icon" />
-              <span class="ml-2">{{ item.label }}</span>
+    <!-- :label="t('portfolio')"
+    icon="pi pi-chevron-down"
+    iconPos="right" -->
+      <Button
+        severity="secondary"
+        variant="text"
+        class="m-1"
+        :style="{ color: isActive(['/portfolio','/portfolio/holdings','/portfolio/transactions','/portfolio/dividends']) ? 'var(--p-primary-color)' : '' }"
+      >
+        <template #default>
+          <div class="font-medium">
+            {{ t('portfolio') }}
+            <i class="pi pi-chevron-down ml-1" style="font-size: .65rem"></i>
+          </div>
+        </template>
+      </Button>
+      <Menu
+        ref="portfolioMenu"
+        :model="portfolioItems"
+        popup
+        class="custom-menu"
+        @mouseenter="openHoverMenu('portfolioMenu', $event)"
+        @mouseleave="closeHoverMenu('portfolioMenu')"
+      >
+        <template #item="{ item, props }">
+          <a v-ripple v-bind="props.action">
+            <span :class="item.icon" />
+            <span class="ml-2">{{ item.label }}</span>
           </a>
-      </template>
-      <template #end>
-        <div class="p-3">
-          <Button
-            :label="$t('portfolios')"
-            icon="pi pi-folder"
-            @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
-            fluid
-            text
-            size="small"
-          />
-        </div>
-      </template>
-    </Menu>
-    <Button
-      :label="t('portfolio')"
-      icon="pi pi-chevron-down"
-      iconPos="right"
-      severity="secondary"
-      variant="text"
-      class="m-1"
-      :style="{ color: isActive(['/portfolio','/portfolio/holdings','/portfolio/transactions','/portfolio/dividends']) ? 'var(--p-primary-color)' : '' }"
-      @click="toggleMenu($event, 'portfolioMenu')"
-    />
+        </template>
+        <template #end>
+          <div class="p-3">
+            <Button
+              :label="$t('portfolios')"
+              icon="pi pi-folder"
+              @click="$router.push('/portfolios')"
+              fluid
+              text
+              size="small"
+            />
+          </div>
+        </template>
+      </Menu>
+    </div>
 
-    <!-- Allocation Menu -->
-    <Menu
-      ref="toolMenu"
-      :model="toolItems"
-      popup
-      class="custom-menu"
+    <!-- Tools Menu -->
+    <div
+      class="relative"
+      @mouseenter="openHoverMenu('toolMenu', $event)"
+      @mouseleave="closeHoverMenu('toolMenu')"
     >
-      <template #item="{ item, props }">
-          <a v-ripple :href="item.url" :target="item.target" v-bind="props.action">
-              <span :class="item.icon" />
-              <span class="ml-2">{{ item.label }}</span>
+      <Button
+        severity="secondary"
+        variant="text"
+        class="m-1"
+        :style="{ color: isActive(['/allocation','/rebalancing','/backtesting']) ? 'var(--p-primary-color)' : '' }"
+      >
+        <template #default>
+          <div class="font-medium">
+            {{ t('functions') }}
+            <i class="pi pi-chevron-down ml-1" style="font-size: .65rem"></i>
+          </div>
+        </template>
+      </Button>
+      <Menu
+        ref="toolMenu"
+        :model="toolItems"
+        popup
+        class="custom-menu"
+        @mouseenter="openHoverMenu('toolMenu', $event)"
+        @mouseleave="closeHoverMenu('toolMenu')"
+      >
+        <template #item="{ item, props }">
+          <a v-ripple v-bind="props.action">
+            <span :class="item.icon" />
+            <span class="ml-2">{{ item.label }}</span>
           </a>
-      </template>
-      <template #end>
-        <div class="p-3">
-          <Button
-            :label="$t('setTargets')"
-            icon="pi pi-cog "
-            @click="$router.push('/allocation'); openDropdown = null; closeTimer = null;"
-            fluid
-            text
-            size="small"
-          />
-        </div>
-      </template>
-    </Menu>
-    <Button
-      :label="t('functions')"
-      icon="pi pi-chevron-down"
-      iconPos="right"
-      severity="secondary"
-      variant="text"
-      class="m-1"
-      :style="{ color: isActive(['/allocation','/rebalancing','/backtesting']) ? 'var(--p-primary-color)' : '' }"
-      @click="toggleMenu($event, 'toolMenu')"
-    />
+        </template>
+        <template #end>
+          <div class="p-3">
+            <Button
+              :label="$t('setTargets')"
+              icon="pi pi-cog"
+              @click="$router.push('/allocation')"
+              fluid
+              text
+              size="small"
+            />
+          </div>
+        </template>
+      </Menu>
+    </div>
   </nav>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Menu from 'primevue/menu'
 import Button from 'primevue/button'
-
+import { useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
-const portfolioStore = usePortfolioStore()
 
-const selectedPortfolio = ref(null)
-
-watch(
-  () => portfolioStore.currentPortfolio,
-  (newVal) => {
-    if (newVal?.id !== selectedPortfolio.value)
-      selectedPortfolio.value = newVal?.id
-  }
-)
-
+const router = useRouter()
+const route = useRoute()
 const { t } = useI18n()
 
-// Menu references
+const portfolioStore = usePortfolioStore()
 const portfolioMenu = ref()
 const toolMenu = ref()
+const hoverTimeout = ref(null)
 
-// Toggle which menu opens
-const toggleMenu = (event, menuName) => {
+const openHoverMenu = (menuName, event) => {
+  console.log('openHoverMenu ', menuName)
+  clearTimeout(hoverTimeout.value)
+  // 開一個之前先全部關掉，確保不重疊
+  portfolioMenu.value?.hide()
+  toolMenu.value?.hide()
+
   if (menuName === 'portfolioMenu') {
-    portfolioMenu.value.toggle(event)
+    portfolioMenu.value.show(event)
   } else if (menuName === 'toolMenu') {
-    toolMenu.value.toggle(event)
+    toolMenu.value.show(event)
   }
 }
 
-// Menu items
+const closeHoverMenu = (menuName) => {
+  console.log('closeHoverMenu called for', menuName)
+  hoverTimeout.value = setTimeout(() => {
+    if (menuName === 'portfolioMenu') {
+      portfolioMenu.value?.hide()
+    } else if (menuName === 'toolMenu') {
+      toolMenu.value?.hide()
+    }
+  }, 150)
+}
+
+
 const portfolioItems = computed(() => [
-  // {
-  //   label: portfolioStore.currentPortfolio
-  //     ? portfolioStore.currentPortfolio.name
-  //     : t('portfolio'),
-  //   items: [
-  //     {
-  //       label: t('holdings'),
-  //       command: () => router.push('/portfolio/holdings'),
-  //     },
-  //     {
-  //       label: t('transactions'),
-  //       command: () => router.push('/portfolio/transactions'),
-  //     },
-  //     {
-  //       label: t('dividends'),
-  //       command: () => router.push('/portfolio/dividends'),
-  //     },
-  //   ]
-  // },
-  {
-    label: t('holdings'),
-    command: () => router.push('/portfolio/holdings'),
-  },
-  {
-    label: t('transactions'),
-    command: () => router.push('/portfolio/transactions'),
-  },
-  {
-    label: t('dividends'),
-    command: () => router.push('/portfolio/dividends'),
-  },
-  { separator: true },
-  // {
-  //   label: t('portfolios'),
-  //   icon: 'pi pi-folder',
-  //   command: () => router.push('/portfolios'),
-  // },
+  { label: t('holdings'), command: () => router.push('/portfolio/holdings') },
+  { label: t('transactions'), command: () => router.push('/portfolio/transactions') },
+  { label: t('dividends'), command: () => router.push('/portfolio/dividends') },
+  { separator: true }
 ])
 
 const toolItems = ref([
-  // {
-  //   label: t('setTargets'),
-  //   icon: 'pi pi-cog',
-  //   command: () => router.push('/allocation'),
-  // },
-  {
-    label: t('rebalance'),
-    command: () => router.push('/rebalancing'),
-  },
-  {
-    label: t('backtesting'),
-    command: () => router.push('/backtesting'),
-  },
-  { separator: true },
+  { label: t('rebalance'), command: () => router.push('/rebalancing') },
+  { label: t('backtesting'), command: () => router.push('/backtesting') },
+  { separator: true }
 ])
 
-// 路由狀態檢查
-import { useRouter, useRoute } from 'vue-router'
-const router = useRouter()
-const route = useRoute()
-
 const isActive = (paths) => {
-  if (Array.isArray(paths)) {
-    return paths.includes(route.path)
-  }
+  if (Array.isArray(paths)) return paths.includes(route.path)
   return route.path === paths
 }
 </script>

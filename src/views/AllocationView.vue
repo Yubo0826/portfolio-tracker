@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pb-8">
     <div class="flex justify-between mt-8">
       <h1 class="text-xl font-semibold pb-2">{{ $t('setTargets') }}</h1>
       <!-- Save button -->
@@ -17,7 +17,7 @@
       <!-- Draggable 1: Holdings -->
       <div class="w-1/3">
         <draggable
-          class="g-group space-y-2 p-4 rounded-xl border"
+          class="g-group space-y-2 p-4 rounded-xl"
           :list="sortedHoldings"
           :group="{ name: 'assets', pull: 'clone', put: false }"
           :clone="cloneItem"
@@ -29,15 +29,16 @@
               <h3 class="font-bold mr-2">{{ $t('holdings') }}</h3>
               <p class="text-sm mt-1 text-gray-500">{{ $t('dragAndDropHint') }}</p>
             </div>
-            <div class="mt-4 flex justify-between text-xs px-4 border rounded-2xl py-2 text-gray-500">
+            <!-- border rounded-2xl -->
+            <div class="mt-4 flex justify-between text-xs px-4 py-2 text-gray-500">
               <span>{{ $t('symbol') }}</span>
               <span>{{ $t('actualPercentage') }}</span>
             </div>
           </template>
           <template #item="{ element }">
             <div
-              class="g-group-item flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md cursor-move"
-              :class="{ 'opacity-50 bg-gray-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
+              class="g-group-item flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-xs transition hover:shadow-md cursor-move"
+              :class="{ 'opacity-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
               >
               <!-- 拖曳圖示 + symbol -->
               <div>
@@ -95,7 +96,7 @@
           </template>
   
           <template #item="{ element, index }">
-            <div v-if="!element.editable" class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-sm hover:shadow-md transition">
+            <div v-if="!element.editable" class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-xs hover:shadow-md transition">
               <!-- 股票名字 -->
               <div>
                 <span class="font-bold mr-2">{{ element.symbol }}</span>
@@ -325,8 +326,8 @@ const sortedAssets = () => {
 </script>
 <style scoped>
 .g-group {
-  background-color: var(--p-overlay-modal-background);
-  border: 1px solid var(--p-select-border-color);
+  background-color: var(--p-content-background);
+  /* border: 1px solid var(--p-select-border-color); */
   color: var(--p-content-color);
   transition: color 0.2s;
   max-height: 80vh;
@@ -334,7 +335,8 @@ const sortedAssets = () => {
 }
 
 .g-group-item {
-  background-color: var(--p-content-background);
+  background-color: var(--p-overlay-modal-background);
+  
   border: 1px solid var(--p-select-border-color);
   color: var(--p-content-color);
   transition: color 0.2s;

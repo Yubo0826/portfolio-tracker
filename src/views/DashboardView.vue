@@ -1,6 +1,6 @@
 <template>
   <!-- px-4 sm:px-6 lg:px-8 -->
-  <div class="container mx-auto mt-4">
+  <div class="container mx-auto mt-4 max-w-screen-xl">
     <!-- 左右兩欄：桌機並排，小螢幕上下堆疊 -->
     <div class="flex flex-col lg:flex-row gap-6">
 
@@ -250,7 +250,7 @@
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              <div class="text-sm text-[#9B9B9B]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
+              <div class="text-sm text-[var(--p-card-subtitle-color)]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
             </template>
           </Column>
 
@@ -276,7 +276,7 @@
           <Column field="target" :header="$t('allocationRatio')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
-              <div class="text-sm text-[#9B9B9B]">
+              <div class="text-sm text-[var(--p-card-subtitle-color)]">
                 🎯
                 {{ data.target || 0 }}%</div>
             </template>

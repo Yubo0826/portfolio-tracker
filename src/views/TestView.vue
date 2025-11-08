@@ -1,25 +1,74 @@
 <template>
-  <div>
-    <button
-      @click="loadData"
-      class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 opacity-25"
-    >
-      載入資料
-    </button>
-  </div>
+  <nav class="navbar">
+    <ul>
+      <li 
+        v-for="(item, index) in menuItems" 
+        :key="index" 
+        @mouseenter="handleMouseEnter(index)" 
+        @mouseleave="handleMouseLeave"
+        :class="{ active: activeIndex === index }"
+      >
+        {{ item }}
+        <div v-if="activeIndex === index" class="dropdown">
+          Dropdown Content for {{ item }}
+        </div>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script>
-import { showLoading, hideLoading } from "@/composables/loading.js";
-
 export default {
+  data() {
+    return {
+      menuItems: ["Home", "About", "Services", "Contact"],
+      activeIndex: null, // Tracks the currently hovered menu item
+    };
+  },
   methods: {
-    async loadData() {
-      showLoading();
-      // 模擬 API
-      await new Promise((res) => setTimeout(res, 5000));
-      hideLoading();
-    }
-  }
+    handleMouseEnter(index) {
+      this.activeIndex = index; // Set the active index on mouseenter
+    },
+    handleMouseLeave() {
+      this.activeIndex = null; // Reset the active index on mouseleave
+    },
+  },
 };
 </script>
+
+<style scoped>
+.navbar {
+  background-color: #333;
+  padding: 10px;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar li {
+  color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+.navbar li.active {
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  color: black;
+  padding: 10px;
+  border: 1px solid #ccc;
+  z-index: 10;
+}
+</style>
