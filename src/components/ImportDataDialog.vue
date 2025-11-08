@@ -255,7 +255,7 @@ function closeDialog() {
 
 async function confirmImport() {
   if (!selectedPortfolioId.value) {
-    toast.error('請選擇投資組合', '')
+    toast.error($t('pleaseSelectPortfolio'), '')
     return
   }
 

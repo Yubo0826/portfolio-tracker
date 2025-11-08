@@ -1,6 +1,6 @@
 <template>
   <div class="p-6 min-h-90">
-    <h2 class="text-xl font-semibold mb-16">{{ $t('rebalanceTitle') }}</h2>
+    <h2 class="text-xl font-semibold mb-8">{{ $t('rebalanceTitle') }}</h2>
 
     <!-- 存入 / 提取 + 金額輸入 -->
     <div class="flex justify-center items-center mb-4 gap-4">
@@ -15,14 +15,17 @@
     <!-- 再平衡結果表格 -->
     <DataTable v-if="isRebalancing" :value="rebalanceResult" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
       <Column field="symbol" :header="$t('symbol')">
+
         <template #body="slotProps">
-          <div :class="slotProps.data.executed ? 'bg-gray-100 p-1 rounded flex items-center' : ''">
-            {{ slotProps.data.symbol }}
+          <!-- :class="slotProps.data.executed ? 'bg-gray-100 p-1 rounded flex items-center' : ''" -->
+          <div>
+            <span class="font-medium">{{ slotProps.data.symbol }}</span>
+            <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ slotProps.data.name }}</div>
             <i v-if="slotProps.data.executed" class="pi pi-check ml-2 text-green-600"></i>
           </div>
         </template>
       </Column>
-      <Column field="name" :header="$t('name')"></Column>
+      <!-- <Column field="name" :header="$t('name')"></Column> -->
       <Column field="shares" :header="$t('currentShares')"></Column>
       <Column field="target" :header="$t('targetPct')">
         <template #body="slotProps">
@@ -67,7 +70,7 @@
     </DataTable>
 
     <!-- Unused Cash & Execute All -->
-    <div v-if="isRebalancing" class="mt-4 flex justify-between items-center">
+    <!-- <div v-if="isRebalancing" class="mt-4 flex justify-between items-center">
       <div class="text-sm">
         {{ $t('unusedCash') }}：
         <span class="font-semibold">${{ leftoverCash.toFixed(2) }}</span>
@@ -77,13 +80,16 @@
         icon="pi pi-check"
         @click="executeAllTransactions"
       />
-    </div>
+    </div> -->
   </div>
+
+  <TransactionDialog v-model="transactionDialog" :formData="newTransaction" />
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
 import api from '@/utils/api';
+import TransactionDialog from '@/components/TransactionDialog.vue';
 import * as toast from '@/composables/toast';
 import FloatLabel from 'primevue/floatlabel'
 
@@ -339,7 +345,7 @@ const addTransaction = (data, index) => {
     price: Number(data.currentPrice) || 0,
     fee: 0,
     date: new Date(),
-    type: data.action.toLowerCase(),
+    operation: data.action.toLowerCase(),
     rowIndex: index
   };
   transactionDialog.value = true;

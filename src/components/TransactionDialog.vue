@@ -118,6 +118,7 @@ const { t } = useI18n();
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   editingId: { type: [Number, String, null], default: null },
+  formData: { type: Object, default: null },
 });
 const emit = defineEmits(['update:modelValue', 'saved']);
 
@@ -160,6 +161,8 @@ const emptyForm = () => ({
 });
 
 const form = ref(emptyForm());
+
+console.log('初始 form 資料:', form.value);
 
 const hasError = computed(() => {
   const e = {
@@ -223,22 +226,42 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => props.formData,
+  (newForm) => {
+    form.value = emptyForm();
+    form.value = {
+      date: new Date(newForm.date),
+      symbol: newForm.symbol,
+      name: newForm.name,
+      assetType: newForm.assetType,
+      shares: newForm.shares,
+      price: newForm.price,
+      fee: newForm.fee,
+      operation: newForm.transactionType,
+    }
+  }
+);
+
 const onSave = async (saveAnother = false) => {
   if (hasError.value) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Please fill in all required fields.', life: 3000 });
+    // 請填寫所有必填欄位。
+    toast.error(t('fillAllRequiredFields'), '');
     return;
   }
 
   if (form.value.operation === 'sell') {
     const ok = store.canSell(form.value.symbol, form.value.shares);
     if (!ok) {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Not enough shares to sell.', life: 3000 });
+      // 無法賣出超過持有的股數。
+      toast.error(t('notEnoughSharesToSell'), '');
       return;
     }
   }
 
   if (Number(form.value.fee) < 0) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Fee cannot be negative.', life: 3000 });
+    // 手續費不能為負數。
+    toast.error(t('feeCannotBeNegative'), '');
     return;
   }
 
@@ -249,17 +272,12 @@ const onSave = async (saveAnother = false) => {
       form: form.value,
       portfolioId: selectedPortfolioId.value,
     });
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: props.editingId ? 'Transaction updated.' : 'Transaction created.',
-      life: 3000,
-    });
+    toast.suucess(t('transactionSavedSuccessfully'), '');
     emit('saved', result);
     if (saveAnother) form.value = emptyForm();
     else close();
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Error saving transaction', life: 3000 });
+    toast.error(t('errorSavingTransaction'), '');
   }
 };
 

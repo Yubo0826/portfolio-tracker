@@ -24,6 +24,7 @@
         variant="text"
         class="m-1"
         :style="{ color: isActive(['/portfolio','/portfolio/holdings','/portfolio/transactions','/portfolio/dividends']) ? 'var(--p-primary-color)' : '' }"
+        @click="$router.push('/portfolio/holdings')"
       >
         <template #default>
           <div class="font-medium">

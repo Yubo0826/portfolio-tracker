@@ -96,7 +96,7 @@
           </template>
   
           <template #item="{ element, index }">
-            <div v-if="!element.editable" class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-xs hover:shadow-md transition">
+            <div v-if="!element.editable" class="g-group-item flex items-center justify-between p-4 rounded-xl shadow-xs transition">
               <!-- 股票名字 -->
               <div>
                 <span class="font-bold mr-2">{{ element.symbol }}</span>

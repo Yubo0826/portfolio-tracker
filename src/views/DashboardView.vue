@@ -8,7 +8,8 @@
       <div class="w-full lg:w-3/5 flex flex-col gap-6">
         
         <!-- 三張統計卡 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 -->
+        <div class="grid grid-cols-3 gap-4">
           <!-- Total Value -->
           <Card class="rounded-xl shadow-md">
             <template #title>

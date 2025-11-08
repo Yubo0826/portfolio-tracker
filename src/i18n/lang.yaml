@@ -520,3 +520,21 @@ fetchAllocationErrorLog:
 symbolhavebeenexisted:
   en: "The symbol '{symbol}' has already been added."
   zh: "代號「{symbol}」已經被新增過了。"
+pleaseSelectPortfolio:
+  en: Please select a portfolio.
+  zh: 請選擇一個投資組合。
+fillAllRequiredFields:
+  en: Please fill in all required fields.
+  zh: 請填寫所有必填欄位。
+notEnoughSharesToSell:  
+  en: Not enough shares to sell.
+  zh: 沒有足夠的股數可供賣出。
+feeCannotBeNegative:
+  en: Fee cannot be negative.
+  zh: 手續費不能為負數。
+transactionSavedSuccessfully:
+  en: Transaction saved successfully.
+  zh: 交易明細已成功儲存。
+errorSavingTransaction:
+  en: Error saving transaction.
+  zh: 儲存交易明細時發生錯誤。
