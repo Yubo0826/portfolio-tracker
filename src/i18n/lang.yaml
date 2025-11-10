@@ -548,8 +548,8 @@ errorSavingTransaction:
 
 # 不分類
 deleteConfirm:
-  en: Are you sure you want to delete the selected item(s)? This action cannot be undone.
-  zh: 確定要刪除選取的項目嗎？此操作無法復原。
+  en: Are you sure you want to delete the selected items? This action cannot be undone and will remove related transactions/holdings/dividend records.
+  zh: 確定要刪除選取的項目嗎？此操作無法復原且會刪除相關的交易紀錄/持有資產/利息紀錄。
 warning:
   en: Warning
   zh: 警告

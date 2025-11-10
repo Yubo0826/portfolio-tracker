@@ -112,6 +112,11 @@ import { usePortfolioStore } from '@/stores/portfolio';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 
+import { useHoldingsStore } from '@/stores/holdings'
+const holdingsStore = useHoldingsStore()
+
+import { showLoading, hideLoading } from "@/composables/loading.js"
+
 const toast = useToast();
 const { t } = useI18n();
 
@@ -267,12 +272,18 @@ const onSave = async (saveAnother = false) => {
 
   try {
     console.log('現在的 portfolio id:', selectedPortfolioId.value);
+    showLoading(t('updatingHoldings'));
     const result = await store.saveTransaction({
       id: props.editingId,
       form: form.value,
       portfolioId: selectedPortfolioId.value,
     });
-    toast.suucess(t('transactionSavedSuccessfully'), '');
+    // 如果加入的是買入交易，則更新持有資料的價格。
+    if (form.value.operation === 'buy') {
+      await holdingsStore.refreshPrices();
+    }
+    hideLoading();
+    toast.success(t('transactionSavedSuccessfully'), '');
     emit('saved', result);
     if (saveAnother) form.value = emptyForm();
     else close();
