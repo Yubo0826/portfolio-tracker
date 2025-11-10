@@ -1,9 +1,11 @@
 <template>
+  <ConfirmDialog></ConfirmDialog>
   <div>
     <div class="flex justify-end mb-8">
       <Button
         :label="$t('delete')"
-        @click="onDelete"
+        @click="deleteConfirm"
+        :disabled="selectedAssets.length === 0"
         icon="pi pi-trash"
         class="mr-2"
         severity="secondary"
@@ -169,5 +171,30 @@ const exportCsv = () => {
   const fileName = `transactions_${new Date().toISOString().slice(0,10)}.csv`;
   link.download = fileName;
   link.click();
+};
+
+
+import { useConfirm } from "primevue/useconfirm";
+const confirm = useConfirm();
+
+const deleteConfirm = () => {
+    confirm.require({
+        message: t('deleteConfirm'),
+        header: t('warning'),
+        icon: 'pi pi-info-circle',
+        rejectLabel: t('cancel'),
+        rejectProps: {
+            label: t('cancel'),
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: t('delete'),
+            severity: 'danger'
+        },
+        accept: () => {
+            onDelete();
+        }
+    });
 };
 </script>

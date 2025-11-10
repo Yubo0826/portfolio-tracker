@@ -3,7 +3,7 @@
     <template #header>
       <div class="inline-flex items-center gap-2">
         <i class="pi pi-upload text-[var(--p-primary-500)]"></i>
-        <span class="font-bold">匯入交易資料至</span>
+        <span class="font-bold">{{ $t('importTransactionDataTo') }}</span>
 
         <!-- 選擇投資組合 -->
         <span class="font-bold">
@@ -41,23 +41,23 @@
       @click="triggerFileInput"
     >
       <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
-      <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">匯入檔案</p>
-      <p class="text-gray-500">拖曳或點擊以上傳 CSV / Excel</p>
+      <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('ImportFile') }}</p>
+      <p class="text-gray-500">{{ $t('dropOrClickToUpload') }}</p>
       <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
     </div>
 
     <!-- 格式說明 -->
     <Message severity="info" class="mt-4">
-      <div class="flex justify-between">
+      <div class="flex justify-between text-sm">
         <span>
-          檔案需包含以下欄位：
-          <strong>date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)</strong>
+          <!-- 檔案需包含以下欄位：date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell) -->
+          {{ $t('importFileHint') }}
         </span>
         <button
           @click="downloadSampleCSV"
           class="ml-4 px-3 py-1 border rounded border-[var(--p-primary-400)] bg-[var(--p-primary-100)] hover:bg-[var(--p-primary-200)] text-[var(--p-primary-700)] text-sm"
         >
-          下載範例 CSV
+          {{ $t('downloadSampleCSV') }}
         </button>
       </div>
     </Message>
@@ -65,7 +65,7 @@
     <!-- 預覽區 -->
     <div v-if="previewData.length" class="mt-6">
       <div class="flex items-center justify-between mb-2">
-        <h3 class="font-semibold">預覽資料：</h3>
+        <h3 class="font-semibold">{{ $t('previewData') }}：</h3>
 
         <Paginator
           :rows="rowsPerPage"
@@ -78,19 +78,19 @@
       </div>
 
       <DataTable :value="paginatedData" size="small" responsiveLayout="scroll">
-        <Column field="date" header="日期"></Column>
-        <Column field="symbol" header="代號"></Column>
-        <Column field="shares" header="股數"></Column>
-        <Column field="price" header="價格"></Column>
-        <Column field="fee" header="手續費"></Column>
-        <Column field="totalCost" header="總和"></Column>
-        <Column field="transactionType" header="類型"></Column>
+        <Column field="date" :header="$t('date')"></Column>
+        <Column field="symbol" :header="$t('symbol')"></Column>
+        <Column field="shares" :header="$t('shares')"></Column>
+        <Column field="price" :header="$t('price')"></Column>
+        <Column field="fee" :header="$t('fee')"></Column>
+        <Column field="totalCost" :header="$t('totalCost')"></Column>
+        <Column field="transactionType" :header="$t('type')"></Column>
       </DataTable>
     </div>
 
     <template #footer>
-      <Button label="取消" severity="secondary" @click="closeDialog" />
-      <Button label="匯入" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
+      <Button :label="$t('cacel')" severity="secondary" @click="closeDialog" />
+      <Button :label="$t('import')" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
     </template>
   </Dialog>
 </template>
