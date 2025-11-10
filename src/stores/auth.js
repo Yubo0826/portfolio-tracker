@@ -11,7 +11,12 @@ import {
 import api from '@/utils/api.js';
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(null)
+  // 沒登入的話就是demo account
+  const user = ref({
+    uid: 'demo-user',
+    email: 'demo@example.com',
+    displayName: 'Demo User'
+  })
 
   const login = async () => {
     await setPersistence(auth, browserLocalPersistence)
@@ -27,7 +32,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     await signOut(auth)
-    user.value = null
+    user.value = {
+      uid: 'demo-user',
+      email: 'demo@example.com',
+      displayName: 'Demo User'
+    }
   }
 
   const saveUserData = () => {
@@ -51,6 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 監聽登入狀態
   onAuthStateChanged(auth, (currentUser) => {
     user.value = currentUser
+    console.log(currentUser)
     console.log('Auth state changed:', currentUser ? currentUser.email : 'No user logged in')
   })
 
