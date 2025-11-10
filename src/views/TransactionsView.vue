@@ -9,6 +9,14 @@
         severity="secondary"
         size="small"
       />
+      <Button
+        :label="$t('export')"
+        @click="exportCsv"
+        icon="pi pi-download"
+        class="mr-2"
+        severity="secondary"
+        size="small"
+      />
       <TransactionDialog
         v-model="dialogVisible"
         :editingId="editingId"
@@ -36,7 +44,6 @@
           </div>
         </template>
       </Column>
-      <!-- <Column field="name" sortable :header="$t('name')" /> -->
       <Column field="shares" sortable :header="$t('shares')" />
       <Column field="price" sortable :header="$t('price')" />
       <Column field="fee" sortable :header="$t('fee')" />
@@ -131,5 +138,36 @@ const onDelete = async () => {
 
 const onSaved = () => {
   // store.saveTransaction 已更新列表，這裡通常不需要再做事
+};
+
+/** 匯出 CSV 功能 **/
+const exportCsv = () => {
+  if (!store.list.length) {
+    toast.add({ severity: 'info', summary: t('info'), detail: t('noDataToExport'), life: 3000 });
+    return;
+  }
+
+  const headers = ['Symbol', 'Name', 'Shares', 'Price', 'Fee', 'Type', 'Date'];
+  const rows = store.list.map(item => [
+    item.symbol,
+    item.name,
+    item.shares,
+    item.price,
+    item.fee,
+    item.transactionType,
+    item.date
+  ]);
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(r => r.join(','))
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  const fileName = `transactions_${new Date().toISOString().slice(0,10)}.csv`;
+  link.download = fileName;
+  link.click();
 };
 </script>

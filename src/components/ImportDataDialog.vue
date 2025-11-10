@@ -98,19 +98,20 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import * as toast from '@/composables/toast'
-import { useI18n } from 'vue-i18n'
 import Papa from 'papaparse'
 import api from '@/utils/api'
 import * as XLSX from 'xlsx'
 import Message from 'primevue/message'
 import Paginator from 'primevue/paginator'
-import { $t } from '@primeuix/themes'
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions'
+import { useHoldingsStore } from '@/stores/holdings'
 
-const { t } = useI18n()
 const store = useTransactionsStore()
 const portfolioStore = usePortfolioStore()
+const holdingsStore = useHoldingsStore()
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -165,6 +166,7 @@ function parseFile(file) {
 
 function normalizeData(rows) {
   return rows.map(item => {
+    console.log('Normalizing item:', item)
     const {
       date,
       symbol = '',
@@ -204,7 +206,7 @@ function toDate(dateStr) {
 
   const d = new Date(dateStr)
   if (!isNaN(d)) return d.toISOString().split('T')[0]
-  toast.error($t('InvalidDateString') + dateStr, '')
+  toast.error(t('InvalidDateString') + dateStr, '')
 }
 
 function readCSV(file) {
@@ -214,6 +216,7 @@ function readCSV(file) {
     transformHeader: h => h.toLowerCase().trim(),
     complete: results => {
       previewData.value = normalizeData(results.data)
+      console.log('Parsed CSV data:', previewData.value)
     },
     error: err => console.error('CSV 解析錯誤:', err),
   })
@@ -253,16 +256,20 @@ function closeDialog() {
   previewData.value = []
 }
 
+import { showLoading, hideLoading } from "@/composables/loading.js"
+
 async function confirmImport() {
   if (!selectedPortfolioId.value) {
-    toast.error($t('pleaseSelectPortfolio'), '')
+    toast.error(t('pleaseSelectPortfolio'), '')
     return
   }
 
+  showLoading()
   const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))]
   let nonexistentSymbols = []
   const symbolDetails = {}
 
+  // 查詢每個 symbol 的詳細資訊 & 蒐集不存在的 symbol
   for (const symbol of symbolList) {
     try {
       const query = await api.get('/api/yahoo/symbol?query=' + symbol)
@@ -285,6 +292,7 @@ async function confirmImport() {
     }
   }
 
+  // 如果有不存在的 symbol，顯示錯誤並中止匯入
   if (nonexistentSymbols.length > 0) {
     toast.error(t('symbolsNotFound'), nonexistentSymbols.join(', '))
     return
@@ -300,10 +308,13 @@ async function confirmImport() {
   try {
     const result = await store.saveTransactionBulk(previewData.value, selectedPortfolioId.value)
     console.log('Bulk import result:', result)
+    await holdingsStore.refreshPrices()
     toast.success(t('importSuccess'), '')
     closeDialog()
   } catch (e) {
     toast.error(t('importFailed'), e.message || '')
+  } finally {
+    hideLoading()
   }
 }
 

@@ -112,6 +112,9 @@ total:
 transactionsDeleteSuccess:
   en: Transactions deleted successfully.
   zh: 已刪除交易明細。
+deletedSuccess:
+  en: Deleted successfully
+  zh: 刪除成功
 deleteFailed:
   en: Delete failed
   zh: 刪除失敗
@@ -352,9 +355,12 @@ importedSuccess:
 symbolsNotFound:
   en: "The following symbols were not found, please check the import content again: {symbols}"
   zh: "找不到以下代號，請再檢查匯入內容："
-importError:
+importFailed:
   en: Import error
   zh: 匯入錯誤
+importSuccess:
+  en: Import successful
+  zh: 匯入成功
 
 # 再平衡
 deposit:
@@ -538,3 +544,15 @@ transactionSavedSuccessfully:
 errorSavingTransaction:
   en: Error saving transaction.
   zh: 儲存交易明細時發生錯誤。
+
+
+# 不分類
+deleteConfirm:
+  en: Are you sure you want to delete the selected item(s)? This action cannot be undone.
+  zh: 確定要刪除選取的項目嗎？此操作無法復原。
+warning:
+  en: Warning
+  zh: 警告
+export:
+  en: Export
+  zh: 匯出

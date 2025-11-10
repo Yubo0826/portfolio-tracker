@@ -86,7 +86,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
     }
   };
 
-  // 更新最近價格
+  // 更新最近價格到資料庫
   const refreshPrices = async () => {
     if (!uid.value || !portfolioId.value) return;
     try {

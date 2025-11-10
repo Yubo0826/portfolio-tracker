@@ -75,6 +75,9 @@
 <script setup>
 import { ref, watch } from 'vue';
 import NoData from '@/components/NoData.vue';
+import * as toast from '@/composables/toast'
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 import { useHoldingsStore } from '@/stores/holdings';
 const store = useHoldingsStore();
@@ -108,9 +111,14 @@ watch(
 
 const onDelete = async () => {
   if (!selectedHoldings.value.length) return;
-  const ids = selectedHoldings.value.map((h) => h.id);
-  await store.deleteHoldings(ids);
-  selectedHoldings.value = [];
+  try {
+    const ids = selectedHoldings.value.map((h) => h.id);
+    await store.deleteHoldings(ids);
+    selectedHoldings.value = [];
+    toast.success(t('deletedSuccess'));
+  } catch (error) {
+    toast.error(t('deleteFailed'));
+  }
 };
 
 import { useConfirm } from "primevue/useconfirm";
@@ -118,17 +126,17 @@ const confirm = useConfirm();
 
 const deleteConfirm = () => {
     confirm.require({
-        message: 'Do you want to delete this record?',
-        header: 'Warning',
+        message: t('deleteConfirm'),
+        header: t('warning'),
         icon: 'pi pi-info-circle',
-        rejectLabel: 'Cancel',
+        rejectLabel: t('cancel'),
         rejectProps: {
-            label: 'Cancel',
+            label: t('cancel'),
             severity: 'secondary',
             outlined: true
         },
         acceptProps: {
-            label: 'Delete',
+            label: t('delete'),
             severity: 'danger'
         },
         accept: () => {
