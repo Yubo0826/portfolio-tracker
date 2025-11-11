@@ -565,12 +565,12 @@ ImportFile:
 dropOrClickToUpload:
   en: Drag or click to upload CSV / Excel
   zh: 拖曳或點擊以上傳 CSV / Excel
-importFileHint:
+importFileHint1:
   en: "The file must contain the following columns: date, symbol, name, shares, price, fee, type (transaction type: buy or sell)"
   zh: "檔案需包含以下欄位：date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)"
 downloadSampleCSV:
-  en: Download Sample CSV
-  zh: 下載範例 CSV
+  en: Download Sample
+  zh: 下載範例
 previewData:
   en: Preview Data
   zh: 預覽資料

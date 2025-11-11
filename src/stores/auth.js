@@ -59,7 +59,15 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 監聽登入狀態
   onAuthStateChanged(auth, (currentUser) => {
-    user.value = currentUser
+    if (currentUser) {
+      user.value = currentUser
+    } else {
+      user.value = {
+        uid: 'demo-user',
+        email: 'demo@example.com',
+        displayName: 'Demo User'
+      }
+    }
     console.log(currentUser)
     console.log('Auth state changed:', currentUser ? currentUser.email : 'No user logged in')
   })

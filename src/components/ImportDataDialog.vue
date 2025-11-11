@@ -51,7 +51,7 @@
       <div class="flex justify-between text-sm">
         <span>
           <!-- 檔案需包含以下欄位：date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell) -->
-          {{ $t('importFileHint') }}
+          {{ $t('importFileHint1') }}
         </span>
         <button
           @click="downloadSampleCSV"
@@ -89,7 +89,7 @@
     </div>
 
     <template #footer>
-      <Button :label="$t('cacel')" severity="secondary" @click="closeDialog" />
+      <Button :label="$t('cancel')" severity="secondary" @click="closeDialog" />
       <Button :label="$t('import')" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
     </template>
   </Dialog>

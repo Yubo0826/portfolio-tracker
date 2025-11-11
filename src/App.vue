@@ -44,13 +44,14 @@
               size="small"
             />
 
-            <!-- 登入狀態 -->
-            <template v-if="auth.user">
+            
+            <template v-if="auth.user.uid !== 'demo-user'">
               <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
               <Menu ref="menu" :model="menuItems" :popup="true" />
             </template>
+            
             <template v-else>
-              <Avatar @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" />
+              <!-- <Avatar @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" /> -->
             </template>
           </div>
         </div>
@@ -106,9 +107,15 @@
             </Select>
           </div>
 
-          <div v-if="noShowAddInvestmentButton" class="flex flex-wrap gap-2 justify-end">
+          <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'" class="flex flex-wrap gap-2 justify-end">
             <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
             <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+          </div>
+          <div v-else-if="auth.user.uid === 'demo-user'">
+            <!-- <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" /> -->
+             <Button class="start-btn" data-hover="Login!">
+              <div>Get Started</div>
+             </Button>
           </div>
         </div>
 
@@ -223,7 +230,8 @@ const toggleLanguage = () => {
   localStorage.setItem('locale', newLocale)
 }
 
-const noShowAddInvestmentButton = computed(() => !['portfolios', 'backtesting', 'rebalancing'].includes(route.name))
+// 顯示新增交易按鈕列的條件: 在 portfolios, backtesting, rebalancing 頁面不顯示
+const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'rebalancing'].includes(route.name))
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
@@ -247,6 +255,42 @@ const menuItems = [
 <style scoped>
 header {
   text-align: center;
+}
+
+.start-btn:hover{cursor: pointer}
+.start-btn {
+  /* background: transparent; outline: none; */
+  /* color: var(--p-primary-color); */
+  position: relative;
+  /* border: 2px solid var(--p-primary-color); */
+  /* padding: 15px 50px; */
+  overflow: hidden;
+}
+
+/*button:before (attr data-hover)*/
+.start-btn:hover:before{opacity: 1; transform: translate(0,0);}
+.start-btn:before{
+  content: attr(data-hover);
+  position: absolute;
+  /* top: 1.1em; left: 0; */
+  width: 100%;
+  /* text-transform: uppercase; */
+  /* letter-spacing: 3px; */
+  /* font-weight: 800; */
+  /* font-size: .8em; */
+  opacity: 0;
+  transform: translate(-100%,0);
+  transition: all .3s ease-in-out;
+}
+
+/*button div (button text before hover)*/
+.start-btn:hover div{opacity: 0; transform: translate(100%,0)}
+.start-btn div{
+  /* text-transform: uppercase; */
+  /* letter-spacing: 3px; */
+  /* font-weight: 800; */
+  /* font-size: .8em; */
+  transition: all .3s ease-in-out;
 }
 </style>
 
