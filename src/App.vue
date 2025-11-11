@@ -113,7 +113,7 @@
           </div>
           <div v-else-if="auth.user.uid === 'demo-user'">
             <!-- <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" /> -->
-             <Button class="start-btn" data-hover="Login">
+             <Button @click="auth.login" class="start-btn" data-hover="Login">
               <div class="flex items-center gap-2">
                 Get Started
                 <i class="pi pi-arrow-right"></i>
