@@ -113,8 +113,11 @@
           </div>
           <div v-else-if="auth.user.uid === 'demo-user'">
             <!-- <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" /> -->
-             <Button class="start-btn" data-hover="Login!">
-              <div>Get Started</div>
+             <Button class="start-btn" data-hover="Login">
+              <div class="flex items-center gap-2">
+                Get Started
+                <i class="pi pi-arrow-right"></i>
+              </div>
              </Button>
           </div>
         </div>
@@ -276,7 +279,7 @@ header {
   width: 100%;
   /* text-transform: uppercase; */
   /* letter-spacing: 3px; */
-  /* font-weight: 800; */
+  font-weight: 600;
   /* font-size: .8em; */
   opacity: 0;
   transform: translate(-100%,0);
@@ -288,7 +291,7 @@ header {
 .start-btn div{
   /* text-transform: uppercase; */
   /* letter-spacing: 3px; */
-  /* font-weight: 800; */
+  font-weight: 600;
   /* font-size: .8em; */
   transition: all .3s ease-in-out;
 }
