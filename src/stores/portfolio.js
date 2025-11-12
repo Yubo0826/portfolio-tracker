@@ -21,9 +21,14 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         if (data.portfolios.length > 0) {
             const localStoragePortfolio = JSON.parse(localStorage.getItem('currentPortfolio'));
             console.log('Local storage portfolio:', localStoragePortfolio);
-            currentPortfolio.value = localStoragePortfolio || data.portfolios[0];
+            // 判斷 localStoragePortfolio 是否在 data.portfolios 中存在
+            if (localStoragePortfolio && data.portfolios.some(p => p.id === localStoragePortfolio.id)) {
+                setCurrentPortfolio(localStoragePortfolio);
+            } else {
+                setCurrentPortfolio(data.portfolios[0]);
+            }
         } else {
-            currentPortfolio.value = null;
+            setCurrentPortfolio(null);
         }
     } catch (error) {
         console.error('Error fetching portfolios:', error);
@@ -43,7 +48,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   function setCurrentPortfolio(portfolio) {
     currentPortfolio.value = portfolio
     localStorage.setItem('currentPortfolio', JSON.stringify(portfolio))
-
+    console.log('Current portfolio set to localstorage:', portfolio);
   }
   
   // 之後後端or前端可能要卡重複名稱

@@ -53,6 +53,9 @@ holding:
 Notification:
   en: Notification
   zh: 通知
+login:
+  en: Login
+  zh: 登入
 logout:
   en: Logout
   zh: 登出
@@ -574,3 +577,6 @@ downloadSampleCSV:
 previewData:
   en: Preview Data
   zh: 預覽資料
+GetStarted:
+  en: Get Started
+  zh: 開始使用

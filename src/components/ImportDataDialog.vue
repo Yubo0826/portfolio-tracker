@@ -45,6 +45,7 @@
       <p class="text-gray-500">{{ $t('dropOrClickToUpload') }}</p>
       <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
     </div>
+    
 
     <!-- 格式說明 -->
     <Message severity="info" class="mt-4">

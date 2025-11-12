@@ -63,7 +63,6 @@
         <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-3">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2">
             <div class="text-sm font-medium">{{ $t('currentPortfolio') }}</div>
-
             <Select
               v-model="selectedPortfolioId"
               size="small"
@@ -113,15 +112,12 @@
           </div>
           <div v-else-if="auth.user.uid === 'demo-user'">
             <!-- <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" /> -->
-             <Button @click="auth.login" class="start-btn" data-hover="Login">
+             <Button @click="auth.login" class="start-btn" :data-hover="$t('login')">
               <div class="flex items-center gap-2">
-                Get Started
+              {{ $t('GetStarted') }}
                 <i class="pi pi-arrow-right"></i>
               </div>
              </Button>
-
-                         <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-            <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
 
           </div>
         </div>
@@ -299,6 +295,7 @@ header {
   /* font-size: .8em; */
   transition: all .3s ease-in-out;
 }
+
 </style>
 
 <style>
