@@ -119,6 +119,10 @@
                 <i class="pi pi-arrow-right"></i>
               </div>
              </Button>
+
+                         <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+            <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+
           </div>
         </div>
 
