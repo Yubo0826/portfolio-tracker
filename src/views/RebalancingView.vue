@@ -31,7 +31,8 @@
         <template #body="slotProps">
           <div>
             <span>{{ (slotProps.data.actualPctBefore * 100).toFixed(2) }}</span>
-            <i v-if="isRebalancing" class="pi pi-arrow-right mx-2" />
+            <!-- <i v-if="isRebalancing" class="pi pi-arrow-right mx-2" /> -->
+            <span v-if="isRebalancing">&nbsp;→&nbsp;</span>
             <span v-if="isRebalancing">{{ (Number(slotProps.data.actualPctAfter) * 100).toFixed(2) }}</span>
             <br />
             <span class="text-xs text-gray-500">
