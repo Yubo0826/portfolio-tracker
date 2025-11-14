@@ -1,7 +1,7 @@
 <template>
     <div
       v-if="visible"
-      class="fixed inset-0 opacity-75 flex flex-col items-center justify-center z-1102 transition-opacity duration-300"
+      class="fixed inset-0 opacity-75 flex flex-col items-center justify-center z-2102 transition-opacity duration-300"
       :style="{ background: 'var(--p-surface-800)' }"
     >
       <div class="snippet" data-title="dot-falling">
