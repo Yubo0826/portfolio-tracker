@@ -109,7 +109,7 @@ import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
-import { useToast } from 'primevue/usetoast';
+import * as toast from '@/composables/toast';
 import { useI18n } from 'vue-i18n';
 
 import { useHoldingsStore } from '@/stores/holdings'
@@ -117,7 +117,6 @@ const holdingsStore = useHoldingsStore()
 
 import { showLoading, hideLoading } from "@/composables/loading.js"
 
-const toast = useToast();
 const { t } = useI18n();
 
 const props = defineProps({
@@ -284,8 +283,13 @@ const onSave = async (saveAnother = false) => {
     }
     hideLoading();
     toast.success(t('transactionSavedSuccessfully'), '');
+    console.log('儲存後的交易資料:', result);
     emit('saved', result);
-    if (saveAnother) form.value = emptyForm();
+    console.log('觸發 saved 事件');
+    if (saveAnother) {
+      form.value = emptyForm();
+      console.log('重設後的 form 資料:', form.value);
+    }
     else close();
   } catch (err) {
     toast.error(t('errorSavingTransaction'), '');

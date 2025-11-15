@@ -63,7 +63,6 @@
         <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-3">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2">
             <div class="text-sm font-medium">{{ $t('currentPortfolio') }}</div>
-
             <Select
               v-model="selectedPortfolioId"
               size="small"
@@ -120,7 +119,7 @@
             <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
              <!-- <Button @click="auth.login" class="start-btn" data-hover="Login">
               <div class="flex items-center gap-2">
-                Get Started
+              {{ $t('GetStarted') }}
                 <i class="pi pi-arrow-right"></i>
               </div>
              </Button> -->
@@ -300,6 +299,7 @@ header {
   /* font-size: .8em; */
   transition: all .3s ease-in-out;
 }
+
 </style>
 
 <style>
