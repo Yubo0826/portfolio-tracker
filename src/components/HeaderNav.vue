@@ -130,7 +130,6 @@ const toolMenu = ref()
 const hoverTimeout = ref(null)
 
 const openHoverMenu = (menuName, event) => {
-  console.log('openHoverMenu ', menuName)
   clearTimeout(hoverTimeout.value)
   // 開一個之前先全部關掉，確保不重疊
   portfolioMenu.value?.hide()
@@ -144,7 +143,6 @@ const openHoverMenu = (menuName, event) => {
 }
 
 const closeHoverMenu = (menuName) => {
-  console.log('closeHoverMenu called for', menuName)
   hoverTimeout.value = setTimeout(() => {
     if (menuName === 'portfolioMenu') {
       portfolioMenu.value?.hide()

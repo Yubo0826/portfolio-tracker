@@ -107,18 +107,23 @@
             </Select>
           </div>
 
-          <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'" class="flex flex-wrap gap-2 justify-end">
-            <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-            <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+          <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
+            <div v-if="portfolioStore.portfolios.length === 0">
+              <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
+            </div>
+            <div class="flex flex-wrap gap-2 justify-end" v-else>
+              <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+              <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+            </div>
           </div>
           <div v-else-if="auth.user.uid === 'demo-user'">
-            <!-- <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" /> -->
-             <Button @click="auth.login" class="start-btn" data-hover="Login">
+            <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
+             <!-- <Button @click="auth.login" class="start-btn" data-hover="Login">
               <div class="flex items-center gap-2">
                 Get Started
                 <i class="pi pi-arrow-right"></i>
               </div>
-             </Button>
+             </Button> -->
           </div>
         </div>
 
