@@ -327,8 +327,12 @@ const isLoading = ref(false)
 const allocation = ref([])
 const dividends = ref([])
 
-const totalValue = ref(0)
-const totalProfit = ref(0)
+const totalValue = computed(() => {
+  return holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
+})
+const totalProfit = computed(() => {
+  return holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
+})
 
 const selectedPieType = ref('actual')
 const pieChartType = computed(() => ([
@@ -337,16 +341,6 @@ const pieChartType = computed(() => ([
 ]))
 
 const selectedPeriod = ref('')
-
-// const periods = computed(() => ([
-//   { label: t('period7d'), value: '7d' },
-//   { label: t('period1mo'), value: '1mo' },
-//   { label: t('period3mo'), value: '3mo' },
-//   { label: t('period6mo'), value: '6mo' },
-//   { label: t('periodYTD'), value: 'ytd' },
-//   { label: t('period1y'), value: '1y' },
-//   { label: t('period5y'), value: '5y' }
-// ]))
 
 const periods = computed(() => ([
   { label: '7D', value: '7d' },
@@ -358,7 +352,7 @@ const periods = computed(() => ([
   { label: '5Y', value: '5y' }
 ]))
 
-const chartSeries = ref([{ name: t('closePrice'), data: [] }])
+const chartSeries = ref([{ name: t('totalPrice'), data: [] }])
 const growthRate = ref(null)
 const change = ref(0)
 
@@ -423,11 +417,6 @@ function setDividends(data) {
   }))
 }
 
-function setOverviewValue() {
-  totalValue.value = holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
-  totalProfit.value = holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
-}
-
 /* =========================
  *  API Calls
  * =======================*/
@@ -451,18 +440,21 @@ async function getDividends() {
 }
 async function loadData() {
   isLoading.value = true
+  if (portfolioStore.currentPortfolio == null) {
+    isLoading.value = false
+    return
+  }
   try {
     await holdingsStore.fetchHoldings()
     if (holdingsStore.list.length === 0) {
       totalValue.value = 0
       totalProfit.value = 0
-      chartSeries.value = [{ name: t('closePrice'), data: [] }]
+      chartSeries.value = [{ name: t('totalPrice'), data: [] }]
       return
     }
-    await transactionsStore.fetchTransactions()
+    // await transactionsStore.fetchTransactions()
     await getAllocation()
     await getDividends()
-    setOverviewValue()
     fetchChartData()
   } catch (e) {
     console.error('Error fetching data:', e)
@@ -536,7 +528,7 @@ const annualReturn = computed(() => {
 })
 
 const irr = computed(() => {
-  if (!transactionsStore.list.length || !holdingsStore.list.length) return null
+  if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
   const cashflows = []
 
   transactionsStore.list.forEach(tx => {
@@ -625,6 +617,7 @@ function calculateGrowthRate() {
   change.value = lastPrice - firstPrice
   growthRate.value = (((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2)
 }
+
 async function fetchChartData() {
   const { period1, period2 } = getPeriodRange(selectedPeriod.value)
   try {
@@ -640,19 +633,36 @@ async function fetchChartData() {
 /* =========================
  *  Watchers & Init
  * =======================*/
-watch(selectedPeriod, (newVal, oldVal) => {
-  if (newVal !== oldVal) fetchChartData()
-})
+
+// Prevent multiple simultaneous data loads
+let isLoadingData = false;
+
 watch(
   () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],
-  ([uid, pid]) => {
-    if (uid && pid) {
-      loadData()
+  async ([uid, pid]) => {
+    console.log('Dashboard Watch User or Portfolio changed, reloading data...', isLoadingData)
+    if (uid && pid && !isLoadingData) {
+      isLoadingData = true
+      await loadData()
+      isLoadingData = false
       selectedPeriod.value = '3mo'
     }
   },
   { immediate: true }
 )
+
+watch(() => transactionsStore.list, async () => {
+  console.log('Dashboard Watch Transactions changed, reloading data...', isLoadingData)
+  if (!isLoadingData) {
+    isLoadingData = true
+    await loadData()
+    isLoadingData = false
+  }
+})
+
+watch(selectedPeriod, (newVal, oldVal) => {
+  if (newVal !== oldVal) fetchChartData()
+})
 
 if (auth.user) {
   loadData()

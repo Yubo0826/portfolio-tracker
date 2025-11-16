@@ -167,7 +167,6 @@ function parseFile(file) {
 
 function normalizeData(rows) {
   return rows.map(item => {
-    console.log('Normalizing item:', item)
     const {
       date,
       symbol = '',
@@ -238,10 +237,58 @@ function readExcel(file) {
 function downloadSampleCSV() {
   const headers = ['date', 'symbol', 'shares', 'price', 'fee', 'type']
   const sampleData = [
-    ['2025/09/20', 'AAPL', 10, 180, 1, 'buy'],
-    ['2025/01/21', 'TSLA', 5, 120, 0.5, 'buy'],
-    ['2025/02/21', 'TSLA', 15, 135, 0.5, 'buy'],
-  ]
+    ['2025/01/03', 'VOO', 5, 420, 1, 'buy'],
+    ['2025/01/08', 'QQQ', 8, 390, 1, 'buy'],
+    ['2025/01/15', 'SCHD', 10, 75, 0.5, 'buy'],
+    ['2025/01/20', 'VTI', 6, 250, 1, 'buy'],
+    ['2025/01/25', 'IWM', 5, 195, 0.5, 'buy'],
+    ['2025/02/02', 'XLV', 4, 145, 0.5, 'buy'],
+    ['2025/02/06', 'VNQ', 6, 90, 0.5, 'buy'],
+    ['2025/02/12', 'QQQ', 4, 405, 0.5, 'sell'],
+    ['2025/02/15', 'VOO', 3, 440, 0.5, 'sell'],
+    ['2025/02/20', 'SCHD', 5, 78, 0.3, 'buy'],
+    ['2025/03/01', 'VTI', 3, 260, 0.5, 'buy'],
+    ['2025/03/06', 'IWM', 5, 205, 0.5, 'buy'],
+    ['2025/03/10', 'XLV', 3, 150, 0.3, 'buy'],
+    ['2025/03/20', 'VNQ', 4, 88, 0.3, 'buy'],
+    ['2025/03/25', 'QQQ', 2, 420, 0.5, 'buy'],
+    ['2025/03/30', 'SCHD', 5, 80, 0.3, 'buy'],
+    ['2025/04/02', 'VTI', 6, 255, 1, 'buy'],
+    ['2025/04/10', 'VOO', 4, 445, 1, 'buy'],
+    ['2025/04/15', 'QQQ', 5, 430, 1, 'buy'],
+    ['2025/04/20', 'IWM', 3, 210, 0.5, 'sell'],
+    ['2025/04/25', 'VNQ', 5, 85, 0.5, 'buy'],
+    ['2025/05/01', 'XLV', 4, 148, 0.5, 'buy'],
+    ['2025/05/05', 'SCHD', 5, 82, 0.3, 'sell'],
+    ['2025/05/10', 'VTI', 4, 265, 0.5, 'buy'],
+    ['2025/05/15', 'VOO', 5, 460, 1, 'buy'],
+    ['2025/05/20', 'QQQ', 4, 440, 0.5, 'sell'],
+    ['2025/05/25', 'IWM', 5, 215, 0.5, 'buy'],
+    ['2025/06/02', 'XLV', 6, 152, 0.5, 'buy'],
+    ['2025/06/10', 'VNQ', 5, 92, 0.3, 'buy'],
+    ['2025/06/15', 'SCHD', 8, 83, 0.5, 'buy'],
+    ['2025/06/20', 'VTI', 5, 270, 0.5, 'sell'],
+    ['2025/06/25', 'VOO', 3, 465, 0.5, 'buy'],
+    ['2025/07/01', 'QQQ', 6, 445, 1, 'buy'],
+    ['2025/07/05', 'IWM', 4, 218, 0.3, 'buy'],
+    ['2025/07/10', 'XLV', 3, 149, 0.3, 'sell'],
+    ['2025/07/15', 'VNQ', 4, 94, 0.3, 'buy'],
+    ['2025/07/20', 'SCHD', 5, 85, 0.3, 'buy'],
+    ['2025/07/25', 'VTI', 5, 275, 0.5, 'buy'],
+    ['2025/08/02', 'VOO', 4, 470, 0.5, 'buy'],
+    ['2025/08/08', 'QQQ', 5, 450, 0.5, 'sell'],
+    ['2025/08/15', 'IWM', 6, 220, 0.5, 'buy'],
+    ['2025/08/20', 'XLV', 5, 155, 0.5, 'buy'],
+    ['2025/08/25', 'VNQ', 6, 95, 0.5, 'buy'],
+    ['2025/09/02', 'SCHD', 5, 86, 0.3, 'sell'],
+    ['2025/09/08', 'VTI', 4, 280, 0.5, 'buy'],
+    ['2025/09/15', 'VOO', 3, 480, 0.5, 'buy'],
+    ['2025/09/20', 'QQQ', 5, 455, 0.5, 'buy'],
+    ['2025/10/05', 'IWM', 4, 225, 0.5, 'buy'],
+    ['2025/10/12', 'XLV', 3, 160, 0.3, 'buy'],
+    ['2025/10/20', 'VNQ', 5, 97, 0.5, 'sell'],
+  ];
+
   const csvContent = [headers.join(','), ...sampleData.map(r => r.join(','))].join('\n')
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -309,7 +356,6 @@ async function confirmImport() {
   try {
     const result = await store.saveTransactionBulk(previewData.value, selectedPortfolioId.value)
     console.log('Bulk import result:', result)
-    await holdingsStore.refreshPrices()
     toast.success(t('importSuccess'), '')
     closeDialog()
   } catch (e) {

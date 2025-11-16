@@ -18,6 +18,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const portfolioId = computed(() => portfolioStore.currentPortfolio?.id || null);
 
   const setTransactions = (data = []) => {
+    console.log('setTransactions', data);
     list.value = data.map((item) => ({
       id: item.id,
       symbol: item.symbol,
@@ -140,7 +141,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     // 後端回傳最新 transactions / holdings
     if (result?.transactions) setTransactions(result.transactions);
-    holdingsStore.fetchHoldings();
+    await holdingsStore.refreshPrices();
+    await holdingsStore.fetchHoldings();
     return result;
   }
 
