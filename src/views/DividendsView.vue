@@ -41,25 +41,35 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import api from '../utils/api.js';
+import api from '../utils/api';
 import NoData from '@/components/NoData.vue';
-
 import { useAuthStore } from '@/stores/auth'
-const auth = useAuthStore()
-
 import { usePortfolioStore } from '@/stores/portfolio';
+
+const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 
 const isLoading = ref(false);
-const dividends = ref([]);
+
+interface Dividend {
+  id: string;
+  symbol: string;
+  name: string;
+  shares: number;
+  amount: number;
+  totalAmount: string;
+  date: string;
+}
+
+const dividends = ref<Dividend[]>([]);
 
 const getDividends = async () => {
   isLoading.value = true;
   try {
     console.log('Fetching dividends for user:', auth.user?.uid, 'and portfolio:', portfolioStore.currentPortfolio?.id);
-    const data = await api.get(`/api/dividends?uid=${auth.user.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    const data: any = await api.get(`/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
     console.log('Dividends data:', data);
     setDividends(data);
   } catch (error) {
@@ -69,7 +79,7 @@ const getDividends = async () => {
   }
 };
 
-const setDividends = (data) => {
+const setDividends = (data: any[]) => {
   dividends.value = data.map(item => {
     return {
       id: item.id,
@@ -90,7 +100,7 @@ const refreshDividends = async () => {
       uid: auth.user?.uid,
       portfolio_id: portfolioStore.currentPortfolio?.id
     };
-    const data = await api.post(`/api/dividends/sync`, payload);
+    const data: any = await api.post(`/api/dividends/sync`, payload);
     console.log('Dividends sync response:', data);
     setDividends(data.dividends);
   } catch (error) {

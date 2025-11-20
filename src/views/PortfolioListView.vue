@@ -1,4 +1,3 @@
-
 <template>
   <div>
       <ConfirmDialog></ConfirmDialog>
@@ -34,7 +33,7 @@
           :editPortfolio="editPortfolio"
           @update:loading="isLoading = $event"
           @update:visible="dialogVisible = $event"
-          @clear:editPortfolio="editPortfolio = { id: null, name: '', description: '' }"
+          @clear:editPortfolio="editPortfolio = { id: null, name: '', description: '', drift_threshold: 5, enable_email_alert: true }"
           />
 
       <DataTable v-model:selection="selectedPortfolios" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
@@ -72,33 +71,47 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 
 import PortfolioFormDialog from '@/components/PortfolioFormDialog.vue'
 
 import { useConfirm } from "primevue/useconfirm";
+
+const { t } = useI18n()
 const confirm = useConfirm();
 
 const portfolioStore = usePortfolioStore()
 const auth = useAuthStore()
 
-const selectedPortfolios = ref([])
+interface Portfolio {
+  id: string;
+  name: string;
+  description: string;
+  drift_threshold: number;
+  enable_email_alert: boolean;
+  uid?: string;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
+const selectedPortfolios = ref<Portfolio[]>([])
 const isLoading = ref(false)
 const dialogVisible = ref(false)
 
-const editPortfolio = ref({
-    id: null,
+const editPortfolio = ref<Portfolio>({
+    id: '', // Placeholder, will be null or string
     name: '',
     description: '',
     drift_threshold: 5,
     enable_email_alert: true
 })
+// Reset id to null for new portfolio
+editPortfolio.value.id = null as any;
 
 const getPortfolios = async () => {
   if (!auth.user?.uid) {
@@ -120,7 +133,7 @@ onMounted(() => {
 })
 
 
-const updateSelectedPortfolios = (id) => {
+const updateSelectedPortfolios = (id: string) => {
   const p = portfolioStore.portfolios.find(p => p.id === id)
   if (!p) return
   editPortfolio.value = {
@@ -137,7 +150,7 @@ const updateSelectedPortfolios = (id) => {
 
 const countdown = ref(5);
 const disabled = ref(true);
-let interval;
+let interval: any;
 
 const showDeleteConfirm = () => {
     countdown.value = 5;
@@ -203,7 +216,7 @@ const showDeleteConfirm = () => {
                 },
                 accept: () => {
                     portfolioStore.removePortfolio(selectedPortfolios.value.map(p => p.id));
-                    toast.success(t('portfolioDeleted'));
+                    toast.success(t('portfolioDeleted'), '');
                     clearInterval(interval);
                 },
                 reject: () => {

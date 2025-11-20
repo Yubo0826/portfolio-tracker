@@ -27,19 +27,19 @@
                 <div class="flex items-center justify-between">
                   <div class="flex items-center mb-2">
                       <div class="text-3xl font-bold mr-4">${{ info.regularMarketPrice }}</div>
-                      <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
-                        <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center text-lg">
+                      <Tag :severity="(growthRate ?? 0) >=0 ? 'success' : 'danger'">
+                        <div :class="(growthRate ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center text-lg">
                           <!-- 變化數值 -->
                           <span class="mr-2">                          
-                            <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
+                            <i v-if="(growthRate ?? 0) >= 0" class="pi pi-sort-up-fill"></i>
                             <i v-else class="pi pi-sort-down-fill"></i>
                           </span>
-                          <span class="font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
+                          <span class="font-semibold mr-4">{{ Math.abs(change) }}</span>
                           (
                             <!-- 變化%數 -->
-                            <span v-if="growthRate >= 0">+</span>
+                            <span v-if="(growthRate ?? 0) >= 0">+</span>
                             <span v-else>-</span>
-                            <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
+                            <span class="font-semibold">{{  Math.abs(growthRate ?? 0) }}%</span>
                           )
                         </div>
                       </Tag>
@@ -175,25 +175,22 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed, reactive } from 'vue'
 import Breadcrumb from 'primevue/breadcrumb';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
 import SelectButton from 'primevue/selectbutton'
 import api from '@/utils/api'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
 
-import { useTheme } from '@/composables/useTheme.js'
+import { useTheme } from '@/composables/useTheme'
 const { isDark } = useTheme()
 
 const route  = useRoute()
-const symbol = computed(() => route.params.symbol)
+const symbol = computed(() => route.params.symbol as string)
 
 onBeforeRouteUpdate((to, from) => {
-  const s = to.params.symbol
+  const s = to.params.symbol as string
   items.value = [{ label: s }]
   console.log('Route updated to symbol:', s)
   fetchChartData(s)
@@ -243,13 +240,13 @@ const chartOptions = computed(() => ({
     gradient: {
       shade: 'light',
       type: 'vertical',
-      gradientToColors: [growthRate.value >= 0 ? '#a7f3d0' : '#fecaca'],
+      gradientToColors: [(growthRate.value ?? 0) >= 0 ? '#a7f3d0' : '#fecaca'],
       opacityFrom: 0.5,
       opacityTo: 0,
       stops: [0, 100]
     }
   },
-  colors: [growthRate.value >= 0 ? '#10b981' : '#ef4444'],
+  colors: [(growthRate.value ?? 0) >= 0 ? '#10b981' : '#ef4444'],
   xaxis: {
     type: 'datetime',
     labels: {
@@ -261,7 +258,7 @@ const chartOptions = computed(() => ({
   },
   yaxis: {
     labels: {
-      formatter: (val) => `$${val.toFixed(2)}`,
+      formatter: (val: number) => `$${val.toFixed(2)}`,
       style: {
         fontSize: '12px',
         colors: '#999'
@@ -289,14 +286,14 @@ const chartOptions = computed(() => ({
   },
 }))
 
-const chartSeries = ref([
+const chartSeries = ref<{name: string; data: any[]}[]>([
   {
     name: '收盤價',
     data: []
   }
 ])
 
-const candleSeries = ref([
+const candleSeries = ref<{name: string; data: any[]}[]>([
   {
     name: 'K線圖',
     data: []
@@ -346,26 +343,26 @@ const home = ref({
     route: '/dashboard'
 });
 const items = ref([
-    { label: symbol.value },
+    { label: symbol.value, route: '' },
 ]);
 
 // 計算區間的成長率和變化量
-const growthRate = ref(null)
+const growthRate = ref<number | null>(null)
 const change = ref(0)
 
 function calculateGrowthRate() {
   if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
   const firstPrice = chartSeries.value[0].data[0].y
   const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
-  change.value = lastPrice - firstPrice
-  growthRate.value = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2)
+  change.value = Number((lastPrice - firstPrice).toFixed(2))
+  growthRate.value = Number(((lastPrice - firstPrice) / firstPrice * 100).toFixed(2))
 }
 
-function getPeriodRange(range) {
+function getPeriodRange(range: string) {
   const today = new Date()
   const endDate = formatDate(today) // period2
 
-  const daysMap = {
+  const daysMap: Record<string, number> = {
       '7d': 7,
       '1mo': 30,
       '3mo': 90,
@@ -394,11 +391,11 @@ function getPeriodRange(range) {
   }
 }
 
-function formatDate(date) {
+function formatDate(date: Date) {
   return date.toISOString().split('T')[0] // 轉為 YYYY-MM-DD
 }
 
-function formatStrDate(dateStr, locale = 'en-US') {
+function formatStrDate(dateStr: string, locale = 'en-US') {
   const date = new Date(dateStr);
 
   console.log('formatStrDate:', date, locale)
@@ -421,7 +418,7 @@ function formatStrDate(dateStr, locale = 'en-US') {
     }).format(date);
 
     // 根據中文常見習慣再手動調整格式
-    const [year, month, day] = formatted.match(/\d+/g);
+    const [year, month, day] = formatted.match(/\d+/g) || [];
     return `${month}月${day}日, ${year}年`;
   }
 
@@ -437,20 +434,22 @@ const info = reactive({
   fiftyTwoWeekHigh: 0,
   fiftyTwoWeekLow: 0,
   fullExchangeName: '',
-  regularMarketVolume: 0
+  regularMarketVolume: 0,
+  regularMarketDayHigh: 0,
+  regularMarketDayLow: 0
 })
 
 const startDate = ref('')
 const endDate = ref('')
 
-async function fetchChartData(symbol) {
+async function fetchChartData(symbol: string) {
   const { period1, period2 } = getPeriodRange(currentRange.value)
 
   startDate.value = period1 // formatStrDate(period1)
   endDate.value = period2 // formatStrDate(period2)
 
   try {
-    const data = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
+    const data: any = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
     console.log('Chart data:', data)
     const quotes = data.quotes || []
 
@@ -469,8 +468,8 @@ async function fetchChartData(symbol) {
 
     if (chartType.value === 'area') {
       const lineData = quotes
-        .filter(q => q.close !== null)
-        .map(q => ({
+        .filter((q: any) => q.close !== null)
+        .map((q: any) => ({
           x: new Date(q.date),
           y: Number(q.close.toFixed(2))
         }))
@@ -478,8 +477,8 @@ async function fetchChartData(symbol) {
       calculateGrowthRate()
     } else if (chartType.value === 'candlestick') {
       const candleData = quotes
-        .filter(q => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
-        .map(q => ({
+        .filter((q: any) => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
+        .map((q: any) => ({
           x: new Date(q.date),
           y: [
             parseFloat(q.open.toFixed(2)),
@@ -496,14 +495,15 @@ async function fetchChartData(symbol) {
 }
 
 
-function formatUTC8(isoString) {
+function formatUTC8(isoString: string) {
+  if (!isoString) return '';
   const date = new Date(isoString);
 
   // 轉換成 UTC+8 時間（毫秒）
   const utc8Time = date.getTime() + 8 * 60 * 60 * 1000;
   const utc8Date = new Date(utc8Time);
 
-  const pad = n => String(n).padStart(2, "0");
+  const pad = (n: number) => String(n).padStart(2, "0");
 
   const month = utc8Date.getUTCMonth() + 1;
   const day = utc8Date.getUTCDate();

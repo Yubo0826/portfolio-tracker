@@ -54,11 +54,10 @@
   </Toast>
 </template>
 
-<script setup>
-const props = defineProps({
-  dark: {
-    type: Boolean,
-    default: false,
-  },
+<script setup lang="ts">
+const props = withDefaults(defineProps<{
+  dark?: boolean
+}>(), {
+  dark: false
 });
 </script>

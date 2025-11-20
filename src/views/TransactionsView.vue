@@ -86,26 +86,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
 import TransactionDialog from '@/components/TransactionDialog.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
-const portfolioStore = usePortfolioStore();
-
 import NoData from '@/components/NoData.vue';
+import { useConfirm } from "primevue/useconfirm";
 
+const { t } = useI18n();
+const portfolioStore = usePortfolioStore();
 const store = useTransactionsStore();
 const auth = useAuthStore();
 const toast = useToast();
+const confirm = useConfirm();
 
 const dialogVisible = ref(false);
-const editingId = ref(null);
-const selectedAssets = ref([]);
+const editingId = ref<string | null>(null);
+const selectedAssets = ref<any[]>([]);
 
 const load = () => store.fetchTransactions();
 
@@ -121,7 +122,7 @@ const openCreate = () => {
   dialogVisible.value = true;
 };
 
-const openEdit = (id) => {
+const openEdit = (id: string) => {
   editingId.value = id;
   dialogVisible.value = true;
 };
@@ -133,7 +134,7 @@ const onDelete = async () => {
     await store.deleteTransactions(ids);
     selectedAssets.value = [];
     toast.add({ severity: 'success', summary: t('success'), detail: t('transactionsDeleteSuccess'), life: 3000 });
-  } catch (e) {
+  } catch (e: any) {
     toast.add({ severity: 'error', summary: t('error'), detail: e?.message || t('deleteFailed'), life: 3000 });
   }
 };
@@ -172,10 +173,6 @@ const exportCsv = () => {
   link.download = fileName;
   link.click();
 };
-
-
-import { useConfirm } from "primevue/useconfirm";
-const confirm = useConfirm();
 
 const deleteConfirm = () => {
     confirm.require({

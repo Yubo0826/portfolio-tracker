@@ -25,7 +25,7 @@
   </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -37,7 +37,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const VALID_TABS = ['holdings', 'transactions', 'dividends']
-const normalize = (t) => (VALID_TABS.includes(t) ? t : 'holdings')
+const normalize = (t: any) => (VALID_TABS.includes(t) ? t : 'holdings')
 
 // PrimeVue SelectButton 選項
 const options = ref([
@@ -69,4 +69,3 @@ watch(tab, (t) => {
   }
 })
 </script>
-

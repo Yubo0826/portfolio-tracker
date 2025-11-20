@@ -85,18 +85,26 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const emit = defineEmits(['close']);
+const emit = defineEmits<{
+  (e: 'close'): void
+}>();
+
+interface SearchResult {
+  symbol: string;
+  name: string;
+  assetType: string;
+}
 
 const query = ref('')
-const inputEl = ref(null)
-const results = ref([])
+const inputEl = ref<HTMLInputElement | null>(null)
+const results = ref<SearchResult[]>([])
 const activeIndex = ref(-1)
 const loading = ref(false)
 
@@ -110,8 +118,8 @@ const search = async () => {
 
   loading.value = true
   try {
-    const data = await api.get('/api/yahoo/symbol?query=' + q)
-    results.value = data.map(item => ({
+    const data: any = await api.get('/api/yahoo/symbol?query=' + q)
+    results.value = data.map((item: any) => ({
       symbol: item.symbol,
       name: item.longname,
       assetType: item.typeDisp,
@@ -137,18 +145,18 @@ function clearAll() {
   inputEl.value?.focus()
 }
 
-function setActive(idx) {
+function setActive(idx: number) {
   activeIndex.value = idx
 }
 
-function select(idx) {
+function select(idx: number) {
   const item = results.value[idx]
   if (!item) return
   emit('close');
   router.push({ name: 'asset', params: { symbol: item.symbol } });
 }
 
-function onKeydown(e) {
+function onKeydown(e: KeyboardEvent) {
   const max = results.value.length - 1
   if (e.key === 'ArrowDown') {
     e.preventDefault()

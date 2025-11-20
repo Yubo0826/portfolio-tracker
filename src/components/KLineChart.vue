@@ -18,16 +18,13 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, defineProps } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import api from '@/utils/api'
 
-const props = defineProps({
-  symbol: {
-    type: String,
-    required: true
-  }
-})
+const props = defineProps<{
+  symbol: string
+}>()
 
 const selectedRange = ref('3mo')
 
@@ -39,7 +36,12 @@ const rangeOptions = [
   { label: '近 5 年', value: '5y' }
 ]
 
-const chartSeries = ref([
+interface ChartSeries {
+  name: string;
+  data: { x: Date; y: number[] }[];
+}
+
+const chartSeries = ref<ChartSeries[]>([
   {
     name: 'K線圖',
     data: []
@@ -79,11 +81,11 @@ const chartOptions = ref({
   }
 })
 
-function getPeriodRange(range) {
+function getPeriodRange(range: string) {
   const today = new Date()
   const endDate = formatDate(today)
 
-  const daysMap = {
+  const daysMap: Record<string, number> = {
     '7d': 7,
     '1mo': 30,
     '3mo': 90,
@@ -102,7 +104,7 @@ function getPeriodRange(range) {
   }
 }
 
-function formatDate(date) {
+function formatDate(date: Date) {
   return date.toISOString().split('T')[0]
 }
 
@@ -111,14 +113,14 @@ async function fetchChartData() {
   const { period1, period2 } = getPeriodRange(range)
 
   try {
-    const res = await api.get(
+    const res: any = await api.get(
       `/api/yahoo/chart?symbol=${props.symbol}&period1=${period1}&period2=${period2}`
     )
     const quotes = res.quotes || []
 
     const candleData = quotes
-      .filter(q => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
-      .map(q => ({
+      .filter((q: any) => q.open !== null && q.close !== null && q.high !== null && q.low !== null)
+      .map((q: any) => ({
         x: new Date(q.date),
         y: [
           parseFloat(q.open.toFixed(2)),

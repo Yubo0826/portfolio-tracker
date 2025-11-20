@@ -1,3 +1,6 @@
+<script setup lang="ts">
+</script>
+
 <template>
     <div class="p-4 m-24 text-center text-gray-500">
         <div>

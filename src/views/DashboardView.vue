@@ -94,19 +94,19 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
               <div class="text-sm">{{ $t('assetTrend') }}</div>
 
-              <Tag :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
-                <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
+              <Tag :severity="(growthRate ?? 0) >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
+                <div :class="(growthRate ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
                   <!-- 變化數值 -->
                   <span class="mr-2">                          
-                    <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
+                    <i v-if="(growthRate ?? 0) >= 0" class="pi pi-sort-up-fill"></i>
                     <i v-else class="pi pi-sort-down-fill"></i>
                   </span>
-                  <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }}</span>
+                  <span class="font-semibold mr-2">{{ Math.abs(Number(change.toFixed(2))) }}</span>
                   (
                     <!-- 變化%數 -->
-                    <span v-if="growthRate >= 0">+</span>
+                    <span v-if="(growthRate ?? 0) >= 0">+</span>
                     <span v-else>-</span>
-                    <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
+                    <span class="font-semibold">{{  Math.abs(growthRate ?? 0) }}%</span>
                   )
                 </div>
               </Tag>
@@ -293,7 +293,7 @@
 </template>
 
 
-<script setup>
+<script setup lang="ts">
 /* =========================
  *  Imports & Stores
  * =======================*/
@@ -324,8 +324,25 @@ const holdingsStore = useHoldingsStore()
  * =======================*/
 const isLoading = ref(false)
 
-const allocation = ref([])
-const dividends = ref([])
+interface AllocationItem {
+  symbol: string;
+  target: number;
+  target_percentage?: number;
+  percentage?: number;
+}
+
+interface DividendItem {
+  id: string;
+  symbol: string;
+  name: string;
+  shares: number;
+  amount: number;
+  totalAmount: string;
+  date: string;
+}
+
+const allocation = ref<AllocationItem[]>([])
+const dividends = ref<DividendItem[]>([])
 
 const totalValue = computed(() => {
   return holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
@@ -352,31 +369,31 @@ const periods = computed(() => ([
   { label: '5Y', value: '5y' }
 ]))
 
-const chartSeries = ref([{ name: t('totalPrice'), data: [] }])
-const growthRate = ref(null)
+const chartSeries = ref<{name: string; data: {x: Date; y: number}[]}[]>([{ name: t('totalPrice'), data: [] }])
+const growthRate = ref<number | null>(null)
 const change = ref(0)
 
 /* =========================
  *  Utils / Formatters
  * =======================*/
-function formatUSD(n) {
+function formatUSD(n: number) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0
   }).format(n)
 }
-function formatDate(date) {
+function formatDate(date: Date) {
   return date.toISOString().split('T')[0]
 }
-function formatStrDate(dateStr, locale = 'en-US') {
+function formatStrDate(dateStr: string, locale = 'en-US') {
   const date = new Date(dateStr)
   if (locale.startsWith('en')) {
     return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: '2-digit' }).format(date)
   }
   if (locale.startsWith('zh')) {
     const formatted = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'numeric', day: 'numeric' }).format(date)
-    const [year, month, day] = formatted.match(/\d+/g)
+    const [year, month, day] = formatted.match(/\d+/g) || []
     return `${month}月${day}日, ${year}年`
   }
   return dateStr
@@ -385,11 +402,11 @@ function formatStrDate(dateStr, locale = 'en-US') {
 const startDate = ref('')
 const endDate = ref('')
 
-function getPeriodRange(range) {
+function getPeriodRange(range: string) {
   const today = new Date()
   const e = formatDate(today)
 
-  const daysMap = { '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
+  const daysMap: Record<string, number> = { '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
   if (range === 'ytd') {
     const start = new Date(today.getFullYear(), 0, 1)
     return { period1: formatDate(start), period2: e }
@@ -405,7 +422,7 @@ function getPeriodRange(range) {
 /* =========================
  *  Setters (transform API -> view model)
  * =======================*/
-function setDividends(data) {
+function setDividends(data: any[]) {
   dividends.value = data.map(item => ({
     id: item.id,
     symbol: item.symbol,
@@ -423,7 +440,7 @@ function setDividends(data) {
 async function getAllocation() {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return
-    const data = await api.get(`/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
+    const data: any = await api.get(`/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
     allocation.value = data
   } catch (e) {
     console.error('Error fetching allocation:', e)
@@ -432,7 +449,7 @@ async function getAllocation() {
 
 async function getDividends() {
   try {
-    const data = await api.get(`/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
+    const data: any = await api.get(`/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
     setDividends(data)
   } catch (e) {
     console.error('Error fetching dividends:', e)
@@ -447,8 +464,7 @@ async function loadData() {
   try {
     await holdingsStore.fetchHoldings()
     if (holdingsStore.list.length === 0) {
-      totalValue.value = 0
-      totalProfit.value = 0
+
       chartSeries.value = [{ name: t('totalPrice'), data: [] }]
       return
     }
@@ -529,7 +545,7 @@ const annualReturn = computed(() => {
 
 const irr = computed(() => {
   if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
-  const cashflows = []
+  const cashflows: { amount: number; when: Date }[] = []
 
   transactionsStore.list.forEach(tx => {
     const amount = (tx.price * tx.shares + tx.fee) * (tx.transactionType === 'buy' ? -1 : 1)
@@ -563,8 +579,8 @@ const rebalanceRows = computed(() => {
     if (!targetMap.has(h.symbol) && h.target) targetMap.set(h.symbol, Number(h.target))
   })
 
-  const symbols = new Set([...holdingsStore.list.map(h => h.symbol), ...targetMap.keys()])
-  const out = []
+  const symbols = new Set([...holdingsStore.list.map(h => h.symbol), ...Array.from(targetMap.keys())])
+  const out: { symbol: string; change: number; amount: number }[] = []
   symbols.forEach(sym => {
     const h = holdingsStore.list.find(x => x.symbol === sym)
     const currentVal = h?.currentValue ?? 0
@@ -591,16 +607,16 @@ const chartOptions = {
     gradient: {
       shade: 'light',
       type: 'vertical',
-      gradientToColors: [growthRate.value >= 0 ? '#a7f3d0' : '#fecaca'],
+      gradientToColors: [(growthRate.value ?? 0) >= 0 ? '#a7f3d0' : '#fecaca'],
       opacityFrom: 0.5,
       opacityTo: 0,
       stops: [0, 100]
     }
   },
-  colors: [growthRate.value >= 0 ? '#10b981' : '#ef4444'],
+  colors: [(growthRate.value ?? 0) >= 0 ? '#10b981' : '#ef4444'],
   xaxis: { type: 'datetime', labels: { style: { fontSize: '12px', colors: '#999' } } },
   yaxis: {
-    labels: { formatter: val => `$${val.toFixed(2)}`, style: { fontSize: '12px', colors: '#999' } },
+    labels: { formatter: (val: number) => `$${val.toFixed(2)}`, style: { fontSize: '12px', colors: '#999' } },
     title: { style: { fontSize: '14px' } }
   },
   tooltip: { x: { format: 'yyyy/MM/dd' } },
@@ -615,14 +631,14 @@ function calculateGrowthRate() {
   const firstPrice = chartSeries.value[0].data[0].y
   const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
   change.value = lastPrice - firstPrice
-  growthRate.value = (((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2)
+  growthRate.value = Number((((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2))
 }
 
 async function fetchChartData() {
   const { period1, period2 } = getPeriodRange(selectedPeriod.value)
   try {
-    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
-    const lineData = data.map(item => ({ x: new Date(item.date), y: item.close }))
+    const data: any = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
+    const lineData = data.map((item: any) => ({ x: new Date(item.date), y: item.close }))
     chartSeries.value = [{ name: t('closePrice'), data: lineData }]
     calculateGrowthRate()
   } catch (e) {

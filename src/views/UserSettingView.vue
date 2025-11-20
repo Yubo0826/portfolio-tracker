@@ -41,14 +41,14 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from "vue";
-import api from '@/utils/api.js';
+import api from '@/utils/api';
 import * as toast from '@/composables/toast';
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-
 import { useAuthStore } from "@/stores/auth";
+
+const { t } = useI18n()
 const auth = useAuthStore();
 
 const threshold = ref(0);
@@ -56,11 +56,11 @@ const threshold = ref(0);
 // 讀取現有設定
 const loadSettings = async () => {
   try {
-    const data = await api.get(`/api/user/settings?uid=${auth.user?.uid}`);
+    const data: any = await api.get(`/api/user/settings?uid=${auth.user?.uid}`);
     console.log('Loaded settings:', data);
     threshold.value = parseFloat(data.settings.drift_threshold * 100) || 0;
   } catch (e) {
-    toast.error(t('loadSettingsError'));
+    toast.error(t('loadSettingsError'), '');
   }
 };
 
@@ -73,19 +73,19 @@ const saveSettings = async () => {
         drift_threshold: threshold.value / 100,
       }
     });
-    toast.success(t('settingsSaved'));
+    toast.success(t('settingsSaved'), '');
   } catch (e) {
-    toast.error(t('saveSettingsError'));
+    toast.error(t('saveSettingsError'), '');
   }
 };
 
 // 測試投資組合偏移檢查
 const checkPortfolioDrift = async () => {
     try {
-        await api.post('/api/user/send-drift-alert-test');
-        toast.success('Portfolio drift check email sent.');
+        await api.post('/api/user/send-drift-alert-test', {});
+        toast.success('Portfolio drift check email sent.', '');
     } catch (e) {
-        toast.error('Error sending portfolio drift check email.');
+        toast.error('Error sending portfolio drift check email.', '');
     }
 };  
 
@@ -94,9 +94,9 @@ const sendEmail = async () => {
         await api.post('/api/user/send-test-email', {
           to: auth.user?.email
         });
-        toast.success(t('testEmailSent'));
+        toast.success(t('testEmailSent'), '');
     } catch (e) {
-        toast.error(t('testEmailError'));
+        toast.error(t('testEmailError'), '');
     }
 };
 

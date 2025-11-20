@@ -21,7 +21,7 @@
           :list="sortedHoldings"
           :group="{ name: 'assets', pull: 'clone', put: false }"
           :clone="cloneItem"
-          :move="(evt) => !existsInAllocation(evt.draggedContext.element.symbol)"
+          :move="(evt: any) => !existsInAllocation(evt.draggedContext.element.symbol)"
           item-key="symbol"
         >
           <template #header>
@@ -68,7 +68,7 @@
           :list="assets"
           group="assets"
           item-key="symbol"
-          move="(evt) => false"
+          :move="(evt: any) => false"
           @add="onDrop"
           draggable="false"
         >
@@ -172,7 +172,7 @@
 </template>
 
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import Slider from "primevue/slider";
 import draggable from "vuedraggable";
@@ -190,9 +190,25 @@ const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 const holdingsStore = useHoldingsStore();
 
-const list1 = ref(holdingsStore.list); // holdings
-const assets = ref([]); // allocation
-const oldAssets = ref([]);
+interface HoldingItem {
+  symbol: string;
+  name: string;
+  assetType: string;
+  actualRatio?: number;
+  [key: string]: any;
+}
+
+interface AllocationItem {
+  symbol: string;
+  name: string;
+  assetType: string;
+  target: number;
+  editable?: boolean;
+}
+
+const list1 = ref<HoldingItem[]>(holdingsStore.list); // holdings
+const assets = ref<AllocationItem[]>([]); // allocation
+const oldAssets = ref<AllocationItem[]>([]);
 const selectedSymbol = ref("");
 
 watch(
@@ -212,7 +228,7 @@ const sortedHoldings = computed(() => {
 const getAllocation = async () => {
   try {
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
-    const data = await api.get(`/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
+    const data: any = await api.get(`/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
     console.log('Fetched allocation:', data);
     assets.value = data;
     oldAssets.value = JSON.parse(JSON.stringify(data));
@@ -244,7 +260,7 @@ watch(() => portfolioStore.currentPortfolio, (newVal) => {
 });
 
 // clone item
-const cloneItem = (item) => {
+const cloneItem = (item: HoldingItem) => {
   return {
     symbol: item.symbol,
     name: item.name,
@@ -254,11 +270,11 @@ const cloneItem = (item) => {
 };
 
 // 檢查是否已存在 allocation
-const existsInAllocation = (symbol) =>
+const existsInAllocation = (symbol: string) =>
   assets.value.some((a) => a.symbol === symbol);
 
 // 移除資產
-const removeAsset = (index) => {
+const removeAsset = (index: number) => {
   assets.value.splice(index, 1);
 };
 
@@ -283,9 +299,9 @@ const addAsset = () => {
 };
 
 // 更新資產資料
-const updateElement = (element, { symbol, name, assetType }) => {
+const updateElement = (element: AllocationItem, { symbol, name, assetType }: { symbol: string, name: string, assetType: string }) => {
   if (existsInAllocation(symbol)) {
-    toast.error(t('symbolhavebeenexisted', { symbol }));
+    toast.error(t('symbolhavebeenexisted', { symbol }), '');
     return;
   }
   element.symbol = symbol;
@@ -299,13 +315,13 @@ const saveAllocation = async () => {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
   // 檢查比例總和是否為 100%
   if (assets.value.length > 0 && totalTarget.value !== 100) {
-    toast.error(t('totalTargetError'));
+    toast.error(t('totalTargetError'), '');
     return;
   }
   // 檢查是否有未完成編輯的項目
   const incompleteItem = assets.value.find(a => a.editable);
   if (incompleteItem) {
-    toast.error(t('completeEditableItemsError'));
+    toast.error(t('completeEditableItemsError'), '');
     return;
   }
   await api.post("/api/allocation/", {
@@ -315,7 +331,7 @@ const saveAllocation = async () => {
   });
   oldAssets.value = JSON.parse(JSON.stringify(assets.value));
   sortedAssets();
-  toast.success(t('allocationSaved'));
+  toast.success(t('allocationSaved'), '');
 };
 
 
@@ -323,6 +339,10 @@ const saveAllocation = async () => {
 const sortedAssets = () => {
   assets.value = [...assets.value].sort((a, b) => b.target - a.target);
 };
+
+const onDrop = (evt: any) => {
+  // Handle drop event if needed
+}
 </script>
 <style scoped>
 .g-group {

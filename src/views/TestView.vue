@@ -17,22 +17,18 @@
   </nav>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      menuItems: ["Home", "About", "Services", "Contact"],
-      activeIndex: null, // Tracks the currently hovered menu item
-    };
-  },
-  methods: {
-    handleMouseEnter(index) {
-      this.activeIndex = index; // Set the active index on mouseenter
-    },
-    handleMouseLeave() {
-      this.activeIndex = null; // Reset the active index on mouseleave
-    },
-  },
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const menuItems = ref(["Home", "About", "Services", "Contact"]);
+const activeIndex = ref<number | null>(null);
+
+const handleMouseEnter = (index: number) => {
+  activeIndex.value = index;
+};
+
+const handleMouseLeave = () => {
+  activeIndex.value = null;
 };
 </script>
 

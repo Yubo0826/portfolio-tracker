@@ -4,33 +4,16 @@
 
         <div class="flex items-center mb-2">
             <div class="text-3xl font-bold mr-4">${{ regularMarketPrice }}</div>
-            <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
-                <span v-if="growthRate >= 0" class="mr-1">▲</span>
+            <div :class="growthRate !== null && growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center">
+                <span v-if="growthRate !== null && growthRate >= 0" class="mr-1">▲</span>
                 <span v-else class="mr-1">▼</span>
                 <span class="font-semibold">{{ growthRate }}%</span>
                 <span class="ml-2 font-semibold">{{ change.toFixed(2) }}</span>
             </div>
         </div>
         <span>
-            {{ new Date(regularMarketTime) }}
+            {{ new Date(regularMarketTime).toLocaleString() }}
         </span>
-        <!-- <div class="text-sm text-gray-500 mb-4">
-            盤前： ${{ premarketPrice }} <span :class="premarketChangePercent >= 0 ? 'text-green-600' : 'text-red-600'">({{ premarketChangePercent.toFixed(2) }}%)</span>
-        </div> -->
-
-
-        <!-- <div>
-            <label for="range">時間區間：</label>
-            <select v-model="selectedRange" @change="fetchChartData">
-              <option v-for="option in rangeOptions" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-        </div>
-
-        <div v-if="growthRate !== null" :class="growthRate >= 0 ? 'text-green-500' : 'text-red-500'" class="font-semibold mt-2">
-            區間漲跌率：{{ growthRate }}%
-        </div> -->
       </div>
 
         <div>
@@ -46,18 +29,23 @@
     </div>
   </template>
   
-<script setup>
-import { ref, onMounted, watch, defineProps } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
 import TabMenu from 'primevue/tabmenu';
 import api from '@/utils/api'
-import { useRoute  } from 'vue-router'
+import { useRoute } from 'vue-router'
 
-const route  = useRoute()
-const symbol = route.params.symbol
+const route = useRoute()
+const symbol = route.params.symbol as string
 
-const selectedRange = ref('3mo')
+// const selectedRange = ref('3mo')
 
-const rangeOptions = [
+interface RangeOption {
+    label: string;
+    value: string;
+}
+
+const rangeOptions: RangeOption[] = [
     { label: '7 天', value: '7d' },
     { label: '1 個月', value: '1mo' },
     { label: '3 個月', value: '3mo' },
@@ -79,16 +67,12 @@ const chartOptions = ref({
     },
     yaxis: {
         labels: {
-        formatter: (val) => `$${val.toFixed(2)}`
+        formatter: (val: number) => `$${val.toFixed(2)}`
         },
         title: {
         text: '股價 (美元)'
         }
     },
-    // title: {
-    //     text: `${props.symbol} · 歷史股價走勢`,
-    //     align: 'left'
-    // },
     tooltip: {
         x: {
             format: 'yyyy/MM/dd HH:mm'
@@ -96,29 +80,34 @@ const chartOptions = ref({
     }
 })
 
-const chartSeries = ref([
+interface ChartSeries {
+    name: string;
+    data: { x: Date; y: string }[];
+}
+
+const chartSeries = ref<ChartSeries[]>([
 {
     name: '收盤價',
     data: []
 }
 ])
 
-const growthRate = ref(null)
+const growthRate = ref<number | null>(null)
 const change = ref(0)
 
 function calculateGrowthRate() {
     if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
-    const firstPrice = chartSeries.value[0].data[0].y
-    const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
+    const firstPrice = parseFloat(chartSeries.value[0].data[0].y)
+    const lastPrice = parseFloat(chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y)
     change.value = lastPrice - firstPrice
-    growthRate.value = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2)
+    growthRate.value = parseFloat(((lastPrice - firstPrice) / firstPrice * 100).toFixed(2))
 }
 
-function getPeriodRange(range) {
+function getPeriodRange(range: string) {
     const today = new Date()
     const endDate = formatDate(today) // period2
 
-    const daysMap = {
+    const daysMap: Record<string, number> = {
         '7d': 7,
         '1mo': 30,
         '3mo': 90,
@@ -139,7 +128,7 @@ function getPeriodRange(range) {
     }
 }
 
-function formatDate(date) {
+function formatDate(date: Date) {
     return date.toISOString().split('T')[0] // 轉為 YYYY-MM-DD
 }
 
@@ -151,7 +140,7 @@ async function fetchChartData() {
     const { period1, period2 } = getPeriodRange(range)
 
     try {
-        const data = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
+        const data: any = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
         console.log('Chart data:', data)
         regularMarketPrice.value = data.meta.regularMarketPrice || 0
         regularMarketTime.value = data.meta.regularMarketTime || ''
@@ -159,8 +148,8 @@ async function fetchChartData() {
         const quotes = data.quotes || []
         
         const chartData = quotes
-        .filter(q => q.close !== null)
-        .map(q => ({
+        .filter((q: any) => q.close !== null)
+        .map((q: any) => ({
             x: new Date(q.date),
             y: q.close.toFixed(2)
         }))
@@ -191,4 +180,3 @@ onMounted(fetchChartData)
     margin-bottom: 1rem;
 }
 </style>
-  

@@ -1,3 +1,6 @@
+<script setup lang="ts">
+</script>
+
 <template>
   <footer
     class="mt-auto flex justify-center items-center p-4 bg-[var(--p-content-background)] text-gray-600 dark:text-gray-300"

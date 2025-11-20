@@ -104,27 +104,44 @@
   </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
 import * as toast from '@/composables/toast';
 import { useI18n } from 'vue-i18n';
-
 import { useHoldingsStore } from '@/stores/holdings'
+import { showLoading, hideLoading } from "@/composables/loading"
+
 const holdingsStore = useHoldingsStore()
-
-import { showLoading, hideLoading } from "@/composables/loading.js"
-
 const { t } = useI18n();
 
-const props = defineProps({
-  modelValue: { type: Boolean, default: false },
-  editingId: { type: [Number, String, null], default: null },
-  formData: { type: Object, default: null },
+interface TransactionForm {
+  date: Date | null;
+  symbol: string | null;
+  name: string;
+  assetType: string;
+  shares: number | null;
+  price: number | string | null;
+  fee: number;
+  operation: 'buy' | 'sell';
+}
+
+const props = withDefaults(defineProps<{
+  modelValue?: boolean;
+  editingId?: number | string | null;
+  formData?: any;
+}>(), {
+  modelValue: false,
+  editingId: null,
+  formData: null
 });
-const emit = defineEmits(['update:modelValue', 'saved']);
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'saved', value: any): void;
+}>();
 
 const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
@@ -134,7 +151,7 @@ const transactionType = ref([
   { name: t('sell'), code: 'sell' },
 ]);
 
-const selectedPortfolioId = ref(null);
+const selectedPortfolioId = ref<string | null>(null);
 
 watch(
   () => portfolioStore.currentPortfolio,
@@ -153,7 +170,7 @@ watch(
   { immediate: true }
 );
 
-const emptyForm = () => ({
+const emptyForm = (): TransactionForm => ({
   date: new Date(),
   symbol: null,
   name: '',
@@ -164,7 +181,7 @@ const emptyForm = () => ({
   operation: 'buy',
 });
 
-const form = ref(emptyForm());
+const form = ref<TransactionForm>(emptyForm());
 
 console.log('初始 form 資料:', form.value);
 
@@ -185,29 +202,30 @@ const totalPrice = computed(() => {
   return Number((s * p).toFixed(2)) || 0;
 });
 
-const onSymbolSelected = ({ symbol, name, assetType }) => {
+const onSymbolSelected = ({ symbol, name, assetType }: any) => {
   form.value.name = name;
   form.value.assetType = assetType;
   const date = form.value.date?.toISOString().split('T')[0];
   if (symbol && date) {
-    store.searchPrice(symbol, date).then((price) => {
+    store.searchPrice(symbol, date).then((price: any) => {
       form.value.price = price ?? null;
     });
   }
 };
 
-const onDateSelect = (d) => {
+const onDateSelect = (d: Date) => {
   form.value.date = d;
   if (form.value.symbol) {
     const date = d.toISOString().split('T')[0];
-    store.searchPrice(form.value.symbol, date).then((price) => {
+    store.searchPrice(form.value.symbol, date).then((price: any) => {
       form.value.price = price ?? null;
     });
   }
 };
 
 const loadEditing = () => {
-  const item = store.getTransactionById(props.editingId);
+  if (!props.editingId) return;
+  const item = store.getTransactionById(props.editingId as string);
   if (!item) return;
   form.value = {
     date: new Date(item.date),
@@ -217,7 +235,7 @@ const loadEditing = () => {
     shares: item.shares,
     price: item.price,
     fee: item.fee,
-    operation: item.transactionType,
+    operation: item.transactionType as 'buy' | 'sell',
   };
 };
 
@@ -233,16 +251,18 @@ watch(
 watch(
   () => props.formData,
   (newForm) => {
-    form.value = emptyForm();
-    form.value = {
-      date: new Date(newForm.date),
-      symbol: newForm.symbol,
-      name: newForm.name,
-      assetType: newForm.assetType,
-      shares: newForm.shares,
-      price: newForm.price,
-      fee: newForm.fee,
-      operation: newForm.transactionType,
+    if (newForm) {
+        form.value = emptyForm();
+        form.value = {
+        date: new Date(newForm.date),
+        symbol: newForm.symbol,
+        name: newForm.name,
+        assetType: newForm.assetType,
+        shares: newForm.shares,
+        price: newForm.price,
+        fee: newForm.fee,
+        operation: newForm.transactionType,
+        }
     }
   }
 );
@@ -255,7 +275,7 @@ const onSave = async (saveAnother = false) => {
   }
 
   if (form.value.operation === 'sell') {
-    const ok = store.canSell(form.value.symbol, form.value.shares);
+    const ok = store.canSell(form.value.symbol!, Number(form.value.shares));
     if (!ok) {
       // 無法賣出超過持有的股數。
       toast.error(t('notEnoughSharesToSell'), '');
@@ -271,7 +291,7 @@ const onSave = async (saveAnother = false) => {
 
   try {
     console.log('現在的 portfolio id:', selectedPortfolioId.value);
-    showLoading(t('updatingHoldings'));
+    showLoading();
     const result = await store.saveTransaction({
       id: props.editingId,
       form: form.value,

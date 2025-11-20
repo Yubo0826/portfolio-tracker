@@ -1,7 +1,7 @@
 <template>
     <AutoComplete
         :modelValue="modelValue"
-        @update:modelValue="(val) => emit('update:modelValue', val)"
+        @update:modelValue="(val: any) => emit('update:modelValue', val)"
         optionLabel="symbol"
         :suggestions="filteredSymbols"
         @complete="debouncedSearch"
@@ -23,29 +23,38 @@
         </template>
     </AutoComplete>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import AutoComplete from 'primevue/autocomplete';
 import debounce from 'lodash/debounce';
-import api from '@/utils/api.js';
+import api from '@/utils/api';
 
-const props = defineProps({
-    modelValue: String,
-    disabled: {
-        type: Boolean,
-        default: false
-    }
+const props = withDefaults(defineProps<{
+    modelValue?: string,
+    disabled?: boolean
+}>(), {
+    disabled: false
 });
-const emit = defineEmits(['update:modelValue', 'update']);
 
-const filteredSymbols = ref([]);
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: string): void;
+    (e: 'update', value: any): void;
+}>();
 
-const search = async (event) => {
+interface SymbolData {
+    symbol: string;
+    name: string;
+    assetType: string;
+}
+
+const filteredSymbols = ref<SymbolData[]>([]);
+
+const search = async (event: any) => {
     if (!event.query.trim().length) return;
     try {
-        const data = await api.get('/api/yahoo/symbol?query=' + event.query);
+        const data: any = await api.get('/api/yahoo/symbol?query=' + event.query);
         console.log('Search results:', data);
-        filteredSymbols.value = data.map(item => ({
+        filteredSymbols.value = data.map((item: any) => ({
             symbol: item.symbol,
             name: item.longname,
             assetType: item.typeDisp,
@@ -57,7 +66,7 @@ const search = async (event) => {
 
 const debouncedSearch = debounce(search, 50);
 
-const onItemSelect = (event) => {
+const onItemSelect = (event: any) => {
     emit('update:modelValue', event.value.symbol);
     emit('update', {
         symbol: event.value.symbol,

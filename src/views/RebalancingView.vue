@@ -86,7 +86,7 @@
 
   <TransactionDialog v-model="transactionDialog" :formData="newTransaction" />
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
 import api from '@/utils/api';
 import TransactionDialog from '@/components/TransactionDialog.vue';
@@ -101,12 +101,43 @@ import { usePortfolioStore } from '@/stores/portfolio';
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 
-const allocation = ref([]);
-const holdings = ref([]);
+interface AllocationItem {
+  symbol: string;
+  name: string;
+  target: number;
+  shares?: number;
+  currentPrice?: number;
+  currentValue?: number;
+  actualPctBefore?: number;
+  actualPctAfter?: number;
+  sharesToBuy?: number;
+  sharesToSell?: number;
+  amount?: number;
+  action?: string;
+  executed?: boolean;
+  targetValue?: number;
+  originalShares?: number;
+  weight?: number;
+  assetType?: string;
+}
+
+interface HoldingItem {
+  id: string;
+  symbol: string;
+  name: string;
+  assetType: string;
+  currentPrice: number;
+  avgCost: number;
+  shares: number;
+  lastUpdated: string;
+}
+
+const allocation = ref<AllocationItem[]>([]);
+const holdings = ref<HoldingItem[]>([]);
 const isLoading = ref(false);
 
 const totalValue = ref(0);
-const rebalanceResult = ref([]);
+const rebalanceResult = ref<AllocationItem[]>([]);
 const depositAmount = ref(1000);
 const leftoverCash = ref(0);
 
@@ -125,11 +156,11 @@ const getData = async () => {
     isLoading.value = true;
     if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
 
-    const allocationData = await api.get(
+    const allocationData: any = await api.get(
       `/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
     );
 
-    allocation.value = allocationData.map(item => ({
+    allocation.value = allocationData.map((item: any) => ({
       symbol: item.symbol,
       name: item.name,
       target: Number(item.target) || 0
@@ -150,8 +181,8 @@ const getHoldings = async () => {
       uid: auth.user?.uid,
       portfolio_id: portfolioStore.currentPortfolio?.id
     };
-    const data = await api.post(`/api/holdings/refresh-prices`, payload);
-    holdings.value = data.holdings.map(item => ({
+    const data: any = await api.post(`/api/holdings/refresh-prices`, payload);
+    holdings.value = data.holdings.map((item: any) => ({
       id: item.id,
       symbol: item.symbol,
       name: item.name,
@@ -166,7 +197,7 @@ const getHoldings = async () => {
   }
 };
 
-const setData = data => {
+const setData = (data: any[]) => {
   allocation.value = data.map(item => {
     const holding = holdings.value.find(h => h.symbol === item.symbol);
     if (holding) {
@@ -276,14 +307,14 @@ function rebalanceAllocate() {
     for (const a of assets) {
       if (!a.currentPrice || a.currentPrice <= 0) continue;
       // 只在顯著超標才賣
-      if (a.currentValue > a.targetValue * (1 + TOL)) {
-        const needToReduce = a.currentValue - a.targetValue;
-        const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
+      if (a.currentValue! > a.targetValue! * (1 + TOL)) {
+        const needToReduce = a.currentValue! - a.targetValue!;
+        const maxSellableShares = Math.max(a.originalShares! - (a.sharesToSell || 0), 0);
         const sharesToSell = Math.min(Math.floor(needToReduce / a.currentPrice), maxSellableShares);
         if (sharesToSell > 0) {
           const sellValue = sharesToSell * a.currentPrice;
-          a.sharesToSell += sharesToSell;
-          a.currentValue -= sellValue;
+          a.sharesToSell = (a.sharesToSell || 0) + sharesToSell;
+          a.currentValue! -= sellValue;
           a.action = 'SELL';
           cashPool += sellValue;
         }
@@ -293,18 +324,18 @@ function rebalanceAllocate() {
     // 如果現金仍不足以提領 → 按比例再賣
     if (cashPool < 0) {
       let needMore = Math.abs(cashPool);
-      const totalValueAfterStep1 = assets.reduce((s, a) => s + a.currentValue, 0);
+      const totalValueAfterStep1 = assets.reduce((s, a) => s + (a.currentValue || 0), 0);
       for (const a of assets) {
         if (needMore <= 0) break;
-        if (!a.currentPrice || a.currentPrice <= 0 || a.currentValue <= 0) continue;
-        const weight = totalValueAfterStep1 > 0 ? a.currentValue / totalValueAfterStep1 : 0;
-        const sellAmount = Math.min(needMore * weight, a.currentValue);
-        const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
+        if (!a.currentPrice || a.currentPrice <= 0 || (a.currentValue || 0) <= 0) continue;
+        const weight = totalValueAfterStep1 > 0 ? (a.currentValue || 0) / totalValueAfterStep1 : 0;
+        const sellAmount = Math.min(needMore * weight, a.currentValue || 0);
+        const maxSellableShares = Math.max(a.originalShares! - (a.sharesToSell || 0), 0);
         const sharesToSell = Math.min(Math.floor(sellAmount / a.currentPrice), maxSellableShares);
         if (sharesToSell > 0) {
           const sellValue = sharesToSell * a.currentPrice;
-          a.sharesToSell += sharesToSell;
-          a.currentValue -= sellValue;
+          a.sharesToSell = (a.sharesToSell || 0) + sharesToSell;
+          a.currentValue! -= sellValue;
           a.action = 'SELL';
           needMore -= sellValue;
           cashPool += sellValue;
@@ -320,25 +351,25 @@ function rebalanceAllocate() {
   // -----------------------------
   const underweights = () =>
     assets.filter(a =>
-      a.currentPrice > 0 &&
-      a.currentValue < a.targetValue * (1 - TOL)
+      (a.currentPrice || 0) > 0 &&
+      (a.currentValue || 0) < (a.targetValue || 0) * (1 - TOL)
     );
 
   const positiveAssets = underweights();
-  const totalNeed = positiveAssets.reduce((sum, a) => sum + (a.targetValue - a.currentValue), 0);
+  const totalNeed = positiveAssets.reduce((sum, a) => sum + ((a.targetValue || 0) - (a.currentValue || 0)), 0);
 
   // 2-1 比例分配
   if (cashPool > 0 && totalNeed > 0) {
     for (const a of positiveAssets) {
       if (cashPool <= 0) break;
-      const need = a.targetValue - a.currentValue;
+      const need = (a.targetValue || 0) - (a.currentValue || 0);
       const weight = need / totalNeed;
       const buyBudget = Math.min(cashPool * weight, need);
-      const sharesToBuy = Math.floor(buyBudget / a.currentPrice);
+      const sharesToBuy = Math.floor(buyBudget / (a.currentPrice || 1));
       if (sharesToBuy > 0) {
-        const buyValue = sharesToBuy * a.currentPrice;
-        a.sharesToBuy += sharesToBuy;
-        a.currentValue += buyValue;
+        const buyValue = sharesToBuy * (a.currentPrice || 0);
+        a.sharesToBuy = (a.sharesToBuy || 0) + sharesToBuy;
+        a.currentValue = (a.currentValue || 0) + buyValue;
         a.action = 'BUY';
         cashPool -= buyValue;
       }
@@ -351,25 +382,25 @@ function rebalanceAllocate() {
     let guard = 10000; // 安全閥避免意外死循環
     while (guard-- > 0) {
       const candidates = underweights()
-        .filter(a => a.currentPrice <= cashPool + 1e-9);
+        .filter(a => (a.currentPrice || 0) <= cashPool + 1e-9);
 
       if (!candidates.length) break;
 
       candidates.sort((x, y) => {
-        const rx = (x.targetValue - x.currentValue) / x.currentPrice;
-        const ry = (y.targetValue - y.currentValue) / y.currentPrice;
+        const rx = ((x.targetValue || 0) - (x.currentValue || 0)) / (x.currentPrice || 1);
+        const ry = ((y.targetValue || 0) - (y.currentValue || 0)) / (y.currentPrice || 1);
         if (ry !== rx) return ry - rx;     // 缺口/股價大的優先
-        return x.currentPrice - y.currentPrice; // 同分先買便宜的
+        return (x.currentPrice || 0) - (y.currentPrice || 0); // 同分先買便宜的
       });
 
       const pick = candidates[0];
-      pick.sharesToBuy += 1;
-      pick.currentValue += pick.currentPrice;
+      pick.sharesToBuy = (pick.sharesToBuy || 0) + 1;
+      pick.currentValue = (pick.currentValue || 0) + (pick.currentPrice || 0);
       pick.action = 'BUY';
-      cashPool -= pick.currentPrice;
+      cashPool -= (pick.currentPrice || 0);
 
       // 若現金不足以買任何一檔，結束
-      const minPrice = Math.min(...underweights().map(a => a.currentPrice));
+      const minPrice = Math.min(...underweights().map(a => a.currentPrice || Infinity));
       if (!isFinite(minPrice) || cashPool < minPrice - 1e-9) break;
     }
   }
@@ -383,13 +414,13 @@ function rebalanceAllocate() {
     const netFlow = buyValue - sellValue;
 
     a.amount = Math.round(netFlow * 100) / 100; // 數值型（非字串）
-    a.actualPctAfter = a.currentValue / futureTotal;
+    a.actualPctAfter = (a.currentValue || 0) / futureTotal;
 
-    if (a.sharesToBuy > 0 && a.sharesToSell > 0) {
+    if ((a.sharesToBuy || 0) > 0 && (a.sharesToSell || 0) > 0) {
       a.action = netFlow > 0 ? 'BUY' : netFlow < 0 ? 'SELL' : 'HOLD';
-    } else if (a.sharesToBuy > 0) {
+    } else if ((a.sharesToBuy || 0) > 0) {
       a.action = 'BUY';
-    } else if (a.sharesToSell > 0) {
+    } else if ((a.sharesToSell || 0) > 0) {
       a.action = 'SELL';
     } else {
       a.action = 'HOLD';
@@ -428,22 +459,25 @@ const newTransaction = ref({
   fee: 0,
   date: new Date(),
   type: 'buy',
-  rowIndex: null
+  rowIndex: null as number | null,
+  operation: 'buy',
+  name: ''
 });
 
-const addTransaction = (data, index) => {
+const addTransaction = (data: AllocationItem, index: number) => {
   newTransaction.value = {
     symbol: data.symbol,
     name: data.name,
     shares:
-      data.sharesToBuy > 0
+      (data.sharesToBuy || 0) > 0
         ? Number(data.sharesToBuy)
         : Number(data.sharesToSell),
   price: Number(data.currentPrice) || 0,
     fee: 0,
     date: new Date(),
-    operation: data.action.toLowerCase(),
-    rowIndex: index
+    operation: (data.action || 'buy').toLowerCase(),
+    rowIndex: index,
+    type: (data.action || 'buy').toLowerCase()
   };
   transactionDialog.value = true;
 };
@@ -454,18 +488,18 @@ const executeAllTransactions = async () => {
     if (item.action === 'HOLD' || item.executed) continue;
 
     const payload = {
-      uid: auth.user.uid,
-      portfolio_id: portfolioStore.currentPortfolio.id,
+      uid: auth.user!.uid,
+      portfolio_id: portfolioStore.currentPortfolio!.id,
       symbol: item.symbol,
       shares:
-        item.sharesToBuy > 0
+        (item.sharesToBuy || 0) > 0
           ? Number(item.sharesToBuy)
           : Number(item.sharesToSell),
       name: item.name,
-      asset_type: item.asset_type,
+      asset_type: item.assetType || 'stock',
       fee: 0,
       price: item.currentPrice,
-      transaction_type: item.action.toLowerCase(),
+      transaction_type: (item.action || 'buy').toLowerCase(),
       transaction_date: new Date().toISOString().split('T')[0]
     };
 

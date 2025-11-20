@@ -12,7 +12,7 @@
     </div>
   </template>
   
-  <script>
+  <script lang="ts">
   import { ref } from "vue";
   
   export const globalLoadingVisible = ref(false); // 對外暴露
@@ -98,4 +98,3 @@
     }
 
   </style>
-  

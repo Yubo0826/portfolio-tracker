@@ -16,23 +16,11 @@
   <div v-else class="text-red-500">未知圖表類型</div>
 </template>
 
-<script setup>
-defineProps({
-  type: {
-    type: String,
-    required: true,
-    validator: (val) => ['area', 'candlestick'].includes(val)
-  },
-  options: {
-    type: Object,
-    required: true
-  },
-  series: {
-    type: Array,
-    required: true
-  },
-  height: {
-    type: [String, Number]
-  }
-});
+<script setup lang="ts">
+defineProps<{
+  type: 'area' | 'candlestick';
+  options: Record<string, any>;
+  series: any[];
+  height?: string | number;
+}>();
 </script>

@@ -122,8 +122,8 @@
   </nav>
 </template>
 
-<script setup>
-import { ref, computed, watch } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Menu from 'primevue/menu'
 import Button from 'primevue/button'
@@ -137,10 +137,10 @@ const { t } = useI18n()
 const portfolioStore = usePortfolioStore()
 const portfolioMenu = ref()
 const toolMenu = ref()
-const hoverTimeout = ref(null)
+const hoverTimeout = ref<number | null>(null)
 
-const openHoverMenu = (menuName, event) => {
-  clearTimeout(hoverTimeout.value)
+const openHoverMenu = (menuName: string, event: Event) => {
+  if (hoverTimeout.value) clearTimeout(hoverTimeout.value)
   // 開一個之前先全部關掉，確保不重疊
   portfolioMenu.value?.hide()
   toolMenu.value?.hide()
@@ -152,8 +152,8 @@ const openHoverMenu = (menuName, event) => {
   }
 }
 
-const closeHoverMenu = (menuName) => {
-  hoverTimeout.value = setTimeout(() => {
+const closeHoverMenu = (menuName: string) => {
+  hoverTimeout.value = window.setTimeout(() => {
     if (menuName === 'portfolioMenu') {
       portfolioMenu.value?.hide()
     } else if (menuName === 'toolMenu') {
@@ -176,7 +176,7 @@ const toolItems = ref([
   { separator: true }
 ])
 
-const isActive = (paths) => {
+const isActive = (paths: string | string[]) => {
   if (Array.isArray(paths)) return paths.includes(route.path)
   return route.path === paths
 }

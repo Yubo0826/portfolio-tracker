@@ -33,12 +33,15 @@
   },
   "devDependencies": {
     "@rollup/plugin-yaml": "^4.1.2",
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^26.0.0",
+    "typescript": "^5.9.3",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",
     "vitest": "^3.1.1",
+    "vue-tsc": "^3.1.4",
     "yaml-loader": "^0.8.1"
   }
 }

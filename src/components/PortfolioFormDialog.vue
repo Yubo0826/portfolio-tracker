@@ -34,7 +34,7 @@
         {{ $t('driftThreshold') }}
         <i class="pi pi-info-circle ml-1"  v-tooltip.bottom="$t('emailAlertHint')" />
       </label>
-      <InputNumber id="driftThreshold" class="flex-auto" autocomplete="off" max="100" min="0" suffix="%" v-model="newPortfolio.drift_threshold" />
+      <InputNumber id="driftThreshold" class="flex-auto" autocomplete="off" :max="100" :min="0" suffix="%" v-model="newPortfolio.drift_threshold" />
     </div>
 
     <div class="flex items-center gap-4 mb-8">
@@ -53,34 +53,41 @@
     </div>
   </Dialog>
 </template>
-<script setup>
-import { ref, computed, watch, defineProps, defineEmits } from 'vue'
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch';
 import FloatLabel from 'primevue/floatlabel';
 
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-
 import * as toast from '@/composables/toast'
 
-const props = defineProps({
-  visible: Boolean,
-  action: String,
-  editPortfolio: {
-    type: Object,
-    default: () => ({
-      id: null,
-      name: '',
-      description: '',
-      drift_threshold: 5,
-      enable_email_alert: true,
-    }),
-  },
-})
+const { t } = useI18n()
 
-const initializePortfolio = () => {
+interface PortfolioData {
+  id?: string | null;
+  name: string;
+  description: string;
+  drift_threshold: number;
+  enable_email_alert: boolean;
+}
+
+const props = withDefaults(defineProps<{
+  visible: boolean;
+  action?: string;
+  editPortfolio?: PortfolioData;
+}>(), {
+  editPortfolio: () => ({
+    id: null,
+    name: '',
+    description: '',
+    drift_threshold: 5,
+    enable_email_alert: true,
+  })
+});
+
+const initializePortfolio = (): PortfolioData => {
   return {
     name: '',
     description: '',
@@ -89,7 +96,7 @@ const initializePortfolio = () => {
   }
 }
 
-const newPortfolio = ref(initializePortfolio())
+const newPortfolio = ref<PortfolioData>(initializePortfolio())
 
 watch(
   () => props.editPortfolio,
@@ -104,7 +111,11 @@ watch(
   { immediate: true }
 )
 
-const emit = defineEmits(['update:loading', 'update:visible', 'clear:editPortfolio'])
+const emit = defineEmits<{
+  (e: 'update:loading', value: boolean): void;
+  (e: 'update:visible', value: boolean): void;
+  (e: 'clear:editPortfolio'): void;
+}>()
 
 const portfolioStore = usePortfolioStore()
 
@@ -144,7 +155,7 @@ const addPortfolio = async () => {
     
     // 沒有立即套用新建立的投資組合 的訊息
     toast.success(t('portfolioAdded', { name }))
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding portfolio:', error)
     toast.error(t('errorOccurred'), error.message || '')
   } finally {
@@ -158,11 +169,13 @@ const updatePortfolio = async () => {
 
   try {
     emit('update:loading', true)
-    await portfolioStore.editPortfolio(props.editPortfolio.id, { name, description, drift_threshold, enable_email_alert })
+    if (props.editPortfolio.id) {
+        await portfolioStore.editPortfolio(props.editPortfolio.id, { name, description, drift_threshold, enable_email_alert })
+    }
     emit('clear:editPortfolio')
     newPortfolio.value = initializePortfolio()
     toast.success(`${t('portfolioModified')}「${name}」`, '')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating portfolio:', error)
     toast.error(t('errorOccurred'), error.message || '')
   } finally {

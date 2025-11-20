@@ -137,7 +137,7 @@
 </template>
 
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from "vue";
 import api from "@/utils/api";
 import { useI18n } from 'vue-i18n'
@@ -151,7 +151,28 @@ const { isDark } = useTheme()
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 
-const form = ref({
+interface BacktestForm {
+  startDate: Date;
+  endDate: Date;
+  initialCapital: number;
+  rebalance: string;
+}
+
+interface BacktestResult {
+  cumulativeReturn: number;
+  annualizedReturn: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  volatility: number;
+  winRate: number;
+}
+
+interface ChartSeries {
+  name: string;
+  data: (number | [number, number])[];
+}
+
+const form = ref<BacktestForm>({
   startDate: new Date("2020-01-01"),
   endDate: new Date("2024-12-25"),
   initialCapital: 10000,
@@ -165,9 +186,9 @@ const rebalanceOptions = [
   { label: t('threshold'), value: "threshold" },
 ];
 
-const result = ref(null);
+const result = ref<BacktestResult | null>(null);
 const isLoading = ref(false);
-const chartSeries = ref([]);
+const chartSeries = ref<ChartSeries[]>([]);
 const chartOptions = computed(() => {
   return {
     chart: {
@@ -179,7 +200,7 @@ const chartOptions = computed(() => {
     
     stroke: { curve: "smooth", width: 2 },
     xaxis: { type: "datetime", labels: { datetimeUTC: false } },
-    yaxis: { labels: { formatter: (val) => `$${val.toFixed(0)}` } },
+    yaxis: { labels: { formatter: (val: number) => `$${val.toFixed(0)}` } },
     tooltip: { x: { format: "yyyy-MM-dd" } },
     colors: ["#3B82F6", "#EF4444"],
     theme: {
@@ -189,7 +210,7 @@ const chartOptions = computed(() => {
 })
 
 /** 📊 Sharpe Ratio */
-function calculateSharpeRatio(portfolioValues, riskFreeRate = 0) {
+function calculateSharpeRatio(portfolioValues: number[], riskFreeRate = 0) {
   if (portfolioValues.length < 2) return 0;
   const dailyReturns = portfolioValues
     .slice(1)
@@ -204,7 +225,7 @@ function calculateSharpeRatio(portfolioValues, riskFreeRate = 0) {
 }
 
 /** 📉 最大回撤 */
-function calculateMaxDrawdown(portfolioValues) {
+function calculateMaxDrawdown(portfolioValues: number[]) {
   let peak = portfolioValues[0];
   let maxDrawdown = 0;
   for (let value of portfolioValues) {
@@ -216,7 +237,7 @@ function calculateMaxDrawdown(portfolioValues) {
 }
 
 /** 📈 波動率 */
-function calculateVolatility(portfolioValues) {
+function calculateVolatility(portfolioValues: number[]) {
   if (portfolioValues.length < 2) return 0;
   const dailyReturns = portfolioValues
     .slice(1)
@@ -230,7 +251,7 @@ function calculateVolatility(portfolioValues) {
 }
 
 /** 🟢 勝率 */
-function calculateWinRate(portfolioValues) {
+function calculateWinRate(portfolioValues: number[]) {
   if (portfolioValues.length < 2) return 0;
   const dailyReturns = portfolioValues
     .slice(1)
@@ -239,14 +260,7 @@ function calculateWinRate(portfolioValues) {
   return wins / dailyReturns.length;
 }
 
-function rebalancePortfolio(validAssets, holdings, prices, i, total) {
-  for (let asset of validAssets) {
-    const price = prices[asset.symbol][i].close;
-    holdings[asset.symbol] = (total * (asset.target / 100)) / price;
-  }
-}
-
-function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
+function simulateBacktest(allocation: any[], prices: any, { initialCapital, rebalance }: BacktestForm) {
   const validAssets = allocation.filter((asset) => prices[asset.symbol]);
   if (validAssets.length === 0) {
     console.warn("simulateBacktest: no matching price data found");
@@ -254,25 +268,25 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
   }
 
   /** ✅ 1. 只取所有資產的共同日期 (intersection) */
-  const assetDates = Object.values(prices).map(arr => arr.map(p => p.date));
-  const commonDates = assetDates.reduce((acc, dates) =>
+  const assetDates = Object.values(prices).map((arr: any) => arr.map((p: any) => p.date));
+  const commonDates = assetDates.reduce((acc: any[], dates: any) =>
     acc.filter((d) => dates.includes(d))
   );
 
-  const sortedDates = commonDates.sort((a, b) => new Date(a) - new Date(b));
+  const sortedDates = commonDates.sort((a: string, b: string) => new Date(a).getTime() - new Date(b).getTime());
 
   /** 建立對齊後價格資料 */
-  const alignedPrices = {};
+  const alignedPrices: Record<string, { date: string; close: number }[]> = {};
   for (let symbol in prices) {
-    const dailyMap = new Map(prices[symbol].map((p) => [p.date, p.close]));
-    alignedPrices[symbol] = sortedDates.map((date) => {
+    const dailyMap = new Map(prices[symbol].map((p: any) => [p.date, p.close]));
+    alignedPrices[symbol] = sortedDates.map((date: string) => {
       const price = dailyMap.get(date);
       return { date, close: price };
     });
   }
 
   /** 初始化持倉 */
-  let holdings = {};
+  let holdings: Record<string, number> = {};
   const firstDate = sortedDates[0];
   for (let asset of validAssets) {
     const startPrice =
@@ -281,10 +295,10 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
     holdings[asset.symbol] = (initialCapital * weight) / startPrice;
   }
 
-  const portfolioValues = [];
+  const portfolioValues: number[] = [];
 
   /** 主模擬迴圈 */
-  sortedDates.forEach((dateStr, i) => {
+  sortedDates.forEach((dateStr: string, i: number) => {
     const date = new Date(dateStr);
     let total = 0;
 
@@ -322,7 +336,7 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
 /** 執行回測 */
 
 // 🔵 年度報酬率圖表設定（含負報酬顏色）
-const annualChartSeries = ref([]);
+const annualChartSeries = ref<ChartSeries[]>([]);
 const annualChartOptions = computed(() => {
   return {
     chart: { 
@@ -342,32 +356,33 @@ const annualChartOptions = computed(() => {
     dataLabels: { enabled: false },
     xaxis: {
       title: { text: "Year" },
-      categories: [],
+      categories: [] as number[],
       labels: { style: { fontWeight: 600 } },
     },
     yaxis: {
       labels: {
-        formatter: (val) => `${(val * 100).toFixed(1)}%`,
+        formatter: (val: number) => `${(val * 100).toFixed(1)}%`,
       },
       title: { text: "Annual Return" },
     },
     tooltip: {
       y: {
-        formatter: (val) => `${(val * 100).toFixed(2)}%`,
+        formatter: (val: number) => `${(val * 100).toFixed(2)}%`,
       },
     },
     theme: {
       mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
     },
+    colors: [] as string[]
   };
 });
 
 
 // 📅 年報酬率計算
-function calculateAnnualReturns(portfolioValues, dates) {
+function calculateAnnualReturns(portfolioValues: number[], dates: string[]) {
   if (!portfolioValues?.length || !dates?.length) return [];
 
-  const yearly = {};
+  const yearly: Record<number, number[]> = {};
   for (let i = 1; i < portfolioValues.length; i++) {
     const year = new Date(dates[i]).getFullYear();
     const prev = portfolioValues[i - 1];
@@ -392,12 +407,12 @@ async function runBacktest() {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
   isLoading.value = true;
   try {
-    const allocation = await api.get(
+    const allocation: any = await api.get(
       `/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
     );
 
     // 取得價格(adjClose)資料
-    const prices = await api.get(
+    const prices: any = await api.get(
       `/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${form.value.startDate
         .toISOString()
         .split("T")[0]}&period2=${form.value.endDate
@@ -414,7 +429,7 @@ async function runBacktest() {
     const initial = portfolioValues[0];
     const final = portfolioValues[portfolioValues.length - 1];
     const cumulativeReturn = (final - initial) / initial;
-    const totalDays = (new Date(form.value.endDate) - new Date(form.value.startDate)) / (1000 * 60 * 60 * 24);
+    const totalDays = (new Date(form.value.endDate).getTime() - new Date(form.value.startDate).getTime()) / (1000 * 60 * 60 * 24);
     const annualizedReturn = Math.pow(1 + cumulativeReturn, 365 / totalDays) - 1;
     const sharpeRatio = calculateSharpeRatio(portfolioValues);
     const maxDrawdown = calculateMaxDrawdown(portfolioValues);
@@ -434,7 +449,7 @@ async function runBacktest() {
     chartSeries.value = [
       {
         name: "Portfolio Value",
-        data: dates.map((d, i) => [new Date(d).getTime(), portfolioValues[i]]),
+        data: dates.map((d: string, i: number) => [new Date(d).getTime(), portfolioValues[i]]),
       },
     ];
 

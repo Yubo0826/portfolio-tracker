@@ -96,7 +96,7 @@
   </Dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import * as toast from '@/composables/toast'
 import Papa from 'papaparse'
@@ -105,29 +105,47 @@ import * as XLSX from 'xlsx'
 import Message from 'primevue/message'
 import Paginator from 'primevue/paginator'
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions'
 import { useHoldingsStore } from '@/stores/holdings'
+import { showLoading, hideLoading } from "@/composables/loading"
 
+const { t } = useI18n();
 const store = useTransactionsStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-})
+const props = defineProps<{
+  modelValue: boolean
+}>()
 
-const emit = defineEmits(['update:modelValue', 'import'])
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'import'): void;
+}>()
+
 const localVisible = ref(false)
 watch(() => props.modelValue, v => (localVisible.value = v), { immediate: true })
 watch(localVisible, v => emit('update:modelValue', v))
 
-const fileInput = ref(null)
-const previewData = ref([])
+const fileInput = ref<HTMLInputElement | null>(null)
+
+interface PreviewItem {
+  date: string;
+  symbol: string;
+  name: string;
+  assetType: string;
+  shares: number;
+  price: number;
+  fee: number;
+  totalCost: number;
+  transactionType: 'buy' | 'sell';
+}
+
+const previewData = ref<PreviewItem[]>([])
 
 // 改為 ID 模式
-const selectedPortfolioId = ref(null)
+const selectedPortfolioId = ref<string | null>(null)
 
 watch(
   () => portfolioStore.currentPortfolio,
@@ -145,27 +163,28 @@ const rowsPerPage = ref(5)
 const paginatedData = computed(() => previewData.value.slice(first.value, first.value + rowsPerPage.value))
 
 function triggerFileInput() {
-  fileInput.value.click()
+  fileInput.value?.click()
 }
 
-function handleFileChange(event) {
-  const file = event.target.files[0]
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0]
   if (file) parseFile(file)
 }
 
-function handleDrop(event) {
-  const file = event.dataTransfer.files[0]
+function handleDrop(event: DragEvent) {
+  const file = event.dataTransfer?.files[0]
   if (file) parseFile(file)
 }
 
-function parseFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase()
+function parseFile(file: File) {
+  const ext = file.name.split('.').pop()?.toLowerCase()
   if (ext === 'csv') readCSV(file)
   else if (ext === 'xlsx' || ext === 'xls') readExcel(file)
   else console.warn('不支援的檔案格式:', ext)
 }
 
-function normalizeData(rows) {
+function normalizeData(rows: any[]): PreviewItem[] {
   return rows.map(item => {
     const {
       date,
@@ -181,7 +200,7 @@ function normalizeData(rows) {
     const numShares = Number(shares) || 0
     const numPrice = Number(price) || 0
     const numFee = Number(fee) || 0
-    const normalizedDate = toDate(date)
+    const normalizedDate = toDate(date) || new Date().toISOString().split('T')[0]
 
     return {
       date: normalizedDate,
@@ -197,7 +216,7 @@ function normalizeData(rows) {
   })
 }
 
-function toDate(dateStr) {
+function toDate(dateStr: string) {
   const regex = /^\d{4}-\d{2}-\d{2}$/
   if (regex.test(dateStr)) {
     const [year, month, day] = dateStr.split('-').map(Number)
@@ -205,27 +224,28 @@ function toDate(dateStr) {
   }
 
   const d = new Date(dateStr)
-  if (!isNaN(d)) return d.toISOString().split('T')[0]
+  if (!isNaN(d.getTime())) return d.toISOString().split('T')[0]
   toast.error(t('InvalidDateString') + dateStr, '')
+  return null
 }
 
-function readCSV(file) {
+function readCSV(file: File) {
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: h => h.toLowerCase().trim(),
-    complete: results => {
+    transformHeader: (h: string) => h.toLowerCase().trim(),
+    complete: (results: any) => {
       previewData.value = normalizeData(results.data)
       console.log('Parsed CSV data:', previewData.value)
     },
-    error: err => console.error('CSV 解析錯誤:', err),
+    error: (err: any) => console.error('CSV 解析錯誤:', err),
   })
 }
 
-function readExcel(file) {
+function readExcel(file: File) {
   const reader = new FileReader()
   reader.onload = e => {
-    const data = new Uint8Array(e.target.result)
+    const data = new Uint8Array(e.target?.result as ArrayBuffer)
     const workbook = XLSX.read(data, { type: 'array' })
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const json = XLSX.utils.sheet_to_json(sheet)
@@ -304,8 +324,6 @@ function closeDialog() {
   previewData.value = []
 }
 
-import { showLoading, hideLoading } from "@/composables/loading.js"
-
 async function confirmImport() {
   if (!selectedPortfolioId.value) {
     toast.error(t('pleaseSelectPortfolio'), '')
@@ -314,20 +332,20 @@ async function confirmImport() {
 
   showLoading()
   const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))]
-  let nonexistentSymbols = []
-  const symbolDetails = {}
+  let nonexistentSymbols: string[] = []
+  const symbolDetails: Record<string, { name: string; assetType: string }> = {}
 
   // 查詢每個 symbol 的詳細資訊 & 蒐集不存在的 symbol
   for (const symbol of symbolList) {
     try {
-      const query = await api.get('/api/yahoo/symbol?query=' + symbol)
+      const query: any = await api.get('/api/yahoo/symbol?query=' + symbol)
       if (!query || query.length === 0) {
         nonexistentSymbols.push(symbol)
         continue
       }
       const matched =
-        query.find(q => q.exchange === 'NMS' && q.quoteType === 'EQUITY') ||
-        query.find(q => q.quoteType === 'EQUITY') ||
+        query.find((q: any) => q.exchange === 'NMS' && q.quoteType === 'EQUITY') ||
+        query.find((q: any) => q.quoteType === 'EQUITY') ||
         query[0]
 
       symbolDetails[symbol] = {
@@ -358,14 +376,14 @@ async function confirmImport() {
     console.log('Bulk import result:', result)
     toast.success(t('importSuccess'), '')
     closeDialog()
-  } catch (e) {
+  } catch (e: any) {
     toast.error(t('importFailed'), e.message || '')
   } finally {
     hideLoading()
   }
 }
 
-function onPage(event) {
+function onPage(event: any) {
   first.value = event.first
   rowsPerPage.value = event.rows
 }

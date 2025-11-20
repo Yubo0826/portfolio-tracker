@@ -72,23 +72,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
 import NoData from '@/components/NoData.vue';
 import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
-
 import { useHoldingsStore } from '@/stores/holdings';
-const store = useHoldingsStore();
-
 import { useAuthStore } from '@/stores/auth';
-const auth = useAuthStore();
-
 import { usePortfolioStore } from '@/stores/portfolio';
-const portfolioStore = usePortfolioStore();
+import { useConfirm } from "primevue/useconfirm";
 
-const selectedHoldings = ref([]);
+const { t } = useI18n();
+const store = useHoldingsStore();
+const auth = useAuthStore();
+const portfolioStore = usePortfolioStore();
+const confirm = useConfirm();
+
+const selectedHoldings = ref<any[]>([]);
 
 // 初始化＆監聽登入/投組變化後自動載入
 if (auth.user && portfolioStore.currentPortfolio?.id) {
@@ -115,14 +115,11 @@ const onDelete = async () => {
     const ids = selectedHoldings.value.map((h) => h.id);
     await store.deleteHoldings(ids);
     selectedHoldings.value = [];
-    toast.success(t('deletedSuccess'));
+    toast.success(t('deletedSuccess'), '');
   } catch (error) {
-    toast.error(t('deleteFailed'));
+    toast.error(t('deleteFailed'), '');
   }
 };
-
-import { useConfirm } from "primevue/useconfirm";
-const confirm = useConfirm();
 
 const deleteConfirm = () => {
     confirm.require({

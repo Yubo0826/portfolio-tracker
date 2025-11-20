@@ -9,13 +9,13 @@ import router from './router'
 
 // i18n Setup
 import { createI18n } from 'vue-i18n'
-import messages from './i18n/index.js'
+import messages from './i18n/index'
 
 const lang = sessionStorage.getItem('lang') || 'zh'
 const i18n = createI18n({
-  legacy: false,
-  locale: lang,
-  messages
+    legacy: false,
+    locale: lang,
+    messages
 })
 
 // PrimeVue Setup
@@ -53,12 +53,12 @@ app.use(i18n)
 app.use(VueApexCharts)
 
 app.use(PrimeVue, {
-  theme: {
-    preset: customPreset,
-    options: {
-      darkModeSelector: '.my-app-dark'
+    theme: {
+        preset: customPreset,
+        options: {
+            darkModeSelector: '.my-app-dark'
+        }
     }
-  }
 })
 app.use(ToastService)
 app.use(ConfirmationService)
@@ -68,23 +68,23 @@ app.directive('tooltip', Tooltip)
 
 // Global Components
 const components = {
-  Button,
-  Select,
-  InputText,
-  DataTable,
-  Column,
-  Dialog,
-  InputNumber,
-  DatePicker,
-  ConfirmDialog,
-  Toast,
-  SelectButton,
-  Card,
-  Tag
+    Button,
+    Select,
+    InputText,
+    DataTable,
+    Column,
+    Dialog,
+    InputNumber,
+    DatePicker,
+    ConfirmDialog,
+    Toast,
+    SelectButton,
+    Card,
+    Tag
 }
 
 Object.entries(components).forEach(([name, component]) => {
-  app.component(name, component)
+    app.component(name, component)
 })
 
 // Mount App
