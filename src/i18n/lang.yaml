@@ -261,7 +261,7 @@ editTransaction:
   en: Edit Trade
   zh: 編輯交易明細
 addTransactionTo:
-  en: Add Trade to 
+  en: Add Trade to
   zh: 新增交易到
 transactionDate:
   en: Trade Date
@@ -407,7 +407,6 @@ rebalance.executeAll:
   en: Add All Suggested Trades
   zh: 新增所有建議交易
 
-
 # 回測頁面
 backtest:
   en: Backtest
@@ -535,7 +534,7 @@ pleaseSelectPortfolio:
 fillAllRequiredFields:
   en: Please fill in all required fields.
   zh: 請填寫所有必填欄位。
-notEnoughSharesToSell:  
+notEnoughSharesToSell:
   en: Not enough shares to sell.
   zh: 沒有足夠的股數可供賣出。
 feeCannotBeNegative:
@@ -547,7 +546,6 @@ transactionSavedSuccessfully:
 errorSavingTransaction:
   en: Error saving transaction.
   zh: 儲存交易明細時發生錯誤。
-
 
 # 不分類
 deleteConfirm:
@@ -580,3 +578,176 @@ previewData:
 GetStarted:
   en: Get Started
   zh: 開始使用
+
+# User Guide
+userGuide:
+  en: User Guide
+  zh: 使用者指南
+userGuideTitle:
+  en: User Operation Guide
+  zh: 使用者操作指南
+tableOfContents:
+  en: Table of Contents
+  zh: 目錄
+dashboardIntro:
+  en: The dashboard is the main page after logging in, providing a real-time overview of your portfolio.
+  zh: 儀表板是您登入後的主要頁面，提供投資組合的即時概況。
+coreMetrics:
+  en: Core Metrics
+  zh: 核心指標
+totalValueDesc:
+  en: The total asset value of the current portfolio (in USD).
+  zh: 目前投資組合的總資產價值 (以 USD 計價)。
+totalProfitDesc:
+  en: Total profit or loss of the portfolio, and Return on Investment (ROI).
+  zh: 投資組合的總獲利或虧損金額，以及年化報酬率 (ROI)。
+irrDesc:
+  en: Annualized return considering the timing of cash flows, reflecting true investment performance.
+  zh: 考量資金進出時間點的年化報酬率，更能反映真實投資績效。
+assetTrendDesc1:
+  en: Shows the change in portfolio value over time.
+  zh: 顯示投資組合隨時間的價值變化。
+assetTrendDesc2:
+  en: You can switch between different time ranges (e.g., 7D, 1M, YTD, 1Y, 5Y) to view trends.
+  zh: 您可以切換不同的時間範圍 (如：7天、1個月、今年以來 YTD、1年、5年) 來查看趨勢。
+allocationPie:
+  en: Allocation Pie Chart
+  zh: 資產配置圓餅圖
+actualAllocationDesc:
+  en: Shows the current proportion of each asset in the total value.
+  zh: 顯示目前各資產佔總市值的比例。
+targetAllocationDesc:
+  en: Shows your ideal asset allocation ratio.
+  zh: 顯示您設定的理想資產配置比例。
+allocationPieDesc1:
+  en: Click the gear icon in the top right to quickly go to the "Allocation" page for settings.
+  zh: 點擊右上角的齒輪圖示可快速前往「資產配置」頁面進行設定。
+rebalanceSuggestion:
+  en: Rebalancing Suggestions
+  zh: 再平衡建議
+rebalanceSuggestionDesc:
+  en: If a target allocation is set, the top 5 assets deviating most from the target will be displayed below, with suggested buy/sell amounts to achieve rebalancing.
+  zh: 若有設定目標配置，下方會顯示偏離目標最多的前 5 名資產，並建議買入或賣出的金額以達成再平衡。
+holdingsTable:
+  en: Holdings Table
+  zh: 持倉列表
+holdingsTableDesc1:
+  en: Lists all held assets.
+  zh: 列出所有持有的資產。
+holdingsTableDesc2:
+  en: "Information includes: Symbol, Current Price, Shares, Total Cost, Total Value, Profit, and Allocation Ratio."
+  zh: "資訊包含：代號 (Symbol)、現價 (Current Price)、股數 (Shares)、總成本 (Total Cost)、總市值 (Total Value)、損益 (Profit) 及配置比例。"
+holdingsTableDesc3:
+  en: Click on an asset name to view its detailed page (Asset Profile).
+  zh: 點擊資產名稱可進入該資產的詳細頁面 (Asset Profile)。
+transactionsIntro:
+  en: This page is used to manage all buy/sell transaction records. The system calculates your holding costs and performance based on these records.
+  zh: 此頁面用於管理所有的買賣交易記錄。系統會根據這些記錄計算您的持倉成本與績效。
+operations:
+  en: Operations
+  zh: 操作說明
+addTransaction:
+  en: Add Transaction
+  zh: 新增交易
+addTransactionDesc:
+  en: Click the button in the top right (usually "Add" or similar icon) to open the transaction window. Enter Symbol, Date, Type (Buy/Sell), Shares, Price, and Fee. After saving, the system automatically updates holding data.
+  zh: 點擊右上角的按鈕 (通常為「新增」或類似圖示) 開啟交易視窗。輸入代號 (Symbol)、日期 (Date)、交易類型 (買入 Buy / 賣出 Sell)、股數 (Shares)、價格 (Price) 及手續費 (Fee)。儲存後，系統會自動更新持倉數據。
+editDeleteTransaction:
+  en: Edit/Delete Transaction
+  zh: 編輯/刪除交易
+editDeleteTransactionDesc:
+  en: Click the "Edit" icon in the list to modify transaction details. Select multiple transactions and click the "Delete" button above to batch delete records.
+  zh: 在列表中點擊「編輯」圖示可修改交易內容。勾選多筆交易後，點擊上方的「刪除 (Delete)」按鈕可批次刪除記錄。
+exportData:
+  en: Export Data
+  zh: 匯出資料
+exportDataDesc:
+  en: Click the "Export" button in the top right to download transaction records as a CSV file for external backup or analysis.
+  zh: 點擊右上角的「匯出 (Export)」按鈕，可將交易記錄下載為 CSV 檔案，方便進行外部備份或分析。
+holdingsIntro:
+  en: This page provides a more detailed view of holdings, similar to the list below the dashboard but may include more filtering or sorting features.
+  zh: 此頁面提供更詳細的持倉檢視，功能與儀表板下方的列表類似，但可能包含更多篩選或排序功能。
+viewDetails:
+  en: View Details
+  zh: 查看詳情
+viewDetailsDesc:
+  en: Click on any asset to view its historical trend and individual transaction records.
+  zh: 點擊任一資產可查看該資產的歷史走勢與個別交易記錄。
+allocationIntro:
+  en: Set your ideal portfolio proportions, which is the basis for "Rebalancing".
+  zh: 設定您理想的投資組合比例，這是執行「再平衡」的基礎。
+setTargetsDesc:
+  en: The system lists your current holdings. You can enter a Target % for each asset. Ensure the total sum is 100% (or adjust according to your strategy).
+  zh: 系統會列出您目前的持倉資產。您可以為每個資產輸入目標百分比 (Target %)。確保所有資產的目標總和為 100% (或根據您的策略調整)。
+addTrackedAsset:
+  en: Add Tracked Asset
+  zh: 新增追蹤資產
+addTrackedAssetDesc:
+  en: If you plan to buy a new asset but don't hold it yet, you can add it here and set a target ratio. The system will suggest buying it on the rebalancing page.
+  zh: 若您計畫買入新資產但尚未持有，可以在此新增該資產並設定目標比例，系統會在再平衡頁面建議您買入。
+rebalancingIntro:
+  en: Helps you adjust your portfolio back to target proportions to maintain risk control.
+  zh: 協助您將投資組合調整回目標比例，以維持風險控管。
+features:
+  en: Features
+  zh: 功能說明
+rebalanceTable:
+  en: Rebalance Table
+  zh: 再平衡表
+rebalanceTableDesc:
+  en: The system calculates the current difference for each asset.
+  zh: 系統會計算每個資產目前的偏差 (Difference)。
+suggestions:
+  en: Suggestions
+  zh: 建議操作
+suggestionsDesc:
+  en: Shows how much amount and shares to Buy or Sell to return the asset to its target ratio. You can place orders with your broker based on these suggestions.
+  zh: 顯示需要買入 (Buy) 或賣出 (Sell) 多少金額與股數，才能讓該資產回到目標比例。您可以根據這些建議在券商端進行下單操作。
+dividendsIntro:
+  en: Track your passive income.
+  zh: 追蹤您的被動收入。
+viewDividends:
+  en: View Dividends
+  zh: 檢視股息
+viewDividendsDesc:
+  en: Lists received dividend records, including date, amount, and corresponding asset.
+  zh: 列表顯示已領取的股息記錄，包含發放日期、金額與對應資產。
+backtestingIntro:
+  en: (Advanced Feature) Allows you to test different investment strategies.
+  zh: (進階功能) 讓您測試不同的投資策略。
+setParams:
+  en: Set Parameters
+  zh: 設定參數
+setParamsDesc:
+  en: Choose portfolio, backtest period, initial capital, and rebalancing frequency.
+  zh: 選擇資產組合、回測期間、初始資金與再平衡頻率。
+viewResults:
+  en: View Results
+  zh: 查看結果
+viewResultsDesc:
+  en: The system simulates the strategy's performance using historical data, including annualized return, Max Drawdown, etc., to help you optimize your strategy.
+  zh: 系統會模擬該策略在歷史數據下的表現，包含年化報酬率、最大回撤 (Max Drawdown) 等指標，協助您優化投資策略。
+userSettings:
+  en: User Settings
+  zh: 使用者設定
+userSettingsIntro:
+  en: Manage your personal preferences and account information.
+  zh: 管理您的個人偏好與帳戶資訊。
+generalSettings:
+  en: General Settings
+  zh: 一般設定
+generalSettingsDesc:
+  en: Switch language (e.g., English/Chinese), Dark/Light Mode.
+  zh: 切換語系 (如：英文/中文)、深色/淺色模式 (Dark/Light Mode)。
+accountManagement:
+  en: Account Management
+  zh: 帳戶管理
+accountManagementDesc:
+  en: Logout or update personal profile.
+  zh: 登出或更新個人資料。
+tip:
+  en: Tip
+  zh: 小提示
+dataAccuracyTip:
+  en: To ensure data accuracy, please make sure to update "Transactions" after every trade. All system calculations (Cost, Profit, XIRR) rely on accurate transaction data.
+  zh: 為了確保數據準確，請務必在每次交易後確實更新「交易記錄」。系統的所有計算 (成本、損益、XIRR) 皆依賴於準確的交易資料。

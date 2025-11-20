@@ -80,6 +80,11 @@ const router = createRouter({
       path: '/user-settings',
       name: 'user-settings',
       component: () => import('../views/UserSettingView.vue'),
+    },
+    {
+      path: '/user-guide',
+      name: 'user-guide',
+      component: () => import('../views/UserGuideView.vue'),
     }
   ],
 })
