@@ -75,11 +75,11 @@
         v-else-if="query.trim().length > 0 && !loading"
         class="select-none py-12 text-center text-sm text-neutral-400"
       >
-        No results
+        {{ t('noResults') }}
       </div>
 
       <div v-if="loading" class="select-none py-12 text-center text-sm text-neutral-400">
-        Loading...
+        {{ t('loading') }}
       </div>
     </div>
   </div>
@@ -87,10 +87,12 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 
+const { t } = useI18n()
 const router = useRouter()
 const emit = defineEmits(['close']);
 

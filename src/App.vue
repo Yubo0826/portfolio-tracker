@@ -224,7 +224,7 @@ const { isDark, toggleTheme } = useTheme()
 
 watch(() => auth.user, async (newUser) => {
   if (newUser) {
-    showLoading('Loading user data...')
+    showLoading(t('loadingUserData'))
     await getPortfolios()
     await holdingsStore.fetchHoldings()
     await transactionsStore.fetchTransactions()

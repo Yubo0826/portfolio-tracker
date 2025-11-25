@@ -546,6 +546,45 @@ transactionSavedSuccessfully:
 errorSavingTransaction:
   en: Error saving transaction.
   zh: 儲存交易明細時發生錯誤。
+portfolioDriftCheckSent:
+  en: Portfolio drift check email sent.
+  zh: 投資組合偏移檢查郵件已發送。
+portfolioDriftCheckError:
+  en: Error sending portfolio drift check email.
+  zh: 發送投資組合偏移檢查郵件時發生錯誤。
+loadingUserData:
+  en: Loading user data...
+  zh: 載入使用者資料中...
+loading:
+  en: Loading...
+  zh: 載入中...
+noResults:
+  en: No results
+  zh: 無結果
+dividendsRefreshed:
+  en: Dividends refreshed successfully.
+  zh: 股利資料已成功更新。
+dividendsRefreshFailed:
+  en: Failed to refresh dividends.
+  zh: 更新股利資料失敗。
+pricesRefreshed:
+  en: Prices refreshed successfully.
+  zh: 價格已成功更新。
+pricesRefreshFailed:
+  en: Failed to refresh prices.
+  zh: 更新價格失敗。
+loadSettingsError:
+  en: Error loading settings.
+  zh: 載入設定時發生錯誤。
+portfolioRequired:
+  en: Portfolio name is required.
+  zh: 投資組合名稱為必填項目。
+refreshingPrices:
+  en: Refreshing prices...
+  zh: 正在更新價格...
+refreshingDividends:
+  en: Refreshing dividends...
+  zh: 正在更新股利...
 
 # 不分類
 deleteConfirm:
