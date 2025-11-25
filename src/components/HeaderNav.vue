@@ -11,14 +11,14 @@
     />
 
     <!-- User Guide -->
-    <Button
+    <!-- <Button
       :label="t('userGuide')"
       severity="secondary"
       variant="text"
       class="font-bold m-1"
       :style="{ color: isActive('/user-guide') ? 'var(--p-primary-color)' : '' }"
       @click="$router.push('/user-guide')"
-    />
+    /> -->
 
     <!-- Portfolio Menu -->
     <div

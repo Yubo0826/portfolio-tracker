@@ -1,28 +1,39 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { auth, provider } from '@/firebase'
 import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  type User
 } from 'firebase/auth'
-import api from '@/utils/api.js';
+import api from '@/utils/api.js'
+
+interface UserData {
+  uid: string
+  email: string
+  displayName: string
+}
 
 export const useAuthStore = defineStore('auth', () => {
   // 沒登入的話就是demo account
-  const user = ref({
+  const user: Ref<UserData> = ref({
     uid: 'demo-user',
     email: 'demo@example.com',
     displayName: 'Demo User'
   })
 
-  const login = async () => {
+  const login = async (): Promise<void> => {
     await setPersistence(auth, browserLocalPersistence)
     try {
       const result = await signInWithPopup(auth, provider)
-      user.value = result.user
+      user.value = {
+        uid: result.user.uid,
+        email: result.user.email || '',
+        displayName: result.user.displayName || ''
+      }
       saveUserData()
       console.log('登入成功', user.value.email)
     } catch (err) {
@@ -30,7 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     await signOut(auth)
     user.value = {
       uid: 'demo-user',
@@ -39,28 +50,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const saveUserData = () => {
+  const saveUserData = (): void => {
     if (user.value) {
-      const userData = {
+      const userData: UserData = {
         uid: user.value.uid,
         email: user.value.email,
         displayName: user.value.displayName
       }
 
       api.post('/api/user', userData)
-        .then(response => {
+        .then((response: any) => {
           console.log('User data saved successfully:', response)
         })
-        .catch(error => {
+        .catch((error: any) => {
           console.error('Error saving user data:', error)
         })
     }
   }
 
   // 監聽登入狀態
-  onAuthStateChanged(auth, (currentUser) => {
+  onAuthStateChanged(auth, (currentUser: User | null) => {
     if (currentUser) {
-      user.value = currentUser
+      user.value = {
+        uid: currentUser.uid,
+        email: currentUser.email || '',
+        displayName: currentUser.displayName || ''
+      }
     } else {
       user.value = {
         uid: 'demo-user',

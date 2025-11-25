@@ -36,18 +36,45 @@
               size="small"
             />
 
-            <Button
-              @click="toggleLanguage"
-              class="p-button-rounded p-button-text"
-              icon="pi pi-language"
-              aria-label="Language"
-              size="small"
-            />
+            <div 
+              @mouseenter="showLanguageMenu" 
+              @mouseleave="hideLanguageMenu"
+              class="relative"
+            >
+              <Button
+                ref="languageButton"
+                class="p-button-rounded p-button-text"
+                icon="pi pi-language"
+                aria-label="Language"
+                size="small"
+                @click="toggleLanguageMenu"
+              />
+              <Menu 
+                ref="languageMenu"
+                :model="languageMenuItems"
+                :popup="true"
+                class="language-menu"
+                @mouseenter="cancelHide"
+                @mouseleave="hideLanguageMenu"
+              />
+            </div>
 
             
             <template v-if="auth.user.uid !== 'demo-user'">
               <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
-              <Menu ref="menu" :model="menuItems" :popup="true" />
+              <Menu ref="menu" :model="menuItems" :popup="true">
+
+                <template #start>
+                  <div class="user-info-item flex items-center p-3 border-b border-gray-200">
+                    <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
+                    <div class="flex flex-col">
+                      <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
+                      <span class="text-sm text-gray-500">{{ auth.user.email }}</span>
+                    </div>
+                  </div>
+                </template>
+
+              </Menu>
             </template>
             
             <template v-else>
@@ -166,6 +193,7 @@ import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
 import Menu from 'primevue/menu'
 import Dialog from 'primevue/dialog'
+import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
@@ -231,6 +259,75 @@ async function getPortfolios() {
 
 const searchBoxVisible = ref(false)
 
+const languageOptions = [
+  { label: 'English', value: 'en', flag: '🇺🇸' },
+  { label: '繁體中文', value: 'zh-TW', flag: '🇹🇼' }
+]
+
+const currentLanguage = ref(locale.value)
+
+const languageMenuItems = computed(() => 
+  languageOptions.map(option => ({
+    label: `${option.flag} ${option.label}`,
+    command: () => selectLanguage(option.value),
+    class: currentLanguage.value === option.value ? 'active-language' : ''
+  }))
+)
+
+const onLanguageChange = (event) => {
+  const newLocale = event.value
+  locale.value = newLocale
+  currentLanguage.value = newLocale
+  localStorage.setItem('locale', newLocale)
+}
+
+const languageMenu = ref()
+const languageButton = ref()
+let hideTimeout = null
+
+const showLanguageMenu = () => {
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
+  // 使用按鈕的實際 DOM 元素
+  const buttonElement = languageButton.value?.$el || languageButton.value
+  if (buttonElement) {
+    // 創建一個模擬的點擊事件
+    const mockEvent = {
+      currentTarget: buttonElement,
+      target: buttonElement,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    }
+    languageMenu.value?.show(mockEvent)
+  }
+}
+
+const hideLanguageMenu = () => {
+  hideTimeout = setTimeout(() => {
+    languageMenu.value?.hide()
+  }, 200)
+}
+
+const cancelHide = () => {
+  if (hideTimeout) {
+    clearTimeout(hideTimeout)
+    hideTimeout = null
+  }
+}
+
+const toggleLanguageMenu = (event) => {
+  languageMenu.value?.toggle(event)
+}
+
+const selectLanguage = (value) => {
+  locale.value = value
+  currentLanguage.value = value
+  localStorage.setItem('locale', value)
+  languageMenu.value?.hide()
+}
+
 const toggleLanguage = () => {
   const newLocale = locale.value === 'en' ? 'zh-TW' : 'en'
   locale.value = newLocale
@@ -247,16 +344,19 @@ onMounted(() => {
     document.documentElement.classList.add('my-app-dark')
   }
   const savedLocale = localStorage.getItem('locale')
-  if (savedLocale && savedLocale !== locale.value) locale.value = savedLocale
+  if (savedLocale && savedLocale !== locale.value) {
+    locale.value = savedLocale
+    currentLanguage.value = savedLocale
+  }
 })
 
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
-const menuItems = [
-  // { label: '設定', icon: 'pi pi-cog', command: () => router.push('/user-settings') },
-  // { separator: true },
+const menuItems = computed(() => [
+  { separator: true },
+  { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
   { label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() },
-]
+])
 </script>
 
 <style scoped>
@@ -305,5 +405,33 @@ header {
 <style>
 .custom-select-root:hover {
   border: 1px solid rgb(121, 121, 121) !important;
+}
+
+.language-menu {
+  z-index: 1000;
+}
+
+.language-menu :deep(.active-language) {
+  color: var(--p-primary-color) !important;
+  font-weight: 600;
+}
+
+.language-menu :deep(.active-language:hover) {
+  color: var(--p-primary-color) !important;
+}
+
+/* 用戶選單頭像樣式 */
+.p-menu :deep(.user-info-item) {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.p-menu :deep(.user-info-item):hover {
+  background: none !important;
+  cursor: default !important;
+}
+
+.p-menu :deep(.user-info-item) .p-menuitem-content {
+  padding: 0 !important;
 }
 </style>
