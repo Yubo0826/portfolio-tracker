@@ -790,3 +790,202 @@ tip:
 dataAccuracyTip:
   en: To ensure data accuracy, please make sure to update "Transactions" after every trade. All system calculations (Cost, Profit, XIRR) rely on accurate transaction data.
   zh: 為了確保數據準確，請務必在每次交易後確實更新「交易記錄」。系統的所有計算 (成本、損益、XIRR) 皆依賴於準確的交易資料。
+
+# 現金流管理
+cashFlow:
+  title:
+    en: Cash Flow Management
+    zh: 現金流管理
+  addAccount:
+    en: Add Account
+    zh: 新增帳戶
+  addCashFlow:
+    en: Add Cash Flow
+    zh: 新增現金流
+  totalBalance:
+    en: Total Balance
+    zh: 總餘額
+  balance:
+    en: Balance
+    zh: 餘額
+  activeAccounts:
+    en: Active Accounts
+    zh: 啟用帳戶
+  accountCount:
+    en: Accounts
+    zh: 帳戶數量
+  accounts:
+    en: Cash Accounts
+    zh: 現金帳戶
+  recentFlows:
+    en: Recent Flows
+    zh: 最近現金流
+  viewAll:
+    en: View All
+    zh: 查看全部
+  noAccounts:
+    en: No cash accounts yet
+    zh: 尚未建立現金帳戶
+  createFirstAccount:
+    en: Create First Account
+    zh: 建立第一個帳戶
+  noRecentFlows:
+    en: No recent cash flows
+    zh: 暫無現金流記錄
+  editAccount:
+    en: Edit Account
+    zh: 編輯帳戶
+  accountName:
+    en: Account Name
+    zh: 帳戶名稱
+  accountNamePlaceholder:
+    en: e.g., Bank Account, Brokerage Cash
+    zh: 例如：銀行帳戶、券商現金
+  currency:
+    en: Currency
+    zh: 貨幣
+  currencyFixedHint:
+    en: All accounts use USD to match your US stock portfolio
+    zh: 所有帳戶統一使用美金，與您的美股投資組合一致
+  selectCurrency:
+    en: Select Currency
+    zh: 選擇貨幣
+  initialBalance:
+    en: Initial Balance
+    zh: 初始餘額
+  initialBalancePlaceholder:
+    en: Enter amount
+    zh: 輸入金額
+  initialBalanceHint:
+    en: The current cash balance in this account
+    zh: 此帳戶的目前現金餘額
+  accountDescription:
+    en: Description
+    zh: 帳戶描述
+  accountDescriptionPlaceholder:
+    en: Optional description for this account
+    zh: 可選的帳戶說明
+  activeAccount:
+    en: Active Account
+    zh: 啟用帳戶
+  activeAccountHint:
+    en: Inactive accounts will be hidden from transaction forms
+    zh: 停用的帳戶將不會顯示在交易表單中
+  selectAccount:
+    en: Select Account
+    zh: 選擇帳戶
+  selectAccountPlaceholder:
+    en: Choose a cash account
+    zh: 選擇現金帳戶
+  flowType:
+    en: Flow Type
+    zh: 現金流類型
+  selectFlowType:
+    en: Select flow type
+    zh: 選擇現金流類型
+  amount:
+    en: Amount
+    zh: 金額
+  amountPlaceholder:
+    en: Enter amount
+    zh: 輸入金額
+  incomeHint:
+    en: Money coming into the account
+    zh: 流入帳戶的資金
+  expenseHint:
+    en: Money going out of the account
+    zh: 流出帳戶的資金
+  description:
+    en: Description
+    zh: 描述
+  descriptionPlaceholder:
+    en: Describe this cash flow
+    zh: 描述這筆現金流
+  relatedStock:
+    en: Related Stock
+    zh: 相關股票
+  relatedStockPlaceholder:
+    en: Stock symbol (optional)
+    zh: 股票代號（可選）
+  relatedStockHint:
+    en: If this flow is related to a stock transaction
+    zh: 如果此現金流與股票交易相關
+  transactionDate:
+    en: Transaction Date
+    zh: 交易日期
+  selectDate:
+    en: Select date
+    zh: 選擇日期
+  dateHint:
+    en: Leave empty to use current time
+    zh: 留空將使用目前時間
+  preview:
+    en: Preview
+    zh: 預覽
+  account:
+    en: Account
+    zh: 帳戶
+  currentBalance:
+    en: Current Balance
+    zh: 目前餘額
+  change:
+    en: Change
+    zh: 變動
+  newBalance:
+    en: New Balance
+    zh: 新餘額
+  insufficientBalance:
+    en: Insufficient balance
+    zh: 餘額不足
+  types:
+    deposit:
+      en: Deposit
+      zh: 存款
+    withdrawal:
+      en: Withdrawal
+      zh: 提款
+    dividend:
+      en: Dividend
+      zh: 股利
+    fee:
+      en: Fee
+      zh: 手續費
+    transfer:
+      en: Transfer
+      zh: 轉帳
+    adjustment:
+      en: Adjustment
+      zh: 調整
+    other:
+      en: Other
+      zh: 其他
+
+# 表單驗證
+validation:
+  required:
+    en: This field is required
+    zh: 此欄位為必填
+  minLength:
+    en: Minimum length is {min} characters
+    zh: 最少需要 {min} 個字符
+  maxLength:
+    en: Maximum length is {max} characters
+    zh: 最多 {max} 個字符
+  minValue:
+    en: Minimum value is {min}
+    zh: 最小值為 {min}
+
+# 通用
+common:
+  cancel:
+    en: Cancel
+    zh: 取消
+  save:
+    en: Save
+    zh: 儲存
+  create:
+    en: Create
+    zh: 新增
+  update:
+    en: Update
+    zh: 更新

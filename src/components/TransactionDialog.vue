@@ -32,65 +32,98 @@
       </div>
     </template>
 
-    <div class="flex items-center gap-4 mb-4">
-      <label class="w-24">
-        {{ $t('symbol') }} <span style="color:#f27362">*</span>
+    <div class="mb-4">
+      <label for="symbol" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('symbol') }} <span class="text-red-500">*</span>
       </label>
       <SymbolAutoComplete
+        id="symbol"
         v-model="form.symbol"
         @update="onSymbolSelected"
         :disabled="!!editingId"
       />
     </div>
 
-    <div class="flex items-center gap-4 mb-4">
-      <label class="w-24">
-        {{ $t('transactionDate') }} <span style="color:#f27362">*</span>
+    <div class="mb-4">
+      <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('transactionDate') }} <span class="text-red-500">*</span>
       </label>
       <DatePicker
+        id="date"
         v-model="form.date"
         @date-select="onDateSelect"
         :maxDate="new Date()"
         showIcon
         fluid
         iconDisplay="input"
-        class="flex-auto"
+        class="w-full"
         :placeholder="$t('pleaseSelectDate')"
       />
     </div>
 
-    <div class="flex items-center gap-4 mb-4">
-      <label class="w-24">
-        {{ $t('share') }} <span style="color:#f27362">*</span>
+    <div class="mb-4">
+      <label for="shares" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('share') }} <span class="text-red-500">*</span>
       </label>
-      <InputNumber v-model="form.shares" class="flex-auto" showButtons autocomplete="off" />
+      <InputNumber 
+        id="shares"
+        v-model="form.shares" 
+        class="w-full" 
+        showButtons 
+        autocomplete="off" 
+      />
     </div>
 
-    <div class="flex items-center gap-4 mb-4">
-      <label class="w-24">
-        {{ $t('price') }} <span style="color:#f27362">*</span>
+    <div class="mb-4">
+      <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('price') }} <span class="text-red-500">*</span>
       </label>
-      <InputText v-model="form.price" class="flex-auto" autocomplete="off" :placeholder="$t('pleaseInputPrice')" />
+      <InputText 
+        id="price"
+        v-model="form.price" 
+        class="w-full" 
+        autocomplete="off" 
+        :placeholder="$t('pleaseInputPrice')" 
+      />
     </div>
 
-    <div class="flex items-center gap-4 mb-8">
-      <label class="w-24">{{ $t('fee') }}</label>
-      <InputNumber v-model="form.fee" class="flex-auto" showButtons autocomplete="off" />
+    <div class="mb-4">
+      <label for="fee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('fee') }}
+      </label>
+      <InputNumber 
+        id="fee"
+        v-model="form.fee" 
+        class="w-full" 
+        showButtons 
+        autocomplete="off" 
+      />
     </div>
 
-    <div class="flex items-center gap-4 mb-8">
-      <label class="w-24">{{ $t('type') }}</label>
-      <SelectButton v-model="form.operation" :options="transactionType" optionLabel="name" optionValue="code" />
+    <div class="mb-4">
+      <label for="operation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('type') }}
+      </label>
+      <SelectButton 
+        id="operation"
+        v-model="form.operation" 
+        :options="transactionType" 
+        optionLabel="name" 
+        optionValue="code" 
+        class="w-full"
+      />
     </div>
 
-    <div style="border: .5px solid #eeee;"></div>
+    <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div>
 
-    <div class="flex items-center gap-4 my-8">
-      <label class="w-24">{{ $t('total') }}</label>
-      ${{ totalPrice }} USD
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-center">
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('total') }}</label>
+        <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ totalPrice }} USD</span>
+      </div>
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="close" />
 
       <span v-if="!editingId">

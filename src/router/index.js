@@ -67,6 +67,11 @@ const router = createRouter({
       component: () => import('../views/DividendsView.vue'),
     },
     {
+      path: '/cash-flow',
+      name: 'cash-flow',
+      component: () => import('../views/CashFlowView.vue'),
+    },
+    {
       path: '/asset/:symbol',
       name: 'asset',
       component: () => import('../views/AssetProfileView.vue'),

@@ -167,10 +167,11 @@ const portfolioItems = computed(() => [
   { label: t('holdings'), command: () => router.push('/portfolio/holdings') },
   { label: t('transactions'), command: () => router.push('/portfolio/transactions') },
   { label: t('dividends'), command: () => router.push('/portfolio/dividends') },
+  { label: t('cashFlow.title'), command: () => router.push('/cash-flow') },
   { separator: true }
 ])
 
-const toolItems = ref([
+const toolItems = computed(() => [
   { label: t('rebalance'), command: () => router.push('/rebalancing') },
   { label: t('backtesting'), command: () => router.push('/backtesting') },
   { separator: true }

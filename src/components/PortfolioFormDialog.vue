@@ -6,48 +6,58 @@
     modal
     :style="{ width: '30rem' }"
   >
-    <span class="text-surface-500 dark:text-surface-400 block mb-8">
-      <!-- {{ $t('updateYourInfo') }} -->
-    </span>
-
-    <div class="flex items-center gap-4 mb-4">
-      <label for="name" class="font-semibold w-24">{{ $t('name') }}</label>
-      <InputText id="name" class="flex-auto" autocomplete="off" v-model="newPortfolio.name" />
-    </div>
-
-    <div class="flex items-center gap-4 mb-8">
-      <label for="description" class="font-semibold w-24">{{ $t('description') }}</label>
-      <FloatLabel variant="on">
-        <Textarea
-          id="over_label"
-          class="flex-auto"
-          v-model="newPortfolio.description"
-          rows="5"
-          cols="30"
-          style="resize: none"
-        />
-      </FloatLabel>
-    </div>
-
-    <div class="flex items-center gap-4 mb-8">
-      <label for="driftThreshold" class="font-semibold w-24">
-        {{ $t('driftThreshold') }}
-        <i class="pi pi-info-circle ml-1"  v-tooltip.bottom="$t('emailAlertHint')" />
+    <div class="mb-4">
+      <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('name') }} <span class="text-red-500">*</span>
       </label>
-      <InputNumber id="driftThreshold" class="flex-auto" autocomplete="off" max="100" min="0" suffix="%" v-model="newPortfolio.drift_threshold" />
+      <InputText id="name" class="w-full" autocomplete="off" v-model="newPortfolio.name" />
     </div>
 
-    <div class="flex items-center gap-4 mb-8">
-      <label for="enableEmailAlert">{{ $t('emailAlert') }}</label>
+    <div class="mb-4">
+      <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('description') }}
+      </label>
+      <Textarea
+        id="description"
+        class="w-full"
+        v-model="newPortfolio.description"
+        rows="5"
+        cols="30"
+        style="resize: none"
+      />
+    </div>
+
+    <div class="mb-4">
+      <label for="driftThreshold" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('driftThreshold') }}
+        <i class="pi pi-info-circle ml-1 text-gray-400" v-tooltip.bottom="$t('emailAlertHint')" />
+      </label>
+      <InputNumber 
+        id="driftThreshold" 
+        class="w-full" 
+        autocomplete="off" 
+        :max="100" 
+        :min="0" 
+        suffix="%" 
+        v-model="newPortfolio.drift_threshold" 
+      />
+    </div>
+
+    <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <label for="enableEmailAlert" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ $t('emailAlert') }}
+      </label>
       <ToggleSwitch id="enableEmailAlert" v-model="newPortfolio.enable_email_alert" />
     </div>
 
-    <div class="flex items-center gap-4 mb-8">
-      <label for="applyNewPortfolio">{{ $t('applyNewPortfolioImmediately') }}</label>
+    <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <label for="applyNewPortfolio" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ $t('applyNewPortfolioImmediately') }}
+      </label>
       <ToggleSwitch id="applyNewPortfolio" v-model="isApplyNewPortfolio" />
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="emit('update:visible', false)" />
       <Button type="button" :label="$t('save')" @click="clickSave" :disabled="saveDisabled" />
     </div>
@@ -58,7 +68,6 @@ import { ref, computed, watch, defineProps, defineEmits } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch';
-import FloatLabel from 'primevue/floatlabel';
 
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
