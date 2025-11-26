@@ -150,8 +150,6 @@ export const useCashFlowStore = defineStore('cashflow', () => {
       if (!selectedAccount.value && activeAccounts.value.length > 0) {
         selectedAccount.value = activeAccounts.value[0]
       }
-      
-      success('成功', '現金帳戶載入完成')
     } catch (error) {
       console.error('Error fetching cash accounts:', error)
       errorToast('錯誤', '獲取現金帳戶失敗')
@@ -278,6 +276,7 @@ export const useCashFlowStore = defineStore('cashflow', () => {
       // 按時間排序（最新的在前）
       filteredFlows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       
+      // 不再清空，直接更新資料
       cashFlows.value = filteredFlows
     } catch (error) {
       console.error('Error fetching cash flows:', error)

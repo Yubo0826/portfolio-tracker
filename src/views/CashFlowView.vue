@@ -109,7 +109,7 @@
                 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm': selectedAccount?.id === account.id,
                 'bg-white dark:bg-gray-900': selectedAccount?.id !== account.id
               }"
-              @click="setSelectedAccount(account)"
+              @click="handleAccountSelection(account)"
             >
               <div class="flex justify-between items-start">
                 <div class="flex-1">
@@ -253,6 +253,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useCashFlowStore } from '@/stores/cashflow'
 import CashAccountForm from '@/components/CashAccountForm.vue'
 import CashFlowForm from '@/components/CashFlowForm.vue'
+import { showLoading, hideLoading } from '@/composables/loading.js'
 
 // Composables
 const { t } = useI18n()
@@ -288,11 +289,32 @@ const showAddCashFlowDialog = ref(false)
 const editingAccount = ref(null)
 
 // 計算屬性
-const recentCashFlows = computed(() => 
-  (cashFlows.value || []).slice(0, 5)
-)
+const recentCashFlows = computed(() => {
+  if (!cashFlows.value) return []
+  
+  // 如果有選擇的帳戶，只顯示該帳戶的現金流
+  if (selectedAccount.value) {
+    return cashFlows.value
+      .filter(flow => flow.accountId === selectedAccount.value.id)
+      .slice(0, 5)
+  }
+  
+  // 否則顯示所有現金流
+  return cashFlows.value.slice(0, 5)
+})
 
 // 方法
+const handleAccountSelection = async (account) => {
+  try {
+    showLoading()
+    setSelectedAccount(account)
+    // 獲取選中帳戶的現金流
+    await fetchCashFlows({ accountId: account.id, limit: 10 })
+  } finally {
+    hideLoading()
+  }
+}
+
 const editAccount = (account) => {
   editingAccount.value = { ...account }
   showAddAccountDialog.value = true
