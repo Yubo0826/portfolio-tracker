@@ -19,8 +19,8 @@
       </div>
     </div>
 
-    <!-- 現金總覽卡片 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- 現金總覽卡片（只顯示總資金和帳戶數量） -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <!-- 總現金餘額 -->
       <Card>
         <template #content>
@@ -37,24 +37,6 @@
           </div>
         </template>
       </Card>
-
-      <!-- 按貨幣顯示餘額 -->
-      <Card v-for="(balance, currency) in balanceByCurrency" :key="currency">
-        <template #content>
-          <div class="flex items-center">
-            <div class="bg-green-100 dark:bg-green-900/30 rounded-full p-3 mr-4">
-              <i class="pi pi-dollar text-green-600 dark:text-green-400 text-xl"></i>
-            </div>
-            <div>
-              <div class="text-sm text-gray-600 dark:text-gray-400">{{ currency }}</div>
-              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {{ currency === 'TWD' ? 'NT$' : '$' }}{{ balance.toLocaleString() }}
-              </div>
-            </div>
-          </div>
-        </template>
-      </Card>
-
       <!-- 帳戶數量 -->
       <Card>
         <template #content>
@@ -71,143 +53,147 @@
       </Card>
     </div>
 
-    <!-- 現金帳戶管理 -->
+    <!-- 新版現金帳戶管理區塊：左側卡片+帳戶列表，右側現金流列表 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- 現金帳戶 -->
-      <Card>
-        <template #header>
-          <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cashFlow.accounts') }}</h2>
-            <Button 
-              icon="pi pi-refresh" 
-              text 
-              rounded 
-              @click="fetchCashAccounts" 
-              :loading="isLoading"
-            />
-          </div>
-        </template>
-        <template #content>
-          <div v-if="isLoading" class="text-center py-4">
-            <ProgressSpinner />
-          </div>
-          <div v-else-if="cashAccounts.length === 0" class="text-center py-8">
-            <i class="pi pi-wallet text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.noAccounts') }}</p>
-            <Button 
-              :label="$t('cashFlow.createFirstAccount')"
-              class="mt-4"
-              @click="showAddAccountDialog = true"
-            />
-          </div>
-          <div v-else class="space-y-3">
-            <div 
-              v-for="account in cashAccounts" 
-              :key="account.id"
-              class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200 hover:shadow-md"
-              :class="{ 
-                'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm': selectedAccount?.id === account.id,
-                'bg-white dark:bg-gray-900': selectedAccount?.id !== account.id
-              }"
-              @click="handleAccountSelection(account)"
-            >
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ account.name }}</h3>
-                    <Tag 
-                      :value="account.currency" 
-                      severity="info" 
-                      class="text-xs"
-                    />
-                    <Tag 
-                      v-if="!account.isActive" 
-                      value="停用" 
-                      severity="warning" 
-                      class="text-xs"
-                    />
-                  </div>
-                  <p v-if="account.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {{ account.description }}
-                  </p>
-                  <div class="text-lg font-bold mt-2" :class="account.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                    {{ account.currency === 'TWD' ? 'NT$' : '$' }}{{ account.balance.toLocaleString() }}
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <Button 
-                    icon="pi pi-pencil" 
-                    text 
-                    rounded 
-                    size="small"
-                    @click.stop="editAccount(account)"
-                  />
-                  <Button 
-                    icon="pi pi-trash" 
-                    text 
-                    rounded 
-                    severity="danger"
-                    size="small"
-                    @click.stop="confirmDeleteAccount(account)"
-                  />
-                </div>
-              </div>
+      <!-- 左半邊：卡片+帳戶列表 -->
+      <div class="space-y-6">
+        <!-- 卡片（總資金和帳戶數量）已在上方顯示 -->
+        <Card>
+          <template #header>
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cashFlow.accounts') }}</h2>
+              <Button 
+                icon="pi pi-refresh" 
+                text 
+                rounded 
+                @click="fetchCashAccounts" 
+                :loading="isLoading"
+              />
             </div>
-          </div>
-        </template>
-      </Card>
-
-      <!-- 最近現金流 -->
-      <Card>
-        <template #header>
-          <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cashFlow.recentFlows') }}</h2>
-            <Button 
-              :label="$t('cashFlow.viewAll')"
-              text 
-              @click="$router.push('/cash-flows')"
-            />
-          </div>
-        </template>
-        <template #content>
-          <div v-if="isLoading" class="text-center py-4">
-            <ProgressSpinner />
-          </div>
-          <div v-else-if="recentCashFlows.length === 0" class="text-center py-8">
-            <i class="pi pi-clock text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.noRecentFlows') }}</p>
-          </div>
-          <div v-else class="space-y-3">
-            <div 
-              v-for="flow in recentCashFlows" 
-              :key="flow.id"
-              class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
-            >
-              <div class="flex items-center gap-3">
-                <div 
-                  class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs"
-                  :class="flow.amount > 0 ? 'bg-green-500 dark:bg-green-600' : 'bg-red-500 dark:bg-red-600'"
-                >
-                  <i :class="flow.amount > 0 ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
-                </div>
-                <div>
-                  <div class="font-medium text-gray-900 dark:text-gray-100">{{ getCashFlowTypeLabel(flow.type) }}</div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">{{ flow.description }}</div>
-                  <div class="text-xs text-gray-400 dark:text-gray-500">
-                    {{ formatDate(flow.createdAt) }}
-                  </div>
-                </div>
-              </div>
+          </template>
+          <template #content>
+            <div v-if="isLoading" class="text-center py-4">
+              <ProgressSpinner />
+            </div>
+            <div v-else-if="cashAccounts.length === 0" class="text-center py-8">
+              <i class="pi pi-wallet text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.noAccounts') }}</p>
+              <Button 
+                :label="$t('cashFlow.createFirstAccount')"
+                class="mt-4"
+                @click="showAddAccountDialog = true"
+              />
+            </div>
+            <div v-else class="space-y-3">
               <div 
-                class="font-semibold text-lg"
-                :class="flow.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                v-for="account in cashAccounts" 
+                :key="account.id"
+                class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200 hover:shadow-md"
+                :class="{ 
+                  'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm': selectedAccount?.id === account.id,
+                  'bg-white dark:bg-gray-900': selectedAccount?.id !== account.id
+                }"
+                @click="handleAccountSelection(account)"
               >
-                {{ flow.amount > 0 ? '+' : '' }}${{ Math.abs(flow.amount).toLocaleString() }}
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ account.name }}</h3>
+                      <Tag 
+                        :value="account.currency" 
+                        severity="info" 
+                        class="text-xs"
+                      />
+                      <Tag 
+                        v-if="!account.isActive" 
+                        value="停用" 
+                        severity="warning" 
+                        class="text-xs"
+                      />
+                    </div>
+                    <p v-if="account.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {{ account.description }}
+                    </p>
+                    <div class="text-lg font-bold mt-2" :class="account.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                      {{ account.currency === 'TWD' ? 'NT$' : '$' }}{{ account.balance.toLocaleString() }}
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <Button 
+                      icon="pi pi-pencil" 
+                      text 
+                      rounded 
+                      size="small"
+                      @click.stop="editAccount(account)"
+                    />
+                    <Button 
+                      icon="pi pi-trash" 
+                      text 
+                      rounded 
+                      severity="danger"
+                      size="small"
+                      @click.stop="confirmDeleteAccount(account)"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </Card>
+          </template>
+        </Card>
+      </div>
+      <!-- 右半邊：現金流列表 -->
+      <div>
+        <Card>
+          <template #header>
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cashFlow.recentFlows') }}</h2>
+              <Button 
+                :label="$t('cashFlow.viewAll')"
+                text 
+                @click="$router.push('/cash-flows')"
+              />
+            </div>
+          </template>
+          <template #content>
+            <div v-if="isLoading" class="text-center py-4">
+              <ProgressSpinner />
+            </div>
+            <div v-else-if="recentCashFlows.length === 0" class="text-center py-8">
+              <i class="pi pi-clock text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+              <p class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.noRecentFlows') }}</p>
+            </div>
+            <div v-else class="space-y-3">
+              <div 
+                v-for="flow in recentCashFlows" 
+                :key="flow.id"
+                class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+              >
+                <div class="flex items-center gap-3">
+                  <div 
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs"
+                    :class="flow.amount > 0 ? 'bg-green-500 dark:bg-green-600' : 'bg-red-500 dark:bg-red-600'"
+                  >
+                    <i :class="flow.amount > 0 ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ getCashFlowTypeLabel(flow.type) }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ flow.description }}</div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500">
+                      {{ formatDate(flow.createdAt) }}
+                    </div>
+                  </div>
+                </div>
+                <div 
+                  class="font-semibold text-lg"
+                  :class="flow.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                >
+                  {{ flow.amount > 0 ? '+' : '' }}${{ Math.abs(flow.amount).toLocaleString() }}
+                </div>
+              </div>
+            </div>
+          </template>
+        </Card>
+      </div>
     </div>
 
     <!-- 對話框 -->

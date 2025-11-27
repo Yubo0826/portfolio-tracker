@@ -10,6 +10,16 @@
       @click="$router.push('/dashboard')"
     />
 
+    <!-- Cash Flow (standalone) -->
+    <Button
+      :label="t('cashFlow.title')"
+      severity="secondary"
+      variant="text"
+      class="font-bold m-1"
+      :style="{ color: isActive('/cash-flow') ? 'var(--p-primary-color)' : '' }"
+      @click="$router.push('/cash-flow')"
+    />
+
     <!-- User Guide -->
     <!-- <Button
       :label="t('userGuide')"
@@ -167,7 +177,6 @@ const portfolioItems = computed(() => [
   { label: t('holdings'), command: () => router.push('/portfolio/holdings') },
   { label: t('transactions'), command: () => router.push('/portfolio/transactions') },
   { label: t('dividends'), command: () => router.push('/portfolio/dividends') },
-  { label: t('cashFlow.title'), command: () => router.push('/cash-flow') },
   { separator: true }
 ])
 

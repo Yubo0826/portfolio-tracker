@@ -33,6 +33,22 @@
     </template>
 
     <div class="mb-4">
+      <label for="accountId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {{ $t('cashFlow.account') }}
+      </label>
+      <Select
+        id="accountId"
+        v-model="form.accountId"
+        :options="activeAccounts"
+        optionLabel="name"
+        optionValue="id"
+        :placeholder="$t('cashFlow.selectAccount')"
+        class="w-full"
+        showClear
+      />
+    </div>
+
+    <div class="mb-4">
       <label for="symbol" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         {{ $t('symbol') }} <span class="text-red-500">*</span>
       </label>
@@ -142,6 +158,7 @@ import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
+import { useCashFlowStore } from '@/stores/cashflow';
 import * as toast from '@/composables/toast';
 import { useI18n } from 'vue-i18n';
 
@@ -161,6 +178,8 @@ const emit = defineEmits(['update:modelValue', 'saved']);
 
 const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
+const cashFlowStore = useCashFlowStore();
+const { activeAccounts } = cashFlowStore;
 
 const transactionType = ref([
   { name: t('buy'), code: 'buy' },
@@ -195,6 +214,7 @@ const emptyForm = () => ({
   price: null,
   fee: 0,
   operation: 'buy',
+  accountId: null,
 });
 
 const form = ref(emptyForm());
