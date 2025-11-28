@@ -42,9 +42,21 @@
       </Column>
       <!-- <Column field="name" sortable :header="$t('name')" /> -->
       <Column field="shares" sortable :header="$t('shares')" />
-      <Column field="totalCost" sortable :header="$t('totalCost')" />
-      <Column field="currentPrice" sortable :header="$t('currentPrice')" />
-      <Column field="currentValue" sortable :header="$t('currentValue')" />
+      <Column field="totalCost" sortable :header="$t('totalCost')">
+        <template #body="{ data }">
+          {{ formatAmount(data.totalCost) }}
+        </template>
+      </Column>
+      <Column field="currentPrice" sortable :header="$t('currentPrice')">
+        <template #body="{ data }">
+          {{ formatPrice(data.currentPrice) }}
+        </template>
+      </Column>
+      <Column field="currentValue" sortable :header="$t('currentValue')">
+        <template #body="{ data }">
+          {{ formatAmount(data.currentValue) }}
+        </template>
+      </Column>
       <Column field="totalProfit" sortable :header="$t('totalProfit')">
         <template #body="{ data }">
           <div
@@ -54,7 +66,7 @@
             }"
           >
             <span class="font-bold mr-4 whitespace-nowrap">
-              {{ data.totalProfit > 0 ? '+' : '-' }} {{ Math.abs(data.totalProfit).toFixed(2) }}
+              {{ formatChange(data.totalProfit) }}
             </span>
             <div class="flex items-center gap-1">
               <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
@@ -87,6 +99,9 @@ const auth = useAuthStore();
 
 import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore();
+
+import { useCurrency } from '@/composables/useCurrency';
+const { formatAmount, formatChange, formatPrice } = useCurrency();
 
 const selectedHoldings = ref([]);
 

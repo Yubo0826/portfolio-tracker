@@ -31,7 +31,7 @@
             <div>
               <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('cashFlow.totalBalance') }}</div>
               <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                ${{ totalCashBalance.toLocaleString() }}
+                {{ formatAmount(totalCashBalance) }}
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@
                       {{ account.description }}
                     </p>
                     <div class="text-lg font-bold mt-2" :class="account.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                      {{ account.currency === 'TWD' ? 'NT$' : '$' }}{{ account.balance.toLocaleString() }}
+                      {{ formatAmount(account.balance) }}
                     </div>
                   </div>
                   <div class="flex gap-2">
@@ -183,7 +183,7 @@
                   class="font-semibold text-lg"
                   :class="flow.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
                 >
-                  {{ flow.amount > 0 ? '+' : '' }}${{ Math.abs(flow.amount).toLocaleString() }}
+                  {{ formatChange(flow.amount) }}
                 </div>
               </div>
             </div>
@@ -238,6 +238,7 @@ import { useCashFlowStore } from '@/stores/cashflow'
 import CashAccountForm from '@/components/CashAccountForm.vue'
 import CashFlowForm from '@/components/CashFlowForm.vue'
 import { showLoading, hideLoading } from '@/composables/loading.js'
+import { useCurrency } from '@/composables/useCurrency'
 
 import { useAuthStore } from '@/stores/auth';
 const auth = useAuthStore();
@@ -246,6 +247,7 @@ const auth = useAuthStore();
 const { t } = useI18n()
 const confirm = useConfirm()
 const cashFlowStore = useCashFlowStore()
+const { formatAmount, formatChange } = useCurrency()
 
 // Destructure store with storeToRefs for reactivity
 const {

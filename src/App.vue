@@ -21,6 +21,20 @@
 
           <!-- 功能按鈕區 -->
           <div class="flex justify-center items-center flex-wrap gap-1 sm:gap-2">
+            <!-- Currency Toggle -->
+            <Button
+              class="p-button-rounded p-button-text"
+              aria-label="Toggle Currency"
+              @click="toggleCurrency"
+              v-tooltip.bottom="currencyTooltip"
+              size="small"
+            >
+              <div class="flex items-center gap-1 font-medium text-sm">
+                <i class="pi pi-sync" style="font-size: 0.85rem"></i>
+                <span>{{ displayCurrency }}</span>
+              </div>
+            </Button>
+
             <Button
               class="p-button-rounded p-button-text"
               aria-label="Search"
@@ -36,11 +50,7 @@
               size="small"
             />
 
-            <div 
-              @mouseenter="showLanguageMenu" 
-              @mouseleave="hideLanguageMenu"
-              class="relative"
-            >
+            <div class="relative">
               <Button
                 ref="languageButton"
                 class="p-button-rounded p-button-text"
@@ -54,8 +64,6 @@
                 :model="languageMenuItems"
                 :popup="true"
                 class="language-menu"
-                @mouseenter="cancelHide"
-                @mouseleave="hideLanguageMenu"
               />
             </div>
 
@@ -222,6 +230,29 @@ const transactionsStore = useTransactionsStore()
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark, toggleTheme } = useTheme()
 
+// Currency settings
+import { useSettingsStore } from '@/stores/settings'
+import { storeToRefs } from 'pinia'
+const settingsStore = useSettingsStore()
+const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
+
+const toggleCurrency = () => {
+  settingsStore.toggleCurrency()
+}
+
+const currencyTooltip = computed(() => {
+  if (displayCurrency.value === 'TWD') {
+    const rate = exchangeRate.value.toFixed(2)
+    return `1 USD = ${rate} TWD`
+  }
+  return t('currency.clickToSwitch', 'Click to switch currency')
+})
+
+// Fetch exchange rate on mount
+onMounted(() => {
+  settingsStore.fetchExchangeRate()
+})
+
 watch(() => auth.user, async (newUser) => {
   if (newUser) {
     showLoading(t('loadingUserData'))
@@ -283,39 +314,6 @@ const onLanguageChange = (event) => {
 
 const languageMenu = ref()
 const languageButton = ref()
-let hideTimeout = null
-
-const showLanguageMenu = () => {
-  if (hideTimeout) {
-    clearTimeout(hideTimeout)
-    hideTimeout = null
-  }
-  // 使用按鈕的實際 DOM 元素
-  const buttonElement = languageButton.value?.$el || languageButton.value
-  if (buttonElement) {
-    // 創建一個模擬的點擊事件
-    const mockEvent = {
-      currentTarget: buttonElement,
-      target: buttonElement,
-      preventDefault: () => {},
-      stopPropagation: () => {}
-    }
-    languageMenu.value?.show(mockEvent)
-  }
-}
-
-const hideLanguageMenu = () => {
-  hideTimeout = setTimeout(() => {
-    languageMenu.value?.hide()
-  }, 200)
-}
-
-const cancelHide = () => {
-  if (hideTimeout) {
-    clearTimeout(hideTimeout)
-    hideTimeout = null
-  }
-}
 
 const toggleLanguageMenu = (event) => {
   languageMenu.value?.toggle(event)

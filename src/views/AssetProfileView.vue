@@ -26,7 +26,7 @@
               <div>
                 <div class="flex items-center justify-between">
                   <div class="flex items-center mb-2">
-                      <div class="text-3xl font-bold mr-4">${{ info.regularMarketPrice }}</div>
+                      <div class="text-3xl font-bold mr-4">{{ formatPrice(info.regularMarketPrice) }}</div>
                       <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
                         <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center text-lg">
                           <!-- 變化數值 -->
@@ -34,7 +34,7 @@
                             <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
                             <i v-else class="pi pi-sort-down-fill"></i>
                           </span>
-                          <span class="font-semibold mr-4">{{ Math.abs(change.toFixed(2)) }}</span>
+                          <span class="font-semibold mr-4">{{ formatChange(change) }}</span>
                           (
                             <!-- 變化%數 -->
                             <span v-if="growthRate >= 0">+</span>
@@ -148,11 +148,11 @@
                   </div>
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
                     <span>單日股價範圍</span>
-                    <span class="font-semibold">${{ info.regularMarketDayLow }} - ${{ info.regularMarketDayHigh }}</span>
+                    <span class="font-semibold">{{ formatPrice(info.regularMarketDayLow) }} - {{ formatPrice(info.regularMarketDayHigh) }}</span>
                   </div>
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
                     <span>一年股價範圍</span>
-                    <span class="font-semibold">${{ info.fiftyTwoWeekLow }} - ${{ info.fiftyTwoWeekHigh }}</span>
+                    <span class="font-semibold">{{ formatPrice(info.fiftyTwoWeekLow) }} - {{ formatPrice(info.fiftyTwoWeekHigh) }}</span>
                   </div>
                   <div class="flex justify-between border-b border-gray-300 py-4 px-0">
                     <span>今日交易量</span>
@@ -185,9 +185,12 @@ import SelectButton from 'primevue/selectbutton'
 import api from '@/utils/api'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
 import { Tag } from 'primevue';
+import { useCurrency } from '@/composables/useCurrency'
 
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark } = useTheme()
+
+const { formatPrice, formatChange } = useCurrency()
 
 const route  = useRoute()
 const symbol = computed(() => route.params.symbol)

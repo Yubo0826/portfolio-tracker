@@ -30,8 +30,16 @@
         </template>
       </Column>
       <Column field="shares" sortable :header="$t('shares')" />
-      <Column field="amount" sortable :header="$t('dividendPerShare')" />
-      <Column field="totalAmount" sortable :header="$t('dividendTotal')" />
+      <Column field="amount" sortable :header="$t('dividendPerShare')">
+        <template #body="{ data }">
+          {{ formatPrice(data.amount) }}
+        </template>
+      </Column>
+      <Column field="totalAmount" sortable :header="$t('dividendTotal')">
+        <template #body="{ data }">
+          {{ formatAmount(data.totalAmount) }}
+        </template>
+      </Column>
       <Column field="date" sortable :header="$t('date')" />
 
       <template #empty>
@@ -45,12 +53,15 @@
 import { onMounted, ref, watch } from 'vue';
 import api from '../utils/api.js';
 import NoData from '@/components/NoData.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
 import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore()
+
+const { formatAmount, formatPrice } = useCurrency();
 
 const isLoading = ref(false);
 const dividends = ref([]);

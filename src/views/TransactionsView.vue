@@ -47,8 +47,16 @@
         </template>
       </Column>
       <Column field="shares" sortable :header="$t('shares')" />
-      <Column field="price" sortable :header="$t('price')" />
-      <Column field="fee" sortable :header="$t('fee')" />
+      <Column field="price" sortable :header="$t('price')">
+        <template #body="{ data }">
+          {{ formatPrice(data.price) }}
+        </template>
+      </Column>
+      <Column field="fee" sortable :header="$t('fee')">
+        <template #body="{ data }">
+          {{ formatAmount(data.fee) }}
+        </template>
+      </Column>
       <Column field="" sortable :header="$t('operation')">
         <template #body="slotProps">
           <div>
@@ -95,6 +103,7 @@ import TransactionDialog from '@/components/TransactionDialog.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
+import { useCurrency } from '@/composables/useCurrency';
 const portfolioStore = usePortfolioStore();
 
 import NoData from '@/components/NoData.vue';
@@ -102,6 +111,7 @@ import NoData from '@/components/NoData.vue';
 const store = useTransactionsStore();
 const auth = useAuthStore();
 const toast = useToast();
+const { formatAmount, formatPrice } = useCurrency();
 
 const dialogVisible = ref(false);
 const editingId = ref(null);

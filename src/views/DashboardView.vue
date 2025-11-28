@@ -21,14 +21,14 @@
             <template #content>
               <div class="flex justify-between items-center mt-2">
                 <div v-if="totalValue" class="text-2xl font-bold">
-                  ${{ totalValue.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                  {{ formatAmount(totalValue) }}
                 </div>
                 <div v-else class="text-2xl font-bold">--</div>
               </div>
             </template>
             <template #footer>
               <div class="text-sm mt-2 sm:mt-4">
-                {{ $t('baseCurrency', { code: 'USD' }) }}
+                {{ $t('baseCurrency', { code: currencySymbol }) }}
               </div>
             </template>
           </Card>
@@ -47,7 +47,7 @@
             <template #content>
               <div class="flex justify-between items-center mt-2">
                 <div v-if="totalProfit" class="text-2xl font-bold">
-                  ${{ totalProfit.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                  {{ formatAmount(totalProfit) }}
                 </div>
                 <div v-else class="text-2xl font-bold">--</div>
               </div>
@@ -213,7 +213,7 @@
                     </span>
                   </div>
                   <div class="text-right font-medium">
-                    {{ formatUSD(r.amount) }}
+                    {{ formatAmount(r.amount, { maximumFractionDigits: 0 }) }}
                   </div>
                 </div>
               </div>
@@ -243,21 +243,21 @@
 
           <Column field="currentPrice" :header="$t('currentPrice')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">${{ data.currentPrice.toFixed(2) }}</span>
+              <span class="font-bold mr-4">{{ formatPrice(data.currentPrice) }}</span>
             </template>
           </Column>
 
           <Column field="shares" :header="$t('shares')" sortable />
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">${{ data.totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
-              <div class="text-sm text-[var(--p-card-subtitle-color)]">{{ data.avgCost.toFixed(2) }} {{ $t('perShare') }}</div>
+              <span class="font-bold mr-4">{{ formatAmount(data.totalCost) }}</span>
+              <div class="text-sm text-[var(--p-card-subtitle-color)]">{{ formatPrice(data.avgCost) }} {{ $t('perShare') }}</div>
             </template>
           </Column>
 
           <Column field="currentValue" :header="$t('totalValue')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">${{ data.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
+              <span class="font-bold mr-4">{{ formatAmount(data.currentValue) }}</span>
               <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
                 <div class="flex items-center gap-1 font-bold text-sm">
                   <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
@@ -310,6 +310,7 @@ import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import NoData from '@/components/NoData.vue'
+import { useCurrency } from '@/composables/useCurrency'
 
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark } = useTheme()
@@ -318,6 +319,9 @@ const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
+
+// Currency formatting
+const { formatAmount, formatChange, formatPrice, currencySymbol } = useCurrency()
 
 /* =========================
  *  State
@@ -359,13 +363,7 @@ const change = ref(0)
 /* =========================
  *  Utils / Formatters
  * =======================*/
-function formatUSD(n) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
-  }).format(n)
-}
+// formatUSD now uses useCurrency composable (formatAmount)
 function formatDate(date) {
   return date.toISOString().split('T')[0]
 }

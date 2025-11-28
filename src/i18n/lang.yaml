@@ -995,3 +995,24 @@ common:
   update:
     en: Update
     zh: 更新
+
+# 幣別切換
+currency:
+  usd:
+    en: USD
+    zh: 美元
+  twd:
+    en: TWD
+    zh: 台幣
+  toggle:
+    en: Toggle Currency
+    zh: 切換幣別
+  clickToSwitch:
+    en: Click to switch currency
+    zh: 點擊切換幣別
+  rateInfo:
+    en: "Exchange rate: 1 USD = {rate} TWD"
+    zh: "匯率：1 美元 = {rate} 台幣"
+  lastUpdated:
+    en: "Last updated: {time}"
+    zh: "最後更新：{time}"

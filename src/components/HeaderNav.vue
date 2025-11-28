@@ -58,7 +58,7 @@
         :model="portfolioItems"
         popup
         class="custom-menu"
-        @mouseenter="openHoverMenu('portfolioMenu', $event)"
+        @mouseenter="keepMenuOpen('portfolioMenu')"
         @mouseleave="closeHoverMenu('portfolioMenu')"
       >
         <template #item="{ item, props }">
@@ -106,7 +106,7 @@
         :model="toolItems"
         popup
         class="custom-menu"
-        @mouseenter="openHoverMenu('toolMenu', $event)"
+        @mouseenter="keepMenuOpen('toolMenu')"
         @mouseleave="closeHoverMenu('toolMenu')"
       >
         <template #item="{ item, props }">
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Menu from 'primevue/menu'
 import Button from 'primevue/button'
@@ -145,9 +145,13 @@ const route = useRoute()
 const { t } = useI18n()
 
 const portfolioStore = usePortfolioStore()
+
 const portfolioMenu = ref()
 const toolMenu = ref()
 const hoverTimeout = ref(null)
+
+// 保存觸發按鈕的事件，用於正確定位 Menu
+const menuTriggerEvent = ref(null)
 
 const openHoverMenu = (menuName, event) => {
   clearTimeout(hoverTimeout.value)
@@ -155,11 +159,19 @@ const openHoverMenu = (menuName, event) => {
   portfolioMenu.value?.hide()
   toolMenu.value?.hide()
 
+  // 保存原始事件用於定位
+  menuTriggerEvent.value = event
+
   if (menuName === 'portfolioMenu') {
     portfolioMenu.value.show(event)
   } else if (menuName === 'toolMenu') {
     toolMenu.value.show(event)
   }
+}
+
+// 滑鼠進入 Menu 時只取消關閉計時器，不重新定位
+const keepMenuOpen = (menuName) => {
+  clearTimeout(hoverTimeout.value)
 }
 
 const closeHoverMenu = (menuName) => {
