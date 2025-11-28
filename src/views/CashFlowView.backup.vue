@@ -14,7 +14,7 @@
           :label="$t('cashFlow.addCashFlow')"
           severity="secondary"
           @click="showAddCashFlowDialog = true"
-          :disabled="activeAccounts.length === 0"
+          :disabled="cashAccounts.length === 0"
         />
       </div>
     </div>
@@ -75,12 +75,12 @@
         </template>
         <template #content>
           <div class="flex justify-between items-center mt-2">
-            <div class="text-2xl font-bold">{{ activeAccounts.length }}</div>
+            <div class="text-2xl font-bold">{{ cashAccounts.length }}</div>
           </div>
         </template>
         <template #footer>
           <div class="text-sm mt-2 opacity-75">
-            {{ $t('cashFlow.activeAccounts') }}
+            {{ $t('cashFlow.accounts') }}
           </div>
         </template>
       </Card>
@@ -133,12 +133,6 @@
                     <Tag 
                       :value="account.currency" 
                       severity="info" 
-                      class="text-xs"
-                    />
-                    <Tag 
-                      v-if="!account.isActive" 
-                      value="停用" 
-                      severity="warning" 
                       class="text-xs"
                     />
                   </div>
@@ -247,7 +241,7 @@
       :style="{ width: '600px' }"
     >
       <CashFlowForm 
-        :accounts="activeAccounts"
+        :accounts="cashAccounts"
         @save="handleSaveCashFlow"
         @cancel="showAddCashFlowDialog = false"
       />
@@ -279,8 +273,7 @@ const {
   isLoading,
   selectedAccount,
   totalCashBalance,
-  balanceByCurrency,
-  activeAccounts
+  balanceByCurrency
 } = storeToRefs(cashFlowStore)
 
 // Store actions (these don't need storeToRefs)

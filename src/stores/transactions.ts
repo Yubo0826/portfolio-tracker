@@ -5,6 +5,7 @@ import api from '@/utils/api.js'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useHoldingsStore } from '@/stores/holdings'
+import { useCashFlowStore } from '@/stores/cashflow'
 
 interface TransactionData {
   id: string
@@ -17,6 +18,7 @@ interface TransactionData {
   transaction_type: string
   transaction_date?: string
   date?: string
+  cash_account_id?: string | null
 }
 
 interface Transaction {
@@ -29,6 +31,7 @@ interface Transaction {
   shares: number
   transactionType: string
   date: string
+  accountId?: string | null
 }
 
 interface TransactionForm {
@@ -40,6 +43,7 @@ interface TransactionForm {
   price: number
   operation: string
   date: Date | string
+  accountId?: string | null  // 現金帳戶 ID（選填）
 }
 
 interface BulkTransactionForm {
@@ -51,6 +55,7 @@ interface BulkTransactionForm {
   price: number
   transactionType: string
   date: Date | string
+  accountId?: string | null  // 現金帳戶 ID（選填）
 }
 
 interface SaveTransactionParams {
@@ -82,6 +87,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       shares: parseInt(String(item.shares)) || 0,
       transactionType: item.transaction_type,
       date: item.transaction_date?.split('T')[0] || item.date || '',
+      accountId: item.cash_account_id || null,
     }))
   }
 
@@ -139,6 +145,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     const payload = {
       uid: uid.value,
       portfolio_id: customPortfolioId,
+      cash_account_id: form.accountId || null,
       symbol: String(form.symbol || '').toUpperCase(),
       name: form.name || '',
       asset_type: form.assetType || '',
@@ -163,6 +170,12 @@ export const useTransactionsStore = defineStore('transactions', () => {
     // 後端回傳最新 transactions / holdings
     if (result?.transactions) setTransactions(result.transactions)
     holdingsStore.fetchHoldings()
+    
+    // 如果有選擇現金帳戶，重新獲取帳戶資料以更新餘額
+    if (form.accountId) {
+      const cashFlowStore = useCashFlowStore()
+      await cashFlowStore.fetchCashAccounts()
+    }
 
     return result
   }
@@ -191,6 +204,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
         transaction_date: form.date instanceof Date
           ? form.date.toISOString().split('T')[0]
           : form.date, // 允許事先就是 'YYYY-MM-DD'
+        cash_account_id: form.accountId || null,
       })),
     }
 
@@ -204,6 +218,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
     if (result?.transactions) setTransactions(result.transactions)
     await holdingsStore.refreshPrices()
     await holdingsStore.fetchHoldings()
+    
+    // 如果有任何交易選擇了現金帳戶，重新獲取帳戶資料以更新餘額
+    const hasAccountId = transactions.some(t => t.accountId)
+    if (hasAccountId) {
+      const cashFlowStore = useCashFlowStore()
+      await cashFlowStore.fetchCashAccounts()
+    }
+    
     return result
   }
 

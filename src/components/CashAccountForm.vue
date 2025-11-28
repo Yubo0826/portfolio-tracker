@@ -10,7 +10,7 @@
         v-model="form.name"
         :placeholder="$t('cashFlow.accountNamePlaceholder')"
         class="w-full"
-        :class="{ 'p-invalid': errors.name }"
+        :class="errors.name ? 'p-invalid' : ''"
         required
       />
       <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
@@ -39,7 +39,7 @@
         v-model="form.balance"
         :placeholder="$t('cashFlow.initialBalancePlaceholder')"
         class="w-full"
-        :class="{ 'p-invalid': errors.balance }"
+        :class="errors.balance ? 'p-invalid' : ''"
         :minFractionDigits="2"
         :maxFractionDigits="2"
         :min="0"
@@ -53,10 +53,10 @@
       <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         {{ $t('cashFlow.accountDescription') }}
       </label>
+      <!-- :placeholder="$t('cashFlow.accountDescriptionPlaceholder')" -->
       <Textarea
         id="description"
         v-model="form.description"
-        :placeholder="$t('cashFlow.accountDescriptionPlaceholder')"
         class="w-full"
         rows="3"
         :maxlength="200"
@@ -67,7 +67,7 @@
     </div>
 
     <!-- 啟用狀態 -->
-    <div class="flex items-center">
+    <!-- <div class="flex items-center">
       <Checkbox
         id="isActive"
         v-model="form.isActive"
@@ -77,10 +77,10 @@
         {{ $t('cashFlow.activeAccount') }}
       </label>
     </div>
-    <small class="text-gray-500 dark:text-gray-400 block">{{ $t('cashFlow.activeAccountHint') }}</small>
+    <small class="text-gray-500 dark:text-gray-400 block">{{ $t('cashFlow.activeAccountHint') }}</small> -->
 
     <!-- 按鈕 -->
-    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex justify-end gap-3 pt-4 border-t">
       <Button
         type="button"
         :label="$t('common.cancel')"
@@ -99,6 +99,8 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Textarea from 'primevue/textarea'
+import Checkbox from 'primevue/checkbox'
 
 // Props & Emits
 const props = defineProps({

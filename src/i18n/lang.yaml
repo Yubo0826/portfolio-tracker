@@ -959,6 +959,12 @@ cashFlow:
     other:
       en: Other
       zh: 其他
+  buy:
+    en: Buy
+    zh: 買入
+  sell:
+    en: Sell
+    zh: 賣出
 
 # 表單驗證
 validation:

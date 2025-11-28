@@ -13,7 +13,7 @@
         optionValue="id"
         :placeholder="$t('cashFlow.selectAccountPlaceholder')"
         class="w-full"
-        :class="{ 'p-invalid': errors.accountId }"
+        :class="errors.accountId ? 'p-invalid' : ''"
         required
       >
         <template #option="slotProps">
@@ -44,7 +44,7 @@
         optionValue="value"
         :placeholder="$t('cashFlow.selectFlowType')"
         class="w-full"
-        :class="{ 'p-invalid': errors.type }"
+        :class="errors.type ? 'p-invalid' : ''"
         required
       />
       <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
@@ -68,7 +68,7 @@
           v-model="form.amount"
           :placeholder="$t('cashFlow.amountPlaceholder')"
           class="flex-1"
-          :class="{ 'p-invalid': errors.amount }"
+          :class="errors.amount ? 'p-invalid' : ''"
           :minFractionDigits="2"
           :maxFractionDigits="2"
           :min="0.01"
@@ -180,6 +180,11 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import Dropdown from 'primevue/dropdown'
+import Calendar from 'primevue/calendar'
+import Textarea from 'primevue/textarea'
+import Checkbox from 'primevue/checkbox'
 
 // Props & Emits
 const props = defineProps({
@@ -338,6 +343,9 @@ const handleSubmit = async () => {
       type: form.type,
       amount: finalAmount.value,
       description: form.description.trim(),
+      date: transactionDate.value ? 
+        new Date(transactionDate.value).toISOString().split('T')[0] : 
+        new Date().toISOString().split('T')[0],
       relatedSymbol: form.relatedSymbol?.trim() || undefined
     }
 

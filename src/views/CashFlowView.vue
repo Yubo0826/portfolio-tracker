@@ -14,7 +14,7 @@
           :label="$t('cashFlow.addCashFlow')"
           severity="secondary"
           @click="showAddCashFlowDialog = true"
-          :disabled="activeAccounts.length === 0"
+          :disabled="cashAccounts.length === 0"
         />
       </div>
     </div>
@@ -46,7 +46,7 @@
             </div>
             <div>
               <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('cashFlow.accountCount') }}</div>
-              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ activeAccounts.length }}</div>
+              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ cashAccounts.length }}</div>
             </div>
           </div>
         </template>
@@ -102,12 +102,6 @@
                       <Tag 
                         :value="account.currency" 
                         severity="info" 
-                        class="text-xs"
-                      />
-                      <Tag 
-                        v-if="!account.isActive" 
-                        value="停用" 
-                        severity="warning" 
                         class="text-xs"
                       />
                     </div>
@@ -176,7 +170,9 @@
                     <i :class="flow.amount > 0 ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
                   </div>
                   <div>
-                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ getCashFlowTypeLabel(flow.type) }}</div>
+                    <div class="font-medium text-gray-900 dark:text-gray-100">
+                      {{ getFlowDisplayLabel(flow) }}
+                    </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">{{ flow.description }}</div>
                     <div class="text-xs text-gray-400 dark:text-gray-500">
                       {{ formatDate(flow.createdAt) }}
@@ -207,7 +203,7 @@
     >
       <CashAccountForm
         :account="editingAccount"
-        @submit="handleAccountSubmit"
+        @save="handleAccountSubmit"
         @cancel="handleAccountCancel"
       />
     </Dialog>
@@ -221,7 +217,8 @@
       class="w-full max-w-lg mx-4 sm:mx-auto"
     >
       <CashFlowForm
-        @submit="handleCashFlowSubmit"
+        :accounts="cashAccounts"
+        @save="handleCashFlowSubmit"
         @cancel="handleCashFlowCancel"
       />
     </Dialog>
@@ -232,14 +229,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
+import ProgressSpinner from 'primevue/progressspinner'
 import { useCashFlowStore } from '@/stores/cashflow'
 import CashAccountForm from '@/components/CashAccountForm.vue'
 import CashFlowForm from '@/components/CashFlowForm.vue'
 import { showLoading, hideLoading } from '@/composables/loading.js'
+
+import { useAuthStore } from '@/stores/auth';
+const auth = useAuthStore();
 
 // Composables
 const { t } = useI18n()
@@ -253,8 +254,7 @@ const {
   isLoading,
   selectedAccount,
   totalCashBalance,
-  balanceByCurrency,
-  activeAccounts
+  balanceByCurrency
 } = storeToRefs(cashFlowStore)
 
 // Store actions (these don't need storeToRefs)
@@ -365,9 +365,33 @@ const formatDate = (dateString) => {
   })
 }
 
+// 獲取現金流顯示標籤（股票買賣會顯示股票代號）
+const getFlowDisplayLabel = (flow) => {
+  const baseLabel = getCashFlowTypeLabel(flow.type)
+  
+  if (flow.type === 'STOCK_BUY' && flow.relatedSymbol) {
+    return `${t('cashFlow.buy')} ${flow.relatedSymbol}`
+  }
+  if (flow.type === 'STOCK_SELL' && flow.relatedSymbol) {
+    return `${t('cashFlow.sell')} ${flow.relatedSymbol}`
+  }
+  if (flow.type === 'DIVIDEND' && flow.relatedSymbol) {
+    return `${baseLabel} (${flow.relatedSymbol})`
+  }
+  
+  return baseLabel
+}
+
 // 生命週期
 onMounted(async () => {
   await fetchCashAccounts()
   await fetchCashFlows({ limit: 10 })
+})
+
+watch(() => auth.user, async (newUser) => {
+  if (newUser) {
+    await fetchCashAccounts()
+    await fetchCashFlows({ limit: 10 })
+  }
 })
 </script>

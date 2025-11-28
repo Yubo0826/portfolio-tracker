@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import { success, error as errorToast } from '@/composables/toast'
+import { useAuthStore } from '@/stores/auth'
+import api from '@/utils/api.js'
 import type { 
   CashAccount, 
   CashFlow, 
@@ -11,103 +13,13 @@ import type {
   CashFlowType 
 } from '@/types/global'
 
-// 模擬數據
-const mockCashAccounts: CashAccount[] = [
-  {
-    id: '1',
-    name: 'Interactive Brokers',
-    currency: 'USD',
-    balance: 12500,
-    portfolioId: 'demo-portfolio',
-    description: 'US Stock Trading Account',
-    isActive: true,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-11-26T00:00:00Z'
-  },
-  {
-    id: '2',
-    name: 'TD Ameritrade',
-    currency: 'USD',
-    balance: 8300,
-    portfolioId: 'demo-portfolio',
-    description: 'Options Trading Account',
-    isActive: true,
-    createdAt: '2024-02-01T00:00:00Z',
-    updatedAt: '2024-11-25T00:00:00Z'
-  }
-]
-
-const mockCashFlows: CashFlow[] = [
-  {
-    id: '1',
-    accountId: '1',
-    portfolioId: 'demo-portfolio',
-    type: 'DEPOSIT',
-    amount: 5000,
-    description: 'Wire Transfer Deposit',
-    createdAt: '2024-11-25T09:00:00Z',
-    updatedAt: '2024-11-25T09:00:00Z'
-  },
-  {
-    id: '2',
-    accountId: '1',
-    portfolioId: 'demo-portfolio',
-    type: 'STOCK_BUY',
-    amount: -2500,
-    description: 'Buy AAPL Shares',
-    relatedSymbol: 'AAPL',
-    createdAt: '2024-11-24T14:30:00Z',
-    updatedAt: '2024-11-24T14:30:00Z'
-  },
-  {
-    id: '3',
-    accountId: '2',
-    portfolioId: 'demo-portfolio',
-    type: 'DIVIDEND',
-    amount: 320,
-    description: 'AAPL Dividend Income',
-    relatedSymbol: 'AAPL',
-    createdAt: '2024-11-23T10:00:00Z',
-    updatedAt: '2024-11-23T10:00:00Z'
-  },
-  {
-    id: '4',
-    accountId: '1',
-    portfolioId: 'demo-portfolio',
-    type: 'FEE',
-    amount: -5,
-    description: 'Trading Commission',
-    createdAt: '2024-11-24T14:30:00Z',
-    updatedAt: '2024-11-24T14:30:00Z'
-  },
-  {
-    id: '5',
-    accountId: '2',
-    portfolioId: 'demo-portfolio',
-    type: 'STOCK_SELL',
-    amount: 3500,
-    description: 'Sell TSLA Shares',
-    relatedSymbol: 'TSLA',
-    createdAt: '2024-11-22T11:00:00Z',
-    updatedAt: '2024-11-22T11:00:00Z'
-  },
-  {
-    id: '6',
-    accountId: '1',
-    portfolioId: 'demo-portfolio',
-    type: 'DIVIDEND',
-    amount: 180,
-    description: 'MSFT Dividend Income',
-    relatedSymbol: 'MSFT',
-    createdAt: '2024-11-21T10:00:00Z',
-    updatedAt: '2024-11-21T10:00:00Z'
-  }
-]
-
 export const useCashFlowStore = defineStore('cashflow', () => {
+  // Get auth store for uid
+  const authStore = useAuthStore()
+  
   // State
-  const cashAccounts: Ref<CashAccount[]> = ref([...mockCashAccounts])
-  const cashFlows: Ref<CashFlow[]> = ref([...mockCashFlows])
+  const cashAccounts: Ref<CashAccount[]> = ref([])
+  const cashFlows: Ref<CashFlow[]> = ref([])
   const isLoading: Ref<boolean> = ref(false)
   const selectedAccount: Ref<CashAccount | null> = ref(null)
 
@@ -128,27 +40,38 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     return balances
   })
 
-  // 啟用的現金帳戶
-  const activeAccounts: ComputedRef<CashAccount[]> = computed(() => 
-    cashAccounts.value.filter(account => account.isActive)
-  )
-
   // === 現金帳戶管理 ===
 
   // 獲取現金帳戶列表
   const fetchCashAccounts = async (): Promise<void> => {
-    // 使用模擬數據，不調用API
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
+      }
       
-      cashAccounts.value = [...mockCashAccounts]
+      const response = await api.get(`/api/cash-accounts?uid=${uid}`)
+
+      console.log('Fetched cash accounts:', response)
       
-      // 如果沒有選擇的帳戶且有可用帳戶，選擇第一個啟用的帳戶
-      if (!selectedAccount.value && activeAccounts.value.length > 0) {
-        selectedAccount.value = activeAccounts.value[0]
+      // 將後端格式轉換為前端格式
+      cashAccounts.value = response.accounts.map((account: any) => ({
+        id: account.id.toString(),
+        name: account.name,
+        currency: account.currency,
+        balance: parseFloat(account.balance),
+        portfolioId: account.portfolio_id?.toString() || '',
+        description: account.description || '',
+        createdAt: account.created_at,
+        updatedAt: account.updated_at
+      }))
+      
+      // 如果沒有選擇的帳戶且有可用帳戶，選擇第一個帳戶
+      if (!selectedAccount.value && cashAccounts.value.length > 0) {
+        selectedAccount.value = cashAccounts.value[0]
       }
     } catch (error) {
       console.error('Error fetching cash accounts:', error)
@@ -163,19 +86,32 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
+      }
+
+      console.log('Adding cash account:', account)
       
-      const newAccount: CashAccount = {
-        id: Date.now().toString(),
+      const response = await api.post('/api/cash-accounts', {
+        uid,
         name: account.name,
-        currency: account.currency,
         balance: account.balance || 0,
-        portfolioId: 'demo-portfolio',
-        description: account.description,
-        isActive: account.isActive ?? true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        currency: account.currency,
+        description: account.description || ''
+      })
+      
+      // 將新增的帳戶加入列表
+      const newAccount: CashAccount = {
+        id: response.account.id.toString(),
+        name: response.account.name,
+        currency: response.account.currency,
+        balance: parseFloat(response.account.balance),
+        portfolioId: response.account.portfolio_id?.toString() || '',
+        description: response.account.description || '',
+        createdAt: response.account.created_at,
+        updatedAt: response.account.updated_at
       }
       
       cashAccounts.value.push(newAccount)
@@ -193,19 +129,32 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
+      }
       
+      const response = await api.put(`/api/cash-accounts/${account.id}`, {
+        uid,
+        name: account.name,
+        balance: account.balance || 0,
+        currency: account.currency,
+        description: account.description || ''
+      })
+      
+      // 更新本地數據
       const index = cashAccounts.value.findIndex(a => a.id === account.id)
       if (index !== -1) {
         cashAccounts.value[index] = {
-          ...cashAccounts.value[index],
-          name: account.name,
-          currency: account.currency,
-          balance: account.balance || 0,
-          description: account.description,
-          isActive: account.isActive ?? true,
-          updatedAt: new Date().toISOString()
+          id: response.account.id.toString(),
+          name: response.account.name,
+          currency: response.account.currency,
+          balance: parseFloat(response.account.balance),
+          portfolioId: response.account.portfolio_id?.toString() || '',
+          description: response.account.description || '',
+          createdAt: response.account.created_at,
+          updatedAt: response.account.updated_at
         }
       }
       
@@ -223,27 +172,41 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
+      }
       
       const index = cashAccounts.value.findIndex(a => a.id === accountId)
-      if (index !== -1) {
-        const accountName = cashAccounts.value[index].name
-        cashAccounts.value.splice(index, 1)
-        
-        // 刪除相關的現金流記錄
-        cashFlows.value = cashFlows.value.filter(cf => cf.accountId !== accountId)
-        
-        // 如果刪除的是選中的帳戶，重新選擇
-        if (selectedAccount.value?.id === accountId) {
-          selectedAccount.value = activeAccounts.value[0] || null
-        }
-        
-        success('成功', `現金帳戶 "${accountName}" 已刪除`)
+      if (index === -1) {
+        errorToast('錯誤', '找不到指定的帳戶')
+        return
       }
-    } catch (error) {
+      
+      const accountName = cashAccounts.value[index].name
+      
+      await api.delete(`/api/cash-accounts/${accountId}?uid=${uid}`)
+      
+      // 從本地列表移除
+      cashAccounts.value.splice(index, 1)
+      
+      // 同時移除相關的現金流記錄
+      cashFlows.value = cashFlows.value.filter(cf => cf.accountId !== accountId)
+      
+      // 如果刪除的是選中的帳戶，重新選擇
+      if (selectedAccount.value?.id === accountId) {
+        selectedAccount.value = cashAccounts.value[0] || null
+      }
+      
+      success('成功', `現金帳戶 "${accountName}" 已刪除`)
+    } catch (error: any) {
       console.error('Error deleting cash account:', error)
-      errorToast('錯誤', '刪除現金帳戶失敗')
+      if (error.message?.includes('existing cash flow records')) {
+        errorToast('錯誤', '此帳戶有相關現金流記錄，無法刪除')
+      } else {
+        errorToast('錯誤', '刪除現金帳戶失敗')
+      }
     } finally {
       isLoading.value = false
     }
@@ -251,33 +214,74 @@ export const useCashFlowStore = defineStore('cashflow', () => {
 
   // === 現金流管理 ===
 
+  // 後端到前端的現金流類型對照
+  const mapBackendFlowType = (backendType: string): CashFlowType => {
+    const typeMap: Record<string, CashFlowType> = {
+      'salary': 'DEPOSIT',
+      'transfer': 'TRANSFER_IN',
+      'exchange': 'ADJUSTMENT',
+      'stock_buy': 'STOCK_BUY',
+      'stock_sell': 'STOCK_SELL',
+      'dividend': 'DIVIDEND',
+      'other': 'OTHER'
+    }
+    return typeMap[backendType] || 'OTHER'
+  }
+
+  // 前端到後端的現金流類型對照
+  const mapFrontendFlowType = (frontendType: CashFlowType): string => {
+    const typeMap: Record<CashFlowType, string> = {
+      'DEPOSIT': 'salary',
+      'WITHDRAWAL': 'other',
+      'STOCK_BUY': 'stock_buy',
+      'STOCK_SELL': 'stock_sell',
+      'DIVIDEND': 'dividend',
+      'FEE': 'other',
+      'TRANSFER_IN': 'transfer',
+      'TRANSFER_OUT': 'transfer',
+      'ADJUSTMENT': 'exchange',
+      'OTHER': 'other'
+    }
+    return typeMap[frontendType] || 'other'
+  }
+
   // 獲取現金流記錄
   const fetchCashFlows = async (query?: CashFlowQuery): Promise<void> => {
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      let filteredFlows = [...mockCashFlows]
-      
-      if (query) {
-        if (query.accountId) {
-          filteredFlows = filteredFlows.filter(cf => cf.accountId === query.accountId)
-        }
-        if (query.type) {
-          filteredFlows = filteredFlows.filter(cf => cf.type === query.type)
-        }
-        if (query.limit) {
-          filteredFlows = filteredFlows.slice(0, query.limit)
-        }
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
       }
       
-      // 按時間排序（最新的在前）
-      filteredFlows.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      // 組裝查詢參數
+      const params = new URLSearchParams({ uid })
+      if (query?.accountId) params.append('account_id', query.accountId)
+      if (query?.type) params.append('flow_type', mapFrontendFlowType(query.type))
+      if (query?.startDate) params.append('start_date', query.startDate)
+      if (query?.endDate) params.append('end_date', query.endDate)
+      if (query?.limit) params.append('limit', query.limit.toString())
+      if (query?.offset) params.append('page', ((query.offset / (query.limit || 50)) + 1).toString())
       
-      // 不再清空，直接更新資料
-      cashFlows.value = filteredFlows
+      const response = await api.get(`/api/cash-flows?${params.toString()}`)
+      
+      // 將後端格式轉換為前端格式
+      cashFlows.value = response.cashFlows.map((flow: any) => ({
+        id: flow.id.toString(),
+        accountId: flow.account_id.toString(),
+        portfolioId: flow.portfolio_id?.toString() || '',
+        type: mapBackendFlowType(flow.flow_type),
+        amount: parseFloat(flow.amount),
+        description: flow.description,
+        relatedTransactionId: flow.related_transaction_id?.toString(),
+        relatedSymbol: flow.related_symbol,
+        createdAt: flow.created_at,
+        updatedAt: flow.updated_at
+      }))
+
+      console.log('Fetched cash flows:', cashFlows.value)
     } catch (error) {
       console.error('Error fetching cash flows:', error)
       errorToast('錯誤', '獲取現金流記錄失敗')
@@ -291,28 +295,54 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
+      }
+
+      // 驗證 accountId
+      if (!cashFlow.accountId) {
+        errorToast('錯誤', '請選擇現金帳戶')
+        return
+      }
+
+      console.log('addCashFlow input:', cashFlow)
       
-      const newCashFlow: CashFlow = {
-        id: Date.now().toString(),
-        accountId: cashFlow.accountId,
-        portfolioId: 'demo-portfolio',
-        type: cashFlow.type,
+      const payload = {
+        uid,
+        account_id: parseInt(cashFlow.accountId),
+        portfolio_id: null, // 可選，如需要可從其他地方獲取
         amount: cashFlow.amount,
+        flow_type: mapFrontendFlowType(cashFlow.type),
         description: cashFlow.description,
-        relatedTransactionId: cashFlow.relatedTransactionId,
-        relatedSymbol: cashFlow.relatedSymbol,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        date: cashFlow.date || new Date().toISOString().split('T')[0] // YYYY-MM-DD 格式
+      }
+
+      console.log('addCashFlow payload:', payload)
+      
+      const response = await api.post('/api/cash-flows', payload)
+      
+      // 將新增的現金流加入列表
+      const newCashFlow: CashFlow = {
+        id: response.cashFlow.id.toString(),
+        accountId: response.cashFlow.account_id.toString(),
+        portfolioId: response.cashFlow.portfolio_id?.toString() || '',
+        type: mapBackendFlowType(response.cashFlow.flow_type),
+        amount: parseFloat(response.cashFlow.amount),
+        description: response.cashFlow.description,
+        relatedTransactionId: response.cashFlow.related_transaction_id?.toString(),
+        relatedSymbol: response.cashFlow.related_symbol,
+        createdAt: response.cashFlow.created_at,
+        updatedAt: response.cashFlow.updated_at
       }
       
       cashFlows.value.unshift(newCashFlow)
       
-      // 更新對應帳戶餘額
+      // 更新對應帳戶餘額（使用後端返回的新餘額）
       const account = cashAccounts.value.find(a => a.id === cashFlow.accountId)
-      if (account) {
-        account.balance += cashFlow.amount
+      if (account && response.newBalance !== undefined) {
+        account.balance = parseFloat(response.newBalance)
         account.updatedAt = new Date().toISOString()
       }
       
@@ -331,8 +361,11 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     try {
       isLoading.value = true
       
-      // 模擬網路延遲
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const uid = authStore.user?.uid
+      if (!uid) {
+        errorToast('錯誤', '請先登入')
+        return
+      }
       
       // 先找到要刪除的現金流記錄
       const cashFlow = cashFlows.value.find(cf => cf.id === cashFlowId)
@@ -341,23 +374,29 @@ export const useCashFlowStore = defineStore('cashflow', () => {
         return
       }
       
+      const response = await api.delete(`/api/cash-flows/${cashFlowId}?uid=${uid}`)
+      
       // 從列表中移除
       const index = cashFlows.value.findIndex(cf => cf.id === cashFlowId)
       if (index !== -1) {
         cashFlows.value.splice(index, 1)
       }
       
-      // 回復帳戶餘額
+      // 更新帳戶餘額（使用後端返回的新餘額）
       const account = cashAccounts.value.find(a => a.id === cashFlow.accountId)
-      if (account) {
-        account.balance -= cashFlow.amount
+      if (account && response.newBalance !== undefined) {
+        account.balance = parseFloat(response.newBalance)
         account.updatedAt = new Date().toISOString()
       }
       
       success('成功', '現金流記錄已刪除')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting cash flow:', error)
-      errorToast('錯誤', '刪除現金流記錄失敗')
+      if (error.message?.includes('auto-generated')) {
+        errorToast('錯誤', '自動生成的記錄無法刪除，請刪除對應的交易或股利')
+      } else {
+        errorToast('錯誤', '刪除現金流記錄失敗')
+      }
     } finally {
       isLoading.value = false
     }
@@ -477,7 +516,6 @@ export const useCashFlowStore = defineStore('cashflow', () => {
     // Computed
     totalCashBalance,
     balanceByCurrency,
-    activeAccounts,
     
     // Actions - 現金帳戶
     fetchCashAccounts,

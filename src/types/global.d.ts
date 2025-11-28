@@ -21,7 +21,6 @@ export interface CashAccount {
   balance: number        // 目前餘額
   portfolioId: string    // 所屬投資組合
   description?: string   // 帳戶描述
-  isActive: boolean      // 是否啟用
   createdAt: string
   updatedAt: string
 }
@@ -72,6 +71,7 @@ export interface NewCashFlow {
   type: CashFlowType
   amount: number
   description: string
+  date?: string  // YYYY-MM-DD 格式
   relatedTransactionId?: string
   relatedSymbol?: string
 }

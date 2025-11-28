@@ -39,7 +39,7 @@
       <Select
         id="accountId"
         v-model="form.accountId"
-        :options="activeAccounts"
+        :options="cashAccounts"
         optionLabel="name"
         optionValue="id"
         :placeholder="$t('cashFlow.selectAccount')"
@@ -155,6 +155,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -179,7 +180,7 @@ const emit = defineEmits(['update:modelValue', 'saved']);
 const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
 const cashFlowStore = useCashFlowStore();
-const { activeAccounts } = cashFlowStore;
+const { cashAccounts } = storeToRefs(cashFlowStore);
 
 const transactionType = ref([
   { name: t('buy'), code: 'buy' },
@@ -271,6 +272,7 @@ const loadEditing = () => {
     price: item.price,
     fee: item.fee,
     operation: item.transactionType,
+    accountId: item.accountId || null,
   };
 };
 
@@ -296,6 +298,7 @@ watch(
       price: newForm.price,
       fee: newForm.fee,
       operation: newForm.transactionType,
+      accountId: newForm.accountId || null,
     }
   }
 );
