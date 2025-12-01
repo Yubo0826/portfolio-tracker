@@ -937,6 +937,12 @@ cashFlow:
   insufficientBalance:
     en: Insufficient balance
     zh: 餘額不足
+  income: 
+    en: Income +
+    zh: 收入 +
+  expense:
+    en: Expense -
+    zh: 支出 -
   types:
     deposit:
       en: Deposit
