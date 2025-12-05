@@ -17,6 +17,7 @@
                 icon="pi pi-bars"
                 class="hamburger-btn lg:hidden"
                 size="small"
+                variant="outlined"
               />
             </span>
 
@@ -204,176 +205,7 @@
   <PortfolioFormDialog :visible="dialogVisible" @update:visible="dialogVisible = $event" />
 
   <!-- Mobile Sidebar -->
-  <Drawer v-model:visible="sidebarVisible">
-    <template #container="{ closeCallback }">
-      <div class="flex flex-col h-full">
-        <!-- Header -->
-        <div class="flex items-center justify-between px-6 pt-4 pb-2 shrink-0">
-          <span class="inline-flex items-center gap-2">
-            <span class="text-2xl font-bold">
-              <span class="text-gray-500">Stock</span>
-              <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
-            </span>
-          </span>
-          <span>
-            <Button type="button" @click="closeCallback" icon="pi pi-times" rounded variant="outlined"></Button>
-          </span>
-        </div>
-
-        <!-- Scrollable Navigation -->
-        <div class="overflow-y-auto">
-          <ul class="list-none p-4 m-0">
-            <!-- Main Navigation -->
-            <li>
-              <router-link
-                v-ripple
-                to="/dashboard"
-                @click="sidebarVisible = false"
-                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                :class="isActive('/dashboard') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-              >
-                <i class="pi pi-home mr-2"></i>
-                <span class="font-medium">{{ $t('dashboard') }}</span>
-              </router-link>
-            </li>
-            <li>
-              <router-link
-                v-ripple
-                to="/cash-flow"
-                @click="sidebarVisible = false"
-                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                :class="isActive('/cash-flow') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-              >
-                <i class="pi pi-credit-card mr-2"></i>
-                <span class="font-medium">{{ $t('cashFlow.title') }}</span>
-              </router-link>
-            </li>
-          </ul>
-
-          <!-- Portfolio Section -->
-          <ul class="list-none p-4 m-0">
-            <li>
-              <div class="p-4 flex items-center justify-between text-surface-500 dark:text-surface-400 cursor-default">
-                <span class="font-medium uppercase text-xs tracking-wider">{{ $t('portfolio') }}</span>
-              </div>
-              <ul class="list-none p-0 m-0 overflow-hidden">
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/portfolio/holdings"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/portfolio/holdings') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-briefcase mr-2"></i>
-                    <span class="font-medium">{{ $t('holdings') }}</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/portfolio/transactions"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/portfolio/transactions') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-list mr-2"></i>
-                    <span class="font-medium">{{ $t('transactions') }}</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/portfolio/dividends"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/portfolio/dividends') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-dollar mr-2"></i>
-                    <span class="font-medium">{{ $t('dividends') }}</span>
-                  </router-link>
-                </li>
-              </ul>
-            </li>
-          </ul>
-
-          <!-- Functions Section -->
-          <ul class="list-none p-4 m-0">
-            <li>
-              <div class="p-4 flex items-center justify-between text-surface-500 dark:text-surface-400 cursor-default">
-                <span class="font-medium uppercase text-xs tracking-wider">{{ $t('functions') }}</span>
-              </div>
-              <ul class="list-none p-0 m-0 overflow-hidden">
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/allocation"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/allocation') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-chart-pie mr-2"></i>
-                    <span class="font-medium">{{ $t('setTargets') }}</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/rebalancing"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/rebalancing') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-sliders-h mr-2"></i>
-                    <span class="font-medium">{{ $t('rebalance') }}</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/backtesting"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/backtesting') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-history mr-2"></i>
-                    <span class="font-medium">{{ $t('backtesting') }}</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    v-ripple
-                    to="/portfolios"
-                    @click="sidebarVisible = false"
-                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-                    :class="isActive('/portfolios') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-                  >
-                    <i class="pi pi-folder mr-2"></i>
-                    <span class="font-medium">{{ $t('portfolios') }}</span>
-                  </router-link>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-auto">
-          <hr class="mb-4 mx-4 border-t border-0 border-surface-200 dark:border-surface-700" />
-          <router-link
-            v-ripple
-            to="/user-settings"
-            @click="sidebarVisible = false"
-            class="m-4 flex items-center cursor-pointer p-4 gap-2 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
-            :class="isActive('/user-settings') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
-          >
-            <i class="pi pi-cog"></i>
-            <span class="font-bold">{{ $t('settings') }}</span>
-          </router-link>
-        </div>
-      </div>
-    </template>
-  </Drawer>
+  <MobileSidebar v-model:visible="sidebarVisible" />
 </template>
 
 <script setup>
@@ -388,13 +220,12 @@ import Avatar from 'primevue/avatar'
 import Menu from 'primevue/menu'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
-import Drawer from 'primevue/drawer'
-import Ripple from 'primevue/ripple'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
 import HeaderNav from './components/HeaderNav.vue'
+import MobileSidebar from './components/MobileSidebar.vue'
 import Footer from './components/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
@@ -409,7 +240,7 @@ const dialogVisible = ref(false)
 const importDataDialogVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
-const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios'].includes(route.name))
+const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide'].includes(route.name))
 const auth = useAuthStore()
 const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
@@ -525,11 +356,6 @@ const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'reb
 
 // Mobile sidebar state
 const sidebarVisible = ref(false)
-
-// Helper function to check if route is active
-const isActive = (path) => {
-  return route.path === path || route.path.startsWith(path + '/')
-}
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')

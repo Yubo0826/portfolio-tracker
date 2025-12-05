@@ -1,7 +1,7 @@
 <template>
   <!-- px-4 sm:px-6 lg:px-8 -->
   <div class="container mx-auto mt-4 max-w-screen-xl">
-    <!-- 左右兩欄：桌機並排，小螢幕上下堆疊 -->
+    <!-- 左右兩欄 -->
     <div class="flex flex-col lg:flex-row gap-6">
 
       <!-- 左半邊（統計卡 + 走勢圖） -->
@@ -9,7 +9,7 @@
         
         <!-- 三張統計卡 -->
         <!-- grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 -->
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Total Value -->
           <Card class="rounded-xl shadow-md">
             <template #title>

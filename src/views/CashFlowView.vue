@@ -25,12 +25,12 @@
       <Card>
         <template #content>
           <div class="flex items-center">
-            <div class="bg-blue-100 dark:bg-blue-900/30 rounded-full p-3 mr-4">
-              <i class="pi pi-wallet text-blue-600 dark:text-blue-400 text-xl"></i>
+            <div class="rounded-full p-3 mr-4">
+              <i class="pi pi-wallet text-blue-600 text-xl"></i>
             </div>
             <div>
-              <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('cashFlow.totalBalance') }}</div>
-              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <div class="text-sm">{{ $t('cashFlow.totalBalance') }}</div>
+              <div class="text-2xl font-bold">
                 {{ formatAmount(totalCashBalance) }}
               </div>
             </div>
@@ -41,12 +41,12 @@
       <Card>
         <template #content>
           <div class="flex items-center">
-            <div class="bg-purple-100 dark:bg-purple-900/30 rounded-full p-3 mr-4">
-              <i class="pi pi-building text-purple-600 dark:text-purple-400 text-xl"></i>
+            <div class="rounded-full p-3 mr-4">
+              <i class="pi pi-building text-purple-600 text-xl"></i>
             </div>
             <div>
-              <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('cashFlow.accountCount') }}</div>
-              <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ cashAccounts.length }}</div>
+              <div class="text-sm">{{ $t('cashFlow.accountCount') }}</div>
+              <div class="text-2xl font-bold">{{ cashAccounts.length }}</div>
             </div>
           </div>
         </template>
@@ -60,8 +60,8 @@
         <!-- 卡片（總資金和帳戶數量）已在上方顯示 -->
         <Card>
           <template #header>
-            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cashFlow.accounts') }}</h2>
+            <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
+              <h2 class="text-xl font-semibold">{{ $t('cashFlow.accounts') }}</h2>
               <Button 
                 icon="pi pi-refresh" 
                 text 
@@ -76,8 +76,8 @@
               <ProgressSpinner />
             </div>
             <div v-else-if="cashAccounts.length === 0" class="text-center py-8">
-              <i class="pi pi-wallet text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-              <p class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.noAccounts') }}</p>
+              <i class="pi pi-wallet text-6xl text-surface-400 mb-4"></i>
+              <p class="text-surface-600">{{ $t('cashFlow.noAccounts') }}</p>
               <Button 
                 :label="$t('cashFlow.createFirstAccount')"
                 class="mt-4"
@@ -88,27 +88,27 @@
               <div 
                 v-for="account in cashAccounts" 
                 :key="account.id"
-                class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200 hover:shadow-md"
+                class="border border-[var(--p-overlay-modal-border-color)] rounded-lg p-4 hover:bg-surface-50 cursor-pointer transition-all duration-200 hover:shadow-md"
                 :class="{ 
-                  'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm': selectedAccount?.id === account.id,
-                  'bg-white dark:bg-gray-900': selectedAccount?.id !== account.id
+                  'border-primary bg-primary-50 shadow-sm': selectedAccount?.id === account.id,
+                  'bg-surface-0': selectedAccount?.id !== account.id
                 }"
                 @click="handleAccountSelection(account)"
               >
                 <div class="flex justify-between items-start">
                   <div class="flex-1">
                     <div class="flex items-center gap-2">
-                      <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ account.name }}</h3>
+                      <h3 class="font-semibold text-surface-900">{{ account.name }}</h3>
                       <Tag 
                         :value="account.currency" 
                         severity="info" 
                         class="text-xs"
                       />
                     </div>
-                    <p v-if="account.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p v-if="account.description" class="text-sm text-surface-600 mt-1">
                       {{ account.description }}
                     </p>
-                    <div class="text-lg font-bold mt-2" :class="account.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    <div class="text-lg font-bold mt-2" :class="account.balance >= 0 ? 'text-green-600' : 'text-red-600'">
                       {{ formatAmount(account.balance) }}
                     </div>
                   </div>
@@ -139,8 +139,8 @@
       <div>
         <Card>
           <template #header>
-            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $t('cashFlow.recentFlows') }}</h2>
+            <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
+              <h2 class="text-xl font-semibold text-surface-900">{{ $t('cashFlow.recentFlows') }}</h2>
               <Button 
                 :label="$t('cashFlow.viewAll')"
                 text 
@@ -153,35 +153,35 @@
               <ProgressSpinner />
             </div>
             <div v-else-if="recentCashFlows.length === 0" class="text-center py-8">
-              <i class="pi pi-clock text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-              <p class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.noRecentFlows') }}</p>
+              <i class="pi pi-clock text-6xl text-surface-400 mb-4"></i>
+              <p class="text-surface-600">{{ $t('cashFlow.noRecentFlows') }}</p>
             </div>
             <div v-else class="space-y-3">
               <div 
                 v-for="flow in recentCashFlows" 
                 :key="flow.id"
-                class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                class="flex justify-between items-center py-2 border-b border-[var(--p-overlay-modal-border-color)] last:border-0"
               >
                 <div class="flex items-center gap-3">
                   <div 
                     class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs"
-                    :class="flow.amount > 0 ? 'bg-green-500 dark:bg-green-600' : 'bg-red-500 dark:bg-red-600'"
+                    :class="flow.amount > 0 ? 'bg-green-500' : 'bg-red-500'"
                   >
                     <i :class="flow.amount > 0 ? 'pi pi-arrow-down' : 'pi pi-arrow-up'"></i>
                   </div>
                   <div>
-                    <div class="font-medium text-gray-900 dark:text-gray-100">
+                    <div class="font-medium text-surface-900">
                       {{ getFlowDisplayLabel(flow) }}
                     </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">{{ flow.description }}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500">
+                    <div class="text-sm text-surface-600">{{ flow.description }}</div>
+                    <div class="text-xs text-surface-500">
                       {{ formatDate(flow.createdAt) }}
                     </div>
                   </div>
                 </div>
                 <div 
                   class="font-semibold text-lg"
-                  :class="flow.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                  :class="flow.amount > 0 ? 'text-green-600' : 'text-red-600'"
                 >
                   {{ formatChange(flow.amount) }}
                 </div>

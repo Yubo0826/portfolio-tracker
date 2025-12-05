@@ -792,6 +792,9 @@ dataAccuracyTip:
   zh: 為了確保數據準確，請務必在每次交易後確實更新「交易記錄」。系統的所有計算 (成本、損益、XIRR) 皆依賴於準確的交易資料。
 
 # 現金流管理
+cashFlowNav:
+  en: Cash Flow
+  zh: 現金流
 cashFlow:
   title:
     en: Cash Flow Management

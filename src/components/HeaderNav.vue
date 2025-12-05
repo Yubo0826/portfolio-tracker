@@ -12,7 +12,7 @@
 
     <!-- Cash Flow (standalone) -->
     <Button
-      :label="t('cashFlow.title')"
+      :label="t('cashFlowNav')"
       severity="secondary"
       variant="text"
       class="font-bold m-1"

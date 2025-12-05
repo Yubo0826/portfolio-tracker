@@ -33,13 +33,13 @@ export default definePreset(Aura, {
             focusBackground: '{zinc.700}',
             color: '{zinc.900}',
             focusColor: '{zinc.900}',
+            borderColor: '{zinc.300}'
           },
           surface: {
               // background: '#ffffff',
               // background: '#e2e8f6',
               background: '#f1f5f9',
               card: '#ffffff',
-              border: `1px solid var(--p-surface-borderColor)`,
               0: '#ffffff',
               50: '{zinc.50}',
               100: '{zinc.100}',
@@ -67,7 +67,8 @@ export default definePreset(Aura, {
             background: '#141f34',
             focusBackground: 'rgba(250, 250, 250, .24)',
             color: 'rgba(255,255,255,.87)',
-            focusColor: 'rgba(255,255,255,.87)'
+            focusColor: 'rgba(255,255,255,.87)',
+            borderColor: '#444454'
           },
           surface: {
             // background: '#272732',
