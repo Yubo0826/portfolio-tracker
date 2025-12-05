@@ -14,7 +14,8 @@ import api from '@/utils/api.js'
 interface UserData {
   uid: string
   email: string
-  displayName: string
+  displayName: string,
+  photoURL?: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -32,7 +33,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = {
         uid: result.user.uid,
         email: result.user.email || '',
-        displayName: result.user.displayName || ''
+        displayName: result.user.displayName || '',
+        photoURL: result.user.photoURL || ''
       }
       saveUserData()
       console.log('登入成功', user.value.email)
@@ -55,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
       const userData: UserData = {
         uid: user.value.uid,
         email: user.value.email,
-        displayName: user.value.displayName
+        displayName: user.value.displayName,
       }
 
       api.post('/api/user', userData)
@@ -74,7 +76,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = {
         uid: currentUser.uid,
         email: currentUser.email || '',
-        displayName: currentUser.displayName || ''
+        displayName: currentUser.displayName || '',
+        photoURL: currentUser.photoURL || ''
       }
     } else {
       user.value = {
