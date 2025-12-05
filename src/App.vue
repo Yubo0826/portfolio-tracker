@@ -6,21 +6,34 @@
     <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
     <div class="w-full flex-grow mx-auto p-4 max-w-screen-xl">
       <!-- Header -->
-      <header class="px-4 mb-4">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <!-- Logo -->
-          <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer whitespace-nowrap">
-            <span class="text-gray-500">Stock</span>
-            <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+      <header class="px-2 sm:px-4 mb-4">
+        <div class="flex justify-between items-center gap-2 sm:gap-3 py-2">
+          <!-- Left: Hamburger Menu (Mobile) + Logo -->
+          <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Hamburger Toggle Button - Mobile Only -->
+            <span class="lg:hidden">
+              <Button
+                @click="sidebarVisible = true"
+                icon="pi pi-bars"
+                class="hamburger-btn lg:hidden"
+                size="small"
+              />
+            </span>
+
+            <!-- Logo -->
+            <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
+              <span class="text-gray-500">Stock</span>
+              <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+            </div>
           </div>
 
-          <!-- 導覽列 -->
-          <div class="flex items-center justify-center flex-wrap gap-2 sm:gap-4">
+          <!-- 導覽列 - Hidden on mobile, shown on lg+ -->
+          <div class="hidden lg:flex items-center justify-center flex-wrap gap-2 sm:gap-4">
             <HeaderNav />
           </div>
 
-          <!-- 功能按鈕區 -->
-          <div class="flex justify-center items-center flex-wrap gap-1 sm:gap-2">
+          <!-- 右上功能按鈕區 -->
+          <div class="flex justify-center items-center flex-wrap gap-1">
             <!-- Currency Toggle -->
             <Button
               class="p-button-rounded p-button-text"
@@ -29,9 +42,9 @@
               v-tooltip.bottom="currencyTooltip"
               size="small"
             >
-              <div class="flex items-center gap-1 font-medium text-sm">
-                <i class="pi pi-sync" style="font-size: 0.85rem"></i>
-                <span>{{ displayCurrency }}</span>
+              <div class="flex items-center gap-1 font-medium text-xs sm:text-sm">
+                <i class="pi pi-sync" style="font-size: 0.75rem"></i>
+                <span class="hidden sm:inline">{{ displayCurrency }}</span>
               </div>
             </Button>
 
@@ -40,6 +53,7 @@
               aria-label="Search"
               icon="pi pi-search"
               @click="searchBoxVisible = true"
+              size="small"
             />
 
             <Button
@@ -69,7 +83,7 @@
 
             
             <template v-if="auth.user.uid !== 'demo-user'">
-              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
+              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer" size="normal" />
               <Menu ref="menu" :model="menuItems" :popup="true">
 
                 <template #start>
@@ -188,6 +202,178 @@
   <TransactionDialog v-model="transctionDialogVisible" />
 
   <PortfolioFormDialog :visible="dialogVisible" @update:visible="dialogVisible = $event" />
+
+  <!-- Mobile Sidebar -->
+  <Drawer v-model:visible="sidebarVisible">
+    <template #container="{ closeCallback }">
+      <div class="flex flex-col h-full">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 pt-4 pb-2 shrink-0">
+          <span class="inline-flex items-center gap-2">
+            <span class="text-2xl font-bold">
+              <span class="text-gray-500">Stock</span>
+              <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+            </span>
+          </span>
+          <span>
+            <Button type="button" @click="closeCallback" icon="pi pi-times" rounded variant="outlined"></Button>
+          </span>
+        </div>
+
+        <!-- Scrollable Navigation -->
+        <div class="overflow-y-auto">
+          <ul class="list-none p-4 m-0">
+            <!-- Main Navigation -->
+            <li>
+              <router-link
+                v-ripple
+                to="/dashboard"
+                @click="sidebarVisible = false"
+                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                :class="isActive('/dashboard') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+              >
+                <i class="pi pi-home mr-2"></i>
+                <span class="font-medium">{{ $t('dashboard') }}</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link
+                v-ripple
+                to="/cash-flow"
+                @click="sidebarVisible = false"
+                class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                :class="isActive('/cash-flow') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+              >
+                <i class="pi pi-credit-card mr-2"></i>
+                <span class="font-medium">{{ $t('cashFlow.title') }}</span>
+              </router-link>
+            </li>
+          </ul>
+
+          <!-- Portfolio Section -->
+          <ul class="list-none p-4 m-0">
+            <li>
+              <div class="p-4 flex items-center justify-between text-surface-500 dark:text-surface-400 cursor-default">
+                <span class="font-medium uppercase text-xs tracking-wider">{{ $t('portfolio') }}</span>
+              </div>
+              <ul class="list-none p-0 m-0 overflow-hidden">
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/portfolio/holdings"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/portfolio/holdings') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-briefcase mr-2"></i>
+                    <span class="font-medium">{{ $t('holdings') }}</span>
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/portfolio/transactions"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/portfolio/transactions') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-list mr-2"></i>
+                    <span class="font-medium">{{ $t('transactions') }}</span>
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/portfolio/dividends"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/portfolio/dividends') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-dollar mr-2"></i>
+                    <span class="font-medium">{{ $t('dividends') }}</span>
+                  </router-link>
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+          <!-- Functions Section -->
+          <ul class="list-none p-4 m-0">
+            <li>
+              <div class="p-4 flex items-center justify-between text-surface-500 dark:text-surface-400 cursor-default">
+                <span class="font-medium uppercase text-xs tracking-wider">{{ $t('functions') }}</span>
+              </div>
+              <ul class="list-none p-0 m-0 overflow-hidden">
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/allocation"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/allocation') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-chart-pie mr-2"></i>
+                    <span class="font-medium">{{ $t('setTargets') }}</span>
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/rebalancing"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/rebalancing') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-sliders-h mr-2"></i>
+                    <span class="font-medium">{{ $t('rebalance') }}</span>
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/backtesting"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/backtesting') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-history mr-2"></i>
+                    <span class="font-medium">{{ $t('backtesting') }}</span>
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    v-ripple
+                    to="/portfolios"
+                    @click="sidebarVisible = false"
+                    class="flex items-center cursor-pointer p-4 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+                    :class="isActive('/portfolios') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+                  >
+                    <i class="pi pi-folder mr-2"></i>
+                    <span class="font-medium">{{ $t('portfolios') }}</span>
+                  </router-link>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-auto">
+          <hr class="mb-4 mx-4 border-t border-0 border-surface-200 dark:border-surface-700" />
+          <router-link
+            v-ripple
+            to="/user-settings"
+            @click="sidebarVisible = false"
+            class="m-4 flex items-center cursor-pointer p-4 gap-2 rounded text-surface-700 hover:bg-surface-100 dark:text-surface-0 dark:hover:bg-surface-800 duration-150 transition-colors p-ripple"
+            :class="isActive('/user-settings') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''"
+          >
+            <i class="pi pi-cog"></i>
+            <span class="font-bold">{{ $t('settings') }}</span>
+          </router-link>
+        </div>
+      </div>
+    </template>
+  </Drawer>
 </template>
 
 <script setup>
@@ -202,6 +388,8 @@ import Avatar from 'primevue/avatar'
 import Menu from 'primevue/menu'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
+import Drawer from 'primevue/drawer'
+import Ripple from 'primevue/ripple'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
@@ -334,6 +522,14 @@ const toggleLanguage = () => {
 
 // 顯示新增交易按鈕列的條件: 在 portfolios, backtesting, rebalancing 頁面不顯示
 const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'rebalancing'].includes(route.name))
+
+// Mobile sidebar state
+const sidebarVisible = ref(false)
+
+// Helper function to check if route is active
+const isActive = (path) => {
+  return route.path === path || route.path.startsWith(path + '/')
+}
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
