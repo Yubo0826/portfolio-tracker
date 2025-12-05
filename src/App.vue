@@ -88,7 +88,7 @@
               <Menu ref="menu" :model="menuItems" :popup="true">
 
                 <template #start>
-                  <div class="user-info-item flex items-center p-3 border-b border-gray-200">
+                  <div class="user-info-item flex items-center p-3">
                     <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
                     <div class="flex flex-col">
                       <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
