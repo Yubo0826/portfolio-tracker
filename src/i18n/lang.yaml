@@ -313,8 +313,8 @@ targetAllocation:
   en: Target Allocation
   zh: 目標配置
 setTargets:
-  en: Set Targets
-  zh: 設定目標
+  en: Set Target Allocation
+  zh: 設定目標配置
 actualPercentage:
   en: Actual %
   zh: 實際比例
@@ -799,6 +799,9 @@ cashFlow:
   title:
     en: Cash Flow Management
     zh: 現金流管理
+  tradingAccount:
+    en: Trading Account
+    zh: 交易帳戶
   addAccount:
     en: Add Account
     zh: 新增帳戶
@@ -823,6 +826,9 @@ cashFlow:
   recentFlows:
     en: Recent Flows
     zh: 最近現金流
+  recentFlowsHint:
+    en: Records cash flows since account creation, including those affected by transactions and dividend income.
+    zh: 紀錄新增帳戶以來的現金流，也包括交易、股息收益會影響的現金流
   viewAll:
     en: View All
     zh: 查看全部
@@ -848,8 +854,8 @@ cashFlow:
     en: Currency
     zh: 貨幣
   currencyFixedHint:
-    en: All accounts use USD to match your US stock portfolio
-    zh: 所有帳戶統一使用美金，與您的美股投資組合一致
+    en: All accounts currently use USD
+    zh: 目前所有帳戶統一使用美金
   selectCurrency:
     en: Select Currency
     zh: 選擇貨幣
@@ -1025,3 +1031,7 @@ currency:
   lastUpdated:
     en: "Last updated: {time}"
     zh: "最後更新：{time}"
+
+allocationNoSettings:
+  en: No allocation settings found. Please set your target allocation first.
+  zh: 找不到資產配置設定。請先設定您的目標配置。

@@ -84,7 +84,7 @@
 
             
             <template v-if="auth.user.uid !== 'demo-user'">
-              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer" size="normal" />
+              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer ml-4" size="normal" />
               <Menu ref="menu" :model="menuItems" :popup="true">
 
                 <template #start>
