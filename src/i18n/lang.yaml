@@ -59,6 +59,18 @@ login:
 logout:
   en: Logout
   zh: 登出
+language:
+  en: Language
+  zh: 語言
+appearance:
+  en: Appearance
+  zh: 外觀
+darkMode:
+  en: Dark Mode
+  zh: 深色模式
+lightMode:
+  en: Light Mode
+  zh: 淺色模式
 
 # 股利頁欄位（更精準）
 dividendPerShare:
@@ -214,8 +226,8 @@ baseCurrency:
   en: Base currency {code}
   zh: 基準貨幣：{code}
 totalProfitHint:
-  en: Total Profit = Market Value − Total Cost
-  zh: 總收益＝總市值－總成本
+  en: Total Profit = Current Market Value − Total Cost (excluding fees)
+  zh: 總損益 = 當前市值 − 總成本（未計入手續費）
 roi:
   en: Return on Investment
   zh: 投資報酬率：
@@ -223,8 +235,8 @@ irr:
   en: IRR
   zh: IRR
 xirrHint:
-  en: Annualized return using XIRR, considering buy/sell/dividend dates and current market value.
-  zh: 使用 XIRR 計算的年化投資報酬率，考慮買進、賣出、股息發放時間與金額，以及目前市值。
+  en: Internal Rate of Return (IRR) - Annualized return considering all cash flows (buys, sells, dividends) with their exact dates and current holdings value.
+  zh: 內部報酬率 (IRR) - 考慮所有現金流（買入、賣出、股息）及其確切日期和當前持倉市值的年化報酬率。
 applyNewPortfolioImmediately:
   en: Apply new portfolio immediately
   zh: 新增後立即套用
@@ -974,6 +986,60 @@ cashFlow:
   sell:
     en: Sell
     zh: 賣出
+  allCashFlows:
+    en: All Cash Flows
+    zh: 所有現金流
+  allCashFlowsDesc:
+    en: View and manage all cash flow transactions
+    zh: 查看和管理所有現金流交易
+  backToOverview:
+    en: Back to Overview
+    zh: 返回總覽
+  allAccounts:
+    en: All Accounts
+    zh: 所有帳戶
+  allTypes:
+    en: All Types
+    zh: 所有類型
+  dateRange:
+    en: Date Range
+    zh: 日期範圍
+  selectDateRange:
+    en: Select date range
+    zh: 選擇日期範圍
+  totalIncome:
+    en: Total Income
+    zh: 總收入
+  totalExpense:
+    en: Total Expense
+    zh: 總支出
+  netCashFlow:
+    en: Net Cash Flow
+    zh: 淨現金流
+  totalRecords:
+    en: '{count} records'
+    zh: '共 {count} 筆記錄'
+  noFlowsFound:
+    en: No cash flows found
+    zh: 找不到現金流記錄
+  dateTime:
+    en: Date & Time
+    zh: 日期時間
+  balanceAfter:
+    en: Balance After
+    zh: 交易後餘額
+  viewDetail:
+    en: View Detail
+    zh: 查看詳情
+  confirmDeleteFlow:
+    en: Are you sure you want to delete this cash flow?
+    zh: 確定要刪除這筆現金流嗎？
+  deleteFlow:
+    en: Delete Cash Flow
+    zh: 刪除現金流
+  paginationTemplate:
+    en: 'Showing {first} to {last} of {totalRecords} records'
+    zh: '顯示第 {first} 到 {last} 筆，共 {totalRecords} 筆記錄'
 
 # 表單驗證
 validation:

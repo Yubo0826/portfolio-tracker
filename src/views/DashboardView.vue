@@ -529,13 +529,25 @@ const irr = computed(() => {
   if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
   const cashflows = []
 
+  // 處理交易：買入為負（現金流出），賣出為正（現金流入）
   transactionsStore.list.forEach(tx => {
-    const amount = (tx.price * tx.shares + tx.fee) * (tx.transactionType === 'buy' ? -1 : 1)
+    let amount
+    if (tx.transactionType === 'buy') {
+      // 買入：成本 = 股價 × 股數 + 手續費（現金流出，所以是負數）
+      amount = -(tx.price * tx.shares + tx.fee)
+    } else {
+      // 賣出：收入 = 股價 × 股數 - 手續費（現金流入，所以是正數）
+      amount = tx.price * tx.shares - tx.fee
+    }
     cashflows.push({ amount, when: new Date(tx.date) })
   })
+  
+  // 股息收入（現金流入，正數）
   dividends.value.forEach(d => {
     cashflows.push({ amount: parseFloat(d.totalAmount), when: new Date(d.date) })
   })
+  
+  // 當前持倉市值（視為今日賣出的收入，正數）
   cashflows.push({ amount: holdingsStore.list.reduce((s, h) => s + h.currentValue, 0), when: new Date() })
 
   try {
