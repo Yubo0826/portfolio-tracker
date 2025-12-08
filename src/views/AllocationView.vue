@@ -39,6 +39,7 @@
             <div
               class="g-group-item flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white shadow-xs transition hover:shadow-md cursor-move"
               :class="{ 'opacity-50 cursor-not-allowed': existsInAllocation(element.symbol) }"
+              v-tooltip.right="existsInAllocation(element.symbol) ? $t('in_allocation') : ''"
               >
               <!-- 拖曳圖示 + symbol -->
               <div>
@@ -49,9 +50,9 @@
                 <div class="mx-2 mb-1">
                   {{ element.symbol }}
                 </div>
-                <div v-if="existsInAllocation(element.symbol)" class="text-xs">
+                <!-- <div v-if="existsInAllocation(element.symbol)" class="text-xs">
                   （{{ $t('in_allocation') }}）
-                </div>
+                </div> -->
               </div>
               <!-- 比例 -->
               <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
