@@ -57,7 +57,7 @@
               size="small"
             />
 
-            <!-- <Button
+            <Button
               :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
               @click="toggleTheme"
               class="p-button-rounded p-button-text"
@@ -80,10 +80,11 @@
                 :popup="true"
                 class="language-menu"
               />
-            </div> -->
+            </div>
 
+            
             <template v-if="auth.user.uid !== 'demo-user'">
-              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer ml-4" size="normal" />
+              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer" size="normal" />
               <Menu ref="menu" :model="menuItems" :popup="true">
 
                 <template #start>
@@ -96,53 +97,6 @@
                   </div>
                 </template>
 
-                <template #item="{ item, props }">
-                  <!-- 語言選項 - 使用下拉式選單 -->
-                  <div 
-                    v-if="item.isLanguage" 
-                    class="language-menu-item"
-                    @click.stop="toggleLanguageSubmenu($event)"
-                  >
-                    <div class="flex items-center justify-between px-3 py-2 cursor-pointer">
-                      <div class="flex items-center gap-2">
-                        <i class="pi pi-language"></i>
-                        <span>{{ item.label }}</span>
-                      </div>
-                      <div class="flex items-center gap-2 text-sm text-gray-500">
-                        <span>{{ currentLanguageLabel }}</span>
-                        <i class="pi pi-chevron-right text-xs"></i>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- 深色模式選項 - 簡單切換按鈕 -->
-                  <div v-else-if="item.isDarkMode" class="dark-mode-menu-item">
-                    <div class="flex items-center gap-2 px-3 py-2 cursor-pointer" @click="toggleTheme">
-                      <i :class="isDark ? 'pi pi-moon' : 'pi pi-sun'"></i>
-                      <span>{{ isDark ? $t('darkMode') : $t('lightMode') }}</span>
-                    </div>
-                  </div>
-                  <!-- 一般選項 -->
-                  <a v-else class="flex items-center gap-2 px-3 py-2" v-bind="props.action">
-                    <i :class="item.icon"></i>
-                    <span>{{ item.label }}</span>
-                  </a>
-                </template>
-              </Menu>
-
-              <!-- 語言子選單 -->
-              <Menu 
-                ref="languageSubmenu" 
-                :model="languageMenuItems" 
-                :popup="true" 
-                class="language-submenu"
-              >
-                <template #item="{ item, props }">
-                  <a v-ripple class="flex items-center gap-2" v-bind="props.action">
-                    <span class="text-lg">{{ item.icon }}</span>
-                    <span>{{ item.label }}</span>
-                    <i v-if="item.isActive" class="pi pi-check ml-auto" :style="{ color: 'var(--p-primary-color)' }"></i>
-                  </a>
-                </template>
               </Menu>
             </template>
             
@@ -286,7 +240,7 @@ const dialogVisible = ref(false)
 const importDataDialogVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
-const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide', 'cash-flow', 'cash-flows'].includes(route.name))
+const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide'].includes(route.name))
 const auth = useAuthStore()
 const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
@@ -362,35 +316,33 @@ const languageOptions = [
 
 const currentLanguage = ref(locale.value)
 
-const currentLanguageLabel = computed(() => {
-  const option = languageOptions.find(opt => opt.value === currentLanguage.value)
-  return option ? option.label : '繁體中文'
-})
-
 const languageMenuItems = computed(() => 
   languageOptions.map(option => ({
-    label: option.label,
-    icon: option.flag,
-    isActive: currentLanguage.value === option.value,
-    command: () => selectLanguage(option.value)
+    label: `${option.flag} ${option.label}`,
+    command: () => selectLanguage(option.value),
+    class: currentLanguage.value === option.value ? 'active-language' : ''
   }))
 )
 
-const languageSubmenu = ref()
+const onLanguageChange = (event) => {
+  const newLocale = event.value
+  locale.value = newLocale
+  currentLanguage.value = newLocale
+  localStorage.setItem('locale', newLocale)
+}
 
-const toggleLanguageSubmenu = (event) => {
-  languageSubmenu.value?.toggle(event)
+const languageMenu = ref()
+const languageButton = ref()
+
+const toggleLanguageMenu = (event) => {
+  languageMenu.value?.toggle(event)
 }
 
 const selectLanguage = (value) => {
   locale.value = value
   currentLanguage.value = value
   localStorage.setItem('locale', value)
-  languageSubmenu.value?.hide()
-}
-
-const onThemeToggle = () => {
-  toggleTheme()
+  languageMenu.value?.hide()
 }
 
 const toggleLanguage = () => {
@@ -419,19 +371,8 @@ onMounted(() => {
 })
 
 const menu = ref()
-const toggleMenu = (event) => {
-  menu.value.toggle(event)
-}
+const toggleMenu = (event) => menu.value.toggle(event)
 const menuItems = computed(() => [
-  { separator: true },
-  { 
-    label: t('language'),
-    isLanguage: true
-  },
-  { 
-    label: isDark.value ? t('darkMode') : t('lightMode'),
-    isDarkMode: true
-  },
   { separator: true },
   { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
   { label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() },
@@ -486,50 +427,64 @@ header {
   border: 1px solid rgb(121, 121, 121) !important;
 }
 
-/* 用戶選單樣式 */
-.user-menu-dropdown {
-  min-width: 250px;
+.language-menu {
+  z-index: 1000;
 }
 
-.user-menu-dropdown :deep(.user-info-item) {
+.language-menu :deep(.active-language) {
+  color: var(--p-primary-color) !important;
+  font-weight: 600;
+}
+
+.language-menu :deep(.active-language:hover) {
+  color: var(--p-primary-color) !important;
+}
+
+/* 用戶選單頭像樣式 */
+.p-menu :deep(.user-info-item) {
   padding: 0 !important;
   margin: 0 !important;
 }
 
-.user-menu-dropdown :deep(.user-info-item):hover {
+.p-menu :deep(.user-info-item):hover {
   background: none !important;
   cursor: default !important;
 }
 
-.user-menu-dropdown :deep(.user-info-item) .p-menuitem-content {
+.p-menu :deep(.user-info-item) .p-menuitem-content {
   padding: 0 !important;
 }
 
-/* 語言選項樣式 */
-.language-menu-item {
-  position: relative;
-  transition: background-color 0.2s;
+
+/* 自訂 Primevue DataTable 排序圖示 */
+
+/* 1. 把原本的 SVG icon 藏起來 */
+.p-datatable .p-datatable-sort-icon {
+  display: none;
 }
 
-.language-menu-item:hover {
-  background-color: var(--p-surface-100);
+/* 2. 基本樣式：讓 sort 的 span 有空間顯示新 icon */
+.p-datatable th [data-pc-section="sort"]::before {
+  display: inline-block;
+  font-size: 0.75rem;
+  width: 1em;
+  text-align: center;
 }
 
-.my-app-dark .language-menu-item:hover {
-  background-color: var(--p-surface-800);
+/* 3. 未排序：不顯示任何符號 */
+.p-datatable th[aria-sort="none"] [data-pc-section="sort"]::before,
+.p-datatable th:not([aria-sort]) [data-pc-section="sort"]::before {
+  content: '';
 }
 
-/* 語言子選單樣式 */
-.language-submenu {
-  min-width: 180px;
+/* 4. 升冪 ▲ */
+.p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before {
+  content: '▲';
 }
 
-.language-submenu :deep(.p-menuitem) {
-  position: relative;
+/* 5. 降冪 ▼ */
+.p-datatable th[aria-sort="descending"] [data-pc-section="sort"]::before {
+  content: '▼';
 }
 
-/* 深色模式選項樣式 */
-.dark-mode-menu-item {
-  padding: 0;
-}
 </style>
