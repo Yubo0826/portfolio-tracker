@@ -14,7 +14,7 @@
           <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
-                <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
+                <Button icon="pi pi-wallet" rounded size="small" disabled />
                 <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
               </div>
             </template>
@@ -37,7 +37,7 @@
           <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
-                <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
+                <Button icon="pi pi-chart-line" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('totalProfit') }}
                   <i class="pi pi-question-circle" v-tooltip.bottom="$t('totalProfitHint')"></i>
@@ -67,7 +67,7 @@
           <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
-                <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
+                <Button icon="pi pi-calendar" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('irr') }}
                   <i class="pi pi-question-circle" v-tooltip.bottom="$t('xirrHint')" />
@@ -153,12 +153,14 @@
           <template #title>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
-              <Button 
-                unstyled 
-                :label="$t('setTargets')" 
+              <!-- unstyled  -->
+              <!-- :label="$t('setTargets')"  -->
+              <!-- :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" /> -->
+              <Button
                 icon="pi pi-cog"
-                 @click="$router.push('allocation')" 
-                 :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" />
+                variant="text" rounded
+                @click="$router.push('allocation')" 
+              />
             </div>
           </template>
 

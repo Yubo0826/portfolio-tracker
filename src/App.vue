@@ -7,9 +7,9 @@
     <div class="w-full flex-grow mx-auto p-4 max-w-screen-xl">
       <!-- Header -->
       <header class="px-2 sm:px-4 mb-4">
-        <div class="flex justify-between items-center gap-2 sm:gap-3 py-2">
-          <!-- Left: Hamburger Menu (Mobile) + Logo -->
-          <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex justify-between items-center gap-3 py-2">
+          <!-- Left: Logo + Portfolio Selector -->
+          <div class="flex items-center gap-3">
             <!-- Hamburger Toggle Button - Mobile Only -->
             <span class="lg:hidden">
               <Button
@@ -22,33 +22,65 @@
             </span>
 
             <!-- Logo -->
-            <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
+            <div @click="$router.push('/dashboard')" class="text-2xl sm:text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
               <span class="text-gray-500">Stock</span>
               <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
             </div>
+
+            <!-- Portfolio Selector - Desktop Only -->
+            <!-- <div v-if="!isAssetRoute" class="hidden lg:flex items-center gap-2 ml-2">
+              <span class="text-xs text-gray-500">/</span>
+              <Select
+                v-model="selectedPortfolioId"
+                size="small"
+                ref="PortfolioSelect"
+                :options="portfolioStore.portfolios"
+                optionLabel="name"
+                optionValue="id"
+                checkmark
+                :highlightOnSelect="false"
+                class="min-w-[150px]"
+              >
+                <template #header>
+                  <div class="p-3 font-bold">{{ $t('currentPortfolio') }}</div>
+                </template>
+                <template #dropdownicon>
+                  <i class="pi pi-chevron-down text-xs"></i>
+                </template>
+                <template #footer>
+                  <div class="p-3 border-t border-gray-200">
+                    <Button
+                      :label="$t('addPortfolio')"
+                      icon="pi pi-plus"
+                      @click="dialogVisible = true"
+                      fluid
+                      text
+                      size="small"
+                    />
+                  </div>
+
+                  <div class="p-3 pt-0">
+                    <Button
+                      :label="$t('portfolios')"
+                      icon="pi pi-folder"
+                      @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
+                      fluid
+                      text
+                      size="small"
+                    />
+                  </div>
+                </template>
+              </Select>
+            </div> -->
           </div>
 
-          <!-- 導覽列 - Hidden on mobile, shown on lg+ -->
-          <div class="hidden lg:flex items-center justify-center flex-wrap gap-2 sm:gap-4">
+          <!-- Center: Navigation - Hidden on mobile, shown on lg+ -->
+          <div class="hidden lg:flex items-center justify-center flex-1">
             <HeaderNav />
           </div>
 
           <!-- 右上功能按鈕區 -->
           <div class="flex justify-center items-center flex-wrap gap-1">
-            <!-- Currency Toggle -->
-            <Button
-              class="p-button-rounded p-button-text"
-              aria-label="Toggle Currency"
-              @click="toggleCurrency"
-              v-tooltip.bottom="currencyTooltip"
-              size="small"
-            >
-              <div class="flex items-center gap-1 font-medium text-xs sm:text-sm">
-                <i class="pi pi-sync" style="font-size: 0.75rem"></i>
-                <span class="hidden sm:inline">{{ displayCurrency }}</span>
-              </div>
-            </Button>
-
             <Button
               class="p-button-rounded p-button-text"
               aria-label="Search"
@@ -65,7 +97,7 @@
               size="small"
             />
 
-            <div class="relative">
+            <!-- <div class="relative">
               <Button
                 ref="languageButton"
                 class="p-button-rounded p-button-text"
@@ -80,15 +112,14 @@
                 :popup="true"
                 class="language-menu"
               />
-            </div>
+            </div> -->
 
             
-            <template v-if="auth.user.uid !== 'demo-user'">
-              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer" size="normal" />
-              <Menu ref="menu" :model="menuItems" :popup="true">
+              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer ml-2" size="normal" />
 
+              <Menu ref="menu" :model="menuItems" :popup="true">
                 <template #start>
-                  <div class="user-info-item flex items-center p-3">
+                  <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
                     <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
                     <div class="flex flex-col">
                       <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
@@ -97,32 +128,35 @@
                   </div>
                 </template>
 
+                <template #item="{ item, props }">
+                    <a v-ripple class="flex items-center" v-bind="props.action">
+                        <span :class="item.icon" />
+                        <span>{{ item.label }}</span>
+                        <!-- <Badge v-if="item.badge" class="ml-auto" :value="item.badge" /> -->
+                        <span v-if="item.value" class="ml-auto rounded bg-emphasis text-[#a1a0ab] text-xs p-1">{{ item.value }}</span>
+                    </a>
+                </template>
               </Menu>
-            </template>
-            
-            <template v-else>
-              <!-- <Avatar @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" /> -->
-            </template>
+          
           </div>
         </div>
       </header>
 
       <!-- Main Content -->
       <main class="px-2 sm:px-4">
-        <!-- Portfolio 選單 + 按鈕 -->
-        <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-3">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <div class="text-sm font-medium">{{ $t('currentPortfolio') }}</div>
+        <!-- Action Buttons Bar - Mobile and Desktop -->
+        <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+          <!-- Portfolio Selector - Mobile Only lg:hidden --> 
+          <div class="flex">
             <Select
               v-model="selectedPortfolioId"
               size="small"
-              ref="PortfolioSelect"
               :options="portfolioStore.portfolios"
               optionLabel="name"
               optionValue="id"
               checkmark
               :highlightOnSelect="false"
-              class="min-w-[180px]"
+              class="w-full"
             >
               <template #header>
                 <div class="p-3 font-bold">{{ $t('currentPortfolio') }}</div>
@@ -141,12 +175,11 @@
                     size="small"
                   />
                 </div>
-
                 <div class="p-3 pt-0">
                   <Button
                     :label="$t('portfolios')"
                     icon="pi pi-folder"
-                    @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
+                    @click="$router.push('/portfolios')"
                     fluid
                     text
                     size="small"
@@ -156,23 +189,20 @@
             </Select>
           </div>
 
-          <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
-            <div v-if="portfolioStore.portfolios.length === 0">
-              <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
-            </div>
-            <div class="flex flex-wrap gap-2 justify-end" v-else>
-              <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-              <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
-            </div>
-          </div>
-          <div v-else-if="auth.user.uid === 'demo-user'">
-            <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
-             <!-- <Button @click="auth.login" class="start-btn" data-hover="Login">
-              <div class="flex items-center gap-2">
-              {{ $t('GetStarted') }}
-                <i class="pi pi-arrow-right"></i>
+          <!-- Action Buttons -->
+          <div class="flex justify-end w-full lg:ml-auto">
+            <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
+              <div v-if="portfolioStore.portfolios.length === 0">
+                <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
               </div>
-             </Button> -->
+              <div class="flex flex-wrap gap-2" v-else>
+                <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+              </div>
+            </div>
+            <div v-else-if="auth.user.uid === 'demo-user'">
+              <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
+            </div>
           </div>
         </div>
 
@@ -240,7 +270,7 @@ const dialogVisible = ref(false)
 const importDataDialogVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
-const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide'].includes(route.name))
+const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide', 'cash-flow', 'cash-flows'].includes(route.name))
 const auth = useAuthStore()
 const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
@@ -372,11 +402,32 @@ onMounted(() => {
 
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
-const menuItems = computed(() => [
-  { separator: true },
-  { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
-  { label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() },
-])
+const menuItems = computed(() => {
+  const list =  [
+    { 
+      label: t('currency.label'),
+      icon: 'pi pi-dollar',
+      value: displayCurrency.value,
+      command: () => toggleCurrency()
+    },
+    {
+      label: t('language'),
+      icon: 'pi pi-language',
+      value: locale.value === 'en' ? 'English' : '繁體中文',
+      command: () => toggleLanguage()
+    },
+    { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
+  ]
+  if (auth.user.uid !== 'demo-user') {
+    list.unshift({ separator: true })
+    list.push({ separator: true })
+    list.push({ label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() })
+  } else {
+    list.push({ separator: true })
+    list.push({ label: t('login'), icon: 'pi pi-sign-in', command: () => auth.login() })
+  }
+  return list
+})
 </script>
 
 <style scoped>
