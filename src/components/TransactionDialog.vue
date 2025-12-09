@@ -182,7 +182,7 @@ const portfolioStore = usePortfolioStore();
 const cashFlowStore = useCashFlowStore();
 const { cashAccounts } = storeToRefs(cashFlowStore);
 
-const transactionType = ref([
+const transactionType = computed(() => [
   { name: t('buy'), code: 'buy' },
   { name: t('sell'), code: 'sell' },
 ]);

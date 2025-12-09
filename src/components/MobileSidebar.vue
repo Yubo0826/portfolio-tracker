@@ -154,7 +154,7 @@
 
         <!-- Footer -->
         <div class="mt-auto">
-          <div class="user-info-item flex items-center p-3 border-b border-gray-200">
+          <div class="user-info-item flex items-center p-5 border-b border-gray-200">
             <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
             <div class="flex flex-col">
               <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>

@@ -94,7 +94,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
               <div class="text-sm">{{ $t('assetTrend') }}</div>
 
-              <Tag :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
+              <Tag v-if="holdingsStore.list.length > 0" :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
                 <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
                   <!-- 變化數值 -->
                   <span class="mr-2">                          

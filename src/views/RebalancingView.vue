@@ -1,9 +1,10 @@
 <template>
-  <div class="p-6 min-h-90">
+  <Card class="mt-4 p-6 min-h-90">
+    <template #content>
     <h2 class="text-xl font-semibold mb-8">{{ $t('rebalanceTitle') }}</h2>
 
     <!-- 存入 / 提取 + 金額輸入 -->
-    <div class="flex justify-center items-center mb-4 gap-4">
+    <div class="flex justify-center items-center mb-8 gap-4">
       <SelectButton v-model="cashAction" :options="cashActionOptions" optionLabel="name" optionValue="code" />
       <FloatLabel variant="on">
         <InputNumber v-model="depositAmount" prefix="$" />
@@ -82,7 +83,8 @@
         @click="executeAllTransactions"
       />
     </div> -->
-  </div>
+  </template>
+</Card>
 
   <TransactionDialog v-model="transactionDialog" :formData="newTransaction" />
 </template>
@@ -270,45 +272,44 @@ function rebalanceAllocate() {
   const TOL = 0.0025; // 0.25%
 
   // -----------------------------
-  // STEP 1：處理 withdraw 情境的賣出（deposit 時完全略過）
+  // STEP 1：處理賣出（withdraw 和 deposit 都需要處理超標資產）
   // -----------------------------
-  if (isWithdraw) {
-    for (const a of assets) {
-      if (!a.currentPrice || a.currentPrice <= 0) continue;
-      // 只在顯著超標才賣
-      if (a.currentValue > a.targetValue * (1 + TOL)) {
-        const needToReduce = a.currentValue - a.targetValue;
-        const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
-        const sharesToSell = Math.min(Math.floor(needToReduce / a.currentPrice), maxSellableShares);
-        if (sharesToSell > 0) {
-          const sellValue = sharesToSell * a.currentPrice;
-          a.sharesToSell += sharesToSell;
-          a.currentValue -= sellValue;
-          a.action = 'SELL';
-          cashPool += sellValue;
-        }
+  // 先賣出超標的資產
+  for (const a of assets) {
+    if (!a.currentPrice || a.currentPrice <= 0) continue;
+    // 只在顯著超標才賣
+    if (a.currentValue > a.targetValue * (1 + TOL)) {
+      const needToReduce = a.currentValue - a.targetValue;
+      const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
+      const sharesToSell = Math.min(Math.floor(needToReduce / a.currentPrice), maxSellableShares);
+      if (sharesToSell > 0) {
+        const sellValue = sharesToSell * a.currentPrice;
+        a.sharesToSell += sharesToSell;
+        a.currentValue -= sellValue;
+        a.action = 'SELL';
+        cashPool += sellValue;
       }
     }
+  }
 
-    // 如果現金仍不足以提領 → 按比例再賣
-    if (cashPool < 0) {
-      let needMore = Math.abs(cashPool);
-      const totalValueAfterStep1 = assets.reduce((s, a) => s + a.currentValue, 0);
-      for (const a of assets) {
-        if (needMore <= 0) break;
-        if (!a.currentPrice || a.currentPrice <= 0 || a.currentValue <= 0) continue;
-        const weight = totalValueAfterStep1 > 0 ? a.currentValue / totalValueAfterStep1 : 0;
-        const sellAmount = Math.min(needMore * weight, a.currentValue);
-        const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
-        const sharesToSell = Math.min(Math.floor(sellAmount / a.currentPrice), maxSellableShares);
-        if (sharesToSell > 0) {
-          const sellValue = sharesToSell * a.currentPrice;
-          a.sharesToSell += sharesToSell;
-          a.currentValue -= sellValue;
-          a.action = 'SELL';
-          needMore -= sellValue;
-          cashPool += sellValue;
-        }
+  // 如果是 withdraw 且現金仍不足 → 按比例再賣
+  if (isWithdraw && cashPool < 0) {
+    let needMore = Math.abs(cashPool);
+    const totalValueAfterStep1 = assets.reduce((s, a) => s + a.currentValue, 0);
+    for (const a of assets) {
+      if (needMore <= 0) break;
+      if (!a.currentPrice || a.currentPrice <= 0 || a.currentValue <= 0) continue;
+      const weight = totalValueAfterStep1 > 0 ? a.currentValue / totalValueAfterStep1 : 0;
+      const sellAmount = Math.min(needMore * weight, a.currentValue);
+      const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
+      const sharesToSell = Math.min(Math.floor(sellAmount / a.currentPrice), maxSellableShares);
+      if (sharesToSell > 0) {
+        const sellValue = sharesToSell * a.currentPrice;
+        a.sharesToSell += sharesToSell;
+        a.currentValue -= sellValue;
+        a.action = 'SELL';
+        needMore -= sellValue;
+        cashPool += sellValue;
       }
     }
   }

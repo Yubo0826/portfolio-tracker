@@ -18,6 +18,7 @@
                 class="hamburger-btn lg:hidden"
                 size="small"
                 variant="outlined"
+                severity="secondary"
               />
             </span>
 
@@ -27,51 +28,6 @@
               <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
             </div>
 
-            <!-- Portfolio Selector - Desktop Only -->
-            <!-- <div v-if="!isAssetRoute" class="hidden lg:flex items-center gap-2 ml-2">
-              <span class="text-xs text-gray-500">/</span>
-              <Select
-                v-model="selectedPortfolioId"
-                size="small"
-                ref="PortfolioSelect"
-                :options="portfolioStore.portfolios"
-                optionLabel="name"
-                optionValue="id"
-                checkmark
-                :highlightOnSelect="false"
-                class="min-w-[150px]"
-              >
-                <template #header>
-                  <div class="p-3 font-bold">{{ $t('currentPortfolio') }}</div>
-                </template>
-                <template #dropdownicon>
-                  <i class="pi pi-chevron-down text-xs"></i>
-                </template>
-                <template #footer>
-                  <div class="p-3 border-t border-gray-200">
-                    <Button
-                      :label="$t('addPortfolio')"
-                      icon="pi pi-plus"
-                      @click="dialogVisible = true"
-                      fluid
-                      text
-                      size="small"
-                    />
-                  </div>
-
-                  <div class="p-3 pt-0">
-                    <Button
-                      :label="$t('portfolios')"
-                      icon="pi pi-folder"
-                      @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
-                      fluid
-                      text
-                      size="small"
-                    />
-                  </div>
-                </template>
-              </Select>
-            </div> -->
           </div>
 
           <!-- Center: Navigation - Hidden on mobile, shown on lg+ -->
@@ -159,13 +115,13 @@
               class="w-full"
             >
               <template #header>
-                <div class="p-3 font-bold">{{ $t('currentPortfolio') }}</div>
+                <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
               </template>
               <template #dropdownicon>
                 <i class="pi pi-chevron-down text-xs"></i>
               </template>
               <template #footer>
-                <div class="p-3 border-t border-gray-200">
+                <div class="p-3 border-t border-[var(--p-content-border-color)]">
                   <Button
                     :label="$t('addPortfolio')"
                     icon="pi pi-plus"
