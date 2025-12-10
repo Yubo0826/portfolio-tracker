@@ -99,7 +99,14 @@ export const useCurrency = () => {
       formatOptions
     )
 
-    return showSymbol ? `${currencySymbol.value}${formatted}` : formatted
+    if (!showSymbol) return formatted
+
+    // 處理負數：將負號放在幣別符號前面
+    if (converted < 0) {
+      return `-${currencySymbol.value}${formatted.replace('-', '')}`
+    }
+
+    return `${currencySymbol.value}${formatted}`
   }
 
   /**

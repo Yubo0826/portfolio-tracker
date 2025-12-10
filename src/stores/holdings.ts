@@ -97,6 +97,8 @@ export const useHoldingsStore = defineStore('holdings', () => {
         `/api/holdings?uid=${uid.value}&portfolio_id=${portfolioId.value}`
       )
       setHoldings(data)
+    } catch (error) {
+      console.error('Error fetching holdings:', error)
     } finally {
       isLoading.value = false
     }
@@ -162,5 +164,6 @@ export const useHoldingsStore = defineStore('holdings', () => {
     fetchHoldings,
     deleteHoldings,
     refreshPrices,
+    setHoldings // for testing purposes
   }
 })

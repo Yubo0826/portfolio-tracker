@@ -94,6 +94,7 @@ import api from '@/utils/api';
 import TransactionDialog from '@/components/TransactionDialog.vue';
 import * as toast from '@/composables/toast';
 import FloatLabel from 'primevue/floatlabel';
+import { rebalanceAllocate } from '@/utils/rebalance';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -207,203 +208,29 @@ const clickRebalance = () => {
     toast.error(t('amountGreaterThanZero'), '');
     return;
   }
-  const newAllocation = rebalanceAllocate();
-  rebalanceResult.value = newAllocation;
+
+  // 使用純函數版本的 rebalanceAllocate
+  const result = rebalanceAllocate({
+    action: cashAction.value,
+    amount: depositAmount.value,
+    totalValue: totalValue.value,
+    assets: allocation.value.map(a => ({
+      symbol: a.symbol,
+      name: a.name,
+      target: a.target,
+      shares: a.shares || 0,
+      currentPrice: a.currentPrice || 0,
+      assetType: a.assetType
+    }))
+  });
+
+  rebalanceResult.value = result.assets;
+  leftoverCash.value = result.leftoverCash;
   isRebalancing.value = true;
 
   // 把剩餘現金滾動到下一次的 deposit
   depositAmount.value = leftoverCash.value;
 };
-
-function rebalanceAllocate() {
-  const isWithdraw = cashAction.value === 'withdraw';
-
-  // --- 標準化目標權重（自動辨識是 0–1 或 0–100） ---
-  const rawTargets = allocation.value.map(a => Number(a.target) || 0);
-  const isPercent = rawTargets.some(v => v > 1.0001);
-  let weights = rawTargets.map(v => (isPercent ? v / 100 : v));
-  const wSum = weights.reduce((s, w) => s + w, 0);
-  if (wSum <= 0) {
-    // 目標全為 0 的安全防護：平均分配
-    weights = allocation.value.map(() => 1 / allocation.value.length);
-  } else {
-    weights = weights.map(w => w / wSum);
-  }
-
-  // --- 未來總資產、現金池 ---
-  const deltaCash = isWithdraw ? -Number(depositAmount.value || 0) : Number(depositAmount.value || 0);
-  const futureTotal = Math.max(totalValue.value + deltaCash, 0);
-  let cashPool = deltaCash;
-
-  // 建立工作陣列
-  const assets = allocation.value.map((a, idx) => {
-    const currentValue = (a.currentPrice || 0) * (a.shares || 0);
-    const targetValue = weights[idx] * futureTotal;
-    const actualPctBefore = totalValue.value > 0 ? currentValue / totalValue.value : 0;
-    return {
-      ...a,
-      weight: weights[idx],
-      originalShares: a.shares || 0,
-      currentValue,
-      targetValue,
-      actualPctBefore,
-      sharesToBuy: 0,
-      sharesToSell: 0,
-      amount: 0,
-      action: 'HOLD',
-      executed: false
-    };
-  });
-
-  // 邊界：總市值或 futureTotal 非正 → 不動
-  if (totalValue.value <= 0 || futureTotal <= 0) {
-    leftoverCash.value = isWithdraw ? -Number(depositAmount.value || 0) : Number(depositAmount.value || 0);
-    return assets.map(a => ({
-      ...a,
-      actualPctAfter: a.actualPctBefore,
-      amount: 0,
-      sharesToBuy: 0,
-      sharesToSell: 0,
-      action: 'HOLD'
-    }));
-  }
-
-  // 容忍閾值（避免小額噪音交易）
-  const TOL = 0.0025; // 0.25%
-
-  // -----------------------------
-  // STEP 1：處理賣出（withdraw 和 deposit 都需要處理超標資產）
-  // -----------------------------
-  // 先賣出超標的資產
-  for (const a of assets) {
-    if (!a.currentPrice || a.currentPrice <= 0) continue;
-    // 只在顯著超標才賣
-    if (a.currentValue > a.targetValue * (1 + TOL)) {
-      const needToReduce = a.currentValue - a.targetValue;
-      const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
-      const sharesToSell = Math.min(Math.floor(needToReduce / a.currentPrice), maxSellableShares);
-      if (sharesToSell > 0) {
-        const sellValue = sharesToSell * a.currentPrice;
-        a.sharesToSell += sharesToSell;
-        a.currentValue -= sellValue;
-        a.action = 'SELL';
-        cashPool += sellValue;
-      }
-    }
-  }
-
-  // 如果是 withdraw 且現金仍不足 → 按比例再賣
-  if (isWithdraw && cashPool < 0) {
-    let needMore = Math.abs(cashPool);
-    const totalValueAfterStep1 = assets.reduce((s, a) => s + a.currentValue, 0);
-    for (const a of assets) {
-      if (needMore <= 0) break;
-      if (!a.currentPrice || a.currentPrice <= 0 || a.currentValue <= 0) continue;
-      const weight = totalValueAfterStep1 > 0 ? a.currentValue / totalValueAfterStep1 : 0;
-      const sellAmount = Math.min(needMore * weight, a.currentValue);
-      const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0);
-      const sharesToSell = Math.min(Math.floor(sellAmount / a.currentPrice), maxSellableShares);
-      if (sharesToSell > 0) {
-        const sellValue = sharesToSell * a.currentPrice;
-        a.sharesToSell += sharesToSell;
-        a.currentValue -= sellValue;
-        a.action = 'SELL';
-        needMore -= sellValue;
-        cashPool += sellValue;
-      }
-    }
-  }
-
-  // -----------------------------
-  // STEP 2：買入（deposit 與 withdraw 都可能進入）
-  //   2-1 先按「缺口比例」買一輪
-  //   2-2 再用 greedy 逐股把零頭現金花掉
-  // -----------------------------
-  const underweights = () =>
-    assets.filter(a =>
-      a.currentPrice > 0 &&
-      a.currentValue < a.targetValue * (1 - TOL)
-    );
-
-  const positiveAssets = underweights();
-  const totalNeed = positiveAssets.reduce((sum, a) => sum + (a.targetValue - a.currentValue), 0);
-
-  // 2-1 比例分配
-  if (cashPool > 0 && totalNeed > 0) {
-    for (const a of positiveAssets) {
-      if (cashPool <= 0) break;
-      const need = a.targetValue - a.currentValue;
-      const weight = need / totalNeed;
-      const buyBudget = Math.min(cashPool * weight, need);
-      const sharesToBuy = Math.floor(buyBudget / a.currentPrice);
-      if (sharesToBuy > 0) {
-        const buyValue = sharesToBuy * a.currentPrice;
-        a.sharesToBuy += sharesToBuy;
-        a.currentValue += buyValue;
-        a.action = 'BUY';
-        cashPool -= buyValue;
-      }
-    }
-  }
-
-  // 2-2 greedy 逐股補（把零頭花掉）
-  //    依「缺口/股價」由大到小優先（買得起者），同分時優先便宜的
-  if (cashPool > 0) {
-    let guard = 10000; // 安全閥避免意外死循環
-    while (guard-- > 0) {
-      const candidates = underweights()
-        .filter(a => a.currentPrice <= cashPool + 1e-9);
-
-      if (!candidates.length) break;
-
-      candidates.sort((x, y) => {
-        const rx = (x.targetValue - x.currentValue) / x.currentPrice;
-        const ry = (y.targetValue - y.currentValue) / y.currentPrice;
-        if (ry !== rx) return ry - rx;     // 缺口/股價大的優先
-        return x.currentPrice - y.currentPrice; // 同分先買便宜的
-      });
-
-      const pick = candidates[0];
-      pick.sharesToBuy += 1;
-      pick.currentValue += pick.currentPrice;
-      pick.action = 'BUY';
-      cashPool -= pick.currentPrice;
-
-      // 若現金不足以買任何一檔，結束
-      const minPrice = Math.min(...underweights().map(a => a.currentPrice));
-      if (!isFinite(minPrice) || cashPool < minPrice - 1e-9) break;
-    }
-  }
-
-  // -----------------------------
-  // STEP 3：更新 actualPctAfter / amount / action
-  // -----------------------------
-  for (const a of assets) {
-    const buyValue = (a.sharesToBuy || 0) * (a.currentPrice || 0);
-    const sellValue = (a.sharesToSell || 0) * (a.currentPrice || 0);
-    const netFlow = buyValue - sellValue;
-
-    a.amount = Math.round(netFlow * 100) / 100; // 數值型（非字串）
-    a.actualPctAfter = a.currentValue / futureTotal;
-
-    if (a.sharesToBuy > 0 && a.sharesToSell > 0) {
-      a.action = netFlow > 0 ? 'BUY' : netFlow < 0 ? 'SELL' : 'HOLD';
-    } else if (a.sharesToBuy > 0) {
-      a.action = 'BUY';
-    } else if (a.sharesToSell > 0) {
-      a.action = 'SELL';
-    } else {
-      a.action = 'HOLD';
-    }
-  }
-
-  // -----------------------------
-  // STEP 4：紀錄剩餘現金（四捨五入避免 0.0000001 殘值）
-  // -----------------------------
-  leftoverCash.value = Math.round(cashPool * 100) / 100;
-
-  return assets;
-}
 
 
 // -------------------- 初始載入 --------------------
