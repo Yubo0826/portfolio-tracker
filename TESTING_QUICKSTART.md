@@ -10,6 +10,7 @@ npm run test:unit
 npm run test:unit src/stores/__tests__/
 npm run test:unit src/utils/__tests__/rebalance.spec.ts
 npm run test:unit src/composables/__tests__/useCurrency.spec.ts
+npm run test:unit src/stores/__tests__/transactions.spec.ts
 
 # Watch 模式（自動重跑）
 npm run test:watch
