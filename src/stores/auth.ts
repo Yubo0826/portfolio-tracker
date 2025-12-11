@@ -86,8 +86,6 @@ export const useAuthStore = defineStore('auth', () => {
         displayName: 'Demo User'
       }
     }
-    console.log(currentUser)
-    console.log('Auth state changed:', currentUser ? currentUser.email : 'No user logged in')
   })
 
   return { user, login, logout }

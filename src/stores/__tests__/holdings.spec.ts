@@ -4,6 +4,7 @@ import { useHoldingsStore } from '../holdings'
 import { useAuthStore } from '../auth'
 import { usePortfolioStore } from '../portfolio'
 import api from '@/utils/api'
+import { mockUser, mockPortfolio } from '@/utils/test-helpers'
 
 // Mock API module
 vi.mock('@/utils/api', () => ({
@@ -25,12 +26,8 @@ describe('Holdings Store', () => {
     const authStore = useAuthStore()
     const portfolioStore = usePortfolioStore()
     
-    authStore.user = {
-      uid: 'demo-user',
-      email: 'demo@example.com',
-      displayName: 'Demo User'
-    }
-    portfolioStore.currentPortfolio = { id: '17', name: 'Demo Portfolio ETF' }
+    authStore.user = mockUser()
+    portfolioStore.currentPortfolio = mockPortfolio()
   })
 
   describe('setHoldings', () => {

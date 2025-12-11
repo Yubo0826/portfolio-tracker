@@ -9,10 +9,9 @@ import { vi } from 'vitest'
  * Mock Firebase Auth User
  */
 export const mockUser = (overrides = {}) => ({
-  uid: 'test-user-123',
-  email: 'test@example.com',
-  displayName: 'Test User',
-  photoURL: 'https://example.com/photo.jpg',
+  uid: 'demo-user',
+  email: 'demo@example.com',
+  displayName: 'Demo User',
   ...overrides
 })
 
@@ -20,8 +19,8 @@ export const mockUser = (overrides = {}) => ({
  * Mock Portfolio
  */
 export const mockPortfolio = (overrides = {}) => ({
-  id: 'portfolio-123',
-  name: 'Test Portfolio',
+  id: '17',
+  name: 'Demo Portfolio ETF',
   user_id: 'test-user-123',
   created_at: '2024-01-01T00:00:00Z',
   ...overrides
@@ -57,6 +56,37 @@ export const mockTransaction = (overrides = {}) => ({
   transaction_type: 'buy',
   transaction_date: '2025-01-01',
   cash_account_id: null,
+  ...overrides
+})
+
+/**
+ * Mock Cash Account
+ */
+export const mockCashAccount = (overrides = {}) => ({
+  id: '1',
+  name: 'Main Account',
+  currency: 'TWD',
+  balance: '10000.00',
+  portfolio_id: 'portfolio-123',
+  description: 'Test account',
+  created_at: '2025-01-01T00:00:00Z',
+  updated_at: '2025-01-01T00:00:00Z',
+  ...overrides
+})
+
+/**
+ * Mock Cash Flow
+ */
+export const mockCashFlow = (overrides = {}) => ({
+  id: '1',
+  account_id: '1',
+  portfolio_id: 'portfolio-123',
+  flow_type: 'salary',
+  amount: '5000.00',
+  description: 'Monthly salary',
+  balance_after: '15000.00',
+  created_at: '2025-01-01T00:00:00Z',
+  updated_at: '2025-01-01T00:00:00Z',
   ...overrides
 })
 
