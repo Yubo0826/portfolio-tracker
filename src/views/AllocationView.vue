@@ -113,10 +113,10 @@
                             v-model="element.target"
                             :min="0"
                             :max="100"
+                            showButtons
                             size="small"
-                            class="w-full"
                           />
-                          <Slider v-model="element.target" class="w-full mt-4" />
+                          <!-- <Slider v-model="element.target" class="w-full mt-4" /> -->
                       </div>
                   </div>
                   
