@@ -71,6 +71,7 @@
             </div> -->
 
             
+            <!-- User Menu -->
               <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer ml-2" size="normal" />
 
               <Menu ref="menu" :model="menuItems" :popup="true">

@@ -28,7 +28,7 @@
             </template>
             <template #footer>
               <div class="text-sm mt-2 sm:mt-4">
-                {{ $t('baseCurrency', { code: currencySymbol }) }}
+                {{ $t('baseCurrency', { code: displayCurrency }) }}
               </div>
             </template>
           </Card>
@@ -312,7 +312,6 @@ import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import NoData from '@/components/NoData.vue'
-import { useCurrency } from '@/composables/useCurrency'
 
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark } = useTheme()
@@ -322,8 +321,14 @@ const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
 
-// Currency formatting
+// Currency settings
+import { useCurrency } from '@/composables/useCurrency'
 const { formatAmount, formatChange, formatPrice, currencySymbol } = useCurrency()
+
+import { useSettingsStore } from '@/stores/settings'
+import { storeToRefs } from 'pinia'
+const settingsStore = useSettingsStore()
+const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
 
 /* =========================
  *  State

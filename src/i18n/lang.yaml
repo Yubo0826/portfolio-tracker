@@ -223,7 +223,7 @@ pleaseSelectDate:
 
 # 卡片/摘要
 baseCurrency:
-  en: Base currency {code}
+  en: Base currency：{code}
   zh: 基準貨幣：{code}
 totalProfitHint:
   en: Total Profit = Current Market Value − Total Cost (excluding fees)
