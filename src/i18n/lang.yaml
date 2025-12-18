@@ -348,7 +348,7 @@ currentAsset:
   en: Asset
   zh: 持有資產
 allocationRatio:
-  en: Allocation %
+  en: Proportion
   zh: 配置比例
 perShare:
   en: / share
@@ -1104,3 +1104,6 @@ currency:
 allocationNoSettings:
   en: No allocation settings found. Please set your target allocation first.
   zh: 找不到資產配置設定。請先設定您的目標配置。
+demoUserMessage:
+  en: This is demo data. Please log in to get started!
+  zh: 此為展示資料，請登入後開始使用！

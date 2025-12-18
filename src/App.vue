@@ -104,7 +104,7 @@
         <!-- Action Buttons Bar - Mobile and Desktop -->
         <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
           <!-- Portfolio Selector - Mobile Only lg:hidden --> 
-          <div class="flex">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
             <Select
               v-model="selectedPortfolioId"
               size="small"
@@ -144,6 +144,14 @@
                 </div>
               </template>
             </Select>
+
+            <div
+              v-if="auth.user?.uid === 'demo-user'"
+              class="text-xs text-gray-400 flex items-center gap-1 whitespace-normal text-left sm:whitespace-nowrap"
+            >
+              <i class="pi pi-info-circle text-gray-400" aria-hidden="true"></i>
+              <span>{{ $t('demoUserMessage') }}</span>
+            </div>
           </div>
 
           <!-- Action Buttons -->
