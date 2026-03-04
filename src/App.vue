@@ -38,19 +38,23 @@
           <!-- 右上功能按鈕區 -->
           <div class="flex justify-center items-center flex-wrap gap-1">
             <Button
-              class="p-button-rounded p-button-text"
               aria-label="Search"
               icon="pi pi-search"
               @click="searchBoxVisible = true"
               size="small"
+              text
+              rounded
+              severity="secondary"
             />
 
             <Button
               :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
               @click="toggleTheme"
-              class="p-button-rounded p-button-text"
               aria-label="Toggle Dark Mode"
               size="small"
+              text
+              rounded
+              severity="secondary"
             />
 
             <!-- <div class="relative">
@@ -72,7 +76,22 @@
 
             
             <!-- User Menu -->
-              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="cursor-pointer ml-2" size="normal" />
+             <div 
+                class="cursor-pointer ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 p-1 transition-colors flex items-center justify-center"
+                @click="toggleMenu"
+              >
+                <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+              </div>
+              <!-- <Button
+                @click="toggleMenu"
+                class="px-1 py-1"
+                rounded
+                text
+                severity="secondary"
+                aria-label="User Menu"
+              >
+                  <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+              </Button> -->
 
               <Menu ref="menu" :model="menuItems" :popup="true">
                 <template #start>
@@ -134,7 +153,7 @@
                 </div>
                 <div class="p-3 pt-0">
                   <Button
-                    :label="$t('portfolios')"
+                    :label="$t('portfolioManagement')"
                     icon="pi pi-folder"
                     @click="$router.push('/portfolios')"
                     fluid

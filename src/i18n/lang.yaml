@@ -4,6 +4,9 @@ portfolio:
 portfolios:
   en: Portfolio List
   zh: 投資組合列表
+portfolioManagement:
+  en: Portfolio Management
+  zh: 投資組合管理
 totalValue:
   en: Total Value
   zh: 總價值

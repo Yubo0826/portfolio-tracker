@@ -280,7 +280,6 @@
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
               <div class="text-sm text-[var(--p-card-subtitle-color)]" :title="$t('targetPct')">
-                🎯
                 {{ data.target || 0 }}%</div>
             </template>
           </Column>
