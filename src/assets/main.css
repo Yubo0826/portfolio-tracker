@@ -1,6 +1,9 @@
 @import './base.css';
 @import "tailwindcss";
 
+/*  Tailwind v4 的自定義 variant 設定，讓 dark: 模式能偵測 .my-app-dark class */
+@custom-variant dark (&:where(.my-app-dark, .my-app-dark *));
+
 #app {
   /* max-width: 1280px; */
   /* max-width: 1680px; */
