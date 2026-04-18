@@ -6,51 +6,58 @@
     <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
     <div class="w-full flex-grow mx-auto p-4 max-w-screen-xl">
       <!-- Header -->
-      <header class="px-4 mb-4">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <!-- Logo -->
-          <div @click="$router.push('/dashboard')" class="text-3xl font-bold cursor-pointer whitespace-nowrap">
-            <span class="text-gray-500">Stock</span>
-            <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+      <header class="px-2 sm:px-4 mb-4">
+        <div class="flex justify-between items-center gap-3 py-2">
+          <!-- Left: Logo + Portfolio Selector -->
+          <div class="flex items-center gap-3">
+            <!-- Hamburger Toggle Button - Mobile Only -->
+            <span class="lg:hidden">
+              <Button
+                @click="sidebarVisible = true"
+                icon="pi pi-bars"
+                class="hamburger-btn lg:hidden"
+                size="small"
+                variant="outlined"
+                severity="secondary"
+              />
+            </span>
+
+            <!-- Logo -->
+            <div @click="$router.push('/dashboard')" class="text-2xl sm:text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
+              <span class="text-gray-500">Stock</span>
+              <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+            </div>
+
           </div>
 
-          <!-- 導覽列 -->
-          <div class="flex items-center justify-center flex-wrap gap-2 sm:gap-4">
+          <!-- Center: Navigation - Hidden on mobile, shown on lg+ -->
+          <div class="hidden lg:flex items-center justify-center flex-1">
             <HeaderNav />
           </div>
 
-          <!-- 功能按鈕區 -->
-          <div class="flex justify-center items-center flex-wrap gap-1 sm:gap-2">
-            <!-- Currency Toggle -->
+          <!-- 右上功能按鈕區 -->
+          <div class="flex justify-center items-center flex-wrap gap-1">
             <Button
-              class="p-button-rounded p-button-text"
-              aria-label="Toggle Currency"
-              @click="toggleCurrency"
-              v-tooltip.bottom="currencyTooltip"
-              size="small"
-            >
-              <div class="flex items-center gap-1 font-medium text-sm">
-                <i class="pi pi-sync" style="font-size: 0.85rem"></i>
-                <span>{{ displayCurrency }}</span>
-              </div>
-            </Button>
-
-            <Button
-              class="p-button-rounded p-button-text"
               aria-label="Search"
               icon="pi pi-search"
               @click="searchBoxVisible = true"
+              size="small"
+              text
+              rounded
+              severity="secondary"
             />
 
             <Button
               :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
               @click="toggleTheme"
-              class="p-button-rounded p-button-text"
               aria-label="Toggle Dark Mode"
               size="small"
+              text
+              rounded
+              severity="secondary"
             />
 
-            <div class="relative">
+            <!-- <div class="relative">
               <Button
                 ref="languageButton"
                 class="p-button-rounded p-button-text"
@@ -65,15 +72,30 @@
                 :popup="true"
                 class="language-menu"
               />
-            </div>
+            </div> -->
 
             
-            <template v-if="auth.user.uid !== 'demo-user'">
-              <Avatar :image="auth.user.photoURL" @click="toggleMenu" shape="circle" class="m-2 cursor-pointer" />
-              <Menu ref="menu" :model="menuItems" :popup="true">
+            <!-- User Menu -->
+             <div 
+                class="cursor-pointer ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 p-1 transition-colors flex items-center justify-center"
+                @click="toggleMenu"
+              >
+                <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+              </div>
+              <!-- <Button
+                @click="toggleMenu"
+                class="px-1 py-1"
+                rounded
+                text
+                severity="secondary"
+                aria-label="User Menu"
+              >
+                  <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+              </Button> -->
 
+              <Menu ref="menu" :model="menuItems" :popup="true">
                 <template #start>
-                  <div class="user-info-item flex items-center p-3 border-b border-gray-200">
+                  <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
                     <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
                     <div class="flex flex-col">
                       <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
@@ -82,41 +104,44 @@
                   </div>
                 </template>
 
+                <template #item="{ item, props }">
+                    <a v-ripple class="flex items-center" v-bind="props.action">
+                        <span :class="item.icon" />
+                        <span>{{ item.label }}</span>
+                        <!-- <Badge v-if="item.badge" class="ml-auto" :value="item.badge" /> -->
+                        <span v-if="item.value" class="ml-auto rounded bg-emphasis text-[#a1a0ab] text-xs p-1">{{ item.value }}</span>
+                    </a>
+                </template>
               </Menu>
-            </template>
-            
-            <template v-else>
-              <!-- <Avatar @click="auth.login" icon="pi pi-user" shape="circle" class="m-2 cursor-pointer" /> -->
-            </template>
+          
           </div>
         </div>
       </header>
 
       <!-- Main Content -->
       <main class="px-2 sm:px-4">
-        <!-- Portfolio 選單 + 按鈕 -->
-        <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-3">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <div class="text-sm font-medium">{{ $t('currentPortfolio') }}</div>
+        <!-- Action Buttons Bar - Mobile and Desktop -->
+        <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+          <!-- Portfolio Selector - Mobile Only lg:hidden --> 
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
             <Select
               v-model="selectedPortfolioId"
               size="small"
-              ref="PortfolioSelect"
               :options="portfolioStore.portfolios"
               optionLabel="name"
               optionValue="id"
               checkmark
               :highlightOnSelect="false"
-              class="min-w-[180px]"
+              class="w-full"
             >
               <template #header>
-                <div class="p-3 font-bold">{{ $t('currentPortfolio') }}</div>
+                <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
               </template>
               <template #dropdownicon>
                 <i class="pi pi-chevron-down text-xs"></i>
               </template>
               <template #footer>
-                <div class="p-3 border-t border-gray-200">
+                <div class="p-3 border-t border-[var(--p-content-border-color)]">
                   <Button
                     :label="$t('addPortfolio')"
                     icon="pi pi-plus"
@@ -126,12 +151,11 @@
                     size="small"
                   />
                 </div>
-
                 <div class="p-3 pt-0">
                   <Button
-                    :label="$t('portfolios')"
+                    :label="$t('portfolioManagement')"
                     icon="pi pi-folder"
-                    @click="$router.push('/portfolios'); openDropdown = null; closeTimer = null;"
+                    @click="$router.push('/portfolios')"
                     fluid
                     text
                     size="small"
@@ -139,25 +163,30 @@
                 </div>
               </template>
             </Select>
+
+            <div
+              v-if="auth.user?.uid === 'demo-user'"
+              class="text-xs text-gray-400 flex items-center gap-1 whitespace-normal text-left sm:whitespace-nowrap"
+            >
+              <i class="pi pi-info-circle text-gray-400" aria-hidden="true"></i>
+              <span>{{ $t('demoUserMessage') }}</span>
+            </div>
           </div>
 
-          <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
-            <div v-if="portfolioStore.portfolios.length === 0">
-              <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
-            </div>
-            <div class="flex flex-wrap gap-2 justify-end" v-else>
-              <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-              <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
-            </div>
-          </div>
-          <div v-else-if="auth.user.uid === 'demo-user'">
-            <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
-             <!-- <Button @click="auth.login" class="start-btn" data-hover="Login">
-              <div class="flex items-center gap-2">
-              {{ $t('GetStarted') }}
-                <i class="pi pi-arrow-right"></i>
+          <!-- Action Buttons -->
+          <div class="flex justify-end w-full lg:ml-auto">
+            <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
+              <div v-if="portfolioStore.portfolios.length === 0">
+                <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
               </div>
-             </Button> -->
+              <div class="flex flex-wrap gap-2" v-else>
+                <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+              </div>
+            </div>
+            <div v-else-if="auth.user.uid === 'demo-user'">
+              <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
+            </div>
           </div>
         </div>
 
@@ -188,6 +217,9 @@
   <TransactionDialog v-model="transctionDialogVisible" />
 
   <PortfolioFormDialog :visible="dialogVisible" @update:visible="dialogVisible = $event" />
+
+  <!-- Mobile Sidebar -->
+  <MobileSidebar v-model:visible="sidebarVisible" />
 </template>
 
 <script setup>
@@ -207,6 +239,7 @@ import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
 import HeaderNav from './components/HeaderNav.vue'
+import MobileSidebar from './components/MobileSidebar.vue'
 import Footer from './components/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
@@ -221,7 +254,7 @@ const dialogVisible = ref(false)
 const importDataDialogVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
-const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios'].includes(route.name))
+const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide', 'cash-flow', 'cash-flows'].includes(route.name))
 const auth = useAuthStore()
 const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
@@ -335,11 +368,14 @@ const toggleLanguage = () => {
 // 顯示新增交易按鈕列的條件: 在 portfolios, backtesting, rebalancing 頁面不顯示
 const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'rebalancing'].includes(route.name))
 
+// Mobile sidebar state
+const sidebarVisible = ref(false)
+
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
     isDark.value = true
-    document.documentElement.classList.add('my-app-dark')
+    document.documentElement.classList.add('dark')
   }
   const savedLocale = localStorage.getItem('locale')
   if (savedLocale && savedLocale !== locale.value) {
@@ -350,11 +386,32 @@ onMounted(() => {
 
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
-const menuItems = computed(() => [
-  { separator: true },
-  { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
-  { label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() },
-])
+const menuItems = computed(() => {
+  const list =  [
+    { 
+      label: t('currency.label'),
+      icon: 'pi pi-dollar',
+      value: displayCurrency.value,
+      command: () => toggleCurrency()
+    },
+    {
+      label: t('language'),
+      icon: 'pi pi-language',
+      value: locale.value === 'en' ? 'English' : '繁體中文',
+      command: () => toggleLanguage()
+    },
+    { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
+  ]
+  if (auth.user.uid !== 'demo-user') {
+    list.unshift({ separator: true })
+    list.push({ separator: true })
+    list.push({ label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() })
+  } else {
+    list.push({ separator: true })
+    list.push({ label: t('login'), icon: 'pi pi-sign-in', command: () => auth.login() })
+  }
+  return list
+})
 </script>
 
 <style scoped>
@@ -432,4 +489,37 @@ header {
 .p-menu :deep(.user-info-item) .p-menuitem-content {
   padding: 0 !important;
 }
+
+
+/* 自訂 Primevue DataTable 排序圖示 */
+
+/* 1. 把原本的 SVG icon 藏起來 */
+.p-datatable .p-datatable-sort-icon {
+  display: none;
+}
+
+/* 2. 基本樣式：讓 sort 的 span 有空間顯示新 icon */
+.p-datatable th [data-pc-section="sort"]::before {
+  display: inline-block;
+  font-size: 0.75rem;
+  width: 1em;
+  text-align: center;
+}
+
+/* 3. 未排序：不顯示任何符號 */
+.p-datatable th[aria-sort="none"] [data-pc-section="sort"]::before,
+.p-datatable th:not([aria-sort]) [data-pc-section="sort"]::before {
+  content: '';
+}
+
+/* 4. 升冪 ▲ */
+.p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before {
+  content: '▲';
+}
+
+/* 5. 降冪 ▼ */
+.p-datatable th[aria-sort="descending"] [data-pc-section="sort"]::before {
+  content: '▼';
+}
+
 </style>

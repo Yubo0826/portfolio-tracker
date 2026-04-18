@@ -35,6 +35,7 @@ export interface CashFlow {
   description: string    // 描述
   relatedTransactionId?: string  // 關聯的交易 ID
   relatedSymbol?: string // 關聯的股票代號
+  balanceAfter?: number  // 交易後餘額
   createdAt: string
   updatedAt: string
 }

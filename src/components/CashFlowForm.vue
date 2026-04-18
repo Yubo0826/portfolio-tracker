@@ -61,7 +61,7 @@
           :options="amountTypeOptions"
           optionLabel="label"
           optionValue="value"
-          class="w-24"
+          class="w-36"
         />
         <InputNumber
           id="amount"
@@ -234,8 +234,8 @@ const flowTypeOptions = [
 
 // 金額類型選項
 const amountTypeOptions = [
-  { label: '收入 +', value: 'income' },
-  { label: '支出 -', value: 'expense' }
+  { label: t('cashFlow.income'), value: 'income' },
+  { label: t('cashFlow.expense'), value: 'expense' }
 ]
 
 // 計算屬性

@@ -7,12 +7,12 @@ export function useTheme() {
   // const isDark = ref(false) // 每次 useTheme() 都會建立一個新的 ref，彼此獨立（互不相通）。
 
   const updateThemeState = () => {
-    isDark.value = document.documentElement.classList.contains('my-app-dark')
+    isDark.value = document.documentElement.classList.contains('dark')
     console.log('Theme updated:', isDark.value ? 'dark' : 'light')
   }
 
   const toggleTheme = () => {
-    document.documentElement.classList.toggle('my-app-dark')
+    document.documentElement.classList.toggle('dark')
     updateThemeState()
     localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
   }

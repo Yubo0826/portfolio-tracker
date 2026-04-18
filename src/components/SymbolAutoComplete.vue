@@ -8,6 +8,7 @@
         :disabled="disabled"
         @item-select="onItemSelect"
         :placeholder="$t('inputSymbol')"
+        class="w-full"
         >
         <!-- forceSelection -->
         <template #option="slotProps">

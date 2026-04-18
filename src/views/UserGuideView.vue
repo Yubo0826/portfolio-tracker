@@ -23,11 +23,15 @@
     <div class="lg:hidden mb-4">
       <div class="p-4 bg-[var(--p-surface-card)] rounded-xl border border-[var(--p-content-border-color)]">
         <div class="font-bold mb-2">{{ $t('tableOfContents') }}</div>
-        <select @change="scrollToSection($event.target.value)" class="w-full p-2 rounded border border-[var(--p-content-border-color)] bg-[var(--p-surface-ground)]">
-          <option v-for="item in menuItems" :key="item.id" :value="item.id">
-            {{ item.label }}
-          </option>
-        </select>
+        <Select 
+          v-model="selectedSection" 
+          @change="scrollToSection(selectedSection)" 
+          :options="menuItems" 
+          optionLabel="label" 
+          optionValue="id"
+          placeholder="Select a section"
+          class="w-full"
+        />
       </div>
     </div>
 
@@ -101,7 +105,7 @@
         </section>
 
         <section id="rebalancing" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">5. {{ $t('rebalancing') }}</h2>
+          <h2 class="text-2xl font-bold mb-4 border-b pb-2">5. {{ $t('rebalance') }}</h2>
           <p class="mb-4">{{ $t('rebalancingIntro') }}</p>
           
           <h3 class="text-xl font-semibold mb-2">{{ $t('features') }}</h3>
@@ -152,23 +156,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const activeSection = ref('dashboard')
+const selectedSection = ref('dashboard')
 
-const menuItems = [
+const menuItems = computed(() => [
   { id: 'dashboard', label: '1. ' + t('dashboard') },
   { id: 'transactions', label: '2. ' + t('transactions') },
   { id: 'holdings', label: '3. ' + t('holdings') },
   { id: 'allocation', label: '4. ' + t('allocation') },
-  { id: 'rebalancing', label: '5. ' + t('rebalancing') },
+  { id: 'rebalance', label: '5. ' + t('rebalance') },
   { id: 'dividends', label: '6. ' + t('dividends') },
   { id: 'backtesting', label: '7. ' + t('backtesting') },
   { id: 'settings', label: '8. ' + t('userSettings') },
-]
+])
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id)
@@ -192,7 +197,7 @@ onMounted(() => {
     rootMargin: '-20% 0px -50% 0px'
   })
 
-  menuItems.forEach((item) => {
+  menuItems.value.forEach((item) => {
     const el = document.getElementById(item.id)
     if (el) observer.observe(el)
   })

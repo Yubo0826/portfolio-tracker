@@ -34,7 +34,7 @@
 
     <div class="mb-4">
       <label for="accountId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('cashFlow.account') }}
+        {{ $t('cashFlow.tradingAccount') }}
       </label>
       <Select
         id="accountId"
@@ -182,7 +182,7 @@ const portfolioStore = usePortfolioStore();
 const cashFlowStore = useCashFlowStore();
 const { cashAccounts } = storeToRefs(cashFlowStore);
 
-const transactionType = ref([
+const transactionType = computed(() => [
   { name: t('buy'), code: 'buy' },
   { name: t('sell'), code: 'sell' },
 ]);

@@ -23,6 +23,7 @@ import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import Tooltip from 'primevue/tooltip'
+import Ripple from 'primevue/ripple'
 import customPreset from './themes/customPreset.js'
 
 // PrimeVue Components
@@ -56,7 +57,7 @@ app.use(PrimeVue, {
   theme: {
     preset: customPreset,
     options: {
-      darkModeSelector: '.my-app-dark'
+      darkModeSelector: '.dark'
     }
   }
 })
@@ -65,6 +66,7 @@ app.use(ConfirmationService)
 
 // Directives
 app.directive('tooltip', Tooltip)
+app.directive('ripple', Ripple)
 
 // Global Components
 const components = {

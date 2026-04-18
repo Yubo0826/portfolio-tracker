@@ -306,7 +306,7 @@ const candleSeries = ref([
   }
 ])
 
-const candleOptions = ref({
+const candleOptions = computed(() => ({
   chart: {
     type: 'candlestick',
     // height: 400,
@@ -339,9 +339,9 @@ const candleOptions = ref({
     }
   },
   theme: {
-    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+    mode: isDark.value ? 'dark' : 'light'
   },
-})
+}))
 
 
 const home = ref({

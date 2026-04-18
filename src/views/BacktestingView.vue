@@ -139,6 +139,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import * as toast from '@/composables/toast'
 import api from "@/utils/api";
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
@@ -188,7 +189,7 @@ const chartOptions = computed(() => {
   };
 })
 
-/** 📊 Sharpe Ratio */
+/** Sharpe Ratio */
 function calculateSharpeRatio(portfolioValues, riskFreeRate = 0) {
   if (portfolioValues.length < 2) return 0;
   const dailyReturns = portfolioValues
@@ -203,7 +204,7 @@ function calculateSharpeRatio(portfolioValues, riskFreeRate = 0) {
   return (excessReturn / stdDev) * Math.sqrt(252);
 }
 
-/** 📉 最大回撤 */
+/** 最大回撤 */
 function calculateMaxDrawdown(portfolioValues) {
   let peak = portfolioValues[0];
   let maxDrawdown = 0;
@@ -215,7 +216,7 @@ function calculateMaxDrawdown(portfolioValues) {
   return maxDrawdown;
 }
 
-/** 📈 波動率 */
+/** 波動率 */
 function calculateVolatility(portfolioValues) {
   if (portfolioValues.length < 2) return 0;
   const dailyReturns = portfolioValues
@@ -229,7 +230,7 @@ function calculateVolatility(portfolioValues) {
   return stdDev * Math.sqrt(252);
 }
 
-/** 🟢 勝率 */
+/** 勝率 */
 function calculateWinRate(portfolioValues) {
   if (portfolioValues.length < 2) return 0;
   const dailyReturns = portfolioValues
@@ -253,7 +254,7 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
     return { portfolioValues: [], dates: [] };
   }
 
-  /** ✅ 1. 只取所有資產的共同日期 (intersection) */
+  /** 1. 只取所有資產的共同日期 (intersection) */
   const assetDates = Object.values(prices).map(arr => arr.map(p => p.date));
   const commonDates = assetDates.reduce((acc, dates) =>
     acc.filter((d) => dates.includes(d))
@@ -295,7 +296,7 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
     }
     portfolioValues.push(total);
 
-    /** ✅ 2. 月末、季末、年末 再平衡判斷 */
+    /** 2. 月末、季末、年末 再平衡判斷 */
     const nextDate = sortedDates[i + 1] ? new Date(sortedDates[i + 1]) : null;
     const isMonthEnd =
       !nextDate || date.getMonth() !== nextDate.getMonth();
@@ -321,7 +322,7 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
 
 /** 執行回測 */
 
-// 🔵 年度報酬率圖表設定（含負報酬顏色）
+// 年度報酬率圖表設定
 const annualChartSeries = ref([]);
 const annualChartOptions = computed(() => {
   return {
@@ -357,13 +358,13 @@ const annualChartOptions = computed(() => {
       },
     },
     theme: {
-      mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+      mode: isDark.value ? 'dark' : 'light'
     },
   };
 });
 
 
-// 📅 年報酬率計算
+// 年報酬率計算
 function calculateAnnualReturns(portfolioValues, dates) {
   if (!portfolioValues?.length || !dates?.length) return [];
 
@@ -387,7 +388,7 @@ function calculateAnnualReturns(portfolioValues, dates) {
 }
 
 
-// 🔵 原有 runBacktest() 內修改部分
+// 原有 runBacktest() 內修改部分
 async function runBacktest() {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
   isLoading.value = true;
@@ -430,7 +431,7 @@ async function runBacktest() {
       winRate,
     };
 
-    // 📊 更新走勢圖
+    // 更新走勢圖
     chartSeries.value = [
       {
         name: "Portfolio Value",
@@ -453,7 +454,10 @@ async function runBacktest() {
     );
 
   } catch (e) {
-    console.error("回測失敗:", e);
+    if (e?.message) {
+      toast.error(t('allocationNoSettings'));
+    }
+
   } finally {
     isLoading.value = false;
   }

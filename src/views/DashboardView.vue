@@ -1,7 +1,7 @@
 <template>
   <!-- px-4 sm:px-6 lg:px-8 -->
   <div class="container mx-auto mt-4 max-w-screen-xl">
-    <!-- 左右兩欄：桌機並排，小螢幕上下堆疊 -->
+    <!-- 左右兩欄 -->
     <div class="flex flex-col lg:flex-row gap-6">
 
       <!-- 左半邊（統計卡 + 走勢圖） -->
@@ -9,12 +9,12 @@
         
         <!-- 三張統計卡 -->
         <!-- grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 -->
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Total Value -->
           <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
-                <Button icon="pi pi-wallet" severity="secondary" rounded size="small" disabled />
+                <Button icon="pi pi-wallet" rounded size="small" disabled />
                 <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
               </div>
             </template>
@@ -28,7 +28,7 @@
             </template>
             <template #footer>
               <div class="text-sm mt-2 sm:mt-4">
-                {{ $t('baseCurrency', { code: currencySymbol }) }}
+                {{ $t('baseCurrency', { code: displayCurrency }) }}
               </div>
             </template>
           </Card>
@@ -37,7 +37,7 @@
           <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
-                <Button icon="pi pi-chart-line" severity="secondary" rounded size="small" disabled />
+                <Button icon="pi pi-chart-line" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('totalProfit') }}
                   <i class="pi pi-question-circle" v-tooltip.bottom="$t('totalProfitHint')"></i>
@@ -67,7 +67,7 @@
           <Card class="rounded-xl shadow-md">
             <template #title>
               <div class="flex items-center">
-                <Button icon="pi pi-calendar" severity="secondary" rounded size="small" disabled />
+                <Button icon="pi pi-calendar" rounded size="small" disabled />
                 <div class="text-sm ml-2">
                   {{ $t('irr') }}
                   <i class="pi pi-question-circle" v-tooltip.bottom="$t('xirrHint')" />
@@ -94,7 +94,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
               <div class="text-sm">{{ $t('assetTrend') }}</div>
 
-              <Tag :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
+              <Tag v-if="holdingsStore.list.length > 0" :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
                 <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
                   <!-- 變化數值 -->
                   <span class="mr-2">                          
@@ -153,12 +153,14 @@
           <template #title>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
-              <Button 
-                unstyled 
-                :label="$t('setTargets')" 
+              <!-- unstyled  -->
+              <!-- :label="$t('setTargets')"  -->
+              <!-- :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" /> -->
+              <Button
                 icon="pi pi-cog"
-                 @click="$router.push('allocation')" 
-                 :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" />
+                variant="text" rounded
+                @click="$router.push('allocation')" 
+              />
             </div>
           </template>
 
@@ -277,8 +279,7 @@
           <Column field="target" :header="$t('allocationRatio')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
-              <div class="text-sm text-[var(--p-card-subtitle-color)]">
-                🎯
+              <div class="text-sm text-[var(--p-card-subtitle-color)]" :title="$t('targetPct')">
                 {{ data.target || 0 }}%</div>
             </template>
           </Column>
@@ -310,7 +311,6 @@ import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import NoData from '@/components/NoData.vue'
-import { useCurrency } from '@/composables/useCurrency'
 
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark } = useTheme()
@@ -320,8 +320,14 @@ const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
 
-// Currency formatting
+// Currency settings
+import { useCurrency } from '@/composables/useCurrency'
 const { formatAmount, formatChange, formatPrice, currencySymbol } = useCurrency()
+
+import { useSettingsStore } from '@/stores/settings'
+import { storeToRefs } from 'pinia'
+const settingsStore = useSettingsStore()
+const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
 
 /* =========================
  *  State
@@ -529,13 +535,25 @@ const irr = computed(() => {
   if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
   const cashflows = []
 
+  // 處理交易：買入為負（現金流出），賣出為正（現金流入）
   transactionsStore.list.forEach(tx => {
-    const amount = (tx.price * tx.shares + tx.fee) * (tx.transactionType === 'buy' ? -1 : 1)
+    let amount
+    if (tx.transactionType === 'buy') {
+      // 買入：成本 = 股價 × 股數 + 手續費（現金流出，所以是負數）
+      amount = -(tx.price * tx.shares + tx.fee)
+    } else {
+      // 賣出：收入 = 股價 × 股數 - 手續費（現金流入，所以是正數）
+      amount = tx.price * tx.shares - tx.fee
+    }
     cashflows.push({ amount, when: new Date(tx.date) })
   })
+  
+  // 股息收入（現金流入，正數）
   dividends.value.forEach(d => {
     cashflows.push({ amount: parseFloat(d.totalAmount), when: new Date(d.date) })
   })
+  
+  // 當前持倉市值（視為今日賣出的收入，正數）
   cashflows.push({ amount: holdingsStore.list.reduce((s, h) => s + h.currentValue, 0), when: new Date() })
 
   try {
@@ -580,7 +598,7 @@ const rebalanceRows = computed(() => {
 /* =========================
  *  Charts (options & helpers)
  * =======================*/
-const chartOptions = {
+const chartOptions = computed(() => ({
   chart: { id: 'chart', type: 'area', zoom: { enabled: false }, toolbar: { show: false }, background: 'transparent' },
   stroke: { curve: 'smooth', width: 2 },
   dataLabels: { enabled: false },
@@ -604,9 +622,9 @@ const chartOptions = {
   tooltip: { x: { format: 'yyyy/MM/dd' } },
   grid: { show: true, borderColor: '#eee', strokeDashArray: 5 },
   theme: {
-    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+    mode: isDark.value ? 'dark' : 'light'
   }
-}
+}))
 
 function calculateGrowthRate() {
   if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null

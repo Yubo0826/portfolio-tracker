@@ -277,6 +277,7 @@ export const useCashFlowStore = defineStore('cashflow', () => {
         description: flow.description,
         relatedTransactionId: flow.related_transaction_id?.toString(),
         relatedSymbol: flow.related_symbol,
+        balanceAfter: flow.balance_after ? parseFloat(flow.balance_after) : undefined,
         createdAt: flow.created_at,
         updatedAt: flow.updated_at
       }))
@@ -333,6 +334,7 @@ export const useCashFlowStore = defineStore('cashflow', () => {
         description: response.cashFlow.description,
         relatedTransactionId: response.cashFlow.related_transaction_id?.toString(),
         relatedSymbol: response.cashFlow.related_symbol,
+        balanceAfter: response.newBalance ? parseFloat(response.newBalance) : undefined,
         createdAt: response.cashFlow.created_at,
         updatedAt: response.cashFlow.updated_at
       }
