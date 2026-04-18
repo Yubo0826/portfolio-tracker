@@ -598,7 +598,7 @@ const rebalanceRows = computed(() => {
 /* =========================
  *  Charts (options & helpers)
  * =======================*/
-const chartOptions = {
+const chartOptions = computed(() => ({
   chart: { id: 'chart', type: 'area', zoom: { enabled: false }, toolbar: { show: false }, background: 'transparent' },
   stroke: { curve: 'smooth', width: 2 },
   dataLabels: { enabled: false },
@@ -622,9 +622,9 @@ const chartOptions = {
   tooltip: { x: { format: 'yyyy/MM/dd' } },
   grid: { show: true, borderColor: '#eee', strokeDashArray: 5 },
   theme: {
-    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+    mode: isDark.value ? 'dark' : 'light'
   }
-}
+}))
 
 function calculateGrowthRate() {
   if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null

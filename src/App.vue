@@ -375,7 +375,7 @@ onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
     isDark.value = true
-    document.documentElement.classList.add('my-app-dark')
+    document.documentElement.classList.add('dark')
   }
   const savedLocale = localStorage.getItem('locale')
   if (savedLocale && savedLocale !== locale.value) {

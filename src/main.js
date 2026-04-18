@@ -57,7 +57,7 @@ app.use(PrimeVue, {
   theme: {
     preset: customPreset,
     options: {
-      darkModeSelector: '.my-app-dark'
+      darkModeSelector: '.dark'
     }
   }
 })
