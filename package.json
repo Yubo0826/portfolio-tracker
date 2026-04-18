@@ -18,6 +18,8 @@
     "@tailwindcss/vite": "^4.1.10",
     "apexcharts": "^4.7.0",
     "firebase": "^11.9.1",
+    "highcharts": "^12.6.0",
+    "highcharts-vue": "^2.0.1",
     "lodash": "^4.17.21",
     "papaparse": "^5.5.3",
     "pinia": "^3.0.1",

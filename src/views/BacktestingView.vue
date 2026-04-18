@@ -105,31 +105,25 @@
       </template>
     </Card>
     <!-- 資產走勢圖 -->
-    <Card class="my-6" v-if="chartSeries.length">
+    <Card class="my-6" v-if="lineData.length">
       <template #title>{{ $t('chartTitle') }}</template>
       <template #content>
         <p class="text-sm text-gray-500 mb-2">{{ $t('chartSubtitle') }}</p>
-        <apexchart
-          width="100%"
-          height="400"
-          type="line"
-          :options="chartOptions"
-          :series="chartSeries"
+        <highcharts
+          :options="highLineOptions"
+          style="width: 100%; height: 400px;"
         />
       </template>
     </Card>
 
     <!-- 年度報酬率圖 -->
-    <Card class="my-6" v-if="annualChartSeries.length">
+    <Card class="my-6" v-if="annualReturnsData.length">
       <template #title>{{ $t('annualReturnChart') }}</template>
       <template #content>
         <p class="text-sm text-gray-500 mb-2">{{ $t('annualReturnHint') }}</p>
-        <apexchart
-          width="100%"
-          height="400"
-          type="bar"
-          :options="annualChartOptions"
-          :series="annualChartSeries"
+        <highcharts
+          :options="highBarOptions"
+          style="width: 100%; height: 400px;"
         />
       </template>
     </Card>
@@ -168,25 +162,44 @@ const rebalanceOptions = [
 
 const result = ref(null);
 const isLoading = ref(false);
-const chartSeries = ref([]);
-const chartOptions = computed(() => {
+const lineData = ref([]);
+const highLineOptions = computed(() => {
+  const axisColor = isDark.value ? '#9ca3af' : '#999'
+  const gridColor = isDark.value ? '#374151' : '#eee'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
   return {
-    chart: {
-      type: "line",
-      zoom: { enabled: false },
-      toolbar: { show: false },
-      background: 'transparent'
+    chart: { type: 'line', backgroundColor: 'transparent', animation: { duration: 300 } },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' } },
+    xAxis: {
+      type: 'datetime',
+      labels: { datetimeUTC: false, style: { color: axisColor } },
+      lineColor: gridColor,
+      tickColor: gridColor,
     },
-    
-    stroke: { curve: "smooth", width: 2 },
-    xaxis: { type: "datetime", labels: { datetimeUTC: false } },
-    yaxis: { labels: { formatter: (val) => `$${val.toFixed(0)}` } },
-    tooltip: { x: { format: "yyyy-MM-dd" } },
-    colors: ["#3B82F6", "#EF4444"],
-    theme: {
-      mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+    yAxis: {
+      labels: {
+        formatter: function () { return `$${this.value.toFixed(0)}` },
+        style: { color: axisColor },
+      },
+      gridLineColor: gridColor,
     },
-  };
+    tooltip: {
+      xDateFormat: '%Y-%m-%d',
+      valuePrefix: '$',
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
+    },
+    colors: ['#3B82F6', '#EF4444'],
+    series: lineData.value.map((s, i) => ({
+      type: 'line',
+      name: s.name,
+      data: s.data,
+      color: ['#3B82F6', '#EF4444'][i],
+    })),
+  }
 })
 
 /** Sharpe Ratio */
@@ -323,44 +336,47 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
 /** 執行回測 */
 
 // 年度報酬率圖表設定
-const annualChartSeries = ref([]);
-const annualChartOptions = computed(() => {
+const annualReturnsData = ref([]);
+const highBarOptions = computed(() => {
+  const axisColor = isDark.value ? '#9ca3af' : '#999'
+  const gridColor = isDark.value ? '#374151' : '#eee'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
   return {
-    chart: { 
-      type: "bar", 
-      height: 350, 
-      toolbar: { show: false },
-      background: 'transparent'
+    chart: { type: 'column', backgroundColor: 'transparent' },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      categories: annualReturnsData.value.map(r => r.year.toString()),
+      title: { text: 'Year', style: { color: axisColor } },
+      labels: { style: { fontWeight: '600', color: isDark.value ? '#d1d5db' : '#374151' } },
     },
-    plotOptions: {
-      bar: {
-        borderRadius: 4,
-        horizontal: false,
-        columnWidth: "55%",
-        distributed: true, // 讓每個柱子能自訂顏色
-      },
-    },
-    dataLabels: { enabled: false },
-    xaxis: {
-      title: { text: "Year" },
-      categories: [],
-      labels: { style: { fontWeight: 600 } },
-    },
-    yaxis: {
+    yAxis: {
       labels: {
-        formatter: (val) => `${(val * 100).toFixed(1)}%`,
+        formatter: function () { return `${(this.value * 100).toFixed(1)}%` },
+        style: { color: axisColor },
       },
-      title: { text: "Annual Return" },
+      title: { text: 'Annual Return', style: { color: axisColor } },
+      gridLineColor: gridColor,
     },
     tooltip: {
-      y: {
-        formatter: (val) => `${(val * 100).toFixed(2)}%`,
-      },
+      formatter: function () { return `<b>${this.x}</b>: ${(this.y * 100).toFixed(2)}%` },
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
     },
-    theme: {
-      mode: isDark.value ? 'dark' : 'light'
+    plotOptions: {
+      column: { borderRadius: 4 },
     },
-  };
+    series: [{
+      type: 'column',
+      name: 'Annual Return',
+      data: annualReturnsData.value.map(r => ({
+        y: r.value,
+        color: r.value >= 0 ? '#2563EB' : '#DC2626',
+      })),
+    }],
+  }
 });
 
 
@@ -432,26 +448,14 @@ async function runBacktest() {
     };
 
     // 更新走勢圖
-    chartSeries.value = [
+    lineData.value = [
       {
         name: "Portfolio Value",
         data: dates.map((d, i) => [new Date(d).getTime(), portfolioValues[i]]),
       },
     ];
 
-    const annualReturns = calculateAnnualReturns(portfolioValues, dates);
-    annualChartSeries.value = [
-      {
-        name: "Annual Return",
-        data: annualReturns.map((r) => r.value),
-      },
-    ];
-    annualChartOptions.value.xaxis.categories = annualReturns.map((r) => r.year);
-
-    // 根據正負報酬設定顏色
-    annualChartOptions.value.colors = annualReturns.map((r) =>
-      r.value >= 0 ? "#2563EB" : "#DC2626"
-    );
+    annualReturnsData.value = calculateAnnualReturns(portfolioValues, dates);
 
   } catch (e) {
     if (e?.message) {

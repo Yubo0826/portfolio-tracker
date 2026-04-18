@@ -138,10 +138,8 @@
 
           <template #content>
             <StockChart
-              type="area"
-              :options="chartOptions"
-              :series="chartSeries"
-              height="300"
+              :options="areaChartOptions"
+              :height="300"
             />
           </template>
         </Card>
@@ -166,20 +164,15 @@
 
           <template #content>
             <div v-if="holdingsStore.list.length > 0" class="flex justify-center items-center py-4">
-              <!-- height="280" -->
-              <apexchart
+              <highcharts
                 v-if="selectedPieType === 'actual'"
-                width="100%"
-                type="donut"
                 :options="holdingsChart"
-                :series="holdingsSeries"
+                style="width: 100%; min-height: 260px;"
               />
-              <apexchart
+              <highcharts
                 v-else
-                width="100%"
-                type="donut"
                 :options="allocationChart"
-                :series="allocationSeries"
+                style="width: 100%; min-height: 260px;"
               />
             </div>
 
@@ -470,17 +463,6 @@ async function loadData() {
 /* =========================
  *  Computed (derived data)
  * =======================*/
-const holdingsSeries = computed(() => holdingsStore.list.map(h => h.currentValue))
-const allocationSeries = computed(() => sortedAllocation.value.map(a => a.target))
-
-/*
-  為了讓圓餅圖顏色一致:
-  allocationSeries 排序根據 holdingsStore
-  順序規則：allocationSeries 依照 holdingsStore 順序排列。
-  若有 allocationSeries 沒出現在 holdingsStore，會放最後。
-
-*/
-
 const sortedAllocation = computed(() => {
   const holdingSymbols = holdingsStore.list.map(h => h.symbol)
   const allocationList = allocation.value || []
@@ -500,27 +482,59 @@ const sortedAllocation = computed(() => {
 })
 
 const holdingsChart = computed(() => ({
-  chart: { type: 'donut', background: 'transparent' },
-  labels: holdingsStore.list.map(h => h.symbol),
+  chart: { type: 'pie', backgroundColor: 'transparent' },
+  title: { text: null },
+  credits: { enabled: false },
+  plotOptions: {
+    pie: {
+      innerSize: '50%',
+      dataLabels: { enabled: false },
+      showInLegend: true,
+    },
+  },
   legend: {
-    labels: { colors: 'var(--p-content-color)' },
+    layout: 'vertical',
+    align: 'right',
+    verticalAlign: 'middle',
+    itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' },
   },
-  responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }],
-  theme: {
-    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  tooltip: {
+    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Value: ${point.y:.2f}',
+    backgroundColor: isDark.value ? '#1f2937' : '#fff',
+    style: { color: isDark.value ? '#f3f4f6' : '#374151' },
   },
+  series: [{
+    name: 'Holdings',
+    data: holdingsStore.list.map(h => ({ name: h.symbol, y: h.currentValue })),
+  }],
 }))
 
 const allocationChart = computed(() => ({
-  chart: { type: 'donut', background: 'transparent' },
-  labels: sortedAllocation.value.map(a => a.symbol),
+  chart: { type: 'pie', backgroundColor: 'transparent' },
+  title: { text: null },
+  credits: { enabled: false },
+  plotOptions: {
+    pie: {
+      innerSize: '50%',
+      dataLabels: { enabled: false },
+      showInLegend: true,
+    },
+  },
   legend: {
-    labels: { colors: 'var(--p-content-color)' },
+    layout: 'vertical',
+    align: 'right',
+    verticalAlign: 'middle',
+    itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' },
   },
-  responsive: [{ breakpoint: 480, options: { legend: { position: 'bottom' } } }],
-  theme: {
-    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
+  tooltip: {
+    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Target: {point.y}%',
+    backgroundColor: isDark.value ? '#1f2937' : '#fff',
+    style: { color: isDark.value ? '#f3f4f6' : '#374151' },
   },
+  series: [{
+    name: 'Allocation',
+    data: sortedAllocation.value.map(a => ({ name: a.symbol, y: Number(a.target) })),
+  }],
 }))
 
 const annualReturn = computed(() => {
@@ -598,33 +612,65 @@ const rebalanceRows = computed(() => {
 /* =========================
  *  Charts (options & helpers)
  * =======================*/
-const chartOptions = computed(() => ({
-  chart: { id: 'chart', type: 'area', zoom: { enabled: false }, toolbar: { show: false }, background: 'transparent' },
-  stroke: { curve: 'smooth', width: 2 },
-  dataLabels: { enabled: false },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shade: 'light',
-      type: 'vertical',
-      gradientToColors: [growthRate.value >= 0 ? '#a7f3d0' : '#fecaca'],
-      opacityFrom: 0.5,
-      opacityTo: 0,
-      stops: [0, 100]
-    }
-  },
-  colors: [growthRate.value >= 0 ? '#10b981' : '#ef4444'],
-  xaxis: { type: 'datetime', labels: { style: { fontSize: '12px', colors: '#999' } } },
-  yaxis: {
-    labels: { formatter: val => `$${val.toFixed(2)}`, style: { fontSize: '12px', colors: '#999' } },
-    title: { style: { fontSize: '14px' } }
-  },
-  tooltip: { x: { format: 'yyyy/MM/dd' } },
-  grid: { show: true, borderColor: '#eee', strokeDashArray: 5 },
-  theme: {
-    mode: isDark.value ? 'dark' : 'light'
+const areaChartOptions = computed(() => {
+  const isPositive = growthRate.value >= 0
+  const lineColor = isPositive ? '#10b981' : '#ef4444'
+  const fillFrom = isPositive ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'
+  const axisColor = isDark.value ? '#9ca3af' : '#999'
+  const gridColor = isDark.value ? '#374151' : '#eee'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+
+  return {
+    chart: { type: 'area', backgroundColor: 'transparent', animation: { duration: 300 } },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { fontSize: '12px', color: axisColor } },
+      lineColor: gridColor,
+      tickColor: gridColor,
+    },
+    yAxis: {
+      title: { text: null },
+      labels: {
+        formatter: function () { return `$${this.value.toFixed(2)}` },
+        style: { fontSize: '12px', color: axisColor },
+      },
+      gridLineDashStyle: 'Dash',
+      gridLineColor: gridColor,
+    },
+    tooltip: {
+      xDateFormat: '%Y/%m/%d',
+      valuePrefix: '$',
+      valueDecimals: 2,
+      shared: true,
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
+    },
+    plotOptions: {
+      area: {
+        fillColor: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, fillFrom], [1, 'rgba(255,255,255,0)']],
+        },
+        lineColor,
+        lineWidth: 2,
+        marker: { enabled: false },
+      },
+    },
+    series: [{
+      type: 'area',
+      name: t('totalPrice'),
+      data: chartSeries.value[0].data.map(d => [
+        d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime(),
+        d.y
+      ]),
+      color: lineColor,
+    }],
   }
-}))
+})
 
 function calculateGrowthRate() {
   if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null

@@ -1,34 +1,29 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
 
 const transactions = ref([]);
 const quotes = ref([]); // 假設 quotes 是一個以 symbol 分群的物件 { AAPL: [...], TSLA: [...] }
 
-const chartOptions = {
-  chart: {
-    type: 'line',
-    zoom: { enabled: false }
-  },
-  xaxis: {
-    type: 'datetime'
-  },
-  title: {
-    text: '總資產走勢圖',
-    align: 'center'
-  }
-};
+const seriesData = ref([]);
 
-const series = ref([]);
+const highChartOptions = computed(() => ({
+  chart: { type: 'line', backgroundColor: 'transparent', animation: { duration: 300 } },
+  title: { text: '總資產走勢圖', align: 'center' },
+  credits: { enabled: false },
+  legend: { enabled: false },
+  xAxis: { type: 'datetime' },
+  yAxis: {
+    title: { text: '總資產' },
+    labels: { formatter: function () { return `$${this.value.toFixed(2)}` } },
+  },
+  tooltip: { xDateFormat: '%Y/%m/%d', valuePrefix: '$', valueDecimals: 2 },
+  series: [{ type: 'line', name: '資產總值', data: seriesData.value }],
+}))
 
 onMounted(() => {
   // 請自行載入 transactions.value 和 quotes.value
-  
   const portfolioHistory = computePortfolioValue(transactions.value, quotes.value);
-  series.value = [{
-    name: '資產總值',
-    data: portfolioHistory.map(d => [new Date(d.date).getTime(), d.value])
-  }];
+  seriesData.value = portfolioHistory.map(d => [new Date(d.date).getTime(), d.value]);
 });
 
 /**
@@ -86,5 +81,5 @@ function computePortfolioValue(transactions, quotesBySymbol) {
 </script>
 
 <template>
-  <VueApexCharts type="line" height="400" :options="chartOptions" :series="series" />
+  <highcharts :options="highChartOptions" style="width: 100%; height: 400px;" />
 </template>

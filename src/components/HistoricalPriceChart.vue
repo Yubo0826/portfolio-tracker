@@ -37,17 +37,15 @@
             <TabMenu :model="rangeOptions" v-model:activeIndex="activeIndex" />
         </div>
   
-      <apexchart
-        width="100%"
-        type="line"
-        :options="chartOptions"
-        :series="chartSeries"
+      <highcharts
+        :options="highChartOptions"
+        style="width: 100%; height: 350px;"
       />
     </div>
   </template>
   
 <script setup>
-import { ref, onMounted, watch, defineProps } from 'vue'
+import { ref, onMounted, watch, defineProps, computed } from 'vue'
 import TabMenu from 'primevue/tabmenu';
 import api from '@/utils/api'
 import { useRoute  } from 'vue-router'
@@ -106,7 +104,37 @@ const chartSeries = ref([
 const growthRate = ref(null)
 const change = ref(0)
 
-function calculateGrowthRate() {
+const highChartOptions = computed(() => ({
+  chart: { type: 'line', backgroundColor: 'transparent', animation: { duration: 300 } },
+  title: { text: null },
+  credits: { enabled: false },
+  legend: { enabled: false },
+  xAxis: { type: 'datetime', labels: { style: { color: '#999', fontSize: '12px' } } },
+  yAxis: {
+    title: { text: '股僷 (美元)' },
+    labels: {
+      formatter: function () { return `$${this.value.toFixed(2)}` },
+      style: { fontSize: '12px', color: '#999' },
+    },
+    gridLineDashStyle: 'Dash',
+  },
+  tooltip: {
+    xDateFormat: '%Y/%m/%d %H:%M',
+    valueDecimals: 2,
+    valuePrefix: '$',
+  },
+  series: [{
+    type: 'line',
+    name: '收盤僷',
+    data: chartSeries.value[0].data.map(d => [
+      d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime(),
+      Number(d.y)
+    ]),
+    color: growthRate.value >= 0 ? '#10b981' : '#ef4444',
+    marker: { enabled: false },
+    lineWidth: 2,
+  }],
+}))
     if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
     const firstPrice = chartSeries.value[0].data[0].y
     const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y

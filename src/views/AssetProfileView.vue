@@ -116,21 +116,16 @@
     
                 <!-- 圖表區 -->
                 <div>
-                  <apexchart
+                  <highcharts
                     v-if="chartType === 'area'"
-                    width="100%"
-                    type="area"
-                    :options="chartOptions"
-                    :series="chartSeries"
-                    height="300"
+                    :options="highAreaOptions"
+                    style="width: 100%; height: 300px;"
                   />
-    
-                  <apexchart
+
+                  <highcharts
                     v-else-if="chartType === 'candlestick'"
-                    width="100%"
-                    type="candlestick"
-                    :options="candleOptions"
-                    :series="candleSeries"
+                    :options="highCandleOptions"
+                    style="width: 100%; height: 300px;"
                   />
                 </div>
               </div>
@@ -226,71 +221,112 @@ const rangeOptions = computed(() => ([
   { label: '5Y', value: '5y' }
 ]))
 
-const chartOptions = computed(() => ({
-  chart: {
-    id: `${symbol.value}-chart`,
-    type: 'area',
-    zoom: { enabled: false },
-    toolbar: { show: false },
-    background: 'transparent'
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 2,
-  },
-  dataLabels: {
-    enabled: false
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shade: 'light',
-      type: 'vertical',
-      gradientToColors: [growthRate.value >= 0 ? '#a7f3d0' : '#fecaca'],
-      opacityFrom: 0.5,
-      opacityTo: 0,
-      stops: [0, 100]
-    }
-  },
-  colors: [growthRate.value >= 0 ? '#10b981' : '#ef4444'],
-  xaxis: {
-    type: 'datetime',
-    labels: {
-      style: {
-        fontSize: '12px',
-        colors: '#999'
-      }
-    }
-  },
-  yaxis: {
-    labels: {
-      formatter: (val) => `$${val.toFixed(2)}`,
-      style: {
-        fontSize: '12px',
-        colors: '#999'
-      }
+const highAreaOptions = computed(() => {
+  const isPositive = growthRate.value >= 0
+  const lineColor = isPositive ? '#10b981' : '#ef4444'
+  const fillFrom = isPositive ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'
+  const axisColor = isDark.value ? '#9ca3af' : '#999'
+  const gridColor = isDark.value ? '#374151' : '#eee'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+
+  return {
+    chart: { type: 'area', backgroundColor: 'transparent', animation: { duration: 400 } },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { fontSize: '12px', color: axisColor } },
+      lineColor: gridColor,
+      tickColor: gridColor,
     },
-    title: {
-      text: '股價 (美元)',
-      style: {
-        fontSize: '14px'
-      }
-    }
-  },
-  tooltip: {
-    x: {
-      format: 'yyyy/MM/dd'
-    }
-  },
-  grid: {
-    show: true,
-    borderColor: '#eee',
-    strokeDashArray: 5,
-  },
-  theme: {
-    mode: isDark.value ? 'dark' : 'light' // 一鍵套用深色主題
-  },
-}))
+    yAxis: {
+      title: { text: '股價 (美元)', style: { color: axisColor } },
+      labels: {
+        formatter: function () { return `$${this.value.toFixed(2)}` },
+        style: { fontSize: '12px', color: axisColor },
+      },
+      gridLineDashStyle: 'Dash',
+      gridLineColor: gridColor,
+    },
+    tooltip: {
+      xDateFormat: '%Y/%m/%d',
+      valueDecimals: 2,
+      valuePrefix: '$',
+      shared: true,
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
+    },
+    plotOptions: {
+      area: {
+        fillColor: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, fillFrom], [1, 'rgba(255,255,255,0)']],
+        },
+        lineColor,
+        lineWidth: 2,
+        marker: { enabled: false, states: { hover: { enabled: true, radius: 3 } } },
+      },
+    },
+    series: [{
+      type: 'area',
+      name: '收盤價',
+      data: chartSeries.value[0].data.map(d => [
+        d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime(),
+        Number(d.y)
+      ]),
+      color: lineColor,
+    }],
+  }
+})
+
+const highCandleOptions = computed(() => {
+  const axisColor = isDark.value ? '#9ca3af' : '#999'
+  const gridColor = isDark.value ? '#374151' : '#eee'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+
+  return {
+    chart: { type: 'candlestick', backgroundColor: 'transparent', animation: { duration: 400 } },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    xAxis: {
+      type: 'datetime',
+      labels: { style: { color: axisColor } },
+    },
+    yAxis: {
+      title: { text: '價格 (USD)', style: { color: axisColor } },
+      labels: {
+        formatter: function () { return `$${this.value.toFixed(2)}` },
+        style: { color: axisColor },
+      },
+      gridLineColor: gridColor,
+    },
+    tooltip: {
+      xDateFormat: '%Y/%m/%d',
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
+    },
+    plotOptions: {
+      candlestick: {
+        color: '#ef4444',
+        upColor: '#10b981',
+        lineColor: '#ef4444',
+        upLineColor: '#10b981',
+      },
+    },
+    series: [{
+      type: 'candlestick',
+      name: 'K線圖',
+      data: candleSeries.value[0].data.map(d => {
+        const ts = d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime()
+        return [ts, d.y[0], d.y[1], d.y[2], d.y[3]]
+      }),
+    }],
+  }
+})
 
 const chartSeries = ref([
   {
@@ -305,43 +341,6 @@ const candleSeries = ref([
     data: []
   }
 ])
-
-const candleOptions = computed(() => ({
-  chart: {
-    type: 'candlestick',
-    // height: 400,
-    toolbar: {
-      show: false
-    },
-    zoom: {
-      enabled: true
-    },
-    background: 'transparent'
-  },
-  // title: {
-  //   text: `${symbol} · K 線圖`,
-  //   align: 'left'
-  // },
-  xaxis: {
-    type: 'datetime'
-  },
-  yaxis: {
-    tooltip: {
-      enabled: true
-    },
-    title: {
-      text: '價格 (USD)'
-    }
-  },
-  tooltip: {
-    x: {
-      format: 'yyyy/MM/dd'
-    }
-  },
-  theme: {
-    mode: isDark.value ? 'dark' : 'light'
-  },
-}))
 
 
 const home = ref({

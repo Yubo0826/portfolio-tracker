@@ -9,17 +9,15 @@
       </select>
     </div>
 
-    <apexchart
-      width="100%"
-      type="candlestick"
-      :options="chartOptions"
-      :series="chartSeries"
+    <highcharts
+      :options="highCandleOptions"
+      style="width: 100%; height: 400px;"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps } from 'vue'
+import { ref, onMounted, defineProps, computed } from 'vue'
 import api from '@/utils/api'
 
 const props = defineProps({
@@ -46,38 +44,34 @@ const chartSeries = ref([
   }
 ])
 
-const chartOptions = ref({
-  chart: {
+const highCandleOptions = computed(() => ({
+  chart: { type: 'candlestick', backgroundColor: 'transparent', animation: { duration: 300 } },
+  title: { text: `${props.symbol} · K 線圖`, align: 'left' },
+  credits: { enabled: false },
+  legend: { enabled: false },
+  xAxis: { type: 'datetime' },
+  yAxis: {
+    title: { text: '價格 (USD)' },
+    labels: { formatter: function () { return `$${this.value.toFixed(2)}` } },
+  },
+  tooltip: { xDateFormat: '%Y/%m/%d' },
+  plotOptions: {
+    candlestick: {
+      color: '#ef4444',
+      upColor: '#10b981',
+      lineColor: '#ef4444',
+      upLineColor: '#10b981',
+    },
+  },
+  series: [{
     type: 'candlestick',
-    height: 400,
-    toolbar: {
-      show: true
-    },
-    zoom: {
-      enabled: true
-    }
-  },
-  title: {
-    text: `${props.symbol} · K 線圖`,
-    align: 'left'
-  },
-  xaxis: {
-    type: 'datetime'
-  },
-  yaxis: {
-    tooltip: {
-      enabled: true
-    },
-    title: {
-      text: '價格 (USD)'
-    }
-  },
-  tooltip: {
-    x: {
-      format: 'yyyy/MM/dd'
-    }
-  }
-})
+    name: 'K線圖',
+    data: chartSeries.value[0].data.map(d => {
+      const ts = d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime()
+      return [ts, d.y[0], d.y[1], d.y[2], d.y[3]]
+    }),
+  }],
+}))
 
 function getPeriodRange(range) {
   const today = new Date()

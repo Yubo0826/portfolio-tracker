@@ -42,7 +42,16 @@ import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 
 // Chart Library
-import VueApexCharts from 'vue3-apexcharts'
+import Highcharts from 'highcharts/highstock'
+import HighchartsVue from 'highcharts-vue'
+
+Highcharts.setOptions({
+  lang: {
+    locale: 'en-US',
+    thousandsSep: ',',
+    decimalPoint: '.',
+  },
+})
 
 // App Instance
 const app = createApp(App)
@@ -51,7 +60,7 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(i18n)
-app.use(VueApexCharts)
+app.use(HighchartsVue, { highcharts: Highcharts })
 
 app.use(PrimeVue, {
   theme: {
