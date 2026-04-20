@@ -172,6 +172,8 @@
 
 <script setup>
 import { ref, onMounted, watch, computed, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -199,10 +201,10 @@ onBeforeRouteUpdate((to, from) => {
 
 const chartType = ref('area');
 
-const chartTypeOptions = [
-  { label: '面積圖', value: 'area', icon: 'pi pi-chart-line' },
-  { label: 'K線圖', value: 'candlestick', icon: 'pi pi-chart-bar' }
-]
+const chartTypeOptions = computed(() => [
+  { label: t('areaChart'), value: 'area', icon: 'pi pi-chart-line' },
+  { label: t('klineChart'), value: 'candlestick', icon: 'pi pi-chart-bar' }
+])
 
 // 偵測切換
 watch(chartType, (newType) => {
@@ -242,7 +244,7 @@ const highAreaOptions = computed(() => {
       tickColor: gridColor,
     },
     yAxis: {
-      title: { text: '股價 (美元)', style: { color: axisColor } },
+      title: { text: t('stockPriceUSD'), style: { color: axisColor } },
       labels: {
         formatter: function () { return `$${this.value.toFixed(2)}` },
         style: { fontSize: '12px', color: axisColor },
@@ -271,7 +273,7 @@ const highAreaOptions = computed(() => {
     },
     series: [{
       type: 'area',
-      name: '收盤價',
+      name: t('closePrice'),
       data: chartSeries.value[0].data.map(d => [
         d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime(),
         Number(d.y)
@@ -297,7 +299,7 @@ const highCandleOptions = computed(() => {
       labels: { style: { color: axisColor } },
     },
     yAxis: {
-      title: { text: '價格 (USD)', style: { color: axisColor } },
+      title: { text: t('priceUSD'), style: { color: axisColor } },
       labels: {
         formatter: function () { return `$${this.value.toFixed(2)}` },
         style: { color: axisColor },
@@ -319,7 +321,7 @@ const highCandleOptions = computed(() => {
     },
     series: [{
       type: 'candlestick',
-      name: 'K線圖',
+      name: t('klineChart'),
       data: candleSeries.value[0].data.map(d => {
         const ts = d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime()
         return [ts, d.y[0], d.y[1], d.y[2], d.y[3]]

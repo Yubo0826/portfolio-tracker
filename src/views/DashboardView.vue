@@ -186,7 +186,7 @@
           <template #footer>
             <div
               v-if="holdingsStore.list.length > 0"
-              class="w-full max-w-md mx-auto rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] p-5 mt-auto"
+              class="w-full mx-auto rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] p-5 mt-auto"
             >
               <div class="mb-3 grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] text-[13px] font-medium text-[var(--p-text-muted-color)] tracking-wide">
                 <div>{{ $t('symbol') }}</div>
@@ -500,7 +500,18 @@ const holdingsChart = computed(() => ({
   plotOptions: {
     pie: {
       innerSize: '50%',
-      dataLabels: { enabled: false },
+      dataLabels: {
+        enabled: true,
+        format: '<b>{point.name}</b><br>{point.percentage:.1f}%',
+        distance: 18,
+        style: {
+          fontSize: '12px',
+          fontWeight: '600',
+          color: isDark.value ? '#d1d5db' : '#374151',
+          textOutline: 'none',
+        },
+        connectorColor: isDark.value ? '#6b7280' : '#9ca3af',
+      },
       showInLegend: true,
     },
   },
@@ -511,13 +522,16 @@ const holdingsChart = computed(() => ({
     itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' },
   },
   tooltip: {
-    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Value: ${point.y:.2f}',
+    pointFormat: `{series.name}: <b>{point.percentage:.1f}%</b><br/>${t('chartValue')}: $` + '{point.y:.2f}',
     backgroundColor: isDark.value ? '#1f2937' : '#fff',
     style: { color: isDark.value ? '#f3f4f6' : '#374151' },
   },
   series: [{
-    name: 'Holdings',
-    data: holdingsStore.list.map(h => ({ name: h.symbol, y: h.currentValue })),
+    name: t('holdings'),
+    data: [...holdingsStore.list]
+      .sort((a, b) => b.currentValue - a.currentValue)
+      .slice(0, 5)
+      .map(h => ({ name: h.symbol, y: h.currentValue })),
   }],
 }))
 
@@ -528,7 +542,18 @@ const allocationChart = computed(() => ({
   plotOptions: {
     pie: {
       innerSize: '50%',
-      dataLabels: { enabled: false },
+      dataLabels: {
+        enabled: true,
+        format: '<b>{point.name}</b><br>{point.percentage:.1f}%',
+        distance: 18,
+        style: {
+          fontSize: '12px',
+          fontWeight: '600',
+          color: isDark.value ? '#d1d5db' : '#374151',
+          textOutline: 'none',
+        },
+        connectorColor: isDark.value ? '#6b7280' : '#9ca3af',
+      },
       showInLegend: true,
     },
   },
@@ -539,12 +564,12 @@ const allocationChart = computed(() => ({
     itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' },
   },
   tooltip: {
-    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Target: {point.y}%',
+    pointFormat: `{series.name}: <b>{point.percentage:.1f}%</b><br/>${t('target')}: {point.y}%`,
     backgroundColor: isDark.value ? '#1f2937' : '#fff',
     style: { color: isDark.value ? '#f3f4f6' : '#374151' },
   },
   series: [{
-    name: 'Allocation',
+    name: t('allocation'),
     data: sortedAllocation.value.map(a => ({ name: a.symbol, y: Number(a.target) })),
   }],
 }))

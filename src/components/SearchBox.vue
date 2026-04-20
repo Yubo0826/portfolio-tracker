@@ -55,13 +55,13 @@
           @mouseenter="setActive(idx)"
           @click="select(idx)"
           :class="[
-            'group flex items-center justify-between gap-3 px-4 py-3 cursor-pointer',
-            activeIndex === idx ? 'bg-neutral-100' : 'hover:bg-neutral-100'
+            'search-result-item group flex items-center justify-between gap-3 px-4 py-3 cursor-pointer',
+            activeIndex === idx ? 'is-active' : ''
           ]"
         >
           <div class="flex flex-col py-2 px-4">
-            <span class="text-base font-semibold text-black">{{ item.symbol }}</span>
-            <span class="text-sm text-gray-500">
+            <span class="search-item-symbol text-base font-semibold">{{ item.symbol }}</span>
+            <span class="search-item-name text-sm">
               {{ item.name }}
               <template v-if="item.assetType">
                 ({{ item.assetType }})
@@ -172,3 +172,36 @@ onMounted(() => {
   inputEl.value?.focus()
 })
 </script>
+
+<style scoped>
+.search-result-item {
+  margin: 0 0.5rem;
+  border-radius: 0.625rem;
+  transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover {
+  background-color: var(--p-surface-hover);
+}
+
+.search-result-item.is-active {
+  background-color: var(--p-surface-hover);
+  /* background-color: color-mix(in srgb, var(--p-primary-color) 16%, white); */
+}
+
+:global(.dark) .search-result-item:hover {
+  background-color: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
+}
+
+:global(.dark) .search-result-item.is-active {
+  background-color: color-mix(in srgb, var(--p-primary-color) 36%, transparent);
+}
+
+.search-item-symbol {
+  color: var(--p-text-color);
+}
+
+.search-item-name {
+  color: var(--p-text-muted-color);
+}
+</style>

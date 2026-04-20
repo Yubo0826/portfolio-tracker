@@ -4,7 +4,7 @@
 
   <div class="flex flex-col min-h-screen">
     <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
-    <div class="w-full flex-grow mx-auto p-4">
+    <div class="w-full flex-grow mx-auto p-4 ">
       <!-- Header -->
       <header class="px-2 sm:px-4 mb-4">
         <div class="flex justify-between items-center gap-3 py-2">
@@ -57,22 +57,65 @@
               severity="secondary"
             />
 
-            <!-- <div class="relative">
+            <!-- Language Dropdown -->
+            <div class="relative">
               <Button
-                ref="languageButton"
-                class="p-button-rounded p-button-text"
                 icon="pi pi-language"
                 aria-label="Language"
                 size="small"
+                text
+                rounded
+                severity="secondary"
                 @click="toggleLanguageMenu"
               />
-              <Menu 
-                ref="languageMenu"
-                :model="languageMenuItems"
-                :popup="true"
-                class="language-menu"
+              <Menu ref="languageMenu" :model="langMenuItems" :popup="true" class="lang-currency-menu">
+                <template #start>
+                  <div class="menu-panel-title px-2 pt-1 pb-2 text-sm font-semibold">{{ t('language') }}</div>
+                </template>
+                <template #item="{ item, props }">
+                  <a
+                    v-ripple
+                    class="menu-panel-item flex items-center gap-3 px-3 py-2"
+                    :class="{ 'is-active': item.active }"
+                    v-bind="props.action"
+                  >
+                    <span class="text-base leading-none">{{ item.flag }}</span>
+                    <span class="flex-1 text-sm">{{ item.label }}</span>
+                    <i v-if="item.active" class="pi pi-check text-xs text-white"></i>
+                  </a>
+                </template>
+              </Menu>
+            </div>
+
+            <!-- Currency Dropdown -->
+            <div class="relative">
+              <Button
+                icon="pi pi-dollar"
+                aria-label="Currency"
+                size="small"
+                text
+                rounded
+                severity="secondary"
+                @click="toggleCurrencyMenu"
               />
-            </div> -->
+              <Menu ref="currencyMenu" :model="currencyMenuItems" :popup="true" class="lang-currency-menu">
+                <template #start>
+                  <div class="menu-panel-title px-2 pt-1 pb-2 text-sm font-semibold">{{ t('currency.label') }}</div>
+                </template>
+                <template #item="{ item, props }">
+                  <a
+                    v-ripple
+                    class="menu-panel-item flex items-center gap-3 px-3 py-2"
+                    :class="{ 'is-active': item.active }"
+                    v-bind="props.action"
+                  >
+                    <span class="text-sm font-mono w-8 leading-none">{{ item.symbol }}</span>
+                    <span class="flex-1 text-sm">{{ item.label }}</span>
+                    <i v-if="item.active" class="pi pi-check text-xs text-white"></i>
+                  </a>
+                </template>
+              </Menu>
+            </div>
 
             
             <!-- User Menu -->
@@ -119,7 +162,7 @@
       </header>
 
       <!-- Main Content -->
-      <main class="px-2 sm:px-4">
+      <main class="px-2 sm:px-4 max-w-screen-2xl w-full mx-auto flex-grow">
         <!-- Action Buttons Bar - Mobile and Desktop -->
         <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
           <!-- Portfolio Selector - Mobile Only lg:hidden --> 
@@ -352,6 +395,28 @@ const toggleLanguageMenu = (event) => {
   languageMenu.value?.toggle(event)
 }
 
+const currencyMenu = ref()
+const toggleCurrencyMenu = (event) => currencyMenu.value?.toggle(event)
+
+const setCurrency = (value) => {
+  settingsStore.setDisplayCurrency(value)
+  currencyMenu.value?.hide()
+}
+
+const langMenuItems = computed(() =>
+  languageOptions.map(option => ({
+    label: option.label,
+    flag: option.flag,
+    active: currentLanguage.value === option.value,
+    command: () => selectLanguage(option.value),
+  }))
+)
+
+const currencyMenuItems = computed(() => [
+  { label: 'USD', symbol: '$', active: displayCurrency.value === 'USD', command: () => setCurrency('USD') },
+  { label: 'TWD', symbol: 'NT$', active: displayCurrency.value === 'TWD', command: () => setCurrency('TWD') },
+])
+
 const selectLanguage = (value) => {
   locale.value = value
   currentLanguage.value = value
@@ -387,19 +452,7 @@ onMounted(() => {
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
 const menuItems = computed(() => {
-  const list =  [
-    { 
-      label: t('currency.label'),
-      icon: 'pi pi-dollar',
-      value: displayCurrency.value,
-      command: () => toggleCurrency()
-    },
-    {
-      label: t('language'),
-      icon: 'pi pi-language',
-      value: locale.value === 'en' ? 'English' : '繁體中文',
-      command: () => toggleLanguage()
-    },
+  const list = [
     { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
   ]
   if (auth.user.uid !== 'demo-user') {
@@ -464,6 +517,69 @@ header {
 
 .language-menu {
   z-index: 1000;
+}
+
+.lang-currency-menu {
+  min-width: 200px;
+}
+
+.lang-currency-menu :deep(.p-menu-item-content) {
+  padding: 0 !important;
+}
+
+.lang-currency-menu.p-menu {
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--p-content-border-color);
+  background: var(--p-surface-card);
+  box-shadow: 0 14px 30px rgba(7, 10, 18, 0.16);
+}
+
+.lang-currency-menu .p-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.menu-panel-title {
+  color: var(--p-text-color);
+}
+
+.menu-panel-item {
+  border-radius: 0.5rem;
+  border: 1px solid var(--p-content-border-color);
+  color: var(--p-text-color);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.menu-panel-item:hover {
+  background: var(--p-surface-hover);
+}
+
+.menu-panel-item.is-active {
+  border-color: color-mix(in srgb, var(--p-primary-color) 55%, white);
+  background: color-mix(in srgb, var(--p-primary-color) 18%, white);
+  color: var(--p-primary-color);
+}
+
+.dark .lang-currency-menu.p-menu {
+  background: color-mix(in srgb, var(--p-surface-card) 88%, black);
+  border-color: color-mix(in srgb, var(--p-content-border-color) 85%, #1d2436);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
+}
+
+.dark .menu-panel-item {
+  border-color: color-mix(in srgb, var(--p-content-border-color) 80%, #1c2438);
+}
+
+.dark .menu-panel-item:hover {
+  background: color-mix(in srgb, var(--p-primary-color) 14%, transparent);
+}
+
+.dark .menu-panel-item.is-active {
+  border-color: color-mix(in srgb, var(--p-primary-color) 72%, #6f7cff);
+  background: color-mix(in srgb, var(--p-primary-color) 62%, #3644b3);
+  color: #ffffff;
 }
 
 .language-menu :deep(.active-language) {

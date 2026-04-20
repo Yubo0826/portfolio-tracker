@@ -46,9 +46,12 @@
   
 <script setup>
 import { ref, onMounted, watch, defineProps, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import TabMenu from 'primevue/tabmenu';
 import api from '@/utils/api'
 import { useRoute  } from 'vue-router'
+
+const { t } = useI18n()
 
 const route  = useRoute()
 const symbol = route.params.symbol
@@ -111,7 +114,7 @@ const highChartOptions = computed(() => ({
   legend: { enabled: false },
   xAxis: { type: 'datetime', labels: { style: { color: '#999', fontSize: '12px' } } },
   yAxis: {
-    title: { text: '股僷 (美元)' },
+    title: { text: t('stockPriceUSD') },
     labels: {
       formatter: function () { return `$${this.value.toFixed(2)}` },
       style: { fontSize: '12px', color: '#999' },
@@ -125,7 +128,7 @@ const highChartOptions = computed(() => ({
   },
   series: [{
     type: 'line',
-    name: '收盤僷',
+    name: t('closePrice'),
     data: chartSeries.value[0].data.map(d => [
       d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime(),
       Number(d.y)

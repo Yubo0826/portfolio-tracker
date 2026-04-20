@@ -349,7 +349,7 @@ const highBarOptions = computed(() => {
     legend: { enabled: false },
     xAxis: {
       categories: annualReturnsData.value.map(r => r.year.toString()),
-      title: { text: 'Year', style: { color: axisColor } },
+      title: { text: t('year'), style: { color: axisColor } },
       labels: { style: { fontWeight: '600', color: isDark.value ? '#d1d5db' : '#374151' } },
     },
     yAxis: {
@@ -357,7 +357,7 @@ const highBarOptions = computed(() => {
         formatter: function () { return `${(this.value * 100).toFixed(1)}%` },
         style: { color: axisColor },
       },
-      title: { text: 'Annual Return', style: { color: axisColor } },
+      title: { text: t('annualReturnChart'), style: { color: axisColor } },
       gridLineColor: gridColor,
     },
     tooltip: {
@@ -370,7 +370,7 @@ const highBarOptions = computed(() => {
     },
     series: [{
       type: 'column',
-      name: 'Annual Return',
+      name: t('annualReturnChart'),
       data: annualReturnsData.value.map(r => ({
         y: r.value,
         color: r.value >= 0 ? '#2563EB' : '#DC2626',
@@ -450,7 +450,7 @@ async function runBacktest() {
     // 更新走勢圖
     lineData.value = [
       {
-        name: "Portfolio Value",
+        name: t('totalPrice'),
         data: dates.map((d, i) => [new Date(d).getTime(), portfolioValues[i]]),
       },
     ];

@@ -18,7 +18,10 @@
 
 <script setup>
 import { ref, onMounted, defineProps, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/utils/api'
+
+const { t } = useI18n()
 
 const props = defineProps({
   symbol: {
@@ -46,12 +49,12 @@ const chartSeries = ref([
 
 const highCandleOptions = computed(() => ({
   chart: { type: 'candlestick', backgroundColor: 'transparent', animation: { duration: 300 } },
-  title: { text: `${props.symbol} · K 線圖`, align: 'left' },
+  title: { text: `${props.symbol} · ${t('klineChart')}`, align: 'left' },
   credits: { enabled: false },
   legend: { enabled: false },
   xAxis: { type: 'datetime' },
   yAxis: {
-    title: { text: '價格 (USD)' },
+    title: { text: t('priceUSD') },
     labels: { formatter: function () { return `$${this.value.toFixed(2)}` } },
   },
   tooltip: { xDateFormat: '%Y/%m/%d' },
@@ -65,7 +68,7 @@ const highCandleOptions = computed(() => ({
   },
   series: [{
     type: 'candlestick',
-    name: 'K線圖',
+    name: t('klineChart'),
     data: chartSeries.value[0].data.map(d => {
       const ts = d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime()
       return [ts, d.y[0], d.y[1], d.y[2], d.y[3]]

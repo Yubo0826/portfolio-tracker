@@ -1110,6 +1110,29 @@ currency:
     en: "Last updated: {time}"
     zh: "最後更新：{time}"
 
+# 圖表標籤
+totalPrice:
+  en: Portfolio Value
+  zh: 投資組合總值
+year:
+  en: Year
+  zh: 年份
+klineChart:
+  en: Candlestick Chart
+  zh: K線圖
+priceUSD:
+  en: Price (USD)
+  zh: 價格 (美元)
+stockPriceUSD:
+  en: Stock Price (USD)
+  zh: 股價 (美元)
+chartValue:
+  en: Value
+  zh: 價值
+areaChart:
+  en: Area Chart
+  zh: 面積圖
+
 allocationNoSettings:
   en: No allocation settings found. Please set your target allocation first.
   zh: 找不到資產配置設定。請先設定您的目標配置。

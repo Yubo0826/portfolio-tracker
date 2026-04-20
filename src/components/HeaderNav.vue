@@ -207,7 +207,7 @@ const isActive = (paths) => {
 <style scoped>
 .custom-menu {
   background-color: var(--p-surface-card);
-  border: 1px solid var(--p-select-border-color);
+  /* border: 1px solid var(--p-select-border-color); */
   color: var(--p-content-color);
   border-radius: 0.5rem;
 }
