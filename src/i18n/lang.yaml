@@ -333,6 +333,9 @@ setTargets:
 actualPercentage:
   en: Actual %
   zh: 實際比例
+targetPercentage:
+  en: Target %
+  zh: 目標比例
 portfolioNoHoldingsTitle:
   en: This portfolio has no holdings yet
   zh: 這個投資組合還沒有投資項目
@@ -342,6 +345,9 @@ portfolioNoHoldingsDesc:
 diffFromTargetTitle:
   en: Difference from target (needs adjustment)
   zh: 與目標的差值（需調整）
+diffChange:
+  en: Diff
+  zh: 差值
 diffLegend:
   en: Positive = Buy | Negative = Sell
   zh: 正數 = 買入 | 負數 = 賣出
