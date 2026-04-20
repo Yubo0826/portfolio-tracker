@@ -1110,3 +1110,6 @@ allocationNoSettings:
 demoUserMessage:
   en: This is demo data. Please log in to get started!
   zh: 此為展示資料，請登入後開始使用！
+searchResults:
+  en: Search results
+  zh: 搜尋結果

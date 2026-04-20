@@ -42,7 +42,7 @@
         v-if="results.length"
         class="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-neutral-500"
       >
-        搜尋結果
+        {{ t('searchResults') }}
       </div>
 
       <ul v-if="results.length" id="resultsList" role="listbox" class="py-2">
