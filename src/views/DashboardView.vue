@@ -1,6 +1,6 @@
 <template>
   <!-- px-4 sm:px-6 lg:px-8 -->
-  <div class="container mx-auto mt-4 max-w-screen-xl">
+  <div class="container mx-auto mt-4 ">
     <!-- 左右兩欄 -->
     <div class="flex flex-col lg:flex-row gap-6">
 
@@ -113,26 +113,26 @@
             </div>
 
             <!-- 切換期間按鈕 -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">            
-              <div class="flex flex-wrap justify-center sm:justify-start gap-2">
-                <Button
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
+              <!-- Segmented pill control -->
+              <div class="inline-flex items-center rounded-xl p-1 gap-0.5
+                          bg-slate-100 border border-slate-200
+                          dark:bg-[#0f1520] dark:border-[#1d2b3a]">
+                <button
                   v-for="tab in periods"
                   :key="tab.label"
-                  :label="tab.label"
-                  text
-                  rounded
-                  unstyled
                   @click="selectedPeriod = tab.value"
-                  class="px-3 py-2 text-xs rounded-lg cursor-pointer transition-all"
-                  :style="{
-                    backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-500)' : 'transparent',
-                    fontWeight: selectedPeriod === tab.value ? '600' : '400',
-                    color: selectedPeriod === tab.value ? 'var(--p-surface-0)' : 'var(--p-text-color)'
-                  }"
-                />
+                  class="relative px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer
+                         transition-all duration-150 select-none tracking-wide"
+                  :class="selectedPeriod === tab.value
+                    ? 'text-[#030609] bg-[#00F5FF] shadow-[0_0_10px_2px_rgba(0,245,255,0.45)]'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5'"
+                >
+                  {{ tab.label }}
+                </button>
               </div>
 
-              <span class="text-xs ml-4 text-[var(--p-text-color)]">{{ startDate }} ~ {{ endDate }}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
             </div>
           </template>
 
@@ -186,28 +186,28 @@
           <template #footer>
             <div
               v-if="holdingsStore.list.length > 0"
-              class="w-full max-w-md mx-auto rounded-2xl border border-slate-200 p-4 shadow-sm"
+              class="w-full max-w-md mx-auto rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] p-5 mt-auto"
             >
-              <div class="mb-2 grid grid-cols-2 text-[13px] font-medium">
+              <div class="mb-3 grid grid-cols-2 text-[13px] font-medium text-[var(--p-text-muted-color)] tracking-wide">
                 <div>{{ $t('diffFromTargetTitle') }}</div>
                 <div class="text-right">{{ $t('diffLegend') }}</div>
               </div>
 
-              <div class="divide-y divide-slate-100">
+              <div class="divide-y divide-[var(--p-content-border-color)]">
                 <div
                   v-for="r in rebalanceRows"
                   :key="r.symbol"
-                  class="grid grid-cols-2 items-center py-2 text-sm"
+                  class="grid grid-cols-2 items-center py-2.5 text-sm"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="w-10 shrink-0 font-medium">{{ r.symbol }}</div>
-                    <span :class="r.change > 0 ? 'text-emerald-600' : 'text-rose-600'">
-                      <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45"></i>
-                      <i v-else class="fas fa-arrow-right rotate-45"></i>
+                    <div class="w-10 shrink-0 font-semibold text-[var(--p-text-color)]">{{ r.symbol }}</div>
+                    <span :class="r.change > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'" class="font-medium tracking-wide">
+                      <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45 text-[10px]"></i>
+                      <i v-else class="fas fa-arrow-right rotate-45 text-[10px]"></i>
                       <span class="ml-1">{{ Math.abs(r.change).toFixed(1) }}%</span>
                     </span>
                   </div>
-                  <div class="text-right font-medium">
+                  <div class="text-right font-semibold text-[var(--p-text-color)] tracking-wide">
                     {{ formatAmount(r.amount, { maximumFractionDigits: 0 }) }}
                   </div>
                 </div>
