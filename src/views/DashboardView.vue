@@ -1,6 +1,6 @@
 <template>
   <!-- px-4 sm:px-6 lg:px-8 -->
-  <div class="container mx-auto mt-4 max-w-screen-xl">
+  <div class="container mx-auto mt-4 ">
     <!-- 左右兩欄 -->
     <div class="flex flex-col lg:flex-row gap-6">
 
@@ -38,7 +38,7 @@
             <template #title>
               <div class="flex items-center">
                 <Button icon="pi pi-chart-line" rounded size="small" disabled />
-                <div class="text-sm ml-2">
+                <div class="text-sm ml-2 flex items-center justify-end gap-2">
                   {{ $t('totalProfit') }}
                   <i class="pi pi-question-circle" v-tooltip.bottom="$t('totalProfitHint')"></i>
                 </div>
@@ -68,7 +68,7 @@
             <template #title>
               <div class="flex items-center">
                 <Button icon="pi pi-calendar" rounded size="small" disabled />
-                <div class="text-sm ml-2">
+                <div class="text-sm ml-2 flex items-center justify-end gap-2">
                   {{ $t('irr') }}
                   <i class="pi pi-question-circle" v-tooltip.bottom="$t('xirrHint')" />
                 </div>
@@ -113,26 +113,26 @@
             </div>
 
             <!-- 切換期間按鈕 -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">            
-              <div class="flex flex-wrap justify-center sm:justify-start gap-2">
-                <Button
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
+              <!-- Segmented pill control -->
+              <div class="inline-flex items-center rounded-xl p-1 gap-0.5
+                          bg-slate-100 border border-slate-200
+                          dark:bg-[#0f1520] dark:border-[#1d2b3a]">
+                <button
                   v-for="tab in periods"
                   :key="tab.label"
-                  :label="tab.label"
-                  text
-                  rounded
-                  unstyled
                   @click="selectedPeriod = tab.value"
-                  class="px-3 py-2 text-xs rounded-lg cursor-pointer transition-all"
-                  :style="{
-                    backgroundColor: selectedPeriod === tab.value ? 'var(--p-primary-500)' : 'transparent',
-                    fontWeight: selectedPeriod === tab.value ? '600' : '400',
-                    color: selectedPeriod === tab.value ? 'var(--p-surface-0)' : 'var(--p-text-color)'
-                  }"
-                />
+                  class="relative px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer
+                         transition-all duration-150 select-none tracking-wide"
+                  :class="selectedPeriod === tab.value
+                    ? 'text-[#030609] bg-[#00F5FF] shadow-[0_0_10px_2px_rgba(0,245,255,0.45)]'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5'"
+                >
+                  {{ tab.label }}
+                </button>
               </div>
 
-              <span class="text-xs ml-4 text-[var(--p-text-color)]">{{ startDate }} ~ {{ endDate }}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
             </div>
           </template>
 
@@ -186,28 +186,36 @@
           <template #footer>
             <div
               v-if="holdingsStore.list.length > 0"
-              class="w-full max-w-md mx-auto rounded-2xl border border-slate-200 p-4 shadow-sm"
+              class="w-full max-w-md mx-auto rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] p-5 mt-auto"
             >
-              <div class="mb-2 grid grid-cols-2 text-[13px] font-medium">
-                <div>{{ $t('diffFromTargetTitle') }}</div>
-                <div class="text-right">{{ $t('diffLegend') }}</div>
+              <div class="mb-3 grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] text-[13px] font-medium text-[var(--p-text-muted-color)] tracking-wide">
+                <div>{{ $t('symbol') }}</div>
+                <div class="text-right">{{ $t('actualPercentage') }}</div>
+                <div class="text-right">{{ $t('targetPercentage') }}</div>
+                <div class="text-right">{{ $t('diffChange') }}</div>
+                <div class="flex items-center justify-end gap-1">
+                    <span>{{ $t('rebalance') }}</span>
+                    <i class="pi pi-info-circle" v-tooltip.bottom="$t('diffLegend')"></i>
+                </div>
               </div>
 
-              <div class="divide-y divide-slate-100">
+              <div class="divide-y divide-[var(--p-content-border-color)]">
                 <div
                   v-for="r in rebalanceRows"
                   :key="r.symbol"
-                  class="grid grid-cols-2 items-center py-2 text-sm"
+                  class="grid grid-cols-[2fr_1fr_1fr_1fr_1.5fr] items-center py-2.5 text-sm"
                 >
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 shrink-0 font-medium">{{ r.symbol }}</div>
-                    <span :class="r.change > 0 ? 'text-emerald-600' : 'text-rose-600'">
-                      <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45"></i>
-                      <i v-else class="fas fa-arrow-right rotate-45"></i>
+                  <div class="font-semibold text-[var(--p-text-color)]">{{ r.symbol }}</div>
+                  <div class="text-right text-[var(--p-text-muted-color)]">{{ r.currentPct.toFixed(1) }}%</div>
+                  <div class="text-right text-[var(--p-text-muted-color)]">{{ r.targetPct.toFixed(1) }}%</div>
+                  <div class="text-right">
+                    <span :class="r.change > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'" class="font-medium tracking-wide">
+                      <!-- <i v-if="r.change > 0" class="fas fa-arrow-right -rotate-45 text-[10px]"></i>
+                      <i v-else class="fas fa-arrow-right rotate-45 text-[10px]"></i> -->
                       <span class="ml-1">{{ Math.abs(r.change).toFixed(1) }}%</span>
                     </span>
                   </div>
-                  <div class="text-right font-medium">
+                  <div class="text-right font-semibold text-[var(--p-text-color)] tracking-wide">
                     {{ formatAmount(r.amount, { maximumFractionDigits: 0 }) }}
                   </div>
                 </div>
@@ -242,7 +250,11 @@
             </template>
           </Column>
 
-          <Column field="shares" :header="$t('shares')" sortable />
+          <Column field="shares" :header="$t('shares')" sortable>
+            <template #body="{ data }">
+              <span class="font-bold mr-4">{{ data.shares }}</span>
+            </template>
+          </Column>
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ formatAmount(data.totalCost) }}</span>
@@ -255,11 +267,11 @@
               <span class="font-bold mr-4">{{ formatAmount(data.currentValue) }}</span>
               <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
                 <div class="flex items-center gap-1 font-bold text-sm">
-                  <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-                  <i v-else class="pi pi-sort-down-fill"></i>
+                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                  <i v-else class="pi pi-sort-down-fill"></i> -->
                   
-                  <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-                  <i v-else class="fas fa-arrow-right rotate-90"></i> -->
+                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+                  <i v-else class="fas fa-arrow-right rotate-90"></i>
 
                   <!-- <span v-if="data.profitPercentage >= 0">+</span>
                   <span v-else>-</span> -->
@@ -603,7 +615,7 @@ const rebalanceRows = computed(() => {
     const deltaPct = targetPct - currentPct
     if (Math.abs(deltaPct) < 0.05) return
     const amount = Math.round(tv * (deltaPct / 100))
-    out.push({ symbol: sym, change: Number(deltaPct.toFixed(1)), amount })
+    out.push({ symbol: sym, currentPct: Number(currentPct.toFixed(1)), targetPct: Number(targetPct.toFixed(1)), change: Number(deltaPct.toFixed(1)), amount })
   })
   out.sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
   return out.slice(0, 5)

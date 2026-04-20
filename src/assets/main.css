@@ -1,6 +1,14 @@
 @import './base.css';
 @import "tailwindcss";
 
+
+/*
+  Tailwind CSS v4 預設的 dark: variant 是基於 OS 系統層級的 prefers-color-scheme: dark media query，而不是你手動加的 .dark class。所以即使你的應用程式切換到 light mode（移除 .dark class），只要使用者的系統設定是 dark mode，dark: classes 就會繼續觸發。
+  要修正這個問題，需要在 main.css 中告訴 Tailwind v4 改用 class-based dark mode：
+  加入 @custom-variant dark (&:where(.dark, .dark *)); 後，Tailwind v4 的所有 dark: classes 就會改成偵測 HTML 元素上有沒有 .dark class，與你的 useTheme.js 邏輯一致，不再受系統設定影響。
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
 #app {
   /* max-width: 1280px; */
   /* max-width: 1680px; */

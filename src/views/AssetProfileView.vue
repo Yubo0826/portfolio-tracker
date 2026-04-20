@@ -90,27 +90,27 @@
                 </div> -->
                 
                 <!-- 切換期間按鈕 -->
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">                
-                  <div class="flex flex-wrap justify-center sm:justify-start gap-2 py-4">
-                    <Button
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
+                  <!-- Segmented pill control -->
+                  <div class="inline-flex items-center rounded-xl p-1 gap-0.5
+                              bg-[#0f1520] border border-[#1d2b3a]
+                              dark:bg-[#0f1520] dark:border-[#1d2b3a]">
+                    <button
                       v-for="tab in rangeOptions"
                       :key="tab.label"
-                      :label="tab.label"
-                      text
-                      rounded
-                      unstyled
                       @click="currentRange = tab.value"
-                      class="px-3 py-2 text-xs sm:text-sm rounded-lg cursor-pointer transition-all"
-                      :style="{
-                        backgroundColor: currentRange === tab.value ? 'var(--p-primary-500)' : 'transparent',
-                        fontWeight: currentRange === tab.value ? '600' : '400',
-                        color: currentRange === tab.value ? 'var(--p-surface-0)' : 'var(--p-text-color)'
-                      }"
-                    />
+                      class="relative px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer
+                             transition-all duration-150 select-none tracking-wide"
+                      :class="currentRange === tab.value
+                        ? 'text-[#030609] bg-[#003cff] shadow-[0_0_10px_2px_rgba(0,245,255,0.45)]'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'"
+                    >
+                      {{ tab.label }}
+                    </button>
                   </div>
-  
+
                   <div>
-                    <span class="text-xs ml-4">{{ startDate }} ~ {{ endDate }}</span>
+                    <span class="text-xs text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
                   </div>
                 </div>
     
