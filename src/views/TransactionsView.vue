@@ -49,12 +49,20 @@
       <Column field="shares" sortable :header="$t('shares')" />
       <Column field="price" sortable :header="$t('price')">
         <template #body="{ data }">
-          {{ formatPrice(data.price) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.price, 'price').main }}</span>
+            <span>{{ splitDisplayAmount(data.price, 'price').fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.price, 'price').code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="fee" sortable :header="$t('fee')">
         <template #body="{ data }">
-          {{ formatAmount(data.fee) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.fee).main }}</span>
+            <span>{{ splitDisplayAmount(data.fee).fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.fee).code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="" sortable :header="$t('operation')">
@@ -111,7 +119,25 @@ import NoData from '@/components/NoData.vue';
 const store = useTransactionsStore();
 const auth = useAuthStore();
 const toast = useToast();
-const { formatAmount, formatPrice } = useCurrency();
+const { formatAmountWithCode, formatPriceWithCode } = useCurrency();
+
+const splitDisplayAmount = (value, mode = 'amount') => {
+  const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
+  if (formatted === '--') {
+    return { main: '--', fraction: '', code: '' }
+  }
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code: '' }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code: match[3] || ''
+  }
+}
 
 const dialogVisible = ref(false);
 const editingId = ref(null);

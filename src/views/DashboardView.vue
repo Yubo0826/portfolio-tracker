@@ -1,13 +1,9 @@
-<template>
+﻿<template>
   <!-- px-4 sm:px-6 lg:px-8 -->
-  <div class="container mx-auto mt-4 ">
-    <!-- 左右兩欄 -->
+  <div class="container mx-auto mt-4  max-w-screen-2xl">
     <div class="flex flex-col lg:flex-row gap-6">
-
-      <!-- 左半邊（統計卡 + 走勢圖） -->
       <div class="w-full lg:w-3/5 flex flex-col gap-6">
         
-        <!-- 三張統計卡 -->
         <!-- grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Total Value -->
@@ -20,9 +16,10 @@
             </template>
             <template #content>
               <div class="flex justify-between items-center mt-2">
-                <div v-if="totalValue" class="text-2xl font-bold">
+                <div v-if="totalValue" class="text-2xl font-bold inline-flex items-end">
                   <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
                   <span class="text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                  <span class="ml-1 text-[10px] pb-0.5 font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
                 </div>
                 <div v-else class="text-2xl font-bold">--</div>
               </div>
@@ -47,9 +44,10 @@
             </template>
             <template #content>
               <div class="flex justify-between items-center mt-2">
-                <div v-if="totalProfit" class="text-2xl font-bold">
+                <div v-if="totalProfit" class="text-2xl font-bold inline-flex items-end">
                   <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
                   <span class="text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                  <span class="ml-1 text-[10px] pb-0.5 font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
                 </div>
                 <div v-else class="text-2xl font-bold">--</div>
               </div>
@@ -90,7 +88,7 @@
           </Card>
         </div>
 
-        <!-- 資產走勢圖 -->
+        <!-- Asset Trend -->
         <Card>
           <template #title>
             <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
@@ -98,14 +96,14 @@
 
               <Tag v-if="holdingsStore.list.length > 0" :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
                 <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
-                  <!-- 變化數值 -->
+                  <!-- change icon -->
                   <span class="mr-2">                          
                     <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
                     <i v-else class="pi pi-sort-down-fill"></i>
                   </span>
                   <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }}</span>
                   (
-                    <!-- 變化%數 -->
+                    <!-- change percent -->
                     <span v-if="growthRate >= 0">+</span>
                     <span v-else>-</span>
                     <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
@@ -114,7 +112,7 @@
               </Tag>
             </div>
 
-            <!-- 切換期間按鈕 -->
+            <!-- Asset Trend Period Selector -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
               <!-- Segmented pill control -->
               <div class="inline-flex items-center rounded-xl p-1 gap-0.5
@@ -147,7 +145,7 @@
         </Card>
       </div>
 
-      <!-- 右半邊圓餅圖（縮小會掉到下方） -->
+      <!-- Asset Allocation -->
       <div class="w-full lg:w-2/5">
         <Card class="w-full h-full">
           <template #title>
@@ -156,11 +154,13 @@
               <!-- unstyled  -->
               <!-- :label="$t('setTargets')"  -->
               <!-- :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" /> -->
-              <Button
+              <!-- <Button
                 icon="pi pi-cog"
                 variant="text" rounded
                 @click="$router.push('allocation')" 
-              />
+              /> -->
+
+              <p @click="$router.push('allocation')" class="cursor-pointer text-sm text-blue-500 hover:underline">設置目標比例 ⭢</p>
             </div>
           </template>
 
@@ -201,7 +201,7 @@
                 </div>
               </div>
 
-              <div class="divide-y divide-[var(--p-content-border-color)]">
+              <div class="divide-y divide-[var(--p-content-border-color)] overflow-auto height-[155px]">
                 <div
                   v-for="r in rebalanceRows"
                   :key="r.symbol"
@@ -248,27 +248,44 @@
 
           <Column field="currentPrice" :header="$t('currentPrice')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">{{ formatPrice(data.currentPrice) }}</span>
+              <div class="font-medium mr-4 inline-flex items-end">
+                <span>{{ splitAmountWithCode(data.currentPrice, 'price').main }}</span>
+                <span>{{ splitAmountWithCode(data.currentPrice, 'price').fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentPrice, 'price').code }}</span>
+              </div>
             </template>
           </Column>
 
           <Column field="shares" :header="$t('shares')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">{{ data.shares }}</span>
+              <span class="font-medium mr-4">{{ data.shares }}</span>
             </template>
           </Column>
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">{{ formatAmount(data.totalCost) }}</span>
-              <div class="text-sm text-[var(--p-card-subtitle-color)]">{{ formatPrice(data.avgCost) }} {{ $t('perShare') }}</div>
+              <div class="font-medium mr-4 inline-flex items-end">
+                <span>{{ splitAmountWithCode(data.totalCost).main }}</span>
+                <span>{{ splitAmountWithCode(data.totalCost).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.totalCost).code }}</span>
+              </div>
+              <div class="text-sm text-[var(--p-card-subtitle-color)] inline-flex items-end">
+                <span>{{ splitAmountWithCode(data.avgCost, 'price').main }}</span>
+                <span>{{ splitAmountWithCode(data.avgCost, 'price').fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold">{{ splitAmountWithCode(data.avgCost, 'price').code }}</span>
+                <span class="ml-1">{{ $t('perShare') }}</span>
+              </div>
             </template>
           </Column>
 
           <Column field="currentValue" :header="$t('totalValue')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">{{ formatAmount(data.currentValue) }}</span>
+              <div class="font-medium mr-4 inline-flex items-end">
+                <span>{{ splitAmountWithCode(data.currentValue).main }}</span>
+                <span>{{ splitAmountWithCode(data.currentValue).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
+              </div>
               <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
-                <div class="flex items-center gap-1 font-bold text-sm">
+                <div class="flex items-center gap-1 font-medium text-sm">
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
                   <i v-else class="pi pi-sort-down-fill"></i> -->
                   
@@ -285,7 +302,7 @@
 
           <Column field="target" :header="$t('rate')" sortable>
             <template #body="{ data }">
-              <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
+              <span class="font-medium mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
               <div class="text-sm text-[var(--p-card-subtitle-color)]" :title="$t('targetPct')">
                 {{ data.target || 0 }}%</div>
             </template>
@@ -329,7 +346,7 @@ const holdingsStore = useHoldingsStore()
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatChange, formatPrice, currencySymbol } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatChange, formatPrice, formatPriceWithCode, currencySymbol } = useCurrency()
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
@@ -393,14 +410,47 @@ function formatStrDate(dateStr, locale = 'en-US') {
   return dateStr
 }
 
-  function splitAmountForEmphasis(value) {
-    const formatted = formatAmount(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    const match = formatted.match(/^(.*?)([.,]\d{2})$/)
-    if (!match) {
-      return { main: formatted, fraction: '' }
-    }
-    return { main: match[1], fraction: match[2] }
+function splitAmountForEmphasis(value) {
+  const fractionDigits = displayCurrency.value === 'TWD' ? 0 : 2
+  const formatted = formatAmount(value, {
+    showSymbol: false,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })
+
+  if (formatted === '--') {
+    return { main: '--', fraction: '', code: displayCurrency.value }
   }
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code: displayCurrency.value }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code: displayCurrency.value,
+  }
+}
+
+function splitAmountWithCode(value, mode = 'amount') {
+  const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
+  if (formatted === '--') {
+    return { main: '--', fraction: '', code: displayCurrency.value }
+  }
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code: displayCurrency.value }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code: match[3] || displayCurrency.value,
+  }
+}
 
 const startDate = ref('')
 const endDate = ref('')
@@ -494,12 +544,12 @@ const sortedAllocation = computed(() => {
     const indexA = holdingSymbols.indexOf(a.symbol)
     const indexB = holdingSymbols.indexOf(b.symbol)
 
-    // 不在 holdings 裡的放後面
+    // 銝 holdings 鋆∠??曉???
     if (indexA === -1 && indexB === -1) return 0
     if (indexA === -1) return 1
     if (indexB === -1) return -1
 
-    // 依 holdings 順序排序
+    // 靘?holdings ????
     return indexA - indexB
   })
 })
@@ -597,25 +647,25 @@ const irr = computed(() => {
   if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
   const cashflows = []
 
-  // 處理交易：買入為負（現金流出），賣出為正（現金流入）
+  // ??鈭斗?嚗眺?亦鞎??暸?瘚嚗?鞈??箸迤嚗???伐?
   transactionsStore.list.forEach(tx => {
     let amount
     if (tx.transactionType === 'buy') {
-      // 買入：成本 = 股價 × 股數 + 手續費（現金流出，所以是負數）
+      // 鞎瑕嚗???= ?∪ ? ?⊥ + ??鞎鳴??暸?瘚嚗?隞交鞎嚗?
       amount = -(tx.price * tx.shares + tx.fee)
     } else {
-      // 賣出：收入 = 股價 × 股數 - 手續費（現金流入，所以是正數）
+      // 鞈?嚗??= ?∪ ? ?⊥ - ??鞎鳴??暸?瘚嚗?隞交甇?嚗?
       amount = tx.price * tx.shares - tx.fee
     }
     cashflows.push({ amount, when: new Date(tx.date) })
   })
   
-  // 股息收入（現金流入，正數）
+  // Dividend cash inflow
   dividends.value.forEach(d => {
     cashflows.push({ amount: parseFloat(d.totalAmount), when: new Date(d.date) })
   })
   
-  // 當前持倉市值（視為今日賣出的收入，正數）
+  // Current holdings treated as terminal cash inflow today
   cashflows.push({ amount: holdingsStore.list.reduce((s, h) => s + h.currentValue, 0), when: new Date() })
 
   try {
@@ -627,7 +677,7 @@ const irr = computed(() => {
   }
 })
 
-/** 與目標差值（正=買入、負=賣出） */
+/** ?璅榆?潘?甇?鞎瑕??=鞈?嚗?*/
 const rebalanceRows = computed(() => {
   const tv = totalValue.value
   if (!tv || (!holdingsStore.list.length && !allocation.value.length)) return []

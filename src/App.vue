@@ -57,66 +57,6 @@
               severity="secondary"
             />
 
-            <!-- Language Dropdown -->
-            <div class="relative">
-              <Button
-                icon="pi pi-language"
-                aria-label="Language"
-                size="small"
-                text
-                rounded
-                severity="secondary"
-                @click="toggleLanguageMenu"
-              />
-              <Menu ref="languageMenu" :model="langMenuItems" :popup="true" class="lang-currency-menu">
-                <template #start>
-                  <div class="menu-panel-title px-2 pt-1 pb-2 text-sm font-semibold">{{ t('language') }}</div>
-                </template>
-                <template #item="{ item, props }">
-                  <a
-                    v-ripple
-                    class="menu-panel-item flex items-center gap-3 px-3 py-2"
-                    :class="{ 'is-active': item.active }"
-                    v-bind="props.action"
-                  >
-                    <span class="text-base leading-none">{{ item.flag }}</span>
-                    <span class="flex-1 text-sm">{{ item.label }}</span>
-                    <i v-if="item.active" class="pi pi-check text-xs text-white"></i>
-                  </a>
-                </template>
-              </Menu>
-            </div>
-
-            <!-- Currency Dropdown -->
-            <div class="relative">
-              <Button
-                icon="pi pi-dollar"
-                aria-label="Currency"
-                size="small"
-                text
-                rounded
-                severity="secondary"
-                @click="toggleCurrencyMenu"
-              />
-              <Menu ref="currencyMenu" :model="currencyMenuItems" :popup="true" class="lang-currency-menu">
-                <template #start>
-                  <div class="menu-panel-title px-2 pt-1 pb-2 text-sm font-semibold">{{ t('currency.label') }}</div>
-                </template>
-                <template #item="{ item, props }">
-                  <a
-                    v-ripple
-                    class="menu-panel-item flex items-center gap-3 px-3 py-2"
-                    :class="{ 'is-active': item.active }"
-                    v-bind="props.action"
-                  >
-                    <span class="text-sm font-mono w-8 leading-none">{{ item.symbol }}</span>
-                    <span class="flex-1 text-sm">{{ item.label }}</span>
-                    <i v-if="item.active" class="pi pi-check text-xs text-white"></i>
-                  </a>
-                </template>
-              </Menu>
-            </div>
-
             
             <!-- User Menu -->
              <div 
@@ -136,7 +76,7 @@
                   <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
               </Button> -->
 
-              <Menu ref="menu" :model="menuItems" :popup="true">
+              <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
                 <template #start>
                   <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
                     <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
@@ -148,14 +88,15 @@
                 </template>
 
                 <template #item="{ item, props }">
-                    <a v-ripple class="flex items-center" v-bind="props.action">
-                        <span :class="item.icon" />
-                        <span>{{ item.label }}</span>
-                        <!-- <Badge v-if="item.badge" class="ml-auto" :value="item.badge" /> -->
-                        <span v-if="item.value" class="ml-auto rounded bg-emphasis text-[#a1a0ab] text-xs p-1">{{ item.value }}</span>
+                    <a v-ripple class="flex items-center w-full" v-bind="props.action">
+                      <span v-if="item.icon" :class="item.icon" />
+                      <span class="ml-2">{{ item.label }}</span>
+                      <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
+                      <span v-if="item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
+                      <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
                     </a>
                 </template>
-              </Menu>
+        </TieredMenu>
           
           </div>
         </div>
@@ -273,7 +214,7 @@ const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
-import Menu from 'primevue/menu'
+import TieredMenu from 'primevue/tieredmenu'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
@@ -310,18 +251,6 @@ import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
 const settingsStore = useSettingsStore()
 const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
-
-const toggleCurrency = () => {
-  settingsStore.toggleCurrency()
-}
-
-const currencyTooltip = computed(() => {
-  if (displayCurrency.value === 'TWD') {
-    const rate = exchangeRate.value.toFixed(2)
-    return `1 USD = ${rate} TWD`
-  }
-  return t('currency.clickToSwitch', 'Click to switch currency')
-})
 
 // Fetch exchange rate on mount
 onMounted(() => {
@@ -372,61 +301,14 @@ const languageOptions = [
 
 const currentLanguage = ref(locale.value)
 
-const languageMenuItems = computed(() => 
-  languageOptions.map(option => ({
-    label: `${option.flag} ${option.label}`,
-    command: () => selectLanguage(option.value),
-    class: currentLanguage.value === option.value ? 'active-language' : ''
-  }))
-)
-
-const onLanguageChange = (event) => {
-  const newLocale = event.value
-  locale.value = newLocale
-  currentLanguage.value = newLocale
-  localStorage.setItem('locale', newLocale)
-}
-
-const languageMenu = ref()
-const languageButton = ref()
-
-const toggleLanguageMenu = (event) => {
-  languageMenu.value?.toggle(event)
-}
-
-const currencyMenu = ref()
-const toggleCurrencyMenu = (event) => currencyMenu.value?.toggle(event)
-
 const setCurrency = (value) => {
   settingsStore.setDisplayCurrency(value)
-  currencyMenu.value?.hide()
 }
-
-const langMenuItems = computed(() =>
-  languageOptions.map(option => ({
-    label: option.label,
-    flag: option.flag,
-    active: currentLanguage.value === option.value,
-    command: () => selectLanguage(option.value),
-  }))
-)
-
-const currencyMenuItems = computed(() => [
-  { label: 'USD', symbol: '$', active: displayCurrency.value === 'USD', command: () => setCurrency('USD') },
-  { label: 'TWD', symbol: 'NT$', active: displayCurrency.value === 'TWD', command: () => setCurrency('TWD') },
-])
 
 const selectLanguage = (value) => {
   locale.value = value
   currentLanguage.value = value
   localStorage.setItem('locale', value)
-  languageMenu.value?.hide()
-}
-
-const toggleLanguage = () => {
-  const newLocale = locale.value === 'en' ? 'zh-TW' : 'en'
-  locale.value = newLocale
-  localStorage.setItem('locale', newLocale)
 }
 
 // 顯示新增交易按鈕列的條件: 在 portfolios, backtesting, rebalancing 頁面不顯示
@@ -450,8 +332,29 @@ onMounted(() => {
 
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
+const languageSubItems = computed(() =>
+  languageOptions.map(option => ({
+    label: `${option.flag} ${option.label}`,
+    active: currentLanguage.value === option.value,
+    command: () => selectLanguage(option.value),
+  }))
+)
+
+const currencySubItems = computed(() => [
+  { label: 'USD', active: displayCurrency.value === 'USD', command: () => setCurrency('USD') },
+  { label: 'TWD', active: displayCurrency.value === 'TWD', command: () => setCurrency('TWD') },
+])
+
+const currentLanguageLabel = computed(() => {
+  const lang = languageOptions.find(opt => opt.value === currentLanguage.value)
+  return lang ? lang.label : currentLanguage.value
+})
+
 const menuItems = computed(() => {
   const list = [
+    { label: t('language'), icon: 'pi pi-language', items: languageSubItems.value, suffix: currentLanguageLabel.value },
+    { label: t('currency.label'), icon: 'pi pi-dollar', items: currencySubItems.value, suffix: displayCurrency.value },
+    { separator: true },
     { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
   ]
   if (auth.user.uid !== 'demo-user') {

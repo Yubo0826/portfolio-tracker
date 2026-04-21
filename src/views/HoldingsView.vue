@@ -44,35 +44,57 @@
       <Column field="shares" sortable :header="$t('shares')" />
       <Column field="totalCost" sortable :header="$t('totalCost')">
         <template #body="{ data }">
-          {{ formatAmount(data.totalCost) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.totalCost).main }}</span>
+            <span>{{ splitDisplayAmount(data.totalCost).fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalCost).code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="currentPrice" sortable :header="$t('currentPrice')">
         <template #body="{ data }">
-          {{ formatPrice(data.currentPrice) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.currentPrice, 'price').main }}</span>
+            <span>{{ splitDisplayAmount(data.currentPrice, 'price').fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentPrice, 'price').code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="currentValue" sortable :header="$t('currentValue')">
         <template #body="{ data }">
-          {{ formatAmount(data.currentValue) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.currentValue).main }}</span>
+            <span>{{ splitDisplayAmount(data.currentValue).fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentValue).code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="totalProfit" sortable :header="$t('totalProfit')">
         <template #body="{ data }">
-          <div
-            :class="{
-              'text-emerald-600': data.totalProfit >= 0,
-              'text-[#f27362]': data.totalProfit < 0
-            }"
-          >
-            <span class="font-bold mr-4 whitespace-nowrap">
-              {{ formatChange(data.totalProfit) }}
-            </span>
-            <div class="flex items-center gap-1">
-              <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-              <i v-else class="pi pi-sort-down-fill"></i>
-              <span class="font-bold">{{ Math.abs(data.profitPercentage) }}%</span>
+          <div>
+            
+            <div class="flex items-center gap-1 text-sm font-medium">
+              <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+              <i v-else class="pi pi-sort-down-fill"></i> -->
+              <span>
+                <span v-if="data.totalProfit > 0">+</span>
+                <span>{{ splitDisplayAmount(data.totalProfit).main }}</span>
+                <span>{{ splitDisplayAmount(data.totalProfit).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalProfit).code }}</span>
+              </span>
             </div>
+
+            <span class="mr-4 whitespace-nowrap" :class="{
+              'text-emerald-600': data.totalProfit >= 0,
+              'text-[#f27362]': data.totalProfit < 0,
+            }">
+              <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+              <i v-else class="fas fa-arrow-right rotate-90"></i>
+              <span>
+                {{ Math.abs(data.profitPercentage) }}%
+              </span>
+            </span>
+
           </div>
         </template>
       </Column>
@@ -101,7 +123,25 @@ import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore();
 
 import { useCurrency } from '@/composables/useCurrency';
-const { formatAmount, formatChange, formatPrice } = useCurrency();
+const { formatAmountWithCode, formatPriceWithCode } = useCurrency();
+
+const splitDisplayAmount = (value, mode = 'amount') => {
+  const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
+  if (formatted === '--') {
+    return { main: '--', fraction: '', code: '' }
+  }
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code: '' }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code: match[3] || ''
+  }
+}
 
 const selectedHoldings = ref([]);
 

@@ -26,7 +26,11 @@
               <div>
                 <div class="flex items-center justify-between">
                   <div class="flex items-center mb-2">
-                      <div class="text-3xl font-bold mr-4">{{ formatPrice(info.regularMarketPrice) }}</div>
+                      <div class="text-3xl font-bold mr-4 inline-flex items-end">
+                        <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
+                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-amber-500">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
+                      </div>
                       <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
                         <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center text-lg">
                           <!-- 變化數值 -->
@@ -187,10 +191,28 @@ import { useCurrency } from '@/composables/useCurrency'
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark } = useTheme()
 
-const { formatPrice, formatChange } = useCurrency()
+const { formatPrice, formatChange, formatPriceWithCode, displayCurrency } = useCurrency()
 
 const route  = useRoute()
 const symbol = computed(() => route.params.symbol)
+
+function splitPriceForEmphasis(value) {
+  const formatted = formatPriceWithCode(value)
+  if (formatted === '--') {
+    return { main: '--', fraction: '', code: displayCurrency.value }
+  }
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code: displayCurrency.value }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code: match[3] || displayCurrency.value,
+  }
+}
 
 onBeforeRouteUpdate((to, from) => {
   const s = to.params.symbol

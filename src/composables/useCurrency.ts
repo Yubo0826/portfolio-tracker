@@ -136,6 +136,23 @@ export const useCurrency = () => {
   }
 
   /**
+   * 格式化金額顯示（數字在前 + 幣別代碼在後）
+   * 例如：1,234.56 USD / 35,000 TWD
+   */
+  const formatAmountWithCode = (
+    usdAmount: number | null | undefined,
+    options: {
+      minimumFractionDigits?: number
+      maximumFractionDigits?: number
+      compact?: boolean
+    } = {}
+  ): string => {
+    const formatted = formatAmount(usdAmount, { ...options, showSymbol: false })
+    if (formatted === '--') return '--'
+    return `${formatted} ${currencyCode.value}`
+  }
+
+  /**
    * 格式化價格（股價等，通常需要更多小數位）
    * @param usdPrice 美金價格
    * @returns 格式化後的字串
@@ -143,6 +160,13 @@ export const useCurrency = () => {
   const formatPrice = (usdPrice: number | null | undefined): string => {
     return formatAmount(usdPrice, {
       showSymbol: true,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }
+
+  const formatPriceWithCode = (usdPrice: number | null | undefined): string => {
+    return formatAmountWithCode(usdPrice, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })
@@ -174,8 +198,10 @@ export const useCurrency = () => {
     // Methods
     convertAmount,
     formatAmount,
+    formatAmountWithCode,
     formatChange,
     formatPrice,
+    formatPriceWithCode,
     toggleCurrency,
     fetchExchangeRate,
     setExchangeRate,

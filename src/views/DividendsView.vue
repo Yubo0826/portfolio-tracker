@@ -32,12 +32,20 @@
       <Column field="shares" sortable :header="$t('shares')" />
       <Column field="amount" sortable :header="$t('dividendPerShare')">
         <template #body="{ data }">
-          {{ formatPrice(data.amount) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.amount, 'price').main }}</span>
+            <span>{{ splitDisplayAmount(data.amount, 'price').fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.amount, 'price').code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="totalAmount" sortable :header="$t('dividendTotal')">
         <template #body="{ data }">
-          {{ formatAmount(data.totalAmount) }}
+          <div class="inline-flex items-end font-medium">
+            <span>{{ splitDisplayAmount(data.totalAmount).main }}</span>
+            <span>{{ splitDisplayAmount(data.totalAmount).fraction }}</span>
+            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalAmount).code }}</span>
+          </div>
         </template>
       </Column>
       <Column field="date" sortable :header="$t('date')" />
@@ -61,7 +69,25 @@ const auth = useAuthStore()
 import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore()
 
-const { formatAmount, formatPrice } = useCurrency();
+const { formatAmountWithCode, formatPriceWithCode } = useCurrency();
+
+const splitDisplayAmount = (value, mode = 'amount') => {
+  const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
+  if (formatted === '--') {
+    return { main: '--', fraction: '', code: '' }
+  }
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code: '' }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code: match[3] || ''
+  }
+}
 
 const isLoading = ref(false);
 const dividends = ref([]);

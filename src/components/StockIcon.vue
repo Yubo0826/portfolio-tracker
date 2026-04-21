@@ -2,7 +2,7 @@
     <img
       :src="imageSrc"
       @error="handleImageError"
-      class="w-8 h-8 mr-2"
+      class="w-8 h-8 mr-2 rounded-full object-cover"
     />
   </template>
   
