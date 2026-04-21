@@ -175,7 +175,6 @@
               optionValue="id"
               checkmark
               :highlightOnSelect="false"
-              class="w-full"
             >
               <template #header>
                 <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>

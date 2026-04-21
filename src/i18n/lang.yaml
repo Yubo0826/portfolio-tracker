@@ -19,6 +19,9 @@ refreshPrices:
 symbol:
   en: Symbol
   zh: 代號
+rate:
+  en: Rate
+  zh: 占比
 name:
   en: Name
   zh: 名稱

@@ -21,7 +21,8 @@
             <template #content>
               <div class="flex justify-between items-center mt-2">
                 <div v-if="totalValue" class="text-2xl font-bold">
-                  {{ formatAmount(totalValue) }}
+                  <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
+                  <span class="text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
                 </div>
                 <div v-else class="text-2xl font-bold">--</div>
               </div>
@@ -47,7 +48,8 @@
             <template #content>
               <div class="flex justify-between items-center mt-2">
                 <div v-if="totalProfit" class="text-2xl font-bold">
-                  {{ formatAmount(totalProfit) }}
+                  <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
+                  <span class="text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
                 </div>
                 <div v-else class="text-2xl font-bold">--</div>
               </div>
@@ -235,10 +237,10 @@
               <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
                   class="flex items-center cursor-pointer p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
                   :style="{ width: '300px', minWidth: '250px' }">
-                <StockIcon :symbol="data.symbol" class="mr-2" />
+                <StockIcon :symbol="data.symbol" class="mr-8" />
                 <div class="truncate">
-                  <span class="font-bold mx-2">{{ data.symbol }}</span>
-                  <span class="truncate text-sm">{{ data.name }}</span>
+                  <span class="font-medium">{{ data.symbol }}</span>
+                  <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
               </div>
             </template>
@@ -281,7 +283,7 @@
             </template>
           </Column>
 
-          <Column field="target" :header="$t('allocationRatio')" sortable>
+          <Column field="target" :header="$t('rate')" sortable>
             <template #body="{ data }">
               <span class="font-bold mr-4">{{ ((data.currentValue / totalValue) * 100).toFixed(1) }}%</span>
               <div class="text-sm text-[var(--p-card-subtitle-color)]" :title="$t('targetPct')">
@@ -390,6 +392,15 @@ function formatStrDate(dateStr, locale = 'en-US') {
   }
   return dateStr
 }
+
+  function splitAmountForEmphasis(value) {
+    const formatted = formatAmount(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    const match = formatted.match(/^(.*?)([.,]\d{2})$/)
+    if (!match) {
+      return { main: formatted, fraction: '' }
+    }
+    return { main: match[1], fraction: match[2] }
+  }
 
 const startDate = ref('')
 const endDate = ref('')
