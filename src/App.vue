@@ -37,15 +37,24 @@
 
           <!-- 右上功能按鈕區 -->
           <div class="flex justify-center items-center flex-wrap gap-1">
-            <Button
+            <!-- 小螢幕：icon only -->
+            <button
               aria-label="Search"
-              icon="pi pi-search"
               @click="searchBoxVisible = true"
-              size="small"
-              text
-              rounded
-              severity="secondary"
-            />
+              class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 cursor-pointer"
+            >
+              <i class="pi pi-search text-sm"></i>
+            </button>
+            <!-- 大螢幕：pill 樣式 -->
+            <button
+              @click="searchBoxVisible = true"
+              aria-label="Search"
+              class="hidden lg:flex items-center w-[8rem] gap-2 px-3 py-1.5 rounded-lg border border-[var(--p-content-border-color)] bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
+            >
+              <i class="pi pi-search text-xs"></i>
+              <span>{{ $t('search') }}</span>
+              <!-- <span class="text-xs text-gray-400 dark:text-gray-500 ml-1">(Ctrl+K)</span> -->
+            </button>
 
             <Button
               :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
@@ -162,9 +171,9 @@
               <div v-if="portfolioStore.portfolios.length === 0">
                 <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
               </div>
-              <div class="flex flex-wrap gap-2" v-else>
+              <div class="flex flex-wrap gap-4" v-else>
                 <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-file-import" />
+                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-upload" variant="text" />
               </div>
             </div>
             <div v-else-if="auth.user.uid === 'demo-user'">

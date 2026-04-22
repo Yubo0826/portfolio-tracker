@@ -1,6 +1,6 @@
 <template>
   <div class="mt-4">
-      <div class="flex mb-2 mt-6 gap-2 justify-center relative">
+      <div class="flex mb-2 mt-6 gap-2 justify-start relative">
         <SelectButton
           v-model="tab"
           :options="options"

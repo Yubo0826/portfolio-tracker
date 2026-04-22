@@ -42,9 +42,9 @@
           <Column selectionMode="multiple" headerStyle="width: 3rem" />
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
-              <div>
-                <span class="font-medium">{{ data.symbol }}</span>
-                <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold tracking-wide">{{ data.symbol }}</span>
+                <span class="text-sm text-[var(--p-text-color)]">{{ data.name }}</span>
               </div>
             </template>
           </Column>
