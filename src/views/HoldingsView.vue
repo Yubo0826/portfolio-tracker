@@ -1,108 +1,111 @@
 <template>
   <ConfirmDialog></ConfirmDialog>
   <div>
-    <div class="flex justify-end mb-8">
-      <!-- p-button-rounded p-button-text -->
-      <Button
-        :label="$t('delete')"
-        @click="deleteConfirm"
-        :disabled="selectedHoldings.length === 0"
-        class="mr-2"
-        icon="pi pi-trash"
-        severity="secondary"
-        size="small"
-      />
-      <Button
-        :label="$t('refresh')"
-        @click="store.refreshPrices"
-        icon="pi pi-refresh"
-        class="mr-2"
-        severity="secondary"
-        size="small"
-      />
-    </div>
+    <Card>
+      <template #content>
+        <div class="flex justify-end mb-8">
+          <Button
+            :label="$t('delete')"
+            @click="deleteConfirm"
+            :disabled="selectedHoldings.length === 0"
+            class="mr-2"
+            icon="pi pi-trash"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            :label="$t('refresh')"
+            @click="store.refreshPrices"
+            icon="pi pi-refresh"
+            class="mr-2"
+            severity="secondary"
+            size="small"
+          />
+        </div>
 
-    <DataTable
-      v-model:selection="selectedHoldings"
-      :value="store.list"
-      :loading="store.isLoading"
-      dataKey="id"
-      tableStyle="min-width: 50rem"
-      rowHover
-      paginator :rows="15"
-    >
-      <Column selectionMode="multiple" headerStyle="width: 3rem" />
-      <Column field="symbol" sortable :header="$t('symbol')">
-        <template #body="{ data }">
-          <div>
-            <span class="font-medium">{{ data.symbol }}</span>
-            <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
-          </div>
-        </template>
-      </Column>
-      <!-- <Column field="name" sortable :header="$t('name')" /> -->
-      <Column field="shares" sortable :header="$t('shares')" />
-      <Column field="totalCost" sortable :header="$t('totalCost')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.totalCost).main }}</span>
-            <span>{{ splitDisplayAmount(data.totalCost).fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalCost).code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="currentPrice" sortable :header="$t('currentPrice')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.currentPrice, 'price').main }}</span>
-            <span>{{ splitDisplayAmount(data.currentPrice, 'price').fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentPrice, 'price').code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="currentValue" sortable :header="$t('currentValue')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.currentValue).main }}</span>
-            <span>{{ splitDisplayAmount(data.currentValue).fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentValue).code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="totalProfit" sortable :header="$t('totalProfit')">
-        <template #body="{ data }">
-          <div>
-            
-            <div class="flex items-center gap-1 text-sm font-medium">
-              <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-              <i v-else class="pi pi-sort-down-fill"></i> -->
-              <span>
-                <span v-if="data.totalProfit > 0">+</span>
-                <span>{{ splitDisplayAmount(data.totalProfit).main }}</span>
-                <span>{{ splitDisplayAmount(data.totalProfit).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalProfit).code }}</span>
-              </span>
-            </div>
-
-            <span class="mr-4 whitespace-nowrap" :class="{
-              'text-emerald-600': data.totalProfit >= 0,
-              'text-[#f27362]': data.totalProfit < 0,
-            }">
-              <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-              <i v-else class="fas fa-arrow-right rotate-90"></i>
-              <span>
-                {{ Math.abs(data.profitPercentage) }}%
-              </span>
-            </span>
-
-          </div>
-        </template>
-      </Column>
-
-      <template #empty>
-        <NoData />
+        <DataTable
+          v-model:selection="selectedHoldings"
+          :value="store.list"
+          :loading="store.isLoading"
+          dataKey="id"
+          tableStyle="min-width: 50rem"
+          rowHover
+          paginator :rows="15"
+        >
+          <Column selectionMode="multiple" headerStyle="width: 3rem" />
+          <Column field="symbol" sortable :header="$t('symbol')">
+            <template #body="{ data }">
+              <div>
+                <span class="font-medium">{{ data.symbol }}</span>
+                <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
+              </div>
+            </template>
+          </Column>
+          <!-- <Column field="name" sortable :header="$t('name')" /> -->
+          <Column field="shares" sortable :header="$t('shares')" />
+          <Column field="totalCost" sortable :header="$t('totalCost')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.totalCost).main }}</span>
+                <span>{{ splitDisplayAmount(data.totalCost).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalCost).code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="currentPrice" sortable :header="$t('currentPrice')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.currentPrice, 'price').main }}</span>
+                <span>{{ splitDisplayAmount(data.currentPrice, 'price').fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentPrice, 'price').code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="currentValue" sortable :header="$t('currentValue')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.currentValue).main }}</span>
+                <span>{{ splitDisplayAmount(data.currentValue).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentValue).code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="totalProfit" sortable :header="$t('totalProfit')">
+            <template #body="{ data }">
+              <div>
+                
+                <div class="flex items-center gap-1 text-sm font-medium">
+                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
+                  <i v-else class="pi pi-sort-down-fill"></i> -->
+                  <span>
+                    <span v-if="data.totalProfit > 0">+</span>
+                    <span>{{ splitDisplayAmount(data.totalProfit).main }}</span>
+                    <span>{{ splitDisplayAmount(data.totalProfit).fraction }}</span>
+                    <span class="ml-1 text-[10px] pb-0.5 text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalProfit).code }}</span>
+                  </span>
+                </div>
+    
+                <span class="mr-4 whitespace-nowrap" :class="{
+                  'text-emerald-600': data.totalProfit >= 0,
+                  'text-[#f27362]': data.totalProfit < 0,
+                }">
+                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+                  <i v-else class="fas fa-arrow-right rotate-90"></i>
+                  <span>
+                    {{ Math.abs(data.profitPercentage) }}%
+                  </span>
+                </span>
+    
+              </div>
+            </template>
+          </Column>
+    
+          <template #empty>
+            <NoData />
+          </template>
+        </DataTable>
       </template>
-    </DataTable>
+    </Card>
   </div>
 </template>
 

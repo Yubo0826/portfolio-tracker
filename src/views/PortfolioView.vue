@@ -1,7 +1,5 @@
 <template>
-  <Card class="mt-4">
-    <template #content>
-      <!-- top-[60px] -->
+  <div class="mt-4">
       <div class="flex mb-2 mt-6 gap-2 justify-center relative">
         <SelectButton
           v-model="tab"
@@ -10,9 +8,25 @@
           optionValue="value"
           :allowEmpty="false"
         />
-        <!-- <Button @click="tab = 'holdings'" rounded label="持有資產" class="" size="middle" :outlined="tab !== 'holdings'" />
-        <Button @click="tab = 'transactions'" rounded label="交易紀錄" class="" size="middle" :outlined="tab !== 'transactions'" />
-        <Button @click="tab = 'dividends'" rounded label="利息紀錄" class="" size="middle" :outlined="tab !== 'dividends'" /> -->
+
+        <!-- <Button @click="tab = 'holdings'" rounded :label="t('holding')" class="" size="middle" :outlined="tab !== 'holdings'" />
+        <Button @click="tab = 'transactions'" rounded :label="t('transactions')" class="" size="middle" :outlined="tab !== 'transactions'" />
+        <Button @click="tab = 'dividends'" rounded :label="t('dividends')" class="" size="middle" :outlined="tab !== 'dividends'" />-->
+        
+        <!-- <button
+          v-for="option in options"
+          :key="option.value"
+          @click="tab = option.value"
+          class="px-4 py-2 text-sm transition-all duration-200 rounded-lg cursor-pointer"
+          :class="[
+            tab === option.value
+              ? 'bg-gray-100 text-black dark:bg-[#2e2e2e] dark:text-white font-bold'
+              : 'text-gray-500 dark:text-white hover:text-black hover:bg-gray-50 dark:hover:text-white dark:hover:bg-[#222222]'
+          ]"
+        >
+          {{ option.label }}
+        </button> -->
+
       </div>
   
       <div class="mt-4">
@@ -20,9 +34,7 @@
         <div v-else-if="tab === 'transactions'"><TransactionsView /></div>
         <div v-else><DividendsView /></div>
       </div>
-    </template>
-
-  </Card>
+  </div>
 </template>
 
 <script setup>

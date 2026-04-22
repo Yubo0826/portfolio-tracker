@@ -1,104 +1,109 @@
 <template>
   <ConfirmDialog></ConfirmDialog>
   <div>
-    <div class="flex justify-end mb-8">
-      <Button
-        :label="$t('delete')"
-        @click="deleteConfirm"
-        :disabled="selectedAssets.length === 0"
-        icon="pi pi-trash"
-        class="mr-2"
-        severity="secondary"
-        size="small"
-      />
-      <Button
-        :label="$t('export')"
-        @click="exportCsv"
-        icon="pi pi-download"
-        class="mr-2"
-        severity="secondary"
-        size="small"
-      />
-      <TransactionDialog
-        v-model="dialogVisible"
-        :editingId="editingId"
-        @saved="onSaved"
-      />
-    </div>
-
-    <DataTable
-      v-model:selection="selectedAssets"
-      :value="store.list"
-      sortField="date"
-      :sortOrder="-1"
-      :loading="store.isLoading"
-      dataKey="id"
-      tableStyle="min-width: 50rem"
-      paginator :rows="15"
-      rowHover 
-    >
-      <Column selectionMode="multiple" headerStyle="width: 3rem" />
-      <Column field="symbol" sortable :header="$t('symbol')">
-        <template #body="{ data }">
-          <div>
-            <span class="font-medium">{{ data.symbol }}</span>
-            <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
-          </div>
-        </template>
-      </Column>
-      <Column field="shares" sortable :header="$t('shares')" />
-      <Column field="price" sortable :header="$t('price')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.price, 'price').main }}</span>
-            <span>{{ splitDisplayAmount(data.price, 'price').fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.price, 'price').code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="fee" sortable :header="$t('fee')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.fee).main }}</span>
-            <span>{{ splitDisplayAmount(data.fee).fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.fee).code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="" sortable :header="$t('operation')">
-        <template #body="slotProps">
-          <div>
-            <span
-              v-if="slotProps.data.transactionType === 'buy'"
-              class="bg-[#10b981] rounded-full px-4 py-1.5 text-white font-bold text-xs whitespace-nowrap"
-            >
-              {{ $t('buy') }}
-            </span>
-            <span
-              v-else
-              class="bg-red-400 rounded-full px-4 py-1.5 text-white font-bold text-xs whitespace-nowrap"
-            >
-              {{ $t('sell') }}
-            </span>
-          </div>
-        </template>
-      </Column>
-      <Column field="date" sortable :header="$t('date')" />
-      <Column field="" :header="$t('action')">
-        <template #body="slotProps">
+    <Card>
+      <template #content>
+        <div class="flex justify-end mb-8">
           <Button
-            icon="pi pi-pencil"
-            class="p-button-rounded p-button-text"
-            severity="info"
-            @click="openEdit(slotProps.data.id)"
+            :label="$t('delete')"
+            @click="deleteConfirm"
+            :disabled="selectedAssets.length === 0"
+            icon="pi pi-trash"
+            class="mr-2"
+            severity="secondary"
+            size="small"
           />
-        </template>
-      </Column>
+          <Button
+            :label="$t('export')"
+            @click="exportCsv"
+            icon="pi pi-download"
+            class="mr-2"
+            severity="secondary"
+            size="small"
+          />
+          <TransactionDialog
+            v-model="dialogVisible"
+            :editingId="editingId"
+            @saved="onSaved"
+          />
+        </div>
 
-      <template #empty>
-        <NoData />
+        <DataTable
+          v-model:selection="selectedAssets"
+          :value="store.list"
+          sortField="date"
+          :sortOrder="-1"
+          :loading="store.isLoading"
+          dataKey="id"
+          tableStyle="min-width: 50rem"
+          paginator :rows="15"
+          rowHover 
+        >
+          <Column selectionMode="multiple" headerStyle="width: 3rem" />
+          <Column field="symbol" sortable :header="$t('symbol')">
+            <template #body="{ data }">
+              <div>
+                <span class="font-medium">{{ data.symbol }}</span>
+                <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
+              </div>
+            </template>
+          </Column>
+          <Column field="shares" sortable :header="$t('shares')" />
+          <Column field="price" sortable :header="$t('price')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.price, 'price').main }}</span>
+                <span>{{ splitDisplayAmount(data.price, 'price').fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.price, 'price').code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="fee" sortable :header="$t('fee')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.fee).main }}</span>
+                <span>{{ splitDisplayAmount(data.fee).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.fee).code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="" sortable :header="$t('operation')">
+            <template #body="slotProps">
+              <div>
+                <span
+                  v-if="slotProps.data.transactionType === 'buy'"
+                  class="bg-[#10b981] rounded-full px-4 py-1.5 text-white font-bold text-xs whitespace-nowrap"
+                >
+                  {{ $t('buy') }}
+                </span>
+                <span
+                  v-else
+                  class="bg-red-400 rounded-full px-4 py-1.5 text-white font-bold text-xs whitespace-nowrap"
+                >
+                  {{ $t('sell') }}
+                </span>
+              </div>
+            </template>
+          </Column>
+          <Column field="date" sortable :header="$t('date')" />
+          <Column field="" :header="$t('action')">
+            <template #body="slotProps">
+              <Button
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-text"
+                severity="info"
+                @click="openEdit(slotProps.data.id)"
+              />
+            </template>
+          </Column>
+    
+          <template #empty>
+            <NoData />
+          </template>
+        </DataTable>
       </template>
-    </DataTable>
+    </Card>
+
   </div>
 </template>
 

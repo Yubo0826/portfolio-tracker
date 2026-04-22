@@ -1,59 +1,65 @@
 <template>
   <div>
-    <div class="flex justify-end mb-8">
-      <Button
-        :label="$t('refresh')"
-        @click="refreshDividends"
-        icon="pi pi-refresh"
-        class="mr-2"
-        severity="secondary"
-        size="small"
-      />
-    </div>
-
-    <DataTable
-      :value="dividends"
-      sortField="date"
-      :sortOrder="-1"
-      :loading="isLoading"
-      dataKey="id"
-      tableStyle="min-width: 50rem"
-      rowHover 
-      paginator :rows="15"
-    >
-      <Column field="symbol" sortable :header="$t('symbol')">
-        <template #body="{ data }">
-          <div>
-            <span class="font-medium">{{ data.symbol }}</span>
-            <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
-          </div>
-        </template>
-      </Column>
-      <Column field="shares" sortable :header="$t('shares')" />
-      <Column field="amount" sortable :header="$t('dividendPerShare')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.amount, 'price').main }}</span>
-            <span>{{ splitDisplayAmount(data.amount, 'price').fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.amount, 'price').code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="totalAmount" sortable :header="$t('dividendTotal')">
-        <template #body="{ data }">
-          <div class="inline-flex items-end font-medium">
-            <span>{{ splitDisplayAmount(data.totalAmount).main }}</span>
-            <span>{{ splitDisplayAmount(data.totalAmount).fraction }}</span>
-            <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalAmount).code }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column field="date" sortable :header="$t('date')" />
-
-      <template #empty>
-        <NoData />
+    
+    <Card>
+      <template #content>
+        <div class="flex justify-end mb-8">
+          <Button
+            :label="$t('refresh')"
+            @click="refreshDividends"
+            icon="pi pi-refresh"
+            class="mr-2"
+            severity="secondary"
+            size="small"
+          />
+        </div>
+        
+        <DataTable
+          :value="dividends"
+          sortField="date"
+          :sortOrder="-1"
+          :loading="isLoading"
+          dataKey="id"
+          tableStyle="min-width: 50rem"
+          rowHover 
+          paginator :rows="15"
+        >
+          <Column field="symbol" sortable :header="$t('symbol')">
+            <template #body="{ data }">
+              <div>
+                <span class="font-medium">{{ data.symbol }}</span>
+                <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
+              </div>
+            </template>
+          </Column>
+          <Column field="shares" sortable :header="$t('shares')" />
+          <Column field="amount" sortable :header="$t('dividendPerShare')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.amount, 'price').main }}</span>
+                <span>{{ splitDisplayAmount(data.amount, 'price').fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.amount, 'price').code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="totalAmount" sortable :header="$t('dividendTotal')">
+            <template #body="{ data }">
+              <div class="inline-flex items-end font-medium">
+                <span>{{ splitDisplayAmount(data.totalAmount).main }}</span>
+                <span>{{ splitDisplayAmount(data.totalAmount).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalAmount).code }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column field="date" sortable :header="$t('date')" />
+    
+          <template #empty>
+            <NoData />
+          </template>
+        </DataTable>
       </template>
-    </DataTable>
+    </Card>
+
   </div>
 </template>
 

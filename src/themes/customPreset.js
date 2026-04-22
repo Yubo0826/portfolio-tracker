@@ -4,17 +4,17 @@ import Aura from '@primeuix/themes/aura';
 export default definePreset(Aura, {
     semantic: {
       primary: {
-        50:  '{cyan.50}',
-        100: '{cyan.100}',
-        200: '{cyan.200}',
-        300: '{cyan.300}',
-        400: '{cyan.400}',
-        500: '{cyan.500}',
-        600: '{cyan.600}',
-        700: '{cyan.700}',
-        800: '{cyan.800}',
-        900: '{cyan.900}',
-        950: '{cyan.950}'
+        50:  '{indigo.50}',
+        100: '{indigo.100}',
+        200: '{indigo.200}',
+        300: '{indigo.300}',
+        400: '{indigo.400}',
+        500: '{indigo.500}',
+        600: '{indigo.600}',
+        700: '{indigo.700}',
+        800: '{indigo.800}',
+        900: '{indigo.900}',
+        950: '{indigo.950}'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -28,17 +28,17 @@ export default definePreset(Aura, {
             hoverColor: '{primary.600}',
             activeColor: '{primary.700}'
           },
-          content: {
-            background: '{zinc.50}',
-            focusBackground: '{zinc.700}',
-            color: '{zinc.900}',
-            focusColor: '{zinc.900}',
-            borderColor: '{zinc.300}'
-          },
+          // content: {
+          //   background: '{zinc.50}',
+          //   focusBackground: '{zinc.700}',
+          //   color: '{zinc.900}',
+          //   focusColor: '{zinc.900}',
+          //   borderColor: '{zinc.300}'
+          // },
           surface: {
               // background: '#ffffff',
-              // background: '#e2e8f6',
-              background: '#f1f5f9',
+              background: '#f4f6fe',
+              // background: '#f1f5f9',
               card: '#ffffff',
               0: '#ffffff',
               50: '{zinc.50}',

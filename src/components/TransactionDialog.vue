@@ -130,7 +130,7 @@
       />
     </div>
 
-    <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+    <!-- <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div> -->
 
     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
       <div class="flex justify-between items-center">
@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex justify-end gap-3 pt-4 ">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="close" />
 
       <span v-if="!editingId">

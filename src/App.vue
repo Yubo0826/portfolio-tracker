@@ -6,8 +6,8 @@
     <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
     <div class="w-full flex-grow mx-auto p-4 ">
       <!-- Header -->
-      <header class="px-2 sm:px-4 mb-4">
-        <div class="flex justify-between items-center gap-3 py-2">
+      <header class="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 bg-[#f8fafd] dark:bg-black backdrop-blur-sm">
+        <div class="max-w-screen-2xl mx-auto flex justify-between items-center gap-3 py-4">
           <!-- Left: Logo + Portfolio Selector -->
           <div class="flex items-center gap-3">
             <!-- Hamburger Toggle Button - Mobile Only -->
@@ -60,7 +60,7 @@
             
             <!-- User Menu -->
              <div 
-                class="cursor-pointer ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 p-1 transition-colors flex items-center justify-center"
+                class="cursor-pointer ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
                 @click="toggleMenu"
               >
                 <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
@@ -103,7 +103,7 @@
       </header>
 
       <!-- Main Content -->
-      <main class="px-2 sm:px-4 max-w-screen-2xl w-full mx-auto flex-grow">
+      <main class="px-2 sm:px-4 max-w-screen-2xl w-full mx-auto flex-grow pt-16">
         <!-- Action Buttons Bar - Mobile and Desktop -->
         <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
           <!-- Portfolio Selector - Mobile Only lg:hidden --> 
