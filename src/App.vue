@@ -7,7 +7,7 @@
     <div class="w-full flex-grow mx-auto p-4 ">
       <!-- Header -->
       <header class="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 bg-[#f8fafd] dark:bg-black backdrop-blur-sm">
-        <div class="max-w-screen-2xl mx-auto flex justify-between items-center gap-3 py-4">
+        <div class="max-w-screen-2xl mx-auto flex justify-between items-center gap-3 py-4 pl-4">
           <!-- Left: Logo + Portfolio Selector -->
           <div class="flex items-center gap-3">
             <!-- Hamburger Toggle Button - Mobile Only -->
