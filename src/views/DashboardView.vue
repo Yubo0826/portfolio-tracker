@@ -774,9 +774,8 @@ const rebalanceRows = computed(() => {
  *  Charts (options & helpers)
  * =======================*/
 const areaChartOptions = computed(() => {
-  const isPositive = growthRate.value >= 0
-  const lineColor = isPositive ? '#10b981' : '#ef4444'
-  const fillFrom = isPositive ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)'
+  const lineColor = 'var(--p-primary-color)'
+  const fillFrom = 'color-mix(in srgb, var(--p-primary-color) 35%, transparent)'
   const axisColor = isDark.value ? '#9ca3af' : '#999'
   const gridColor = isDark.value ? '#374151' : '#eee'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
