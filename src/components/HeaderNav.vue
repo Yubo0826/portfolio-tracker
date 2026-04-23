@@ -13,7 +13,7 @@
         @click="handleLinkClick(link)"
       >
         <span>{{ link.label }}</span>
-        <i v-if="link.hasMenu" class="pi pi-chevron-down ml-2 text-[10px]"></i>
+        <!-- <i v-if="link.hasMenu" class="pi pi-chevron-down ml-2 text-[10px]"></i> -->
         <div v-if="isActive(link.activePaths)" class="absolute bottom-0 left-3 right-3 h-[2px] bg-[var(--p-primary-color)] rounded"></div>
       </button>
 

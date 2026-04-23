@@ -1,6 +1,65 @@
 ﻿<template>
   <!-- px-4 sm:px-6 lg:px-8 -->
   <div class="container mx-auto mt-4  max-w-screen-2xl">
+    <div v-if="isLoading" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card v-for="idx in skeletonStatCards" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md">
+          <template #content>
+            <div class="space-y-3 py-2">
+              <Skeleton width="6rem" height="1rem" />
+              <Skeleton width="10rem" height="2rem" />
+              <Skeleton width="8rem" height="0.85rem" />
+            </div>
+          </template>
+        </Card>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-6">
+        <Card class="w-full lg:w-3/5">
+          <template #content>
+            <div class="space-y-4 py-1">
+              <div class="flex justify-between items-center gap-4">
+                <Skeleton width="7rem" height="1rem" />
+                <Skeleton width="9rem" height="1.5rem" borderRadius="999px" />
+              </div>
+              <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
+            </div>
+          </template>
+        </Card>
+
+        <Card class="w-full lg:w-2/5">
+          <template #content>
+            <div class="space-y-4 py-1">
+              <div class="flex justify-between items-center gap-4">
+                <Skeleton width="8rem" height="1.5rem" borderRadius="999px" />
+                <Skeleton width="6rem" height="1rem" />
+              </div>
+              <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
+              <Skeleton width="100%" height="9rem" borderRadius="0.75rem" />
+            </div>
+          </template>
+        </Card>
+      </div>
+
+      <Card class="mb-8 p-4">
+        <template #content>
+          <div class="space-y-3">
+            <Skeleton width="12rem" height="1rem" />
+            <div class="space-y-2">
+              <div v-for="idx in skeletonTableRows" :key="`skeleton-row-${idx}`" class="grid grid-cols-5 gap-3 items-center">
+                <Skeleton width="100%" height="1.25rem" />
+                <Skeleton width="100%" height="1.25rem" />
+                <Skeleton width="100%" height="1.25rem" />
+                <Skeleton width="100%" height="1.25rem" />
+                <Skeleton width="100%" height="1.25rem" />
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
+    </div>
+
+    <div v-else>
     <div class="flex flex-col lg:flex-row gap-6">
       <div class="w-full lg:w-3/5 flex flex-col gap-6">
         
@@ -125,7 +184,7 @@
                   class="relative px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer
                          transition-all duration-150 select-none tracking-wide"
                   :class="selectedPeriod === tab.value
-                    ? 'text-[#030609] bg-[#00F5FF] shadow-[0_0_10px_2px_rgba(0,245,255,0.45)]'
+                    ? 'text-[var(--p-primary-contrast-color)] bg-[var(--p-primary-color)] ring-1 ring-[var(--p-primary-color)] shadow-[0_0_10px_1px_color-mix(in_srgb,var(--p-primary-color)_45%,transparent)]'
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5'"
                 >
                   {{ tab.label }}
@@ -314,6 +373,7 @@
         </DataTable>
       </template>
     </Card>
+    </div>
   </div>
 </template>
 
@@ -324,6 +384,7 @@
  * =======================*/
 import { ref, watch, computed } from 'vue'
 import SelectButton from 'primevue/selectbutton'
+import Skeleton from 'primevue/skeleton'
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
@@ -357,6 +418,8 @@ const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
  *  State
  * =======================*/
 const isLoading = ref(false)
+const skeletonStatCards = [1, 2, 3]
+const skeletonTableRows = [1, 2, 3, 4, 5, 6]
 
 const allocation = ref([])
 const dividends = ref([])

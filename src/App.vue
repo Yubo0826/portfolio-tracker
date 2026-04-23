@@ -182,7 +182,14 @@
           </div>
         </div>
 
-        <RouterView />
+        <!-- <RouterView v-slot="{ Component, route: currentRoute }">
+          <Transition name="page-main" mode="out-in" appear>
+            <div :key="currentRoute.fullPath" class="page-main-transition">
+              <component :is="Component" />
+            </div>
+          </Transition> -->
+        <RouterView>
+        </RouterView>
       </main>
     </div>
 
@@ -417,6 +424,36 @@ header {
   font-weight: 600;
   /* font-size: .8em; */
   transition: all .3s ease-in-out;
+}
+
+
+.page-main-transition {
+  width: 100%;
+}
+
+.page-main-enter-active,
+.page-main-leave-active {
+  transition: opacity 0.32s ease, transform 0.32s ease;
+  will-change: opacity, transform;
+}
+
+.page-main-enter-from,
+.page-main-leave-to {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.page-main-enter-to,
+.page-main-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-main-enter-active,
+  .page-main-leave-active {
+    transition: none;
+  }
 }
 
 </style>
