@@ -29,14 +29,6 @@
             severity="secondary"
             size="small"
           />
-          <Button
-            :label="$t('refresh')"
-            @click="store.refreshPrices"
-            icon="pi pi-refresh"
-            class="mr-2"
-            severity="secondary"
-            size="small"
-          />
           </div>
         </div>
 

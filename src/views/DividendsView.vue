@@ -20,22 +20,14 @@
             size="small"
             @click="clearFilters"
           />
-          <div class="flex items-center gap-2 ml-auto">
-            <Button
-              :label="$t('refresh')"
-              @click="refreshDividends"
-              icon="pi pi-refresh"
-              severity="secondary"
-              size="small"
-            />
-          </div>
+
         </div>
         
         <DataTable
           :value="filteredDividends"
           sortField="date"
           :sortOrder="-1"
-          :loading="isLoading"
+          :loading="store.isLoading"
           dataKey="id"
           tableStyle="min-width: 50rem"
           rowHover 
@@ -82,16 +74,16 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import api from '../utils/api.js';
 import DateRangeFilter from '@/components/DateRangeFilter.vue';
 import NoData from '@/components/NoData.vue';
 import { useCurrency } from '@/composables/useCurrency';
-
-import { useAuthStore } from '@/stores/auth'
-const auth = useAuthStore()
-
+import { useDividendsStore } from '@/stores/dividends';
+import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
-const portfolioStore = usePortfolioStore()
+
+const store = useDividendsStore();
+const auth = useAuthStore();
+const portfolioStore = usePortfolioStore();
 
 const { formatAmountWithCode, formatPriceWithCode } = useCurrency();
 
@@ -113,13 +105,11 @@ const splitDisplayAmount = (value, mode = 'amount') => {
   }
 }
 
-const isLoading = ref(false);
-const dividends = ref([]);
 const dateRange = ref(null);
 const selectedSymbols = ref([]);
 
 const symbolOptions = computed(() =>
-  [...new Set(dividends.value.map((d) => d.symbol))].sort()
+  [...new Set(store.list.map((d) => d.symbol))].sort()
 );
 
 const hasActiveFilters = computed(
@@ -131,11 +121,8 @@ const clearFilters = () => {
   dateRange.value = null;
 };
 
-const toStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-const toEndOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-
 const filteredDividends = computed(() => {
-  let list = dividends.value;
+  let list = store.list;
   if (selectedSymbols.value.length) {
     list = list.filter((item) => selectedSymbols.value.includes(item.symbol));
   }
@@ -152,68 +139,21 @@ const filteredDividends = computed(() => {
   return list;
 });
 
-const getDividends = async () => {
-  isLoading.value = true;
-  try {
-    console.log('Fetching dividends for user:', auth.user?.uid, 'and portfolio:', portfolioStore.currentPortfolio?.id);
-    const data = await api.get(`/api/dividends?uid=${auth.user.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`);
-    console.log('Dividends data:', data);
-    setDividends(data);
-  } catch (error) {
-    console.error('Error fetching dividends:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const setDividends = (data) => {
-  dividends.value = data.map(item => {
-    return {
-      id: item.id,
-      symbol: item.symbol,
-      name: item.name,
-      shares: item.shares,
-      amount: item.amount, // 每股股利
-      totalAmount: (item.shares * item.amount).toFixed(2), // 總股利
-      date: item.date.slice(0, 10) // YYYY-MM-DD
-    };
-  });
-};
-
-const refreshDividends = async () => {
-  isLoading.value = true;
-  try {
-    const payload = {
-      uid: auth.user?.uid,
-      portfolio_id: portfolioStore.currentPortfolio?.id
-    };
-    const data = await api.post(`/api/dividends/sync`, payload);
-    console.log('Dividends sync response:', data);
-    setDividends(data.dividends);
-  } catch (error) {
-    console.error('Error fetching dividends:', error);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 watch(() => auth.user, (newUser) => {
   if (newUser && portfolioStore.currentPortfolio?.id) {
-    getDividends();
+    store.fetchDividends();
   }
-})
+});
 
 watch(() => portfolioStore.currentPortfolio, (newVal) => {
   if (newVal?.id && auth.user?.uid) {
-    getDividends();
+    store.fetchDividends();
   }
 });
 
 onMounted(() => {
   if (auth.user?.uid && portfolioStore.currentPortfolio?.id) {
-    getDividends();
-  } else {
-    console.log('No user is logged in or portfolio is not selected');
+    store.fetchDividends();
   }
 });
 </script>

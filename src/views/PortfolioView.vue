@@ -1,6 +1,6 @@
 <template>
   <div class="mt-4">
-      <div class="flex mb-2 mt-6 gap-2 justify-start relative">
+      <div class="flex mb-2 mt-6 gap-2 items-center justify-start relative">
         <SelectButton
           v-model="tab"
           :options="options"
@@ -8,25 +8,16 @@
           optionValue="value"
           :allowEmpty="false"
         />
-
-        <!-- <Button @click="tab = 'holdings'" rounded :label="t('holding')" class="" size="middle" :outlined="tab !== 'holdings'" />
-        <Button @click="tab = 'transactions'" rounded :label="t('transactions')" class="" size="middle" :outlined="tab !== 'transactions'" />
-        <Button @click="tab = 'dividends'" rounded :label="t('dividends')" class="" size="middle" :outlined="tab !== 'dividends'" />-->
-        
-        <!-- <button
-          v-for="option in options"
-          :key="option.value"
-          @click="tab = option.value"
-          class="px-4 py-2 text-sm transition-all duration-200 rounded-lg cursor-pointer"
-          :class="[
-            tab === option.value
-              ? 'bg-gray-100 text-black dark:bg-[#2e2e2e] dark:text-white font-bold'
-              : 'text-gray-500 dark:text-white hover:text-black hover:bg-gray-50 dark:hover:text-white dark:hover:bg-[#222222]'
-          ]"
-        >
-          {{ option.label }}
-        </button> -->
-
+        <div class="ml-auto">
+          <Button
+            :label="$t('refresh')"
+            icon="pi pi-refresh"
+            severity="secondary"
+            size="small"
+            :loading="isRefreshing"
+            @click="refreshAll"
+          />
+        </div>
       </div>
   
       <div class="mt-4">
@@ -38,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import HoldingsView from './HoldingsView.vue'
@@ -47,6 +38,24 @@ import DividendsView from './DividendsView.vue'
 
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
+
+import { useHoldingsStore } from '@/stores/holdings'
+import { useDividendsStore } from '@/stores/dividends'
+import { useTransactionsStore } from '@/stores/transactions'
+
+const holdingsStore = useHoldingsStore()
+const dividendsStore = useDividendsStore()
+const transactionsStore = useTransactionsStore()
+
+const isRefreshing = computed(
+  () => holdingsStore.isLoading || dividendsStore.isLoading || transactionsStore.isLoading
+)
+
+const refreshAll = () => {
+  holdingsStore.refreshPrices()
+  dividendsStore.refreshDividends()
+  transactionsStore.fetchTransactions()
+}
 
 const VALID_TABS = ['holdings', 'transactions', 'dividends']
 const normalize = (t) => (VALID_TABS.includes(t) ? t : 'holdings')
