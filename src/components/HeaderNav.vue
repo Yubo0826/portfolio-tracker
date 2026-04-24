@@ -8,7 +8,7 @@
       @mouseleave="activeMenu = null"
     >
       <button
-        class="px-4 h-10 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)] relative nav-trigger cursor-pointer"
+        class="px-4 h-10 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--p-surface-200)] dark:hover:bg-[var(--p-surface-800)] relative nav-trigger cursor-pointer"
         :class="isActive(link.activePaths) ? 'text-[var(--p-primary-color)]' : 'text-[var(--p-text-color)]'"
         @click="handleLinkClick(link)"
       >
@@ -27,7 +27,7 @@
       >
         <div
           v-if="link.hasMenu && activeMenu === link.key"
-          class="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl py-2 z-[60]"
+          class="absolute top-full left-0 mt-2 w-52 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl py-2 z-[60]"
         >
           <div v-for="group in link.menuGroups" :key="group.label" class="mb-2 last:mb-0">
             <div class="px-4 py-2 text-[10px] uppercase tracking-widest text-[var(--p-text-muted-color)]">
