@@ -3,7 +3,23 @@
   <div>
     <Card>
       <template #content>
-        <div class="flex justify-end mb-8">
+        <div class="flex flex-wrap items-center gap-2 mb-8">
+          <MultiSelect
+            v-model="selectedSymbols"
+            :options="symbolOptions"
+            display="chip"
+            filter
+            :placeholder="$t('symbol')"
+            class="w-60"
+          />
+          <Button
+            v-if="hasActiveFilters"
+            icon="pi pi-filter-slash"
+            severity="secondary"
+            size="small"
+            @click="clearFilters"
+          />
+          <div class="flex items-center gap-2 ml-auto">
           <Button
             :label="$t('delete')"
             @click="deleteConfirm"
@@ -21,12 +37,15 @@
             severity="secondary"
             size="small"
           />
+          </div>
         </div>
 
         <DataTable
           v-model:selection="selectedHoldings"
-          :value="store.list"
+          :value="filteredHoldings"
           :loading="store.isLoading"
+          sortField="currentValue"
+          :sortOrder="-1"
           dataKey="id"
           tableStyle="min-width: 50rem"
           rowHover
@@ -110,7 +129,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import NoData from '@/components/NoData.vue';
 import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n';
@@ -147,6 +166,22 @@ const splitDisplayAmount = (value, mode = 'amount') => {
 }
 
 const selectedHoldings = ref([]);
+const selectedSymbols = ref([]);
+
+const symbolOptions = computed(() =>
+  [...new Set(store.list.map((h) => h.symbol))].sort()
+);
+
+const hasActiveFilters = computed(() => selectedSymbols.value.length > 0);
+
+const clearFilters = () => {
+  selectedSymbols.value = [];
+};
+
+const filteredHoldings = computed(() => {
+  if (!selectedSymbols.value.length) return store.list;
+  return store.list.filter((h) => selectedSymbols.value.includes(h.symbol));
+});
 
 // 初始化＆監聽登入/投組變化後自動載入
 if (auth.user && portfolioStore.currentPortfolio?.id) {

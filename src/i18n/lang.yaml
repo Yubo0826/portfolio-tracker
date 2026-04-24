@@ -1,3 +1,13 @@
+notFound:
+  title:
+    en: Page Not Found
+    zh: 找不到頁面
+  description:
+    en: The page you're looking for doesn't exist or has been moved.
+    zh: 您要找的頁面不存在或已被移動。
+  goHome:
+    en: Back to Home
+    zh: 返回首頁
 portfolio:
   en: Portfolio
   zh: 投資組合
@@ -638,6 +648,41 @@ importFileHint1:
 downloadSampleCSV:
   en: Download Sample
   zh: 下載範例
+
+# 日期篩選
+today:
+  en: Today
+  zh: 今天
+last7Days:
+  en: Last 7 days
+  zh: 過去 7 天
+last30Days:
+  en: Last 30 days
+  zh: 過去 30 天
+thisYear:
+  en: This year
+  zh: 今年
+lastYear:
+  en: Last year
+  zh: 去年
+customDateRange:
+  en: Custom date range
+  zh: 自訂日期範圍
+dateAfter:
+  en: After date
+  zh: 以下日期後
+dateBefore:
+  en: Before date
+  zh: 以下日期前
+clearAll:
+  en: Clear all
+  zh: 全部清除
+apply:
+  en: Apply
+  zh: 套用
+selectAll:
+  en: All
+  zh: 全部
 previewData:
   en: Preview Data
   zh: 預覽資料

@@ -40,6 +40,7 @@ import Toast from 'primevue/toast'
 import SelectButton from 'primevue/selectbutton'
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
+import MultiSelect from 'primevue/multiselect'
 
 // Chart Library
 import Highcharts from 'highcharts/highstock'
@@ -68,6 +69,9 @@ app.use(PrimeVue, {
     options: {
       darkModeSelector: '.dark'
     }
+  },
+  locale: {
+    selectAll: lang === 'zh' ? '全部' : 'All',
   }
 })
 app.use(ToastService)
@@ -91,7 +95,8 @@ const components = {
   Toast,
   SelectButton,
   Card,
-  Tag
+  Tag,
+  MultiSelect
 }
 
 Object.entries(components).forEach(([name, component]) => {

@@ -83,13 +83,6 @@ const navLinks = computed(() => [
     hasMenu: false,
   },
   {
-    key: 'cashflow',
-    label: t('cashFlowNav'),
-    to: '/cash-flow',
-    activePaths: ['/cash-flow', '/cash-flows'],
-    hasMenu: false,
-  },
-  {
     key: 'portfolio',
     label: t('portfolio'),
     to: '/portfolio/holdings',
@@ -117,6 +110,13 @@ const navLinks = computed(() => [
         ],
       },
     ],
+  },
+  {
+    key: 'cashflow',
+    label: t('cashFlowNav'),
+    to: '/cash-flow',
+    activePaths: ['/cash-flow', '/cash-flows'],
+    hasMenu: false,
   },
   {
     key: 'tools',

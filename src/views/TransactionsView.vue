@@ -3,34 +3,59 @@
   <div>
     <Card>
       <template #content>
-        <div class="flex justify-end mb-8">
+        <div class="flex flex-wrap items-center gap-2 mb-8">
+          <!-- showClear -->
+          <MultiSelect
+            v-model="selectedSymbols"
+            :options="symbolOptions"
+            :placeholder="$t('symbol')"
+            display="chip"
+            filter
+            class="w-60"
+          />
+          <MultiSelect
+            v-model="selectedTypes"
+            :options="typeOptions"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="$t('operation')"
+            class="w-30"
+          />
+          <DateRangeFilter v-model="dateRange" />
           <Button
-            :label="$t('delete')"
-            @click="deleteConfirm"
-            :disabled="selectedAssets.length === 0"
-            icon="pi pi-trash"
-            class="mr-2"
+            v-if="hasActiveFilters"
+            icon="pi pi-filter-slash"
             severity="secondary"
             size="small"
+            @click="clearFilters"
           />
-          <Button
-            :label="$t('export')"
-            @click="exportCsv"
-            icon="pi pi-download"
-            class="mr-2"
-            severity="secondary"
-            size="small"
-          />
-          <TransactionDialog
-            v-model="dialogVisible"
-            :editingId="editingId"
-            @saved="onSaved"
-          />
+          <div class="flex items-center gap-2 ml-auto">
+            <Button
+              :label="$t('delete')"
+              @click="deleteConfirm"
+              :disabled="selectedAssets.length === 0"
+              icon="pi pi-trash"
+              severity="secondary"
+              size="small"
+            />
+            <Button
+              :label="$t('export')"
+              @click="exportCsv"
+              icon="pi pi-download"
+              severity="secondary"
+              size="small"
+            />
+            <TransactionDialog
+              v-model="dialogVisible"
+              :editingId="editingId"
+              @saved="onSaved"
+            />
+          </div>
         </div>
 
         <DataTable
           v-model:selection="selectedAssets"
-          :value="store.list"
+          :value="filteredTransactions"
           sortField="date"
           :sortOrder="-1"
           :loading="store.isLoading"
@@ -108,11 +133,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import TransactionDialog from '@/components/TransactionDialog.vue';
+import DateRangeFilter from '@/components/DateRangeFilter.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -147,6 +173,53 @@ const splitDisplayAmount = (value, mode = 'amount') => {
 const dialogVisible = ref(false);
 const editingId = ref(null);
 const selectedAssets = ref([]);
+
+const selectedSymbols = ref([]);
+const selectedTypes = ref([]);
+const dateRange = ref(null);
+
+const symbolOptions = computed(() =>
+  [...new Set(store.list.map((r) => r.symbol))].sort()
+);
+
+const typeOptions = computed(() => [
+  { label: t('buy'), value: 'buy' },
+  { label: t('sell'), value: 'sell' },
+]);
+
+const hasActiveFilters = computed(
+  () =>
+    selectedSymbols.value.length > 0 ||
+    selectedTypes.value.length > 0 ||
+    !!dateRange.value
+);
+
+const clearFilters = () => {
+  selectedSymbols.value = [];
+  selectedTypes.value = [];
+  dateRange.value = null;
+};
+
+const filteredTransactions = computed(() => {
+  let list = store.list;
+  if (selectedSymbols.value.length) {
+    list = list.filter((r) => selectedSymbols.value.includes(r.symbol));
+  }
+  if (selectedTypes.value.length) {
+    list = list.filter((r) => selectedTypes.value.includes(r.transactionType));
+  }
+  if (dateRange.value) {
+    const [start, end] = dateRange.value;
+    list = list.filter((r) => {
+      const d = new Date(`${r.date}T00:00:00`);
+      if (Number.isNaN(d.getTime())) return false;
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+  }
+  return list;
+});
 
 const load = () => store.fetchTransactions();
 

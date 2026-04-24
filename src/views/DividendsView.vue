@@ -3,19 +3,36 @@
     
     <Card>
       <template #content>
-        <div class="flex justify-end mb-8">
+        <div class="flex flex-wrap items-center gap-2 mb-8">
+          <MultiSelect
+            v-model="selectedSymbols"
+            :options="symbolOptions"
+            :placeholder="$t('symbol')"
+            display="chip"
+            filter
+            class="w-60"
+          />
+          <DateRangeFilter v-model="dateRange" />
           <Button
-            :label="$t('refresh')"
-            @click="refreshDividends"
-            icon="pi pi-refresh"
-            class="mr-2"
+            v-if="hasActiveFilters"
+            icon="pi pi-filter-slash"
             severity="secondary"
             size="small"
+            @click="clearFilters"
           />
+          <div class="flex items-center gap-2 ml-auto">
+            <Button
+              :label="$t('refresh')"
+              @click="refreshDividends"
+              icon="pi pi-refresh"
+              severity="secondary"
+              size="small"
+            />
+          </div>
         </div>
         
         <DataTable
-          :value="dividends"
+          :value="filteredDividends"
           sortField="date"
           :sortOrder="-1"
           :loading="isLoading"
@@ -64,8 +81,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import api from '../utils/api.js';
+import DateRangeFilter from '@/components/DateRangeFilter.vue';
 import NoData from '@/components/NoData.vue';
 import { useCurrency } from '@/composables/useCurrency';
 
@@ -97,6 +115,42 @@ const splitDisplayAmount = (value, mode = 'amount') => {
 
 const isLoading = ref(false);
 const dividends = ref([]);
+const dateRange = ref(null);
+const selectedSymbols = ref([]);
+
+const symbolOptions = computed(() =>
+  [...new Set(dividends.value.map((d) => d.symbol))].sort()
+);
+
+const hasActiveFilters = computed(
+  () => selectedSymbols.value.length > 0 || !!dateRange.value
+);
+
+const clearFilters = () => {
+  selectedSymbols.value = [];
+  dateRange.value = null;
+};
+
+const toStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+const toEndOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+
+const filteredDividends = computed(() => {
+  let list = dividends.value;
+  if (selectedSymbols.value.length) {
+    list = list.filter((item) => selectedSymbols.value.includes(item.symbol));
+  }
+  if (dateRange.value) {
+    const [start, end] = dateRange.value;
+    list = list.filter((item) => {
+      const d = new Date(`${item.date}T00:00:00`);
+      if (Number.isNaN(d.getTime())) return false;
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+  }
+  return list;
+});
 
 const getDividends = async () => {
   isLoading.value = true;
