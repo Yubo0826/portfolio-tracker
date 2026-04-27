@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model:visible="localVisible" @hide="onHide" modal :style="{ width: '30rem' }">
+  <Dialog v-model:visible="localVisible" @hide="onHide" modal :style="{ width: '50rem' }" :breakpoints="{ '640px': '95vw' }">
     <template #header>
       <div class="inline-flex items-center justify-center gap-2">
         <!-- 標題 -->
@@ -32,110 +32,118 @@
       </div>
     </template>
 
-    <div class="mb-4">
-      <label for="accountId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('cashFlow.tradingAccount') }}
-      </label>
-      <Select
-        id="accountId"
-        v-model="form.accountId"
-        :options="cashAccounts"
-        optionLabel="name"
-        optionValue="id"
-        :placeholder="$t('cashFlow.selectAccount')"
-        class="w-full"
-        showClear
-      />
-    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+      <!-- Symbol - full width -->
+      <div class="mb-4 sm:col-span-2">
+        <label for="symbol" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('symbol') }} <span class="text-red-500">*</span>
+        </label>
+        <SymbolAutoComplete
+          id="symbol"
+          v-model="form.symbol"
+          @update="onSymbolSelected"
+          :disabled="!!editingId"
+        />
+      </div>
 
-    <div class="mb-4">
-      <label for="symbol" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('symbol') }} <span class="text-red-500">*</span>
-      </label>
-      <SymbolAutoComplete
-        id="symbol"
-        v-model="form.symbol"
-        @update="onSymbolSelected"
-        :disabled="!!editingId"
-      />
-    </div>
+      <!-- Account -->
+      <div class="mb-4">
+        <label for="accountId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('cashFlow.tradingAccount') }}
+        </label>
+        <Select
+          id="accountId"
+          v-model="form.accountId"
+          :options="cashAccounts"
+          optionLabel="name"
+          optionValue="id"
+          :placeholder="$t('cashFlow.selectAccount')"
+          class="w-full"
+          showClear
+        />
+      </div>
 
-    <div class="mb-4">
-      <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('transactionDate') }} <span class="text-red-500">*</span>
-      </label>
-      <DatePicker
-        id="date"
-        v-model="form.date"
-        @date-select="onDateSelect"
-        :maxDate="new Date()"
-        showIcon
-        fluid
-        iconDisplay="input"
-        class="w-full"
-        :placeholder="$t('pleaseSelectDate')"
-      />
-    </div>
+      <!-- Date -->
+      <div class="mb-4">
+        <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('transactionDate') }} <span class="text-red-500">*</span>
+        </label>
+        <DatePicker
+          id="date"
+          v-model="form.date"
+          @date-select="onDateSelect"
+          :maxDate="new Date()"
+          showIcon
+          fluid
+          iconDisplay="input"
+          class="w-full"
+          :placeholder="$t('pleaseSelectDate')"
+        />
+      </div>
 
-    <div class="mb-4">
-      <label for="shares" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('share') }} <span class="text-red-500">*</span>
-      </label>
-      <InputNumber 
-        id="shares"
-        v-model="form.shares" 
-        class="w-full" 
-        showButtons 
-        autocomplete="off" 
-      />
-    </div>
+      <!-- Shares -->
+      <div class="mb-4">
+        <label for="shares" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('share') }} <span class="text-red-500">*</span>
+        </label>
+        <InputNumber 
+          id="shares"
+          v-model="form.shares" 
+          class="w-full" 
+          showButtons 
+          autocomplete="off" 
+        />
+      </div>
 
-    <div class="mb-4">
-      <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('price') }} <span class="text-red-500">*</span>
-      </label>
-      <InputText 
-        id="price"
-        v-model="form.price" 
-        class="w-full" 
-        autocomplete="off" 
-        :placeholder="$t('pleaseInputPrice')" 
-      />
-    </div>
+      <!-- Price -->
+      <div class="mb-4">
+        <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('price') }} <span class="text-red-500">*</span>
+        </label>
+        <InputText 
+          id="price"
+          v-model="form.price" 
+          class="w-full" 
+          autocomplete="off" 
+          :placeholder="$t('pleaseInputPrice')" 
+        />
+      </div>
 
-    <div class="mb-4">
-      <label for="fee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('fee') }}
-      </label>
-      <InputNumber 
-        id="fee"
-        v-model="form.fee" 
-        class="w-full" 
-        showButtons 
-        autocomplete="off" 
-      />
-    </div>
+      <!-- Fee -->
+      <div class="mb-4">
+        <label for="fee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('fee') }}
+        </label>
+        <InputNumber 
+          id="fee"
+          v-model="form.fee" 
+          class="w-full" 
+          showButtons 
+          autocomplete="off" 
+        />
+      </div>
 
-    <div class="mb-4">
-      <label for="operation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {{ $t('type') }}
-      </label>
-      <SelectButton 
-        id="operation"
-        v-model="form.operation" 
-        :options="transactionType" 
-        optionLabel="name" 
-        optionValue="code" 
-        class="w-full"
-      />
-    </div>
+      <!-- Operation -->
+      <div class="mb-4">
+        <label for="operation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('type') }}
+        </label>
+        <SelectButton 
+          id="operation"
+          v-model="form.operation" 
+          :options="transactionType" 
+          optionLabel="name" 
+          optionValue="code" 
+          class="w-full"
+        />
+      </div>
 
-    <!-- <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div> -->
-
-    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
-      <div class="flex justify-between items-center">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('total') }}</label>
-        <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ totalPrice }} USD</span>
+      <!-- Total - full width -->
+      <div class="sm:col-span-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
+        <div class="flex justify-between items-center">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('total') }}</label>
+          <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ totalPrice }} USD</span>
+        </div>
       </div>
     </div>
 
