@@ -1,5 +1,5 @@
 <template>
-  <CustomToast />
+  <CustomToast :dark="isDark" />
   <GlobalLoading />
 
   <div class="flex flex-col min-h-screen">
