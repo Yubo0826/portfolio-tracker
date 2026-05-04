@@ -37,23 +37,23 @@
 
           <!-- 右上功能按鈕區 -->
           <div class="flex justify-center items-center flex-wrap gap-1">
-            <!-- 小螢幕：icon only -->
+            <!-- 搜尋按鈕 - 小螢幕：icon only -->
             <button
               aria-label="Search"
-              @click="searchBoxVisible = true"
+              @click="openSearchBox"
               class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 cursor-pointer"
             >
               <i class="pi pi-search text-sm"></i>
             </button>
-            <!-- 大螢幕：pill 樣式 -->
+            <!-- 搜尋按鈕 - 大螢幕：pill 樣式 -->
             <button
-              @click="searchBoxVisible = true"
+              @click="openSearchBox"
               aria-label="Search"
-              class="hidden lg:flex items-center w-[8rem] gap-2 px-3 py-1.5 rounded-lg border border-[var(--p-content-border-color)] bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
+              class="hidden lg:flex items-center w-[9rem] gap-2 px-3 py-1.5 rounded-lg border border-[var(--p-content-border-color)] bg-[#f2f2f2] dark:bg-[#1a1a1a] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
             >
               <i class="pi pi-search text-xs"></i>
               <span>{{ $t('search') }}</span>
-              <!-- <span class="text-xs text-gray-400 dark:text-gray-500 ml-1">(Ctrl+K)</span> -->
+              <span class="ml-auto text-[11px] leading-none px-1.5 py-1 rounded border border-[var(--p-content-border-color)] text-gray-400 dark:text-gray-500">Ctrl + K</span>
             </button>
 
             <Button
@@ -98,10 +98,13 @@
 
                 <template #item="{ item, props }">
                     <a v-ripple class="flex items-center w-full" v-bind="props.action">
-                      <span v-if="item.icon" :class="item.icon" />
+                      <!-- <span v-if="item.icon" :class="item.icon" /> -->
                       <span class="ml-2">{{ item.label }}</span>
                       <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
-                      <span v-if="item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
+                      <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
+                        <span v-if="item.suffix">{{ item.suffix }}</span>
+                        <i class="pi pi-chevron-right text-xs"></i>
+                      </span>
                       <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
                     </a>
                 </template>
@@ -207,7 +210,7 @@
     :showHeader="false"
   >
     <template #container>
-      <SearchBox @close="searchBoxVisible = false" />
+      <SearchBox ref="searchBoxRef" @close="searchBoxVisible = false" />
     </template>
   </Dialog>
 
@@ -223,7 +226,7 @@
 
 <script setup>
 // 同原始邏輯，無變動
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
@@ -309,6 +312,22 @@ async function getPortfolios() {
 }
 
 const searchBoxVisible = ref(false)
+const searchBoxRef = ref(null)
+
+const openSearchBox = async () => {
+  searchBoxVisible.value = true
+  await nextTick()
+  searchBoxRef.value?.focusInput?.()
+}
+
+const onGlobalSearchShortcut = (event) => {
+  if (event.isComposing || event.repeat) return
+  const isShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'
+  if (!isShortcut) return
+
+  event.preventDefault()
+  openSearchBox()
+}
 
 const languageOptions = [
   { label: 'English', value: 'en', flag: '🇺🇸' },
@@ -344,6 +363,18 @@ onMounted(() => {
     locale.value = savedLocale
     currentLanguage.value = savedLocale
   }
+
+  window.addEventListener('keydown', onGlobalSearchShortcut)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onGlobalSearchShortcut)
+})
+
+watch(searchBoxVisible, async (visible) => {
+  if (!visible) return
+  await nextTick()
+  searchBoxRef.value?.focusInput?.()
 })
 
 const menu = ref()

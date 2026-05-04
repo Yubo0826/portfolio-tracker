@@ -102,6 +102,10 @@ const results = ref([])
 const activeIndex = ref(-1)
 const loading = ref(false)
 
+function focusInput() {
+  inputEl.value?.focus()
+}
+
 // 搜尋資料
 const search = async () => {
   const q = query.value.trim()
@@ -136,7 +140,7 @@ function clearAll() {
   query.value = ''
   results.value = []
   activeIndex.value = -1
-  inputEl.value?.focus()
+  focusInput()
 }
 
 function setActive(idx) {
@@ -169,7 +173,11 @@ function onKeydown(e) {
 }
 
 onMounted(() => {
-  inputEl.value?.focus()
+  focusInput()
+})
+
+defineExpose({
+  focusInput,
 })
 </script>
 
