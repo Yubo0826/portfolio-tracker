@@ -100,32 +100,7 @@
 
         <!-- Search — Centered -->
         <div class="flex-1 flex justify-center">
-          <!-- Mobile: icon only -->
-          <button
-            aria-label="Search"
-            @click="openSearchBox"
-            class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full
-                   hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
-                   text-gray-500 dark:text-gray-400 cursor-pointer"
-          >
-            <i class="pi pi-search text-sm"></i>
-          </button>
-          <!-- Desktop: pill -->
-          <button
-            @click="openSearchBox"
-            aria-label="Search"
-            class="hidden lg:flex items-center w-72 gap-2 px-4 py-2 rounded-xl
-                   border border-[var(--p-content-border-color)]
-                   bg-[var(--p-surface-100)] dark:bg-[var(--p-surface-800)]
-                   hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
-                   text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
-          >
-            <i class="pi pi-search text-xs"></i>
-            <span>{{ $t('search') }}</span>
-            <span class="ml-auto text-[11px] leading-none px-1.5 py-1 rounded
-                         border border-[var(--p-content-border-color)]
-                         text-gray-400 dark:text-gray-500">Ctrl + K</span>
-          </button>
+          <SearchBox ref="searchBoxRef" />
         </div>
 
         <!-- Right: Theme toggle + Avatar (mobile only) -->
@@ -253,20 +228,7 @@
     </div>
   </div>
 
-  <!-- Search Dialog -->
-  <Dialog
-    v-model:visible="searchBoxVisible"
-    modal
-    dismissableMask
-    position="top"
-    :style="{ width: '90vw', maxWidth: '25rem', top: '5rem' }"
-    :closeOnEscape="true"
-    :showHeader="false"
-  >
-    <template #container>
-      <SearchBox ref="searchBoxRef" @close="searchBoxVisible = false" />
-    </template>
-  </Dialog>
+
 
   <ImportDataDialog v-model="importDataDialogVisible" />
   <TransactionDialog v-model="transctionDialogVisible" />
@@ -276,7 +238,7 @@
 
 <script setup>
 // 同原始邏輯，無變動
-import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
@@ -284,7 +246,6 @@ import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
 import TieredMenu from 'primevue/tieredmenu'
-import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
@@ -361,13 +322,10 @@ async function getPortfolios() {
   }
 }
 
-const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
 
-const openSearchBox = async () => {
-  searchBoxVisible.value = true
-  await nextTick()
-  searchBoxRef.value?.focusInput?.()
+const openSearchBox = () => {
+  searchBoxRef.value?.open()
 }
 
 const onGlobalSearchShortcut = (event) => {
@@ -421,11 +379,6 @@ onUnmounted(() => {
   window.removeEventListener('keydown', onGlobalSearchShortcut)
 })
 
-watch(searchBoxVisible, async (visible) => {
-  if (!visible) return
-  await nextTick()
-  searchBoxRef.value?.focusInput?.()
-})
 
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)

@@ -1,92 +1,134 @@
 <template>
-  <div class="w-full max-w-2xl rounded-2xl shadow-2xl backdrop-blur">
-    <!-- Search input -->
-    <div class="relative">
-      <svg
-        class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.35-4.35" />
-      </svg>
+  <!-- Backdrop overlay (rendered at body level, below the header z-40) -->
+  <Teleport to="body">
+    <div
+      v-if="isOpen"
+      class="fixed inset-0 z-30 bg-black/40"
+      @click="close"
+    />
+  </Teleport>
 
+  <!-- Closed: Mobile icon only (hidden on lg+) -->
+  <!-- <button
+    v-if="!isOpen"
+    aria-label="Search"
+    @click="open"
+    class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full
+           hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+           text-gray-500 dark:text-gray-400 cursor-pointer"
+  >
+    <i class="pi pi-search text-sm"></i>
+  </button> -->
+
+  <!-- Closed: Desktop pill (hidden on mobile) -->
+  <button
+    v-if="!isOpen"
+    @click="open"
+    aria-label="Search"
+    class=" lg:flex items-center w-144 gap-2 px-4 py-2 rounded-xl
+           border border-[var(--p-content-border-color)]
+           bg-[var(--p-surface-100)] dark:bg-[var(--p-surface-800)]
+           hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+           text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
+  >
+    <i class="pi pi-search text-xs"></i>
+    <span>{{ $t('search') }}</span>
+    <span class="ml-auto text-[11px] leading-none px-1.5 py-1 rounded
+                 border border-[var(--p-content-border-color)]
+                 text-gray-400 dark:text-gray-500">Ctrl + K</span>
+  </button>
+
+  <!-- Open: inline input + dropdown -->
+  <div v-if="isOpen" class="relative w-full lg:w-144">
+    <!-- Input row -->
+    <div class="flex items-center gap-2 px-4 py-2 rounded-xl
+                border border-[var(--p-primary-color)]
+                bg-[var(--p-surface-100)] dark:bg-[var(--p-surface-800)]
+                shadow-md">
+      <i class="pi pi-search text-xs text-neutral-400 shrink-0"></i>
       <input
         ref="inputEl"
         v-model="query"
         @keydown="onKeydown"
         @input="onInput"
-        id="searchInput"
         type="text"
         :placeholder="$t('searchPlaceholder')"
-        class="w-full bg-transparent placeholder-neutral-500 px-12 py-4 outline-none"
+        class="flex-1 min-w-0 bg-transparent text-sm outline-none
+               text-[var(--p-text-color)] placeholder-neutral-500"
         autocomplete="off"
         aria-autocomplete="list"
         aria-controls="resultsList"
-        aria-expanded="true"
+        :aria-expanded="results.length > 0"
         role="combobox"
         :aria-activedescendant="activeIndex >= 0 ? `opt-${activeIndex}` : undefined"
       />
-
-
-      <i @click="clearAll" class="pi pi-times absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-neutral-400 focus:outline-none"></i>
+      <i
+        @click="close"
+        class="pi pi-times text-xs text-neutral-400 shrink-0 cursor-pointer
+               hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+      ></i>
     </div>
 
-    <!-- Results -->
-    <div class="max-h-96 overflow-auto">
-      <div
-        v-if="results.length"
-        class="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-neutral-500"
-      >
-        {{ t('searchResults') }}
-      </div>
-
-      <ul v-if="results.length" id="resultsList" role="listbox" class="py-2">
-        <li
-          v-for="(item, idx) in results"
-          :key="item.symbol + idx"
-          :id="`opt-${idx}`"
-          role="option"
-          :aria-selected="activeIndex === idx"
-          @mouseenter="setActive(idx)"
-          @click="select(idx)"
-          :class="[
-            'search-result-item group flex items-center justify-between gap-3 px-4 py-3 cursor-pointer',
-            activeIndex === idx ? 'is-active' : ''
-          ]"
+    <!-- Dropdown results panel -->
+    <div
+      v-if="results.length || (query.trim().length > 0 && !loading) || loading"
+      class="absolute top-full mt-1 left-0 right-0 rounded-xl shadow-xl
+             border border-[var(--p-content-border-color)]
+             bg-[var(--p-surface-0)] dark:bg-[var(--p-surface-900)]
+             overflow-hidden"
+    >
+      <div class="max-h-80 overflow-auto">
+        <div
+          v-if="results.length"
+          class="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-neutral-500"
         >
-          <div class="flex flex-col py-2 px-4">
-            <span class="search-item-symbol text-base font-semibold">{{ item.symbol }}</span>
-            <span class="search-item-name text-sm">
-              {{ item.name }}
-              <template v-if="item.assetType">
-                ({{ item.assetType }})
-              </template>
-            </span>
-          </div>
-        </li>
-      </ul>
+          {{ t('searchResults') }}
+        </div>
 
-      <div
-        v-else-if="query.trim().length > 0 && !loading"
-        class="select-none py-12 text-center text-sm text-neutral-400"
-      >
-        {{ t('noResults') }}
-      </div>
+        <ul v-if="results.length" id="resultsList" role="listbox" class="py-2">
+          <li
+            v-for="(item, idx) in results"
+            :key="item.symbol + idx"
+            :id="`opt-${idx}`"
+            role="option"
+            :aria-selected="activeIndex === idx"
+            @mouseenter="setActive(idx)"
+            @click="select(idx)"
+            :class="[
+              'search-result-item group flex items-center gap-3 px-4 py-2 cursor-pointer',
+              'hover:bg-neutral-100 dark:hover:bg-white/10',
+              activeIndex === idx ? 'bg-neutral-100 dark:bg-white/10' : ''
+            ]"
+          >
+            <div class="flex flex-col py-1">
+              <span class="search-item-symbol text-sm font-semibold">{{ item.symbol }}</span>
+              <span class="search-item-name text-xs">
+                {{ item.name }}
+                <template v-if="item.assetType">
+                  ({{ item.assetType }})
+                </template>
+              </span>
+            </div>
+          </li>
+        </ul>
 
-      <div v-if="loading" class="select-none py-12 text-center text-sm text-neutral-400">
-        {{ t('loading') }}
+        <div
+          v-else-if="query.trim().length > 0 && !loading"
+          class="select-none py-8 text-center text-sm text-neutral-400"
+        >
+          {{ t('noResults') }}
+        </div>
+
+        <div v-if="loading" class="select-none py-8 text-center text-sm text-neutral-400">
+          {{ t('loading') }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
@@ -94,16 +136,25 @@ import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 const router = useRouter()
-const emit = defineEmits(['close']);
 
+const isOpen = ref(false)
 const query = ref('')
 const inputEl = ref(null)
 const results = ref([])
 const activeIndex = ref(-1)
 const loading = ref(false)
 
-function focusInput() {
+async function open() {
+  isOpen.value = true
+  await nextTick()
   inputEl.value?.focus()
+}
+
+function close() {
+  isOpen.value = false
+  query.value = ''
+  results.value = []
+  activeIndex.value = -1
 }
 
 // 搜尋資料
@@ -136,13 +187,6 @@ function onInput() {
   debouncedSearch()
 }
 
-function clearAll() {
-  query.value = ''
-  results.value = []
-  activeIndex.value = -1
-  focusInput()
-}
-
 function setActive(idx) {
   activeIndex.value = idx
 }
@@ -150,8 +194,8 @@ function setActive(idx) {
 function select(idx) {
   const item = results.value[idx]
   if (!item) return
-  emit('close');
-  router.push({ name: 'asset', params: { symbol: item.symbol } });
+  close()
+  router.push({ name: 'asset', params: { symbol: item.symbol } })
 }
 
 function onKeydown(e) {
@@ -167,18 +211,11 @@ function onKeydown(e) {
     if (activeIndex.value >= 0) select(activeIndex.value)
   } else if (e.key === 'Escape') {
     e.preventDefault()
-    clearAll()
-    inputEl.value?.blur()
+    close()
   }
 }
 
-onMounted(() => {
-  focusInput()
-})
-
-defineExpose({
-  focusInput,
-})
+defineExpose({ open })
 </script>
 
 <style scoped>
@@ -188,22 +225,7 @@ defineExpose({
   transition: background-color 0.2s ease;
 }
 
-.search-result-item:hover {
-  background-color: var(--p-surface-hover);
-}
 
-.search-result-item.is-active {
-  background-color: var(--p-surface-hover);
-  /* background-color: color-mix(in srgb, var(--p-primary-color) 16%, white); */
-}
-
-:global(.dark) .search-result-item:hover {
-  background-color: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
-}
-
-:global(.dark) .search-result-item.is-active {
-  background-color: color-mix(in srgb, var(--p-primary-color) 36%, transparent);
-}
 
 .search-item-symbol {
   color: var(--p-text-color);
