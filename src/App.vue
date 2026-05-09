@@ -2,201 +2,255 @@
   <CustomToast :dark="isDark" />
   <GlobalLoading />
 
-  <div class="flex flex-col min-h-screen">
-    <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
-    <div class="w-full flex-grow mx-auto p-4 ">
-      <!-- Header -->
-      <header class="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 bg-[#f8fafd] dark:bg-black backdrop-blur-sm">
-        <div class="max-w-screen-2xl mx-auto flex justify-between items-center gap-3 py-4 pl-4">
-          <!-- Left: Logo + Portfolio Selector -->
-          <div class="flex items-center gap-3">
-            <!-- Hamburger Toggle Button - Mobile Only -->
-            <span class="lg:hidden">
-              <Button
-                @click="sidebarVisible = true"
-                icon="pi pi-bars"
-                class="hamburger-btn lg:hidden"
-                size="small"
-                variant="outlined"
-                severity="secondary"
-              />
-            </span>
+  <div class="flex min-h-screen bg-[var(--p-content-background)]">
 
-            <!-- Logo -->
-            <div @click="$router.push('/dashboard')" class="text-2xl sm:text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
-              <span class="text-gray-500">Stock</span>
-              <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+    <!-- ========== Left Sidebar (Desktop only) ========== -->
+    <aside class="hidden lg:flex flex-col fixed top-0 left-0 h-full w-60 z-50
+                  border-r border-[var(--p-content-border-color)]
+                  bg-[var(--p-content-background)]">
+
+      <!-- Logo -->
+      <div class="px-5 pt-5 pb-4 shrink-0">
+        <div @click="$router.push('/dashboard')"
+             class="text-2xl font-bold cursor-pointer whitespace-nowrap select-none">
+          <span class="text-gray-500">Stock</span>
+          <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+        </div>
+      </div>
+
+      <!-- Portfolio Selector -->
+      <div class="px-3 pb-4 shrink-0">
+        <Select
+          v-model="selectedPortfolioId"
+          size="small"
+          :options="portfolioStore.portfolios"
+          optionLabel="name"
+          optionValue="id"
+          checkmark
+          :highlightOnSelect="false"
+          class="w-full"
+        >
+          <template #header>
+            <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
+          </template>
+          <template #dropdownicon>
+            <i class="pi pi-chevron-down text-xs"></i>
+          </template>
+          <template #footer>
+            <div class="p-3 border-t border-[var(--p-content-border-color)]">
+              <Button :label="$t('addPortfolio')" icon="pi pi-plus"
+                @click="dialogVisible = true" fluid text size="small" />
             </div>
+            <div class="p-3 pt-0">
+              <Button :label="$t('portfolioManagement')" icon="pi pi-folder"
+                @click="$router.push('/portfolios')" fluid text size="small" />
+            </div>
+          </template>
+        </Select>
+      </div>
 
-          </div>
+      <!-- Navigation -->
+      <div class="flex-1 overflow-y-auto pb-4">
+        <HeaderNav />
+      </div>
 
-          <!-- Center: Navigation - Hidden on mobile, shown on lg+ -->
-          <div class="hidden lg:flex items-center justify-center flex-1">
-            <HeaderNav />
-          </div>
-
-          <!-- 右上功能按鈕區 -->
-          <div class="flex justify-center items-center flex-wrap gap-1">
-            <!-- 搜尋按鈕 - 小螢幕：icon only -->
-            <button
-              aria-label="Search"
-              @click="openSearchBox"
-              class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 cursor-pointer"
-            >
-              <i class="pi pi-search text-sm"></i>
-            </button>
-            <!-- 搜尋按鈕 - 大螢幕：pill 樣式 -->
-            <button
-              @click="openSearchBox"
-              aria-label="Search"
-              class="hidden lg:flex items-center w-[9rem] gap-2 px-3 py-1.5 rounded-lg border border-[var(--p-content-border-color)] bg-[#f2f2f2] dark:bg-[#1a1a1a] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
-            >
-              <i class="pi pi-search text-xs"></i>
-              <span>{{ $t('search') }}</span>
-              <span class="ml-auto text-[11px] leading-none px-1.5 py-1 rounded border border-[var(--p-content-border-color)] text-gray-400 dark:text-gray-500">Ctrl + K</span>
-            </button>
-
-            <Button
-              :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-              @click="toggleTheme"
-              aria-label="Toggle Dark Mode"
-              size="small"
-              text
-              rounded
-              severity="secondary"
-            />
-
-            
-            <!-- User Menu -->
-             <div 
-                class="cursor-pointer ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
-                @click="toggleMenu"
-              >
-                <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
-              </div>
-              <!-- <Button
-                @click="toggleMenu"
-                class="px-1 py-1"
-                rounded
-                text
-                severity="secondary"
-                aria-label="User Menu"
-              >
-                  <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
-              </Button> -->
-
-              <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
-                <template #start>
-                  <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
-                    <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
-                    <div class="flex flex-col">
-                      <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
-                      <span class="text-sm text-gray-500">{{ auth.user.email }}</span>
-                    </div>
-                  </div>
-                </template>
-
-                <template #item="{ item, props }">
-                    <a v-ripple class="flex items-center w-full" v-bind="props.action">
-                      <!-- <span v-if="item.icon" :class="item.icon" /> -->
-                      <span class="ml-2">{{ item.label }}</span>
-                      <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
-                      <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
-                        <span v-if="item.suffix">{{ item.suffix }}</span>
-                        <i class="pi pi-chevron-right text-xs"></i>
-                      </span>
-                      <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
-                    </a>
-                </template>
-        </TieredMenu>
-          
+      <!-- User Info (bottom) -->
+      <div class="shrink-0 border-t border-[var(--p-content-border-color)] p-3">
+        <div class="flex items-center gap-3 cursor-pointer rounded-lg px-2 py-2
+                    hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)]
+                    transition-colors"
+             @click="toggleMenu">
+          <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+          <div class="flex flex-col min-w-0">
+            <span class="text-sm font-medium truncate">
+              {{ auth.user.displayName || auth.user.email }}
+            </span>
+            <span class="text-xs text-[var(--p-text-muted-color)] truncate">
+              {{ auth.user.email }}
+            </span>
           </div>
         </div>
+      </div>
+    </aside>
+
+    <!-- ========== Main Area ========== -->
+    <div class="flex flex-col flex-1 lg:ml-60 min-h-screen">
+
+      <!-- Top Header -->
+      <header class="fixed top-0 left-0 right-0 lg:left-60 z-40 h-14
+                     px-3 sm:px-4 flex items-center gap-3
+                     bg-[var(--p-content-background)]
+                     border-b border-[var(--p-content-border-color)]">
+
+        <!-- Mobile: Hamburger + Logo -->
+        <div class="flex items-center gap-2 lg:hidden shrink-0">
+          <Button
+            @click="sidebarVisible = true"
+            icon="pi pi-bars"
+            size="small"
+            variant="outlined"
+            severity="secondary"
+          />
+          <div @click="$router.push('/dashboard')"
+               class="text-xl font-bold cursor-pointer whitespace-nowrap select-none">
+            <span class="text-gray-500">Stock</span>
+            <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+          </div>
+        </div>
+
+        <!-- Search — Centered -->
+        <div class="flex-1 flex justify-center">
+          <!-- Mobile: icon only -->
+          <button
+            aria-label="Search"
+            @click="openSearchBox"
+            class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full
+                   hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+                   text-gray-500 dark:text-gray-400 cursor-pointer"
+          >
+            <i class="pi pi-search text-sm"></i>
+          </button>
+          <!-- Desktop: pill -->
+          <button
+            @click="openSearchBox"
+            aria-label="Search"
+            class="hidden lg:flex items-center w-72 gap-2 px-4 py-2 rounded-xl
+                   border border-[var(--p-content-border-color)]
+                   bg-[var(--p-surface-100)] dark:bg-[var(--p-surface-800)]
+                   hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+                   text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
+          >
+            <i class="pi pi-search text-xs"></i>
+            <span>{{ $t('search') }}</span>
+            <span class="ml-auto text-[11px] leading-none px-1.5 py-1 rounded
+                         border border-[var(--p-content-border-color)]
+                         text-gray-400 dark:text-gray-500">Ctrl + K</span>
+          </button>
+        </div>
+
+        <!-- Right: Theme toggle + Avatar (mobile only) -->
+        <div class="flex items-center gap-1 shrink-0">
+          <Button
+            :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+            @click="toggleTheme"
+            aria-label="Toggle Dark Mode"
+            size="small"
+            text
+            rounded
+            severity="secondary"
+          />
+          <!-- Avatar — mobile only (desktop shows in sidebar bottom) -->
+          <div
+            class="lg:hidden cursor-pointer ml-1 rounded-full
+                   hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
+                   flex items-center justify-center"
+            @click="toggleMenu"
+          >
+            <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+          </div>
+        </div>
+
+        <!-- TieredMenu popup -->
+        <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
+          <template #start>
+            <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
+              <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
+              <div class="flex flex-col">
+                <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
+                <span class="text-sm text-gray-500">{{ auth.user.email }}</span>
+              </div>
+            </div>
+          </template>
+          <template #item="{ item, props }">
+            <a v-ripple class="flex items-center w-full" v-bind="props.action">
+              <span class="ml-2">{{ item.label }}</span>
+              <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
+              <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
+                <span v-if="item.suffix">{{ item.suffix }}</span>
+                <i class="pi pi-chevron-right text-xs"></i>
+              </span>
+              <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
+            </a>
+          </template>
+        </TieredMenu>
       </header>
 
-      <!-- Main Content -->
-      <main class="px-2 sm:px-4 max-w-screen-2xl w-full mx-auto flex-grow pt-16">
-        <!-- Action Buttons Bar - Mobile and Desktop -->
-        <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
-          <!-- Portfolio Selector - Mobile Only lg:hidden --> 
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-            <Select
-              v-model="selectedPortfolioId"
-              size="small"
-              :options="portfolioStore.portfolios"
-              optionLabel="name"
-              optionValue="id"
-              checkmark
-              :highlightOnSelect="false"
-            >
-              <template #header>
-                <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
-              </template>
-              <template #dropdownicon>
-                <i class="pi pi-chevron-down text-xs"></i>
-              </template>
-              <template #footer>
-                <div class="p-3 border-t border-[var(--p-content-border-color)]">
-                  <Button
-                    :label="$t('addPortfolio')"
-                    icon="pi pi-plus"
-                    @click="dialogVisible = true"
-                    fluid
-                    text
-                    size="small"
-                  />
-                </div>
-                <div class="p-3 pt-0">
-                  <Button
-                    :label="$t('portfolioManagement')"
-                    icon="pi pi-folder"
-                    @click="$router.push('/portfolios')"
-                    fluid
-                    text
-                    size="small"
-                  />
-                </div>
-              </template>
-            </Select>
+      <!-- Page Content -->
+      <div class="flex flex-col flex-grow pt-14">
+        <main class="px-2 sm:px-4 w-full flex-grow">
 
-            <div
-              v-if="auth.user?.uid === 'demo-user'"
-              class="text-xs text-gray-400 flex items-center gap-1 whitespace-normal text-left sm:whitespace-nowrap"
-            >
-              <i class="pi pi-info-circle text-gray-400" aria-hidden="true"></i>
+          <!-- Action Bar -->
+          <div v-if="!isAssetRoute"
+               class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+
+            <!-- Portfolio Selector — Mobile only -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:hidden">
+              <Select
+                v-model="selectedPortfolioId"
+                size="small"
+                :options="portfolioStore.portfolios"
+                optionLabel="name"
+                optionValue="id"
+                checkmark
+                :highlightOnSelect="false"
+              >
+                <template #header>
+                  <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
+                </template>
+                <template #dropdownicon>
+                  <i class="pi pi-chevron-down text-xs"></i>
+                </template>
+                <template #footer>
+                  <div class="p-3 border-t border-[var(--p-content-border-color)]">
+                    <Button :label="$t('addPortfolio')" icon="pi pi-plus"
+                      @click="dialogVisible = true" fluid text size="small" />
+                  </div>
+                  <div class="p-3 pt-0">
+                    <Button :label="$t('portfolioManagement')" icon="pi pi-folder"
+                      @click="$router.push('/portfolios')" fluid text size="small" />
+                  </div>
+                </template>
+              </Select>
+              <div
+                v-if="auth.user?.uid === 'demo-user'"
+                class="text-xs text-gray-400 flex items-center gap-1 whitespace-normal text-left sm:whitespace-nowrap"
+              >
+                <i class="pi pi-info-circle text-gray-400" aria-hidden="true"></i>
+                <span>{{ $t('demoUserMessage') }}</span>
+              </div>
+            </div>
+
+            <!-- Demo message on desktop -->
+            <div v-if="auth.user?.uid === 'demo-user'"
+                 class="hidden lg:flex text-xs text-gray-400 items-center gap-1">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
               <span>{{ $t('demoUserMessage') }}</span>
             </div>
+            <div v-else class="hidden lg:block"></div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end w-full lg:ml-auto">
+              <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
+                <div v-if="portfolioStore.portfolios.length === 0">
+                  <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
+                </div>
+                <div class="flex flex-wrap gap-4" v-else>
+                  <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+                  <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-upload" variant="text" />
+                </div>
+              </div>
+              <div v-else-if="auth.user.uid === 'demo-user'">
+                <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
+              </div>
+            </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="flex justify-end w-full lg:ml-auto">
-            <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
-              <div v-if="portfolioStore.portfolios.length === 0">
-                <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
-              </div>
-              <div class="flex flex-wrap gap-4" v-else>
-                <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-upload" variant="text" />
-              </div>
-            </div>
-            <div v-else-if="auth.user.uid === 'demo-user'">
-              <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
-            </div>
-          </div>
-        </div>
+          <RouterView />
+        </main>
 
-        <!-- <RouterView v-slot="{ Component, route: currentRoute }">
-          <Transition name="page-main" mode="out-in" appear>
-            <div :key="currentRoute.fullPath" class="page-main-transition">
-              <component :is="Component" />
-            </div>
-          </Transition> -->
-        <RouterView>
-        </RouterView>
-      </main>
+        <Footer />
+      </div>
     </div>
-
-    <Footer />
   </div>
 
   <!-- Search Dialog -->
@@ -215,12 +269,8 @@
   </Dialog>
 
   <ImportDataDialog v-model="importDataDialogVisible" />
-
   <TransactionDialog v-model="transctionDialogVisible" />
-
   <PortfolioFormDialog :visible="dialogVisible" @update:visible="dialogVisible = $event" />
-
-  <!-- Mobile Sidebar -->
   <MobileSidebar v-model:visible="sidebarVisible" />
 </template>
 
@@ -240,9 +290,9 @@ import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
-import HeaderNav from './components/HeaderNav.vue'
-import MobileSidebar from './components/MobileSidebar.vue'
-import Footer from './components/Footer.vue'
+import HeaderNav from './layouts/HeaderNav.vue'
+import MobileSidebar from './layouts/MobileSidebar.vue'
+import Footer from './layouts/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
 import GlobalLoading from "@/components/GlobalLoading.vue"
@@ -417,10 +467,6 @@ const menuItems = computed(() => {
 </script>
 
 <style scoped>
-header {
-  text-align: center;
-}
-
 .start-btn:hover{cursor: pointer}
 .start-btn {
   /* background: transparent; outline: none; */

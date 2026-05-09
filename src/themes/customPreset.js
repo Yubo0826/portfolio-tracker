@@ -62,9 +62,9 @@ export default definePreset(Aura, {
             activeColor: '{primary.200}'
           },
           content: {
-            // background: '#32323e',
+            background: '#222222',
             // background: '#242424',
-            background: '#141f34',
+            // background: '#141f34',
             focusBackground: 'rgba(250, 250, 250, .24)',
             color: 'rgba(255,255,255,.87)',
             focusColor: 'rgba(255,255,255,.87)',

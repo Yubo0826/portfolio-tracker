@@ -1,6 +1,7 @@
 ﻿<template>
   <!-- px-4 sm:px-6 lg:px-8 -->
-  <div class="container mx-auto mt-4  max-w-screen-2xl">
+  <!--  max-w-screen-2xl -->
+  <div class="w-full mt-4 px-4 sm:px-6 lg:px-8">
     <div v-if="isLoading" class="space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card v-for="idx in skeletonStatCards" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md">
