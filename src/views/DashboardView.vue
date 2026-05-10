@@ -1,7 +1,7 @@
 ﻿<template>
   <!-- px-4 sm:px-6 lg:px-8 -->
   <!--  max-w-screen-2xl -->
-  <div class="w-full mt-4 px-4 sm:px-6 lg:px-8">
+  <div class="w-full mt-4">
     <div v-if="isLoading" class="space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card v-for="idx in skeletonStatCards" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md">
@@ -152,14 +152,16 @@
         <Card>
           <template #title>
             <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
-              <div class="text-sm">{{ $t('assetTrend') }}</div>
+              <div class="text-lg">{{ $t('assetTrend') }}</div>
 
-              <Tag v-if="holdingsStore.list.length > 0" :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap">
+              <!-- <Tag v-if="holdingsStore.list.length > 0" :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap"> -->
                 <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
                   <!-- change icon -->
-                  <span class="mr-2">                          
-                    <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
-                    <i v-else class="pi pi-sort-down-fill"></i>
+                  <span>                          
+                    <!-- <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
+                    <i v-else class="pi pi-sort-down-fill"></i> -->
+                    <span v-if="growthRate >= 0">+</span>
+                    <span v-else>-</span>
                   </span>
                   <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }}</span>
                   (
@@ -169,8 +171,15 @@
                     <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
                   )
                 </div>
-              </Tag>
+              <!-- </Tag> -->
             </div>
+          </template>
+
+          <template #content>
+            <StockChart
+              :options="areaChartOptions"
+              :height="300"
+            />
 
             <!-- Asset Trend Period Selector -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
@@ -194,13 +203,6 @@
 
               <span class="text-xs text-slate-500 dark:text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
             </div>
-          </template>
-
-          <template #content>
-            <StockChart
-              :options="areaChartOptions"
-              :height="300"
-            />
           </template>
         </Card>
       </div>
@@ -711,14 +713,11 @@ const irr = computed(() => {
   if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
   const cashflows = []
 
-  // ??鈭斗?嚗眺?亦鞎??暸?瘚嚗?鞈??箸迤嚗???伐?
   transactionsStore.list.forEach(tx => {
     let amount
     if (tx.transactionType === 'buy') {
-      // 鞎瑕嚗???= ?∪ ? ?⊥ + ??鞎鳴??暸?瘚嚗?隞交鞎嚗?
       amount = -(tx.price * tx.shares + tx.fee)
     } else {
-      // 鞈?嚗??= ?∪ ? ?⊥ - ??鞎鳴??暸?瘚嚗?隞交甇?嚗?
       amount = tx.price * tx.shares - tx.fee
     }
     cashflows.push({ amount, when: new Date(tx.date) })
@@ -741,7 +740,6 @@ const irr = computed(() => {
   }
 })
 
-/** ?璅榆?潘?甇?鞎瑕??=鞈?嚗?*/
 const rebalanceRows = computed(() => {
   const tv = totalValue.value
   if (!tv || (!holdingsStore.list.length && !allocation.value.length)) return []

@@ -4,17 +4,17 @@ import Aura from '@primeuix/themes/aura';
 export default definePreset(Aura, {
     semantic: {
       primary: {
-        50:  '{indigo.50}',
-        100: '{indigo.100}',
-        200: '{indigo.200}',
-        300: '{indigo.300}',
-        400: '{indigo.400}',
-        500: '{indigo.500}',
-        600: '{indigo.600}',
-        700: '{indigo.700}',
-        800: '{indigo.800}',
-        900: '{indigo.900}',
-        950: '{indigo.950}'
+        50:  '{blue.50}',
+        100: '{blue.100}',
+        200: '{blue.200}',
+        300: '{blue.300}',
+        400: '{blue.400}',
+        500: '{blue.500}',
+        600: '{blue.600}',
+        700: '{blue.700}',
+        800: '{blue.800}',
+        900: '{blue.900}',
+        950: '{blue.950}'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -61,34 +61,42 @@ export default definePreset(Aura, {
             hoverColor: '{primary.300}',
             activeColor: '{primary.200}'
           },
+          formField: {
+            background: '{surface.900}'
+          },
+          // 卡片背景色、文字色、邊框色等
           content: {
-            background: '#222222',
+            // background: '#32323e',
             // background: '#242424',
-            // background: '#141f34',
+            background: '#141f34', //原本深藍色
+            // background: '#22211f', //更深的黑色
+            // background: '#242c32', //更深的黑色2
             focusBackground: 'rgba(250, 250, 250, .24)',
             color: 'rgba(255,255,255,.87)',
             focusColor: 'rgba(255,255,255,.87)',
             borderColor: '#444454'
           },
           surface: {
-            // background: '#272732',
+            // background: '#101218', // 原本的黑色
             // background: '#282832',
             // background: '#09090b',
             // background: '#1a1a1e',
-            background: '#000c23',
+            background: '#000c23', // 原本的藍色
+            // background: '#101216',
+            // background: '#000000',
             card: '#1a1a1e',
             0: '#ffffff',
-            50: '{gray.50}',
-            100: '{gray.100}',
-            200: '{gray.200}',
-            300: '{gray.300}',
-            400: '{gray.400}',
-            500: '{gray.500}',
-            600: '{gray.600}',
-            700: '{gray.700}',
-            800: '{gray.800}',
-            900: '{gray.900}',
-            950: '{gray.950}'
+             50: '{zinc.50}',
+            100: '{zinc.100}',
+            200: '{zinc.200}',
+            300: '{zinc.300}',
+            400: '{zinc.400}',
+            500: '{zinc.500}',
+            600: '{zinc.600}',
+            700: '{zinc.700}',
+            800: '{zinc.800}',
+            900: '{zinc.900}',
+            950: '{zinc.950}'
           },
         }
       },
@@ -124,7 +132,7 @@ export default definePreset(Aura, {
             }
           }
         }
-      }
+      },
     }
   }
 })

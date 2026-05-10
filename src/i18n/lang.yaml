@@ -188,18 +188,42 @@ portfolioModified:
 portfolioDeleted:
   en: Portfolio deleted
   zh: 投資組合已刪除
+portfolioDuplicated:
+  en: Portfolio "{name}" duplicated
+  zh: 已建立投資組合副本「{name}」
 portfolioDeletedConfirm:
   en: Are you sure you want to delete the selected portfolios? This action cannot be undone.
   zh: 確定要刪除選取的投資組合嗎？此操作無法復原。
+deletePortfolioConfirm:
+  en: Are you sure you want to delete portfolio "{name}"? This action cannot be undone.
+  zh: 確定要刪除投資組合「{name}」嗎？此操作無法復原。
 allPortfolios:
   en: Portfolio List
   zh: 投資組合列表
 currentPortfolio:
   en: "Current Portfolio :"
   zh: "目前投資組合 :"
+openPortfolioMenu:
+  en: Open portfolio menu
+  zh: 開啟投資組合選單
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
+duplicatePortfolio:
+  en: Duplicate...
+  zh: 製作副本...
+createNewPortfolio:
+  en: Create new portfolio
+  zh: 建立新的投資組合
+recentlyUsed:
+  en: Recently used
+  zh: 最近使用
+openPortfolio:
+  en: Open portfolio...
+  zh: 開啟投資組合...
+portfolioCopyName:
+  en: "{name} Copy"
+  zh: "{name} 副本"
 addInvestment:
   en: Add Trade
   zh: 新增交易

@@ -1,252 +1,252 @@
 <template>
   <CustomToast :dark="isDark" />
   <GlobalLoading />
+  <ConfirmDialog />
 
-  <div class="flex min-h-screen bg-[var(--p-content-background)]">
-
-    <!-- ========== Left Sidebar (Desktop only) ========== -->
-    <aside class="hidden lg:flex flex-col fixed top-0 left-0 h-full w-60 z-50
-                  border-r border-[var(--p-content-border-color)]
-                  bg-[var(--p-content-background)]">
-
-      <!-- Logo -->
-      <div class="px-5 pt-5 pb-4 shrink-0">
-        <div @click="$router.push('/dashboard')"
-             class="text-2xl font-bold cursor-pointer whitespace-nowrap select-none">
-          <span class="text-gray-500">Stock</span>
-          <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
-        </div>
-      </div>
-
-      <!-- Portfolio Selector -->
-      <div class="px-3 pb-4 shrink-0">
-        <Select
-          v-model="selectedPortfolioId"
-          size="small"
-          :options="portfolioStore.portfolios"
-          optionLabel="name"
-          optionValue="id"
-          checkmark
-          :highlightOnSelect="false"
-          class="w-full"
-        >
-          <template #header>
-            <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
-          </template>
-          <template #dropdownicon>
-            <i class="pi pi-chevron-down text-xs"></i>
-          </template>
-          <template #footer>
-            <div class="p-3 border-t border-[var(--p-content-border-color)]">
-              <Button :label="$t('addPortfolio')" icon="pi pi-plus"
-                @click="dialogVisible = true" fluid text size="small" />
-            </div>
-            <div class="p-3 pt-0">
-              <Button :label="$t('portfolioManagement')" icon="pi pi-folder"
-                @click="$router.push('/portfolios')" fluid text size="small" />
-            </div>
-          </template>
-        </Select>
-      </div>
-
-      <!-- Navigation -->
-      <div class="flex-1 overflow-y-auto pb-4">
-        <HeaderNav />
-      </div>
-
-      <!-- User Info (bottom) -->
-      <div class="shrink-0 border-t border-[var(--p-content-border-color)] p-3">
-        <div class="flex items-center gap-3 cursor-pointer rounded-lg px-2 py-2
-                    hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)]
-                    transition-colors"
-             @click="toggleMenu">
-          <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
-          <div class="flex flex-col min-w-0">
-            <span class="text-sm font-medium truncate">
-              {{ auth.user.displayName || auth.user.email }}
+  <div class="flex flex-col min-h-screen">
+    <!-- 最大寬度 ; max-w-screen-md, 768px ; max-w-screen-lg, 1024px ; max-w-screen-xl, 1280px ; max-w-screen-2xl, 1536px. -->
+    <div class="w-full flex-grow mx-auto p-16 ">
+      <!-- Header -->
+      <header class="fixed top-0 left-0 right-0 z-50  px-4 sm:px-16 bg-[var(--p-surface-background)] backdrop-blur-sm">
+        <div class="mx-auto flex justify-between items-center gap-3 py-4">
+          <!-- Left: Logo + Portfolio Selector -->
+          <div class="flex items-center gap-3">
+            <!-- Hamburger Toggle Button - Mobile Only -->
+            <span class="lg:hidden">
+              <Button
+                @click="sidebarVisible = true"
+                icon="pi pi-bars"
+                class="hamburger-btn lg:hidden"
+                size="small"
+                variant="outlined"
+                severity="secondary"
+              />
             </span>
-            <span class="text-xs text-[var(--p-text-muted-color)] truncate">
-              {{ auth.user.email }}
-            </span>
+
+            <!-- Logo -->
+            <div @click="$router.push('/dashboard')" class="text-2xl sm:text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
+              <span class="text-gray-500 dark:text-gray-100">Stock</span>
+              <span class="text-gray-500 dark:text-gray-100">Bar</span>
+            </div>
+
           </div>
-        </div>
-      </div>
-    </aside>
 
-    <!-- ========== Main Area ========== -->
-    <div class="flex flex-col flex-1 lg:ml-60 min-h-screen">
-
-      <!-- Top Header -->
-      <header class="fixed top-0 left-0 right-0 lg:left-60 z-40 h-14
-                     px-3 sm:px-4 flex items-center gap-3
-                     bg-[var(--p-content-background)]
-                     border-b border-[var(--p-content-border-color)]">
-
-        <!-- Mobile: Hamburger + Logo -->
-        <div class="flex items-center gap-2 lg:hidden shrink-0">
-          <Button
-            @click="sidebarVisible = true"
-            icon="pi pi-bars"
-            size="small"
-            variant="outlined"
-            severity="secondary"
-          />
-          <div @click="$router.push('/dashboard')"
-               class="text-xl font-bold cursor-pointer whitespace-nowrap select-none">
-            <span class="text-gray-500">Stock</span>
-            <span :style="{ color: 'var(--p-primary-color)' }">Bar</span>
+          <!-- Center: Navigation - Hidden on mobile, shown on lg+ -->
+          <div class="hidden lg:flex items-center justify-center flex-1">
+            <HeaderNav />
           </div>
-        </div>
 
-        <!-- Search — Centered -->
-        <div class="flex-1 flex justify-center">
-          <SearchBox ref="searchBoxRef" />
-        </div>
+          <!-- 右上功能按鈕區 -->
+          <div class="flex justify-center items-center flex-wrap gap-1">
+            <!-- 搜尋按鈕 - 小螢幕：icon only -->
+            <button
+              aria-label="Search"
+              @click="openSearchBox"
+              class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 cursor-pointer"
+            >
+              <i class="pi pi-search text-sm"></i>
+            </button>
+            <!-- 搜尋按鈕 - 大螢幕：pill 樣式 -->
+            <button
+              @click="openSearchBox"
+              aria-label="Search"
+              class="hidden lg:flex items-center w-[16rem] gap-3 px-4 py-2.5 rounded-full border border-[var(--p-content-border-color)] bg-[var(--p-surface-background)] transition-colors text-sm text-[var(--p-text-muted-color)] cursor-pointer"
+            >
+              <i class="pi pi-search text-xs"></i>
+              <span class="truncate">{{ $t('search') }}</span>
+              <span class="ml-auto inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-full border border-[var(--p-content-border-color)] text-sm leading-none text-[var(--p-text-muted-color)]">/</span>
+            </button>
 
-        <!-- Right: Theme toggle + Avatar (mobile only) -->
-        <div class="flex items-center gap-1 shrink-0">
-          <Button
-            :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-            @click="toggleTheme"
-            aria-label="Toggle Dark Mode"
-            size="small"
-            text
-            rounded
-            severity="secondary"
-          />
-          <!-- Avatar — mobile only (desktop shows in sidebar bottom) -->
-          <div
-            class="lg:hidden cursor-pointer ml-1 rounded-full
-                   hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
-                   flex items-center justify-center"
-            @click="toggleMenu"
-          >
-            <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
-          </div>
-        </div>
+            <Button
+              :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+              @click="toggleTheme"
+              aria-label="Toggle Dark Mode"
+              size="small"
+              text
+              rounded
+              severity="secondary"
+            />
 
-        <!-- TieredMenu popup -->
-        <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
-          <template #start>
-            <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
-              <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
-              <div class="flex flex-col">
-                <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
-                <span class="text-sm text-gray-500">{{ auth.user.email }}</span>
+            
+            <!-- User Menu -->
+             <div 
+                class="cursor-pointer ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
+                @click="toggleMenu"
+              >
+                <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
               </div>
-            </div>
-          </template>
-          <template #item="{ item, props }">
-            <a v-ripple class="flex items-center w-full" v-bind="props.action">
-              <span class="ml-2">{{ item.label }}</span>
-              <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
-              <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
-                <span v-if="item.suffix">{{ item.suffix }}</span>
-                <i class="pi pi-chevron-right text-xs"></i>
-              </span>
-              <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
-            </a>
-          </template>
+              <!-- <Button
+                @click="toggleMenu"
+                class="px-1 py-1"
+                rounded
+                text
+                severity="secondary"
+                aria-label="User Menu"
+              >
+                  <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
+              </Button> -->
+
+              <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
+                <template #start>
+                  <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
+                    <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
+                    <div class="flex flex-col">
+                      <span class="font-medium">{{ auth.user.displayName || auth.user.email }}</span>
+                      <span class="text-sm text-gray-500">{{ auth.user.email }}</span>
+                    </div>
+                  </div>
+                </template>
+
+                <template #item="{ item, props }">
+                    <a v-ripple class="flex items-center w-full" v-bind="props.action">
+                      <!-- <span v-if="item.icon" :class="item.icon" /> -->
+                      <span class="ml-2">{{ item.label }}</span>
+                      <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
+                      <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
+                        <span v-if="item.suffix">{{ item.suffix }}</span>
+                        <i class="pi pi-chevron-right text-xs"></i>
+                      </span>
+                      <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
+                    </a>
+                </template>
         </TieredMenu>
+          
+          </div>
+        </div>
       </header>
 
-      <!-- Page Content -->
-      <div class="flex flex-col flex-grow pt-14">
-        <main class="px-2 sm:px-4 w-full flex-grow">
+      <!-- Main Content -->
+      <main class="w-full mx-auto flex-grow pt-16 bg-[var(--p-surface-background)]">
+        <!-- 行：選擇投資組合和新增交易 -->
+        <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+          <!-- Portfolio Selector - Mobile Only lg:hidden --> 
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+            <button
+              type="button"
+              class="portfolio-menu-trigger"
+              :aria-label="t('openPortfolioMenu')"
+              @click="togglePortfolioMenu"
+            >
+              <span class="portfolio-menu-trigger__label">{{ currentPortfolioName }}</span>
+              <i class="pi pi-chevron-down text-xs portfolio-menu-trigger__icon"></i>
+            </button>
 
-          <!-- Action Bar -->
-          <div v-if="!isAssetRoute"
-               class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
+            <TieredMenu ref="portfolioMenu" :model="portfolioMenuItems" :popup="true" class="portfolio-tiered-menu">
+              <template #start>
+                <div class="portfolio-menu-current">
+                  <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
+                  <i class="pi pi-chevron-up text-xs"></i>
+                </div>
+              </template>
 
-            <!-- Portfolio Selector — Mobile only -->
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:hidden">
-              <Select
-                v-model="selectedPortfolioId"
-                size="small"
-                :options="portfolioStore.portfolios"
-                optionLabel="name"
-                optionValue="id"
-                checkmark
-                :highlightOnSelect="false"
-              >
-                <template #header>
-                  <div class="px-5 py-4 font-bold">{{ $t('currentPortfolio') }}</div>
-                </template>
-                <template #dropdownicon>
-                  <i class="pi pi-chevron-down text-xs"></i>
-                </template>
-                <template #footer>
-                  <div class="p-3 border-t border-[var(--p-content-border-color)]">
-                    <Button :label="$t('addPortfolio')" icon="pi pi-plus"
-                      @click="dialogVisible = true" fluid text size="small" />
-                  </div>
-                  <div class="p-3 pt-0">
-                    <Button :label="$t('portfolioManagement')" icon="pi pi-folder"
-                      @click="$router.push('/portfolios')" fluid text size="small" />
-                  </div>
-                </template>
-              </Select>
-              <div
-                v-if="auth.user?.uid === 'demo-user'"
-                class="text-xs text-gray-400 flex items-center gap-1 whitespace-normal text-left sm:whitespace-nowrap"
-              >
-                <i class="pi pi-info-circle text-gray-400" aria-hidden="true"></i>
-                <span>{{ $t('demoUserMessage') }}</span>
-              </div>
-            </div>
+              <template #item="{ item, props }">
+                <div v-if="item.kind === 'section'" class="portfolio-menu-section">
+                  {{ item.label }}
+                </div>
 
-            <!-- Demo message on desktop -->
-            <div v-if="auth.user?.uid === 'demo-user'"
-                 class="hidden lg:flex text-xs text-gray-400 items-center gap-1">
-              <i class="pi pi-info-circle" aria-hidden="true"></i>
+                <a
+                  v-else
+                  v-ripple
+                  class="portfolio-menu-item"
+                  :class="{
+                    'is-active': item.kind === 'portfolio' && item.active,
+                    'is-danger': item.kind === 'danger'
+                  }"
+                  v-bind="props.action"
+                >
+                  <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
+                  <span class="portfolio-menu-item__label">{{ item.label }}</span>
+                  <span v-if="item.items" class="portfolio-menu-item__suffix">
+                    <span v-if="item.suffix">{{ item.suffix }}</span>
+                    <i class="pi pi-chevron-right text-xs"></i>
+                  </span>
+                  <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
+                  <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
+                </a>
+              </template>
+            </TieredMenu>
+
+            <div
+              v-if="auth.user?.uid === 'demo-user'"
+              class="text-xs text-gray-400 flex items-center gap-1 whitespace-normal text-left sm:whitespace-nowrap"
+            >
+              <i class="pi pi-info-circle text-gray-400" aria-hidden="true"></i>
               <span>{{ $t('demoUserMessage') }}</span>
-            </div>
-            <div v-else class="hidden lg:block"></div>
-
-            <!-- Action Buttons -->
-            <div class="flex justify-end w-full lg:ml-auto">
-              <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
-                <div v-if="portfolioStore.portfolios.length === 0">
-                  <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
-                </div>
-                <div class="flex flex-wrap gap-4" v-else>
-                  <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-                  <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-upload" variant="text" />
-                </div>
-              </div>
-              <div v-else-if="auth.user.uid === 'demo-user'">
-                <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
-              </div>
             </div>
           </div>
 
-          <RouterView />
-        </main>
+          <!-- Action Buttons -->
+          <div class="flex justify-end w-full lg:ml-auto">
+            <div v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
+              <div v-if="portfolioStore.portfolios.length === 0">
+                <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
+              </div>
+              <div class="flex flex-wrap gap-4" v-else>
+                <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
+                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-upload" variant="text" />
+              </div>
+            </div>
+            <div v-else-if="auth.user.uid === 'demo-user'">
+              <Button @click="auth.login" label="Get Started" icon="pi pi-arrow-right" iconPos="right" />
+            </div>
+          </div>
+        </div>
 
-        <Footer />
-      </div>
+        <!-- <RouterView v-slot="{ Component, route: currentRoute }">
+          <Transition name="page-main" mode="out-in" appear>
+            <div :key="currentRoute.fullPath" class="page-main-transition">
+              <component :is="Component" />
+            </div>
+          </Transition> -->
+        <RouterView>
+        </RouterView>
+      </main>
     </div>
+
+    <Footer />
   </div>
 
-
+  <!-- Search Dialog -->
+  <Dialog
+    v-model:visible="searchBoxVisible"
+    modal
+    dismissableMask
+    position="top"
+    :style="{ width: '90vw', maxWidth: '25rem', top: '5rem' }"
+    :closeOnEscape="true"
+    :showHeader="false"
+  >
+    <template #container>
+      <SearchBox ref="searchBoxRef" @close="searchBoxVisible = false" />
+    </template>
+  </Dialog>
 
   <ImportDataDialog v-model="importDataDialogVisible" />
+
   <TransactionDialog v-model="transctionDialogVisible" />
-  <PortfolioFormDialog :visible="dialogVisible" @update:visible="dialogVisible = $event" />
+
+  <PortfolioFormDialog
+    :visible="dialogVisible"
+    :editPortfolio="editPortfolio"
+    @update:visible="dialogVisible = $event"
+    @clear:editPortfolio="resetEditPortfolio()"
+  />
+
+  <!-- Mobile Sidebar -->
   <MobileSidebar v-model:visible="sidebarVisible" />
 </template>
 
 <script setup>
 // 同原始邏輯，無變動
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
+import { useConfirm } from 'primevue/useconfirm'
 import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
 import TieredMenu from 'primevue/tieredmenu'
-import Select from 'primevue/select'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
@@ -261,8 +261,10 @@ import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
 import { showLoading, hideLoading } from "@/composables/loading.js"
+import * as toast from '@/composables/toast'
 
 const { locale, t } = useI18n()
+const confirm = useConfirm()
 const dialogVisible = ref(false)
 const importDataDialogVisible = ref(false)
 const route = useRoute()
@@ -297,41 +299,207 @@ watch(() => auth.user, async (newUser) => {
   }
 })
 
-const selectedPortfolioId = ref(null)
+const RECENT_PORTFOLIOS_STORAGE_KEY = 'recentPortfolios'
 
-watch(
-  () => portfolioStore.currentPortfolio,
-  (newVal) => {
-    if (newVal?.id !== selectedPortfolioId.value)
-      selectedPortfolioId.value = newVal?.id
+const createEmptyPortfolio = () => ({
+  id: null,
+  name: '',
+  description: '',
+  drift_threshold: 5,
+  enable_email_alert: true,
+})
+
+const safeParseRecentPortfolioIds = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_PORTFOLIOS_STORAGE_KEY) || '[]')
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
   }
+}
+
+const editPortfolio = ref(createEmptyPortfolio())
+const recentPortfolioIds = ref(safeParseRecentPortfolioIds())
+
+const persistRecentPortfolioIds = () => {
+  localStorage.setItem(RECENT_PORTFOLIOS_STORAGE_KEY, JSON.stringify(recentPortfolioIds.value))
+}
+
+const resetEditPortfolio = () => {
+  editPortfolio.value = createEmptyPortfolio()
+}
+
+const currentPortfolioName = computed(() => portfolioStore.currentPortfolio?.name || t('portfolio'))
+
+const recentPortfolios = computed(() =>
+  recentPortfolioIds.value
+    .map((id) => portfolioStore.portfolios.find((portfolio) => portfolio.id === id))
+    .filter(Boolean)
 )
 
-watch(selectedPortfolioId, (newId) => {
-  const matchedPortfolio = portfolioStore.portfolios.find(p => p.id === newId)
-  if (matchedPortfolio && matchedPortfolio.id !== portfolioStore.currentPortfolio?.id)
-    portfolioStore.setCurrentPortfolio(matchedPortfolio)
+const switchPortfolio = (portfolio) => {
+  if (!portfolio || portfolio.id === portfolioStore.currentPortfolio?.id) return
+  portfolioStore.setCurrentPortfolio(portfolio)
+}
+
+const rememberRecentPortfolio = (portfolio) => {
+  if (!portfolio?.id) return
+  recentPortfolioIds.value = [portfolio.id, ...recentPortfolioIds.value.filter((id) => id !== portfolio.id)].slice(0, 6)
+  persistRecentPortfolioIds()
+}
+
+const pruneRecentPortfolios = () => {
+  const validIds = new Set(portfolioStore.portfolios.map((portfolio) => portfolio.id))
+  recentPortfolioIds.value = recentPortfolioIds.value.filter((id) => validIds.has(id))
+  persistRecentPortfolioIds()
+}
+
+const openCreatePortfolioDialog = () => {
+  resetEditPortfolio()
+  dialogVisible.value = true
+}
+
+const openEditPortfolioDialog = (portfolio = portfolioStore.currentPortfolio) => {
+  if (!portfolio) return
+  editPortfolio.value = {
+    id: portfolio.id,
+    name: portfolio.name,
+    description: portfolio.description || '',
+    drift_threshold: portfolio.drift_threshold ?? 5,
+    enable_email_alert: portfolio.enable_email_alert ?? true,
+  }
+  dialogVisible.value = true
+}
+
+const openPortfolioManagement = () => {
+  router.push('/portfolios')
+}
+
+const buildDuplicatePortfolioName = (name) => t('portfolioCopyName', { name })
+
+const duplicatePortfolio = async (portfolio = portfolioStore.currentPortfolio) => {
+  if (!portfolio) return
+
+  try {
+    await portfolioStore.addPortfolio({
+      name: buildDuplicatePortfolioName(portfolio.name),
+      description: portfolio.description || '',
+      drift_threshold: portfolio.drift_threshold ?? 5,
+      enable_email_alert: portfolio.enable_email_alert ?? true,
+    })
+
+    const duplicatedPortfolio = portfolioStore.portfolios[portfolioStore.portfolios.length - 1]
+
+    if (duplicatedPortfolio) {
+      portfolioStore.setCurrentPortfolio(duplicatedPortfolio)
+      toast.success(t('portfolioDuplicated', { name: duplicatedPortfolio.name }), '')
+    }
+  } catch (error) {
+    console.error('Error duplicating portfolio:', error)
+    toast.error(t('errorOccurred'), error.message || '')
+  }
+}
+
+const confirmDeletePortfolio = (portfolio = portfolioStore.currentPortfolio) => {
+  if (!portfolio) return
+
+  confirm.require({
+    message: t('deletePortfolioConfirm', { name: portfolio.name }),
+    header: t('warning'),
+    icon: 'pi pi-info-circle',
+    rejectProps: {
+      label: t('cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: t('delete'),
+      severity: 'danger',
+    },
+    accept: async () => {
+      await portfolioStore.removePortfolio([portfolio.id])
+      toast.success(t('portfolioDeleted'), '')
+    },
+  })
+}
+
+const buildPortfolioMenuItem = (portfolio) => ({
+  label: portfolio.name,
+  kind: 'portfolio',
+  active: portfolio.id === portfolioStore.currentPortfolio?.id,
+  command: () => switchPortfolio(portfolio),
+})
+
+const portfolioMenuItems = computed(() => {
+  const currentActions = auth.user.uid === 'demo-user'
+    ? []
+    : [
+        { label: t('duplicatePortfolio'), icon: 'pi pi-copy', command: () => duplicatePortfolio() },
+        { label: t('updatePortfolio'), icon: 'pi pi-pencil', command: () => openEditPortfolioDialog() },
+        { label: t('delete'), icon: 'pi pi-trash', kind: 'danger', command: () => confirmDeletePortfolio() },
+        { separator: true },
+        {
+          label: t('createNewPortfolio'),
+          icon: 'pi pi-plus',
+          items: [
+            { label: t('addPortfolio'), icon: 'pi pi-file-plus', command: openCreatePortfolioDialog },
+            { label: t('portfolioManagement'), icon: 'pi pi-folder-open', command: openPortfolioManagement },
+          ],
+        },
+      ]
+
+  const recentItems = recentPortfolios.value.length
+    ? [
+        { separator: true },
+        { label: t('recentlyUsed'), kind: 'section', disabled: true },
+        ...recentPortfolios.value.map(buildPortfolioMenuItem),
+      ]
+    : []
+
+  const openItems = [
+    { separator: true },
+    {
+      label: t('portfolioManagement'),
+      icon: 'pi pi-folder',
+      command: openPortfolioManagement
+    },
+  ]
+
+  return [...currentActions, ...recentItems, ...openItems]
 })
 
 async function getPortfolios() {
   try {
     await portfolioStore.fetchPortfolios()
-    selectedPortfolioId.value = portfolioStore.currentPortfolio?.id
+    pruneRecentPortfolios()
   } catch (error) {
     console.error('Error fetching portfolios:', error)
   }
 }
 
+const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
+const portfolioMenu = ref()
 
-const openSearchBox = () => {
-  searchBoxRef.value?.open()
+const openSearchBox = async () => {
+  searchBoxVisible.value = true
+  await nextTick()
+  searchBoxRef.value?.focusInput?.()
+}
+
+const togglePortfolioMenu = (event) => portfolioMenu.value.toggle(event)
+
+const isEditableTarget = (target) => {
+  if (!(target instanceof HTMLElement)) return false
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
 }
 
 const onGlobalSearchShortcut = (event) => {
   if (event.isComposing || event.repeat) return
-  const isShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'
-  if (!isShortcut) return
+  const isCommandShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'
+  const isSlashShortcut = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && event.key === '/'
+  if (!isCommandShortcut && !isSlashShortcut) return
+  if (isSlashShortcut && isEditableTarget(event.target)) return
 
   event.preventDefault()
   openSearchBox()
@@ -379,6 +547,30 @@ onUnmounted(() => {
   window.removeEventListener('keydown', onGlobalSearchShortcut)
 })
 
+watch(
+  () => portfolioStore.currentPortfolio,
+  (portfolio) => {
+    if (portfolio) rememberRecentPortfolio(portfolio)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => portfolioStore.portfolios.map((portfolio) => portfolio.id),
+  () => {
+    pruneRecentPortfolios()
+  }
+)
+
+watch(dialogVisible, (visible) => {
+  if (!visible) resetEditPortfolio()
+})
+
+watch(searchBoxVisible, async (visible) => {
+  if (!visible) return
+  await nextTick()
+  searchBoxRef.value?.focusInput?.()
+})
 
 const menu = ref()
 const toggleMenu = (event) => menu.value.toggle(event)
@@ -420,6 +612,10 @@ const menuItems = computed(() => {
 </script>
 
 <style scoped>
+header {
+  text-align: center;
+}
+
 .start-btn:hover{cursor: pointer}
 .start-btn {
   /* background: transparent; outline: none; */
@@ -491,6 +687,122 @@ const menuItems = computed(() => {
 <style>
 .custom-select-root:hover {
   border: 1px solid rgb(121, 121, 121) !important;
+}
+
+.portfolio-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--p-text-color);
+  cursor: pointer;
+}
+
+.portfolio-menu-trigger__label {
+  font-size: clamp(1.75rem, 1.2rem + 1.2vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.portfolio-tiered-menu.p-tieredmenu,
+.portfolio-tiered-menu .p-tieredmenu-submenu {
+  min-width: 17rem;
+  padding: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #303030);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--p-surface-card) 92%, #1b1b1b);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+}
+
+.portfolio-tiered-menu .p-tieredmenu-root-list,
+.portfolio-tiered-menu .p-tieredmenu-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.portfolio-tiered-menu .p-tieredmenu-separator {
+  margin: 0.375rem 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #3a3a3a);
+}
+
+.portfolio-menu-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 0.875rem 0.625rem;
+  color: var(--p-text-color);
+}
+
+.portfolio-menu-current__label {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.portfolio-menu-section {
+  padding: 0.5rem 0.875rem 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--p-text-muted-color);
+}
+
+.portfolio-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.7rem;
+  color: var(--p-text-color);
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.portfolio-menu-item:hover {
+  background: color-mix(in srgb, var(--p-surface-hover) 80%, transparent);
+}
+
+.portfolio-menu-item.is-active {
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+}
+
+.portfolio-menu-item.is-danger {
+  color: #ef4444;
+}
+
+.portfolio-menu-item__label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.portfolio-menu-item__suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  color: var(--p-text-muted-color);
+}
+
+.dark .portfolio-tiered-menu.p-tieredmenu,
+.dark .portfolio-tiered-menu .p-tieredmenu-submenu {
+  border-color: #383838;
+  background: #242424;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
+}
+
+.dark .portfolio-tiered-menu .p-tieredmenu-separator {
+  border-top-color: #3a3a3a;
+}
+
+.dark .portfolio-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .language-menu {

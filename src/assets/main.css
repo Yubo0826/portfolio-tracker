@@ -9,6 +9,10 @@
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
+.dark {
+  --p-togglebutton-background: var(--p-surface-900);
+}
+
 #app {
   /* max-width: 1280px; */
   /* max-width: 1680px; */
@@ -44,4 +48,20 @@
     grid-template-columns: 1fr 1fr; */
     /* padding: 2rem; */
   }
+}
+
+/* primevue css 覆寫 */
+.p-card {
+  border: none !important;
+}
+
+.dark .p-togglebutton,
+.dark .p-selectbutton .p-togglebutton {
+  background-color: var(--p-togglebutton-background);
+}
+
+.dark .p-togglebutton .p-button-label,
+.dark .p-selectbutton .p-togglebutton .p-button-label,
+.dark .p-togglebutton-label {
+  background-color: var(--p-surface-900) !important;
 }

@@ -1,50 +1,6 @@
 <template>
-  <!-- Backdrop overlay (rendered at body level, below the header z-40) -->
-  <Teleport to="body">
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-30 bg-black/40"
-      @click="close"
-    />
-  </Teleport>
-
-  <!-- Closed: Mobile icon only (hidden on lg+) -->
-  <!-- <button
-    v-if="!isOpen"
-    aria-label="Search"
-    @click="open"
-    class="lg:hidden flex items-center justify-center w-8 h-8 rounded-full
-           hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors
-           text-gray-500 dark:text-gray-400 cursor-pointer"
-  >
-    <i class="pi pi-search text-sm"></i>
-  </button> -->
-
-  <!-- Closed: Desktop pill (hidden on mobile) -->
-  <button
-    v-if="!isOpen"
-    @click="open"
-    aria-label="Search"
-    class=" lg:flex items-center w-144 gap-2 px-4 py-2 rounded-xl
-           border border-[var(--p-content-border-color)]
-           bg-[var(--p-surface-100)] dark:bg-[var(--p-surface-800)]
-           hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
-           text-sm text-gray-500 dark:text-gray-400 cursor-pointer"
-  >
-    <i class="pi pi-search text-xs"></i>
-    <span>{{ $t('search') }}</span>
-    <span class="ml-auto text-[11px] leading-none px-1.5 py-1 rounded
-                 border border-[var(--p-content-border-color)]
-                 text-gray-400 dark:text-gray-500">Ctrl + K</span>
-  </button>
-
-  <!-- Open: inline input + dropdown -->
-  <div v-if="isOpen" class="relative w-full lg:w-144">
-    <!-- Input row -->
-    <div class="flex items-center gap-2 px-4 py-2 rounded-xl
-                border border-[var(--p-primary-color)]
-                bg-[var(--p-surface-100)] dark:bg-[var(--p-surface-800)]
-                shadow-md">
+  <div class="relative w-full">
+    <div class="search-shell">
       <i class="pi pi-search text-xs text-neutral-400 shrink-0"></i>
       <input
         ref="inputEl"
@@ -62,17 +18,12 @@
         role="combobox"
         :aria-activedescendant="activeIndex >= 0 ? `opt-${activeIndex}` : undefined"
       />
-      <i
-        @click="close"
-        class="pi pi-times text-xs text-neutral-400 shrink-0 cursor-pointer
-               hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
-      ></i>
+      <span class="search-shortcut-indicator">/</span>
     </div>
 
-    <!-- Dropdown results panel -->
     <div
       v-if="results.length || (query.trim().length > 0 && !loading) || loading"
-      class="absolute top-full mt-1 left-0 right-0 rounded-xl shadow-xl
+      class="absolute top-full mt-2 left-0 right-0 rounded-[1.25rem] shadow-xl
              border border-[var(--p-content-border-color)]
              bg-[var(--p-surface-0)] dark:bg-[var(--p-surface-900)]
              overflow-hidden"
@@ -136,25 +87,24 @@ import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 const router = useRouter()
+const emit = defineEmits(['close'])
 
-const isOpen = ref(false)
 const query = ref('')
 const inputEl = ref(null)
 const results = ref([])
 const activeIndex = ref(-1)
 const loading = ref(false)
 
-async function open() {
-  isOpen.value = true
+async function focusInput() {
   await nextTick()
   inputEl.value?.focus()
 }
 
 function close() {
-  isOpen.value = false
   query.value = ''
   results.value = []
   activeIndex.value = -1
+  emit('close')
 }
 
 // 搜尋資料
@@ -194,8 +144,8 @@ function setActive(idx) {
 function select(idx) {
   const item = results.value[idx]
   if (!item) return
-  close()
   router.push({ name: 'asset', params: { symbol: item.symbol } })
+  close()
 }
 
 function onKeydown(e) {
@@ -215,16 +165,52 @@ function onKeydown(e) {
   }
 }
 
-defineExpose({ open })
+defineExpose({ focusInput })
 </script>
 
 <style scoped>
+.search-shell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--p-form-field-background) 94%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.search-shortcut-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 92%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--p-surface-0) 3%, transparent);
+  color: var(--p-text-muted-color);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .search-result-item {
   margin: 0 0.5rem;
   border-radius: 0.625rem;
   transition: background-color 0.2s ease;
 }
 
+.dark .search-shell {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dark .search-shortcut-indicator {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
 
 
 .search-item-symbol {

@@ -1,64 +1,82 @@
 <template>
-  <nav class="flex flex-col gap-0.5 px-2">
-    <div v-for="link in navLinks" :key="link.key">
-      <!-- 無子選單的連結 -->
+  <nav class="flex items-center h-full gap-1">
+    <div
+      v-for="link in navLinks"
+      :key="link.key"
+      class="relative h-full flex items-center"
+      @mouseenter="activeMenu = link.key"
+      @mouseleave="activeMenu = null"
+    >
       <button
-        v-if="!link.hasMenu"
-        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer"
-        :class="isActive(link.activePaths)
-          ? 'bg-[color-mix(in_srgb,var(--p-primary-color)_12%,transparent)] text-[var(--p-primary-color)]'
-          : 'text-[var(--p-text-color)] hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)]'"
-        @click="go(link.to)"
+        class="px-4 h-10 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--p-surface-200)] dark:hover:bg-[var(--p-surface-800)] relative nav-trigger cursor-pointer"
+        :class="isActive(link.activePaths) ? 'text-[var(--p-primary-color)]' : 'text-[var(--p-text-color)]'"
+        @click="handleLinkClick(link)"
       >
-        <i :class="link.icon" class="text-sm w-4 shrink-0 text-center"></i>
         <span>{{ link.label }}</span>
+        
+        <!-- 先移除 裝飾用的icon -->
+        <!-- <i v-if="link.hasMenu" class="pi pi-chevron-down ml-2 text-[10px]"></i> -->
+         
+        <!-- 先移除 裝飾用的underline -->
+        <!-- <div v-if="isActive(link.activePaths)" class="absolute bottom-0 left-3 right-3 h-[2px] bg-[var(--p-primary-color)] rounded"></div> -->
       </button>
 
-      <!-- 有子選單的連結（可展開） -->
-      <div v-else>
-        <button
-          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer"
-          :class="isActive(link.activePaths)
-            ? 'bg-[color-mix(in_srgb,var(--p-primary-color)_12%,transparent)] text-[var(--p-primary-color)]'
-            : 'text-[var(--p-text-color)] hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)]'"
-          @click="toggleSection(link.key)"
+      <transition
+        enter-active-class="transition duration-150 ease-out"
+        enter-from-class="opacity-0 translate-y-1"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-100 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 translate-y-1"
+      >
+        <div
+          v-if="link.hasMenu && activeMenu === link.key"
+          class="absolute top-full left-0 mt-2 w-52 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl py-2 z-[60]"
         >
-          <i :class="link.icon" class="text-sm w-4 shrink-0 text-center"></i>
-          <span class="flex-1 text-left">{{ link.label }}</span>
-          <i class="pi text-[10px]" :class="openSections[link.key] ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
-        </button>
+          <div v-for="group in link.menuGroups" :key="group.label" class="mb-2 last:mb-0">
+            <!-- <div class="px-4 py-2 text-[10px] uppercase tracking-widest text-[var(--p-text-muted-color)]">
+              {{ group.label }}
+            </div> -->
 
-        <!-- 子項目 -->
-        <div v-show="openSections[link.key]"
-             class="ml-4 pl-3 border-l border-[var(--p-content-border-color)] mt-0.5 mb-1 flex flex-col gap-0.5">
-          <template v-for="group in link.menuGroups" :key="group.label">
             <button
               v-for="item in group.items"
               :key="item.label"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer"
-              :class="isSubActive(item.to)
-                ? 'text-[var(--p-primary-color)] font-semibold bg-[color-mix(in_srgb,var(--p-primary-color)_8%,transparent)]'
-                : 'text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)] hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)]'"
+              class="w-[calc(100%-0.5rem)] mx-1 px-2 py-2 rounded-lg cursor-pointer flex items-center justify-between text-left transition-colors hover:bg-[var(--p-surface-100)] dark:hover:bg-[var(--p-surface-800)]"
               @click="go(item.to)"
             >
-              <i v-if="item.icon" :class="item.icon" class="text-xs w-4 shrink-0 text-center"></i>
-              <span>{{ item.label }}</span>
+              <div class="flex items-center gap-3">
+                <i v-if="item.icon" :class="item.icon" class="text-sm text-[var(--p-text-muted-color)] w-4"></i>
+                <div class="flex flex-col">
+                  <span class="text-sm text-[var(--p-text-color)]">{{ item.label }}</span>
+                  <!-- <span v-if="item.sub" class="text-[10px] text-[var(--p-text-muted-color)]">{{ item.sub }}</span> -->
+                </div>
+              </div>
+              <!-- <i class="pi pi-angle-right text-[10px] text-[var(--p-text-muted-color)]"></i> -->
             </button>
-          </template>
+
+            <hr
+              v-if="!group.noDivider"
+              class="mx-4 my-2 border-[var(--p-content-border-color)]"
+            />
+          </div>
         </div>
-      </div>
+      </transition>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
+import { usePortfolioStore } from '@/stores/portfolio'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+
+const portfolioStore = usePortfolioStore()
+const activeMenu = ref(null)
 
 const navLinks = computed(() => [
   {
@@ -66,7 +84,6 @@ const navLinks = computed(() => [
     label: t('dashboard'),
     to: '/dashboard',
     activePaths: ['/dashboard'],
-    icon: 'pi pi-home',
     hasMenu: false,
   },
   {
@@ -74,7 +91,6 @@ const navLinks = computed(() => [
     label: t('portfolio'),
     to: '/portfolio/holdings',
     activePaths: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends', '/portfolios'],
-    icon: 'pi pi-briefcase',
     hasMenu: true,
     menuGroups: [
       {
@@ -89,7 +105,12 @@ const navLinks = computed(() => [
         label: t('portfolios'),
         noDivider: true,
         items: [
-          { label: t('portfolioManagement'), to: '/portfolios', icon: 'pi pi-folder' },
+          {
+            label: t('portfolioManagement'),
+            to: '/portfolios',
+            icon: 'pi pi-folder',
+            sub: portfolioStore.currentPortfolio?.name || undefined,
+          },
         ],
       },
     ],
@@ -99,7 +120,6 @@ const navLinks = computed(() => [
     label: t('cashFlowNav'),
     to: '/cash-flow',
     activePaths: ['/cash-flow', '/cash-flows'],
-    icon: 'pi pi-chart-bar',
     hasMenu: false,
   },
   {
@@ -107,7 +127,6 @@ const navLinks = computed(() => [
     label: t('functions'),
     to: '/allocation',
     activePaths: ['/allocation', '/rebalancing', '/backtesting'],
-    icon: 'pi pi-wrench',
     hasMenu: true,
     menuGroups: [
       {
@@ -128,29 +147,31 @@ const navLinks = computed(() => [
   },
 ])
 
+const go = (to) => {
+  activeMenu.value = null
+  router.push(to)
+}
+
+const handleLinkClick = (link) => {
+  if (!link.hasMenu) {
+    go(link.to)
+    return
+  }
+  if (activeMenu.value !== link.key) {
+    activeMenu.value = link.key
+    return
+  }
+  go(link.to)
+}
+
 const isActive = (paths) => {
-  if (Array.isArray(paths)) return paths.some(p => route.path === p || route.path.startsWith(p + '/'))
-  return route.path === paths || route.path.startsWith(paths + '/')
+  if (Array.isArray(paths)) return paths.includes(route.path)
+  return route.path === paths
 }
-
-const isSubActive = (path) => route.path === path || route.path.startsWith(path + '/')
-
-const openSections = ref({})
-
-function initOpenSections() {
-  navLinks.value.forEach(link => {
-    if (link.hasMenu && isActive(link.activePaths)) {
-      openSections.value[link.key] = true
-    }
-  })
-}
-
-initOpenSections()
-watch(() => route.path, initOpenSections)
-
-const toggleSection = (key) => {
-  openSections.value[key] = !openSections.value[key]
-}
-
-const go = (to) => router.push(to)
 </script>
+
+<style scoped>
+.nav-trigger {
+  letter-spacing: 0.01em;
+}
+</style>
