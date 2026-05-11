@@ -8,7 +8,7 @@
       @mouseleave="activeMenu = null"
     >
       <button
-        class="px-4 h-10 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--p-surface-200)] dark:hover:bg-[var(--p-surface-800)] relative nav-trigger cursor-pointer"
+        class="px-4 h-10 rounded-lg text-md font-medium transition-colors hover:bg-[var(--p-surface-200)] dark:hover:bg-[var(--p-surface-800)] relative nav-trigger cursor-pointer"
         :class="isActive(link.activePaths) ? 'text-[var(--p-primary-color)]' : 'text-[var(--p-text-color)]'"
         @click="handleLinkClick(link)"
       >

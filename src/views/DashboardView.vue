@@ -440,7 +440,7 @@ const pieChartType = computed(() => ([
   { label: t('targetAllocation'), value: 'target' }
 ]))
 
-const selectedPeriod = ref('')
+const selectedPeriod = ref('3mo')
 
 const periods = computed(() => ([
   { label: '7D', value: '7d' },
@@ -866,7 +866,6 @@ watch(
       isLoadingData = true
       await loadData()
       isLoadingData = false
-      selectedPeriod.value = '3mo'
     }
   },
   { immediate: true }
@@ -874,20 +873,14 @@ watch(
 
 watch(() => transactionsStore.list, async () => {
   console.log('Dashboard Watch Transactions changed, reloading data...', isLoadingData)
-  if (!isLoadingData) {
-    isLoadingData = true
-    await loadData()
-    isLoadingData = false
+  if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id || isLoadingData || transactionsStore.isLoading) {
+    return
   }
+
+  await fetchChartData()
 })
 
 watch(selectedPeriod, (newVal, oldVal) => {
   if (newVal !== oldVal) fetchChartData()
 })
-
-if (auth.user) {
-  loadData()
-} else {
-  console.log('No user is logged in')
-}
 </script>

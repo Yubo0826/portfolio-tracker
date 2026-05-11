@@ -609,7 +609,7 @@ const currencySubItems = computed(() => [
 
 const tradeActionItems = computed(() => [
   {
-    label: t('import'),
+    label: t('importTransactions'),
     icon: 'pi pi-upload',
     command: () => {
       importDataDialogVisible.value = true

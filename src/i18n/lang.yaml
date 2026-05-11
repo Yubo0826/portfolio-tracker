@@ -407,6 +407,9 @@ perShare:
 import:
   en: Import
   zh: 匯入
+importTransactions:
+  en: Import Transactions
+  zh: 匯入交易紀錄
 InvalidDateString:
   en: Invalid date string
   zh: 日期格式錯誤
