@@ -98,15 +98,24 @@
       <!-- Price -->
       <div class="mb-4">
         <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {{ $t('price') }} <span class="text-red-500">*</span>
+          {{ $t('pleaseInputPrice') }} <span class="text-red-500">*</span>
         </label>
-        <InputText 
-          id="price"
-          v-model="form.price" 
-          class="w-full" 
-          autocomplete="off" 
-          :placeholder="$t('pleaseInputPrice')" 
-        />
+        <div class="flex items-stretch rounded-lg">
+          <InputNumber 
+            id="price"
+            v-model="form.price" 
+            class="w-full" 
+            autocomplete="off" 
+            showButtons
+            mode="currency"
+            :currency="form.currency || 'USD'"
+            :currencyDisplay="'code'"
+            :placeholder="form.currency || 'USD'" 
+          />
+          <!-- <span class="inline-flex min-w-16 items-center justify-center rounded-r-lg border border-l-0 border-surface-300 bg-surface-100 px-3 text-sm font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300">
+            {{ form.currency || 'USD' }}
+          </span> -->
+        </div>
       </div>
 
       <!-- Fee -->
@@ -120,6 +129,10 @@
           class="w-full" 
           showButtons 
           autocomplete="off" 
+          mode="currency"
+          :currency="form.currency || 'USD'"
+          :currencyDisplay="'code'"
+          :placeholder="form.currency || 'USD'" 
         />
       </div>
 
@@ -139,10 +152,13 @@
       </div>
 
       <!-- Total - full width -->
-      <div class="sm:col-span-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
+      <div class="sm:col-span-2 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
         <div class="flex justify-between items-center">
           <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('total') }}</label>
-          <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ totalPrice }} USD</span>
+          <div>
+            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalPrice.toLocaleString() }}</span>
+            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.currency || 'USD' }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -150,13 +166,14 @@
     <div class="flex justify-end gap-3 pt-4 ">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="close" />
 
+      
+      <Button v-if="hasError" type="button" :label="$t('save')" v-tooltip.bottom="$t('completeInfo')" disabled />
+      <Button v-else type="button" :label="$t('save')" @click="onSave(false)" />
+
       <span v-if="!editingId">
         <Button v-if="hasError" type="button" :label="$t('saveAndAddAnother')" v-tooltip.bottom="$t('completeInfo')" disabled />
         <Button v-else type="button" :label="$t('saveAndAddAnother')" @click="onSave(true)" />
       </span>
-
-      <Button v-if="hasError" type="button" :label="$t('save')" v-tooltip.bottom="$t('completeInfo')" disabled />
-      <Button v-else type="button" :label="$t('save')" @click="onSave(false)" />
     </div>
   </Dialog>
 </template>
@@ -221,6 +238,7 @@ const emptyForm = () => ({
   assetType: '',
   shares: null,
   price: null,
+  currency: 'USD',
   fee: 0,
   operation: 'buy',
   accountId: null,
@@ -247,14 +265,23 @@ const totalPrice = computed(() => {
   return Number((s * p).toFixed(2)) || 0;
 });
 
+const applyQuoteData = async (symbol, date) => {
+  const quoteData = await store.searchPrice(symbol, date);
+  if (!quoteData) {
+    form.value.currency = 'USD';
+    return;
+  }
+
+  form.value.price = quoteData.price ?? null;
+  form.value.currency = quoteData.currency || 'USD';
+};
+
 const onSymbolSelected = ({ symbol, name, assetType }) => {
   form.value.name = name;
   form.value.assetType = assetType;
   const date = form.value.date?.toISOString().split('T')[0];
   if (symbol && date) {
-    store.searchPrice(symbol, date).then((price) => {
-      form.value.price = price ?? null;
-    });
+    applyQuoteData(symbol, date);
   }
 };
 
@@ -262,9 +289,7 @@ const onDateSelect = (d) => {
   form.value.date = d;
   if (form.value.symbol) {
     const date = d.toISOString().split('T')[0];
-    store.searchPrice(form.value.symbol, date).then((price) => {
-      form.value.price = price ?? null;
-    });
+    applyQuoteData(form.value.symbol, date);
   }
 };
 
@@ -278,6 +303,7 @@ const loadEditing = () => {
     assetType: item.assetType,
     shares: item.shares,
     price: item.price,
+    currency: item.currency || 'USD',
     fee: item.fee,
     operation: item.transactionType,
     accountId: item.accountId || null,
@@ -296,6 +322,7 @@ watch(
 watch(
   () => props.formData,
   (newForm) => {
+    if (!newForm) return;
     form.value = emptyForm();
     form.value = {
       date: new Date(newForm.date),
@@ -304,6 +331,7 @@ watch(
       assetType: newForm.assetType,
       shares: newForm.shares,
       price: newForm.price,
+      currency: newForm.currency || 'USD',
       fee: newForm.fee,
       operation: newForm.transactionType,
       accountId: newForm.accountId || null,

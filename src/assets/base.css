@@ -66,9 +66,6 @@ body {
   /* background: var(--color-background); */
   background-color: var(--p-surface-background);
   /* background-color: rgb(202, 202, 202); */
-  transition:
-    color 0.5s,
-    background-color 0.5s;
   line-height: 1.6;
   font-family: var(--font-family-base);
   font-size: 15px;

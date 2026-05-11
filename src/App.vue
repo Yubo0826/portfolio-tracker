@@ -26,7 +26,8 @@
             <!-- Logo -->
             <div @click="$router.push('/dashboard')" class="text-2xl sm:text-3xl font-bold cursor-pointer whitespace-nowrap flex-shrink-0">
               <span class="text-gray-500 dark:text-gray-100">Stock</span>
-              <span class="text-gray-500 dark:text-gray-100">Bar</span>
+              <!-- <span class="text-gray-500 dark:text-gray-100">Bar</span> -->
+              <span class="text-[#a1a1aa]">Bar</span>
             </div>
 
           </div>
@@ -50,7 +51,7 @@
             <button
               @click="openSearchBox"
               aria-label="Search"
-              class="hidden lg:flex items-center w-[16rem] gap-3 px-4 py-2.5 rounded-full border border-[var(--p-content-border-color)] bg-[var(--p-surface-background)] transition-colors text-sm text-[var(--p-text-muted-color)] cursor-pointer"
+              class="hidden lg:flex items-center w-[16rem] gap-3 px-4 py-2.5 rounded-full bg-[#f2f2f2] dark:bg-[#22232b] hover:bg-[#e0e0e0] dark:hover:bg-[#33333b] transition-colors text-sm text-[var(--p-text-muted-color)] cursor-pointer"
             >
               <i class="pi pi-search text-xs"></i>
               <span class="truncate">{{ $t('search') }}</span>
@@ -119,19 +120,28 @@
       <main class="w-full mx-auto flex-grow pt-16 bg-[var(--p-surface-background)]">
         <!-- 行：選擇投資組合和新增交易 -->
         <div v-if="!isAssetRoute" class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
-          <!-- Portfolio Selector - Mobile Only lg:hidden --> 
+          <!-- 投資組合下拉選單 --> 
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
             <button
               type="button"
               class="portfolio-menu-trigger"
+              :class="{ 'is-open': portfolioMenuVisible }"
               :aria-label="t('openPortfolioMenu')"
+              :aria-expanded="portfolioMenuVisible"
               @click="togglePortfolioMenu"
             >
               <span class="portfolio-menu-trigger__label">{{ currentPortfolioName }}</span>
               <i class="pi pi-chevron-down text-xs portfolio-menu-trigger__icon"></i>
             </button>
 
-            <TieredMenu ref="portfolioMenu" :model="portfolioMenuItems" :popup="true" class="portfolio-tiered-menu">
+            <TieredMenu
+              ref="portfolioMenu"
+              :model="portfolioMenuItems"
+              :popup="true"
+              class="portfolio-tiered-menu"
+              @show="portfolioMenuVisible = true"
+              @hide="portfolioMenuVisible = false"
+            >
               <template #start>
                 <div class="portfolio-menu-current">
                   <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
@@ -489,6 +499,7 @@ async function getPortfolios() {
 const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
 const portfolioMenu = ref()
+const portfolioMenuVisible = ref(false)
 
 const openSearchBox = async () => {
   searchBoxVisible.value = true
@@ -713,11 +724,18 @@ header {
   align-items: center;
   gap: 0.75rem;
   width: fit-content;
-  padding: 0;
+  padding: 0.4rem 0.65rem;
   border: 0;
+  border-radius: 0.9rem;
   background: transparent;
   color: var(--p-text-color);
   cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.portfolio-menu-trigger:hover,
+.portfolio-menu-trigger.is-open {
+  background: color-mix(in srgb, var(--p-surface-hover) 82%, transparent);
 }
 
 .portfolio-menu-trigger__label {
@@ -829,6 +847,11 @@ header {
 
 .dark .portfolio-tiered-menu .p-tieredmenu-separator {
   border-top-color: #3a3a3a;
+}
+
+.dark .portfolio-menu-trigger:hover,
+.dark .portfolio-menu-trigger.is-open {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .dark .portfolio-menu-item:hover {

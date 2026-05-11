@@ -28,16 +28,16 @@ export default definePreset(Aura, {
             hoverColor: '{primary.600}',
             activeColor: '{primary.700}'
           },
-          // content: {
-          //   background: '{zinc.50}',
-          //   focusBackground: '{zinc.700}',
-          //   color: '{zinc.900}',
-          //   focusColor: '{zinc.900}',
-          //   borderColor: '{zinc.300}'
-          // },
+          content: {
+            background: '{zinc.50}',
+            focusBackground: '{zinc.700}',
+            color: '{zinc.900}',
+            focusColor: '{zinc.900}',
+            borderColor: '{zinc.300}'
+          },
           surface: {
-              // background: '#ffffff',
-              background: '#f4f6fe',
+              background: '#ffffff',
+              // background: '#f4f6fe',
               // background: '#f1f5f9',
               card: '#ffffff',
               0: '#ffffff',
@@ -62,7 +62,10 @@ export default definePreset(Aura, {
             activeColor: '{primary.200}'
           },
           formField: {
-            background: '{surface.900}'
+            background: 'transparent',
+          },
+          dialog: {
+            background: '{surface.800}'
           },
           // 卡片背景色、文字色、邊框色等
           content: {
@@ -74,7 +77,8 @@ export default definePreset(Aura, {
             focusBackground: 'rgba(250, 250, 250, .24)',
             color: 'rgba(255,255,255,.87)',
             focusColor: 'rgba(255,255,255,.87)',
-            borderColor: '#444454'
+            borderColor: '#444454',
+            hoverBackground: 'rgba(255, 255, 255, 0.08)',
           },
           surface: {
             // background: '#101218', // 原本的黑色

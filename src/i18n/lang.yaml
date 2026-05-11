@@ -235,13 +235,13 @@ dashboard:
   zh: 儀表板
 holdings:
   en: Holdings
-  zh: 持有資產
+  zh: 目前持有
 transactions:
   en: Transactions
-  zh: 歷史交易
+  zh: 交易紀錄
 dividends:
   en: Dividends
-  zh: 配息
+  zh: 配息記錄
 allocation:
   en: Allocation
   zh: 資產配置
@@ -602,17 +602,17 @@ feeCannotBeNegative:
   en: Fee cannot be negative.
   zh: 手續費不能為負數。
 transactionSavedSuccessfully:
-  en: Transaction saved successfully.
-  zh: 交易明細已成功儲存。
+  en: Transaction saved successfully!
+  zh: 成功新增交易紀錄!
 errorSavingTransaction:
-  en: Error saving transaction.
-  zh: 儲存交易明細時發生錯誤。
+  en: Error saving transaction!
+  zh: 新增交易紀錄時發生錯誤!
 portfolioDriftCheckSent:
   en: Portfolio drift check email sent.
   zh: 投資組合偏移檢查郵件已發送。
 portfolioDriftCheckError:
-  en: Error sending portfolio drift check email.
-  zh: 發送投資組合偏移檢查郵件時發生錯誤。
+  en: Error sending portfolio drift check email!
+  zh: 發送投資組合偏移檢查郵件時發生錯誤！
 loadingUserData:
   en: Loading user data...
   zh: 載入使用者資料中...

@@ -13,6 +13,7 @@ interface TransactionData {
   name: string
   assetType: string
   price: string | number
+  currency?: string
   fee: string | number
   shares: string | number
   transaction_type: string
@@ -27,6 +28,7 @@ interface Transaction {
   name: string
   assetType: string
   price: number
+  currency: string
   fee: number
   shares: number
   transactionType: string
@@ -41,6 +43,7 @@ interface TransactionForm {
   shares: number
   fee: number
   price: number
+  currency: string
   operation: string
   date: Date | string
   accountId?: string | null  // 現金帳戶 ID（選填）
@@ -53,9 +56,15 @@ interface BulkTransactionForm {
   shares: number
   fee: number
   price: number
+  currency?: string
   transactionType: string
   date: Date | string
   accountId?: string | null  // 現金帳戶 ID（選填）
+}
+
+interface PriceSearchResult {
+  price: number | null
+  currency: string
 }
 
 interface SaveTransactionParams {
@@ -83,6 +92,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       name: item.name,
       assetType: item.assetType,
       price: parseFloat(String(item.price)) || 0,
+      currency: item.currency || 'USD',
       fee: parseFloat(String(item.fee)) || 0,
       shares: parseInt(String(item.shares)) || 0,
       transactionType: item.transaction_type,
@@ -152,6 +162,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       shares: Number(form.shares) || 0,
       fee: Number(form.fee) || 0,
       price: Number(form.price),
+      currency: form.currency || 'USD',
       transaction_type: form.operation, // 'buy' | 'sell'
       transaction_date: form.date instanceof Date
         ? form.date.toISOString().split('T')[0]
@@ -200,6 +211,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
         shares: Number(form.shares) || 0,
         fee: Number(form.fee) || 0,
         price: Number(form.price),
+        currency: form.currency || 'USD',
         transaction_type: form.transactionType, // 'buy' | 'sell'
         transaction_date: form.date instanceof Date
           ? form.date.toISOString().split('T')[0]
@@ -229,7 +241,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return result
   }
 
-  const searchPrice = async (symbol: string, dateYYYYMMDD: string): Promise<number | null> => {
+  const searchPrice = async (symbol: string, dateYYYYMMDD: string): Promise<PriceSearchResult | null> => {
     if (!symbol || !dateYYYYMMDD) return null
     const nextDay = new Date(new Date(dateYYYYMMDD).getTime() + 24 * 60 * 60 * 1000)
       .toISOString()
@@ -239,12 +251,18 @@ export const useTransactionsStore = defineStore('transactions', () => {
         `/api/yahoo/chart/?symbol=${symbol}&period1=${dateYYYYMMDD}&period2=${nextDay}`
       )
       if (data?.quotes?.length > 0) {
-        return Number(data.quotes[0].close.toFixed(2))
+        return {
+          price: Number(data.quotes[0].close.toFixed(2)),
+          currency: data?.meta?.currency || 'USD',
+        }
       }
     } catch (e) {
       // ignore
     }
-    return null
+    return {
+      price: null,
+      currency: 'USD',
+    }
   }
 
   return {

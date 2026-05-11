@@ -60,8 +60,8 @@
   background-color: var(--p-togglebutton-background);
 }
 
-.dark .p-togglebutton .p-button-label,
+/* .dark .p-togglebutton .p-button-label,
 .dark .p-selectbutton .p-togglebutton .p-button-label,
 .dark .p-togglebutton-label {
   background-color: var(--p-surface-900) !important;
-}
+} */

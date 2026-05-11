@@ -36,8 +36,8 @@
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold tracking-wide">{{ data.symbol }}</span>
-                <span class="text-sm text-[var(--p-text-color)]">{{ data.name }}</span>
+                <span class="px-2 py-0.5 rounded-md bg-gray-200 dark:bg-[#515964] text-gray-700 dark:text-gray-300 text-sm font-semibold tracking-wide">{{ data.symbol }}</span>
+                <span class="text-sm dark:text-[#a1a1a1]">{{ data.name }}</span>
               </div>
             </template>
           </Column>

@@ -49,6 +49,7 @@ describe('Transactions Store', () => {
             name: 'Apple',
             assetType: 'stock',
             price: '150',
+            currency: 'USD',
             fee: '10',
             shares: '100',
             transaction_type: 'buy',
@@ -124,6 +125,7 @@ describe('Transactions Store', () => {
           name: 'Apple',
           assetType: 'stock',
           price: 150,
+          currency: 'USD',
           fee: 10,
           shares: 100,
           transactionType: 'buy',
@@ -135,6 +137,7 @@ describe('Transactions Store', () => {
           name: 'Google',
           assetType: 'stock',
           price: 120,
+            currency: 'USD',
           fee: 5,
           shares: 50,
           transactionType: 'buy',
@@ -150,6 +153,7 @@ describe('Transactions Store', () => {
             name: 'Google',
             assetType: 'stock',
             price: '120',
+            currency: 'USD',
             fee: '5',
             shares: '50',
             transaction_type: 'buy',
@@ -179,8 +183,8 @@ describe('Transactions Store', () => {
       const store = useTransactionsStore()
       
       store.list = [
-        { id: 'tx-1', symbol: 'AAPL', name: 'Apple', assetType: 'stock', price: 150, fee: 10, shares: 100, transactionType: 'buy', date: '2025-01-15' },
-        { id: 'tx-2', symbol: 'GOOGL', name: 'Google', assetType: 'stock', price: 120, fee: 5, shares: 50, transactionType: 'buy', date: '2025-01-16' }
+        { id: 'tx-1', symbol: 'AAPL', name: 'Apple', assetType: 'stock', price: 150, currency: 'USD', fee: 10, shares: 100, transactionType: 'buy', date: '2025-01-15' },
+        { id: 'tx-2', symbol: 'GOOGL', name: 'Google', assetType: 'stock', price: 120, currency: 'USD', fee: 5, shares: 50, transactionType: 'buy', date: '2025-01-16' }
       ]
 
       vi.mocked(api.delete).mockResolvedValue({ success: true })
@@ -201,9 +205,9 @@ describe('Transactions Store', () => {
       const store = useTransactionsStore()
       
       store.list = [
-        { id: 'tx-1', symbol: 'AAPL', name: 'Apple', assetType: 'stock', price: 150, fee: 10, shares: 100, transactionType: 'buy', date: '2025-01-15' },
-        { id: 'tx-2', symbol: 'GOOGL', name: 'Google', assetType: 'stock', price: 120, fee: 5, shares: 50, transactionType: 'buy', date: '2025-01-16' },
-        { id: 'tx-3', symbol: 'TSLA', name: 'Tesla', assetType: 'stock', price: 200, fee: 8, shares: 25, transactionType: 'buy', date: '2025-01-17' }
+        { id: 'tx-1', symbol: 'AAPL', name: 'Apple', assetType: 'stock', price: 150, currency: 'USD', fee: 10, shares: 100, transactionType: 'buy', date: '2025-01-15' },
+        { id: 'tx-2', symbol: 'GOOGL', name: 'Google', assetType: 'stock', price: 120, currency: 'USD', fee: 5, shares: 50, transactionType: 'buy', date: '2025-01-16' },
+        { id: 'tx-3', symbol: 'TSLA', name: 'Tesla', assetType: 'stock', price: 200, currency: 'USD', fee: 8, shares: 25, transactionType: 'buy', date: '2025-01-17' }
       ]
 
       vi.mocked(api.delete).mockResolvedValue({ success: true })
@@ -338,6 +342,7 @@ describe('Transactions Store', () => {
         shares: 100,
         fee: 10,
         price: 150,
+        currency: 'USD',
         transaction_type: 'buy',
         transaction_date: '2025-01-15'
       })
@@ -449,6 +454,7 @@ describe('Transactions Store', () => {
         shares: 100,
         fee: 10,
         price: 150,
+        currency: 'USD',
         operation: 'buy',
         date: '2025-01-15',
         accountId: 'acc-1'
@@ -472,6 +478,7 @@ describe('Transactions Store', () => {
         shares: 100,
         fee: 10,
         price: 150,
+        currency: 'USD',
         operation: 'buy',
         date: '2025-01-15'
       }
@@ -496,6 +503,7 @@ describe('Transactions Store', () => {
             name: 'Apple',
             assetType: 'stock',
             price: '150',
+            currency: 'USD',
             fee: '10',
             shares: '100',
             transaction_type: 'buy',
@@ -507,6 +515,7 @@ describe('Transactions Store', () => {
             name: 'Google',
             assetType: 'stock',
             price: '120',
+            currency: 'USD',
             fee: '5',
             shares: '50',
             transaction_type: 'buy',
@@ -525,6 +534,7 @@ describe('Transactions Store', () => {
           shares: 100,
           fee: 10,
           price: 150,
+          currency: 'USD',
           transactionType: 'buy',
           date: '2025-01-15'
         },
@@ -535,6 +545,7 @@ describe('Transactions Store', () => {
           shares: 50,
           fee: 5,
           price: 120,
+          currency: 'USD',
           transactionType: 'buy',
           date: '2025-01-16'
         }
@@ -571,6 +582,7 @@ describe('Transactions Store', () => {
           shares: 100,
           fee: 10,
           price: 150,
+          currency: 'USD',
           transactionType: 'buy',
           date: '2025-01-15',
           accountId: 'acc-1'
@@ -594,6 +606,7 @@ describe('Transactions Store', () => {
       const store = useTransactionsStore()
       
       const mockResponse = {
+        meta: { currency: 'USD' },
         quotes: [{ close: 150.50 }]
       }
 
@@ -604,7 +617,7 @@ describe('Transactions Store', () => {
       expect(api.get).toHaveBeenCalledWith(
         expect.stringContaining('/api/yahoo/chart/?symbol=AAPL&period1=2025-01-15&period2=2025-01-16')
       )
-      expect(price).toBe(150.50)
+      expect(price).toEqual({ price: 150.50, currency: 'USD' })
     })
 
     it('沒有數據時應該返回 null', async () => {
@@ -614,7 +627,7 @@ describe('Transactions Store', () => {
 
       const price = await store.searchPrice('AAPL', '2025-01-15')
 
-      expect(price).toBeNull()
+      expect(price).toEqual({ price: null, currency: 'USD' })
     })
 
     it('API 錯誤時應該返回 null', async () => {
@@ -624,7 +637,7 @@ describe('Transactions Store', () => {
 
       const price = await store.searchPrice('AAPL', '2025-01-15')
 
-      expect(price).toBeNull()
+      expect(price).toEqual({ price: null, currency: 'USD' })
     })
 
     it('參數為空時應該返回 null', async () => {

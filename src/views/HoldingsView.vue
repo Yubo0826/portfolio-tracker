@@ -47,8 +47,8 @@
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-md bg-[#f2f2f2] dark:bg-[#2e2e2e] text-gray-700 dark:text-gray-300 text-xs font-semibold tracking-wide">{{ data.symbol }}</span>
-                <span class="text-sm text-semibold text-[var(--p-text-color)]">{{ data.name }}</span>
+                <span class="px-2 py-0.5 rounded-md bg-gray-200 dark:bg-[#515964] text-gray-700 dark:text-gray-300 text-sm font-semibold tracking-wide">{{ data.symbol }}</span>
+                <span class="text-sm dark:text-[#a1a1a1]">{{ data.name }}</span>
               </div>
             </template>
           </Column>
@@ -83,31 +83,22 @@
           </Column>
           <Column field="totalProfit" sortable :header="$t('totalProfit')">
             <template #body="{ data }">
-              <div>
-                
-                <div class="flex items-center gap-1 text-sm font-medium">
-                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-                  <i v-else class="pi pi-sort-down-fill"></i> -->
-                  <span>
-                    <span v-if="data.totalProfit > 0">+</span>
-                    <span>{{ splitDisplayAmount(data.totalProfit).main }}</span>
-                    <span>{{ splitDisplayAmount(data.totalProfit).fraction }}</span>
-                    <span class="ml-1 text-[10px] pb-0.5 text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalProfit).code }}</span>
-                  </span>
-                </div>
-    
-                <span class="mr-4 whitespace-nowrap" :class="{
+                <span
+                  v-tooltip.top="formatSignedAmountWithCode(data.totalProfit)"
+                  class="mr-4 cursor-help whitespace-nowrap"
+                  :class="{
                   'text-emerald-600': data.totalProfit >= 0,
                   'text-[#f27362]': data.totalProfit < 0,
-                }">
-                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-                  <i v-else class="fas fa-arrow-right rotate-90"></i>
+                }"
+                >
+                  <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+                  <i v-else class="fas fa-arrow-right rotate-90"></i> -->
+                  <span v-if="data.profitPercentage >= 0">+</span>
+                  <span v-else>-</span>
                   <span>
                     {{ Math.abs(data.profitPercentage) }}%
                   </span>
                 </span>
-    
-              </div>
             </template>
           </Column>
     
@@ -155,6 +146,19 @@ const splitDisplayAmount = (value, mode = 'amount') => {
     fraction: match[2] || '',
     code: match[3] || ''
   }
+}
+
+const formatSignedAmountWithCode = (value) => {
+  const formatted = formatAmountWithCode(value)
+  if (formatted === '--' || value == null || Number.isNaN(Number(value))) {
+    return '--'
+  }
+
+  if (Number(value) > 0) {
+    return `+${formatted}`
+  }
+
+  return formatted
 }
 
 const selectedHoldings = ref([]);
