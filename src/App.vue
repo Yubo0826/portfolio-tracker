@@ -181,9 +181,17 @@
               <div v-if="portfolioStore.portfolios.length === 0">
                 <Button @click="dialogVisible = true" size="small" :label="$t('addPortfolio')" icon="pi pi-plus" />
               </div>
-              <div class="flex flex-wrap gap-4" v-else>
-                <Button @click="transctionDialogVisible = true" size="small" :label="$t('addInvestment')" icon="pi pi-plus" />
-                <Button @click="importDataDialogVisible = true" size="small" :label="$t('import')" icon="pi pi-upload" variant="text" />
+              <div class="flex flex-wrap" v-else>
+                <SplitButton
+                  @click="transctionDialogVisible = true"
+                  class="trade-actions-split"
+                  size="small"
+                  :label="$t('addInvestment')"
+                  icon="pi pi-plus"
+                  :model="tradeActionItems"
+                  appendTo="self"
+                  severity="contrast"
+                />
               </div>
             </div>
             <div v-else-if="auth.user.uid === 'demo-user'">
@@ -262,6 +270,7 @@ import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
 import { showLoading, hideLoading } from "@/composables/loading.js"
 import * as toast from '@/composables/toast'
+import SplitButton from 'primevue/splitbutton'
 
 const { locale, t } = useI18n()
 const confirm = useConfirm()
@@ -587,6 +596,16 @@ const currencySubItems = computed(() => [
   { label: 'TWD', active: displayCurrency.value === 'TWD', command: () => setCurrency('TWD') },
 ])
 
+const tradeActionItems = computed(() => [
+  {
+    label: t('import'),
+    icon: 'pi pi-upload',
+    command: () => {
+      importDataDialogVisible.value = true
+    },
+  },
+])
+
 const currentLanguageLabel = computed(() => {
   const lang = languageOptions.find(opt => opt.value === currentLanguage.value)
   return lang ? lang.label : currentLanguage.value
@@ -775,6 +794,17 @@ header {
 
 .portfolio-menu-item.is-danger {
   color: #ef4444;
+}
+
+.trade-actions-split {
+  position: relative;
+}
+
+.trade-actions-split .p-tieredmenu {
+  top: calc(100% + 0.35rem) !important;
+  right: 0 !important;
+  left: auto !important;
+  max-width: calc(100vw - 1rem);
 }
 
 .portfolio-menu-item__label {
