@@ -41,6 +41,26 @@ describe('useCurrency', () => {
     })
   })
 
+  describe('convertAmountFromCurrency', () => {
+    it('應該把 USD 轉成 TWD', () => {
+      const { convertAmountFromCurrency, displayCurrency, setExchangeRate } = useCurrency()
+
+      displayCurrency.value = 'TWD'
+      setExchangeRate(32)
+
+      expect(convertAmountFromCurrency(100, 'USD')).toBe(3200)
+    })
+
+    it('應該把 TWD 轉成 USD', () => {
+      const { convertAmountFromCurrency, displayCurrency, setExchangeRate } = useCurrency()
+
+      displayCurrency.value = 'USD'
+      setExchangeRate(32)
+
+      expect(convertAmountFromCurrency(3200, 'TWD')).toBe(100)
+    })
+  })
+
   describe('formatChange', () => {
     it('應該格式化正數變化', () => {
       const { formatChange } = useCurrency()
@@ -67,7 +87,7 @@ describe('useCurrency', () => {
       
       // 預設應該是 USD
       expect(displayCurrency.value).toBe('USD')
-      expect(currencySymbol.value).toBe('USD')
+      expect(currencySymbol.value).toBe('$')
     })
   })
 })

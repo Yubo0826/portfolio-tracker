@@ -3,6 +3,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { useHoldingsStore } from '../holdings'
 import { useAuthStore } from '../auth'
 import { usePortfolioStore } from '../portfolio'
+import { useSettingsStore } from '../settings'
 import api from '@/utils/api'
 import { mockUser, mockPortfolio } from '@/utils/test-helpers'
 
@@ -56,6 +57,8 @@ describe('Holdings Store', () => {
         id: '1',
         symbol: 'AAPL',
         name: 'Apple Inc.',
+        currency: 'USD',
+        nativeCurrentPrice: 180,
         shares: 100,
         avgCost: 150.50,
         currentPrice: 180.00,
@@ -127,6 +130,61 @@ describe('Holdings Store', () => {
       
       // GOOGL 實際比例 = 6000 / 24000 = 25%
       expect(store.list[1].actualRatio).toBe('25.00')
+    })
+
+    it('應該根據 holding 幣別轉成目前顯示幣別', () => {
+      const store = useHoldingsStore()
+      const settingsStore = useSettingsStore()
+
+      settingsStore.setExchangeRate(32)
+      settingsStore.setDisplayCurrency('TWD')
+
+      const mockData = [
+        {
+          id: '1',
+          symbol: 'AAPL',
+          name: 'Apple',
+          asset_type: 'stock',
+          total_shares: '2',
+          avg_cost: '150',
+          current_price: '180',
+          currency: 'USD',
+          target_percentage: '50',
+          last_updated: '2025-01-01T00:00:00Z'
+        },
+        {
+          id: '2',
+          symbol: '0050',
+          name: 'ETF',
+          asset_type: 'etf',
+          total_shares: '1',
+          avg_cost: '100',
+          current_price: '120',
+          currency: 'TWD',
+          target_percentage: '50',
+          last_updated: '2025-01-01T00:00:00Z'
+        }
+      ]
+
+      store.setHoldings(mockData)
+
+      expect(store.list[0]).toMatchObject({
+        currency: 'USD',
+        nativeCurrentPrice: 180,
+        avgCost: 4800,
+        currentPrice: 5760,
+        totalCost: 9600,
+        currentValue: 11520,
+      })
+      expect(store.list[1]).toMatchObject({
+        currency: 'TWD',
+        nativeCurrentPrice: 120,
+        avgCost: 100,
+        currentPrice: 120,
+        totalCost: 100,
+        currentValue: 120,
+      })
+      expect(store.list.totalValue).toBe(11640)
     })
   })
 

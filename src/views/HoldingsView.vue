@@ -66,9 +66,9 @@
           <Column field="currentPrice" sortable :header="$t('currentPrice')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
-                <span>{{ splitDisplayAmount(data.currentPrice, 'price').main }}</span>
-                <span>{{ splitDisplayAmount(data.currentPrice, 'price').fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentPrice, 'price').code }}</span>
+                <span>{{ splitNativePrice(data.nativeCurrentPrice, data.currency).main }}</span>
+                <span>{{ splitNativePrice(data.nativeCurrentPrice, data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitNativePrice(data.nativeCurrentPrice, data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -145,6 +145,31 @@ const splitDisplayAmount = (value, mode = 'amount') => {
     main: match[1] || formatted,
     fraction: match[2] || '',
     code: match[3] || ''
+  }
+}
+
+const splitNativePrice = (value, currency) => {
+  const amount = Number(value)
+  const code = String(currency || 'USD').toUpperCase()
+
+  if (value == null || Number.isNaN(amount)) {
+    return { main: '--', fraction: '', code }
+  }
+
+  const formatted = amount.toLocaleString(code === 'TWD' ? 'zh-TW' : 'en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code,
   }
 }
 

@@ -1,9 +1,10 @@
 // src/stores/holdings.js
 import { defineStore } from 'pinia'
-import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import { ref, computed, watch, type Ref, type ComputedRef } from 'vue'
 import api from '@/utils/api.js'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
+import { useCurrency } from '@/composables/useCurrency'
 
 interface HoldingData {
   id: string
@@ -13,6 +14,7 @@ interface HoldingData {
   total_shares: string | number
   avg_cost: string | number
   current_price: string | number
+  currency?: string
   target_percentage: string | number
   last_updated?: string
 }
@@ -22,7 +24,9 @@ interface Holding {
   symbol: string
   name: string
   assetType: string
+  currency: string
   shares: number
+  nativeCurrentPrice: number
   avgCost: number
   currentPrice: number
   target: number
@@ -39,27 +43,33 @@ interface HoldingsList extends Array<Holding> {
 }
 
 export const useHoldingsStore = defineStore('holdings', () => {
+  const rawList: Ref<HoldingData[]> = ref([])
   const list: Ref<HoldingsList> = ref([])          // holdings array（view model）
   const isLoading: Ref<boolean> = ref(false)
 
   const auth = useAuthStore()
   const portfolioStore = usePortfolioStore()
+  const { displayCurrency, exchangeRate, convertAmountFromCurrency } = useCurrency()
 
   const uid: ComputedRef<string | null> = computed(() => auth.user?.uid || null)
   const portfolioId: ComputedRef<string | null> = computed(() => portfolioStore.currentPortfolio?.id || null)
 
-  // 將後端資料轉成前端需要的格式
-  const setHoldings = (data: HoldingData[] = []): void => {
-    list.value = data.map(item => {
+  const roundAmount = (value: number): number => Math.round(value * 100) / 100
+
+  const recalculateHoldings = (): void => {
+    list.value = rawList.value.map(item => {
       const shares = parseInt(String(item.total_shares)) || 0
-      const avgCost = parseFloat(String(item.avg_cost)) || 0
-      const currentPrice = parseFloat(String(item.current_price)) || 0
+      const avgCostRaw = parseFloat(String(item.avg_cost)) || 0
+      const currentPriceRaw = parseFloat(String(item.current_price)) || 0
+      const currency = String(item.currency || 'USD').toUpperCase()
       const target = parseFloat(String(item.target_percentage)) || 0
       const lastUpdated = item.last_updated?.split('T')[0] || ''
 
-      const totalCost = Math.round(avgCost * shares * 100) / 100
-      const currentValue = Math.round(currentPrice * shares * 100) / 100
-      const totalProfit = Math.round((currentValue - totalCost) * 100) / 100
+      const avgCost = roundAmount(convertAmountFromCurrency(avgCostRaw, currency))
+      const currentPrice = roundAmount(convertAmountFromCurrency(currentPriceRaw, currency))
+      const totalCost = roundAmount(convertAmountFromCurrency(avgCostRaw * shares, currency))
+      const currentValue = roundAmount(convertAmountFromCurrency(currentPriceRaw * shares, currency))
+      const totalProfit = roundAmount(currentValue - totalCost)
       const profitPercentage = ((currentValue / (totalCost || 1)) * 100 - 100).toFixed(2)
 
       return {
@@ -67,7 +77,9 @@ export const useHoldingsStore = defineStore('holdings', () => {
         symbol: item.symbol,
         name: item.name,
         assetType: item.asset_type,
+        currency,
         shares,
+        nativeCurrentPrice: currentPriceRaw,
         avgCost,
         currentPrice,
         totalCost,
@@ -79,14 +91,22 @@ export const useHoldingsStore = defineStore('holdings', () => {
       }
     })
 
-    // 計算總市值
     list.value.totalValue = list.value.reduce((sum, h) => sum + h.currentValue, 0)
 
-    // 計算各持股的實際比例
     list.value.forEach(h => {
       h.actualRatio = list.value.totalValue ? ((h.currentValue / list.value.totalValue) * 100).toFixed(2) : '0.00'
     })
   }
+
+  // 將後端資料轉成前端需要的格式
+  const setHoldings = (data: HoldingData[] = []): void => {
+    rawList.value = data
+    recalculateHoldings()
+  }
+
+  watch([displayCurrency, exchangeRate], () => {
+    recalculateHoldings()
+  })
 
   // 取得 holdings
   const fetchHoldings = async (): Promise<void> => {
@@ -153,6 +173,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
 
   return {
     // state
+    rawList,
     list,
     isLoading,
     // computed

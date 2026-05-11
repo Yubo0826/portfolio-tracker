@@ -20,18 +20,44 @@ export const useCurrency = () => {
   // 是否顯示台幣
   const isTWD = computed(() => displayCurrency.value === 'TWD')
 
+  const normalizeCurrency = (currency: string | null | undefined): string => {
+    return String(currency || 'USD').toUpperCase()
+  }
+
+  /**
+   * 依來源幣別轉成目前顯示幣別。
+   */
+  const convertAmountFromCurrency = (
+    amount: number | null | undefined,
+    sourceCurrency: string | null | undefined = 'USD'
+  ): number => {
+    if (amount == null || isNaN(amount)) return 0
+
+    const fromCurrency = normalizeCurrency(sourceCurrency)
+    const toCurrency = displayCurrency.value
+
+    if (fromCurrency === toCurrency) {
+      return amount
+    }
+
+    if (fromCurrency === 'USD' && toCurrency === 'TWD') {
+      return amount * exchangeRate.value
+    }
+
+    if (fromCurrency === 'TWD' && toCurrency === 'USD') {
+      return exchangeRate.value > 0 ? amount / exchangeRate.value : amount
+    }
+
+    return amount
+  }
+
   /**
    * 轉換金額（USD -> 當前幣別）
    * @param usdAmount 美金金額
    * @returns 轉換後的金額數字
    */
   const convertAmount = (usdAmount: number | null | undefined): number => {
-    if (usdAmount == null || isNaN(usdAmount)) return 0
-    
-    if (displayCurrency.value === 'TWD') {
-      return usdAmount * exchangeRate.value
-    }
-    return usdAmount
+    return convertAmountFromCurrency(usdAmount, 'USD')
   }
 
   /**
@@ -197,6 +223,7 @@ export const useCurrency = () => {
     
     // Methods
     convertAmount,
+    convertAmountFromCurrency,
     formatAmount,
     formatAmountWithCode,
     formatChange,

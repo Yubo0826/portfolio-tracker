@@ -311,9 +311,9 @@
           <Column field="currentPrice" :header="$t('currentPrice')" sortable>
             <template #body="{ data }">
               <div class="font-medium mr-4 inline-flex items-end">
-                <span>{{ splitAmountWithCode(data.currentPrice, 'price').main }}</span>
-                <span>{{ splitAmountWithCode(data.currentPrice, 'price').fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentPrice, 'price').code }}</span>
+                <span>{{ splitNativePriceWithCode(data.nativeCurrentPrice, data.currency).main }}</span>
+                <span>{{ splitNativePriceWithCode(data.nativeCurrentPrice, data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitNativePriceWithCode(data.nativeCurrentPrice, data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -325,16 +325,13 @@
           </Column>
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
-              <div class="font-medium mr-4 inline-flex items-end">
+              <div
+                v-tooltip.top="formatAvgCostTooltip(data.avgCost)"
+                class="font-medium mr-4 inline-flex items-end cursor-help"
+              >
                 <span>{{ splitAmountWithCode(data.totalCost).main }}</span>
                 <span>{{ splitAmountWithCode(data.totalCost).fraction }}</span>
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.totalCost).code }}</span>
-              </div>
-              <div class="text-sm text-[var(--p-card-subtitle-color)] inline-flex items-end">
-                <span>{{ splitAmountWithCode(data.avgCost, 'price').main }}</span>
-                <span>{{ splitAmountWithCode(data.avgCost, 'price').fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold">{{ splitAmountWithCode(data.avgCost, 'price').code }}</span>
-                <span class="ml-1">{{ $t('perShare') }}</span>
               </div>
             </template>
           </Column>
@@ -410,12 +407,12 @@ const holdingsStore = useHoldingsStore()
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatAmountWithCode, formatChange, formatPrice, formatPriceWithCode, currencySymbol } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatChange, formatPrice, formatPriceWithCode, currencySymbol, convertAmountFromCurrency } = useCurrency()
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
 const settingsStore = useSettingsStore()
-const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
+const { displayCurrency } = storeToRefs(settingsStore)
 
 /* =========================
  *  State
@@ -515,6 +512,40 @@ function splitAmountWithCode(value, mode = 'amount') {
     main: match[1] || formatted,
     fraction: match[2] || '',
     code: match[3] || displayCurrency.value,
+  }
+}
+
+function formatAvgCostTooltip(value) {
+  const formatted = formatPriceWithCode(value)
+  if (formatted === '--') {
+    return '--'
+  }
+
+  return `${formatted} ${t('perShare')}`
+}
+
+function splitNativePriceWithCode(value, currency) {
+  const amount = Number(value)
+  const code = String(currency || 'USD').toUpperCase()
+
+  if (value == null || Number.isNaN(amount)) {
+    return { main: '--', fraction: '', code }
+  }
+
+  const formatted = amount.toLocaleString(code === 'TWD' ? 'zh-TW' : 'en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+  const match = formatted.match(/^(.*?)([.,]\d+)?$/)
+  if (!match) {
+    return { main: formatted, fraction: '', code }
+  }
+
+  return {
+    main: match[1] || formatted,
+    fraction: match[2] || '',
+    code,
   }
 }
 
@@ -649,7 +680,7 @@ const holdingsChart = computed(() => ({
     itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' },
   },
   tooltip: {
-    pointFormat: `{series.name}: <b>{point.percentage:.1f}%</b><br/>${t('chartValue')}: $` + '{point.y:.2f}',
+    pointFormat: `{series.name}: <b>{point.percentage:.1f}%</b><br/>${t('chartValue')}: ${currencySymbol.value}` + '{point.y:.2f}',
     backgroundColor: isDark.value ? '#1f2937' : '#fff',
     style: { color: isDark.value ? '#f3f4f6' : '#374151' },
   },
@@ -720,7 +751,7 @@ const irr = computed(() => {
     } else {
       amount = tx.price * tx.shares - tx.fee
     }
-    cashflows.push({ amount, when: new Date(tx.date) })
+    cashflows.push({ amount: convertAmountFromCurrency(amount, tx.currency), when: new Date(tx.date) })
   })
   
   // Dividend cash inflow
