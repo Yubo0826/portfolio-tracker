@@ -3,10 +3,10 @@
     <template #header>
       <div class="inline-flex items-center gap-2">
         <i class="pi pi-upload text-[var(--p-primary-500)]"></i>
-        <span class="font-bold">{{ $t('importTransactionDataTo') }}</span>
+        <span class="font-bold">{{ isPortfolioMode ? $t('importPortfolioDialogTitle') : $t('importTransactionDataTo') }}</span>
 
         <!-- 選擇投資組合 -->
-        <span class="font-bold">
+        <span v-if="!isPortfolioMode" class="font-bold">
           <Select
             v-model="selectedPortfolioId"
             size="small"
@@ -32,6 +32,17 @@
       </div>
     </template>
 
+    <div v-if="isPortfolioMode" class="mb-4">
+      <label for="import-portfolio-name" class="font-medium">{{ $t('newPortfolioName') }}</label>
+      <InputText
+        id="import-portfolio-name"
+        v-model.trim="portfolioName"
+        class="w-full mt-2"
+        :placeholder="$t('newPortfolioNamePlaceholder')"
+        autocomplete="off"
+      />
+    </div>
+
     <!-- 拖拉區 -->
     <div
       class="border-2 border-dashed rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-[var(--p-primary-50)]"
@@ -51,7 +62,7 @@
     <Message severity="info" class="mt-4">
       <div class="flex justify-between text-sm">
         <span>
-          <!-- 檔案需包含以下欄位：date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell) -->
+          <!-- 檔案需包含以下欄位：date, symbol, name, shares, price, currency, fee, type(交易類型：buy 或 sell) -->
           {{ $t('importFileHint1') }}
         </span>
         <button
@@ -83,6 +94,7 @@
         <Column field="symbol" :header="$t('symbol')"></Column>
         <Column field="shares" :header="$t('shares')"></Column>
         <Column field="price" :header="$t('price')"></Column>
+        <Column field="currency" :header="$t('currency')"></Column>
         <Column field="fee" :header="$t('fee')"></Column>
         <Column field="totalCost" :header="$t('totalCost')"></Column>
         <Column field="transactionType" :header="$t('type')"></Column>
@@ -91,7 +103,7 @@
 
     <template #footer>
       <Button :label="$t('cancel')" severity="secondary" @click="closeDialog" />
-      <Button :label="$t('import')" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
+      <Button :label="isPortfolioMode ? $t('importPortfolio') : $t('import')" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
     </template>
   </Dialog>
 </template>
@@ -99,6 +111,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import * as toast from '@/composables/toast'
+import InputText from 'primevue/inputtext'
 import Papa from 'papaparse'
 import api from '@/utils/api'
 import * as XLSX from 'xlsx'
@@ -116,6 +129,10 @@ const holdingsStore = useHoldingsStore()
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
+  mode: {
+    type: String,
+    default: 'transactions',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'import'])
@@ -125,6 +142,8 @@ watch(localVisible, v => emit('update:modelValue', v))
 
 const fileInput = ref(null)
 const previewData = ref([])
+const portfolioName = ref('')
+const isPortfolioMode = computed(() => props.mode === 'portfolio')
 
 // 改為 ID 模式
 const selectedPortfolioId = ref(null)
@@ -167,16 +186,21 @@ function parseFile(file) {
 
 function normalizeData(rows) {
   return rows.map(item => {
+    const normalizedItem = Object.fromEntries(
+      Object.entries(item || {}).map(([key, value]) => [String(key).toLowerCase().trim(), value])
+    )
+
     const {
       date,
       symbol = '',
       name = '',
-      assetType = '',
+      assettype = '',
       shares = 0,
       price = 0,
+      currency = 'USD',
       fee = 0,
       type = '',
-    } = item
+    } = normalizedItem
 
     const numShares = Number(shares) || 0
     const numPrice = Number(price) || 0
@@ -187,9 +211,10 @@ function normalizeData(rows) {
       date: normalizedDate,
       symbol,
       name,
-      assetType,
+      assetType: assettype,
       shares: numShares,
       price: numPrice,
+      currency: String(currency || 'USD').toUpperCase(),
       fee: numFee,
       totalCost: +(numShares * numPrice + numFee).toFixed(2),
       transactionType: type.toLowerCase() === 'buy' ? 'buy' : 'sell',
@@ -235,61 +260,72 @@ function readExcel(file) {
 }
 
 function downloadSampleCSV() {
-  const headers = ['date', 'symbol', 'shares', 'price', 'fee', 'type']
+  const headers = ['date', 'symbol', 'shares', 'price', 'currency', 'fee', 'type']
   const sampleData = [
-    ['2025/01/03', 'VOO', 5, 420, 1, 'buy'],
-    ['2025/01/08', 'QQQ', 8, 390, 1, 'buy'],
-    ['2025/01/15', 'SCHD', 10, 75, 0.5, 'buy'],
-    ['2025/01/20', 'VTI', 6, 250, 1, 'buy'],
-    ['2025/01/25', 'IWM', 5, 195, 0.5, 'buy'],
-    ['2025/02/02', 'XLV', 4, 145, 0.5, 'buy'],
-    ['2025/02/06', 'VNQ', 6, 90, 0.5, 'buy'],
-    ['2025/02/12', 'QQQ', 4, 405, 0.5, 'sell'],
-    ['2025/02/15', 'VOO', 3, 440, 0.5, 'sell'],
-    ['2025/02/20', 'SCHD', 5, 78, 0.3, 'buy'],
-    ['2025/03/01', 'VTI', 3, 260, 0.5, 'buy'],
-    ['2025/03/06', 'IWM', 5, 205, 0.5, 'buy'],
-    ['2025/03/10', 'XLV', 3, 150, 0.3, 'buy'],
-    ['2025/03/20', 'VNQ', 4, 88, 0.3, 'buy'],
-    ['2025/03/25', 'QQQ', 2, 420, 0.5, 'buy'],
-    ['2025/03/30', 'SCHD', 5, 80, 0.3, 'buy'],
-    ['2025/04/02', 'VTI', 6, 255, 1, 'buy'],
-    ['2025/04/10', 'VOO', 4, 445, 1, 'buy'],
-    ['2025/04/15', 'QQQ', 5, 430, 1, 'buy'],
-    ['2025/04/20', 'IWM', 3, 210, 0.5, 'sell'],
-    ['2025/04/25', 'VNQ', 5, 85, 0.5, 'buy'],
-    ['2025/05/01', 'XLV', 4, 148, 0.5, 'buy'],
-    ['2025/05/05', 'SCHD', 5, 82, 0.3, 'sell'],
-    ['2025/05/10', 'VTI', 4, 265, 0.5, 'buy'],
-    ['2025/05/15', 'VOO', 5, 460, 1, 'buy'],
-    ['2025/05/20', 'QQQ', 4, 440, 0.5, 'sell'],
-    ['2025/05/25', 'IWM', 5, 215, 0.5, 'buy'],
-    ['2025/06/02', 'XLV', 6, 152, 0.5, 'buy'],
-    ['2025/06/10', 'VNQ', 5, 92, 0.3, 'buy'],
-    ['2025/06/15', 'SCHD', 8, 83, 0.5, 'buy'],
-    ['2025/06/20', 'VTI', 5, 270, 0.5, 'sell'],
-    ['2025/06/25', 'VOO', 3, 465, 0.5, 'buy'],
-    ['2025/07/01', 'QQQ', 6, 445, 1, 'buy'],
-    ['2025/07/05', 'IWM', 4, 218, 0.3, 'buy'],
-    ['2025/07/10', 'XLV', 3, 149, 0.3, 'sell'],
-    ['2025/07/15', 'VNQ', 4, 94, 0.3, 'buy'],
-    ['2025/07/20', 'SCHD', 5, 85, 0.3, 'buy'],
-    ['2025/07/25', 'VTI', 5, 275, 0.5, 'buy'],
-    ['2025/08/02', 'VOO', 4, 470, 0.5, 'buy'],
-    ['2025/08/08', 'QQQ', 5, 450, 0.5, 'sell'],
-    ['2025/08/15', 'IWM', 6, 220, 0.5, 'buy'],
-    ['2025/08/20', 'XLV', 5, 155, 0.5, 'buy'],
-    ['2025/08/25', 'VNQ', 6, 95, 0.5, 'buy'],
-    ['2025/09/02', 'SCHD', 5, 86, 0.3, 'sell'],
-    ['2025/09/08', 'VTI', 4, 280, 0.5, 'buy'],
-    ['2025/09/15', 'VOO', 3, 480, 0.5, 'buy'],
-    ['2025/09/20', 'QQQ', 5, 455, 0.5, 'buy'],
-    ['2025/10/05', 'IWM', 4, 225, 0.5, 'buy'],
-    ['2025/10/12', 'XLV', 3, 160, 0.3, 'buy'],
-    ['2025/10/20', 'VNQ', 5, 97, 0.5, 'sell'],
+    // 2024 Q1
+    ['2024/01/15', '0050.TW', 230, 132, 'TWD', 20, 'buy'],
+    ['2024/01/15', 'VOO', 68, 440, 'USD', 1, 'buy'],
+    ['2024/01/15', 'QQQ', 47, 425, 'USD', 1, 'buy'],
+    ['2024/01/15', '00830.TW', 605, 33, 'TWD', 20, 'buy'],
+    // 2024 Q2
+    ['2024/04/15', '0050.TW', 225, 138, 'TWD', 20, 'buy'],
+    ['2024/04/15', 'VOO', 66, 470, 'USD', 1, 'buy'],
+    ['2024/04/15', 'QQQ', 45, 445, 'USD', 1, 'buy'],
+    ['2024/04/15', '00830.TW', 580, 35, 'TWD', 20, 'buy'],
+    // 2024 Q3
+    ['2024/07/15', '0050.TW', 220, 142, 'TWD', 20, 'buy'],
+    ['2024/07/15', 'VOO', 64, 490, 'USD', 1, 'buy'],
+    ['2024/07/15', 'QQQ', 43, 470, 'USD', 1, 'buy'],
+    ['2024/07/15', '00830.TW', 560, 36, 'TWD', 20, 'buy'],
+    // 2024 Q4
+    ['2024/10/15', '0050.TW', 215, 146, 'TWD', 20, 'buy'],
+    ['2024/10/15', 'VOO', 62, 505, 'USD', 1, 'buy'],
+    ['2024/10/15', 'QQQ', 42, 485, 'USD', 1, 'buy'],
+    ['2024/10/15', '00830.TW', 545, 37, 'TWD', 20, 'buy'],
+    // 2025 Q1
+    ['2025/01/15', '0050.TW', 210, 150, 'TWD', 20, 'buy'],
+    ['2025/01/15', 'VOO', 61, 520, 'USD', 1, 'buy'],
+    ['2025/01/15', 'QQQ', 41, 500, 'USD', 1, 'buy'],
+    ['2025/01/15', '00830.TW', 530, 38, 'TWD', 20, 'buy'],
+    // 2025 Q2
+    ['2025/04/15', '0050.TW', 205, 154, 'TWD', 20, 'buy'],
+    ['2025/04/15', 'VOO', 60, 535, 'USD', 1, 'buy'],
+    ['2025/04/15', 'QQQ', 40, 515, 'USD', 1, 'buy'],
+    ['2025/04/15', '00830.TW', 520, 39, 'TWD', 20, 'buy'],
+    // 2025 Q3
+    ['2025/07/15', '0050.TW', 200, 158, 'TWD', 20, 'buy'],
+    ['2025/07/15', 'VOO', 59, 550, 'USD', 1, 'buy'],
+    ['2025/07/15', 'QQQ', 39, 530, 'USD', 1, 'buy'],
+    ['2025/07/15', '00830.TW', 510, 40, 'TWD', 20, 'buy'],
+    // 2025 Q4
+    ['2025/10/15', '0050.TW', 198, 162, 'TWD', 20, 'buy'],
+    ['2025/10/15', 'VOO', 58, 565, 'USD', 1, 'buy'],
+    ['2025/10/15', 'QQQ', 38, 545, 'USD', 1, 'buy'],
+    ['2025/10/15', '00830.TW', 500, 41, 'TWD', 20, 'buy'],
+    // 2026 Q1
+    ['2026/01/15', '0050.TW', 195, 166, 'TWD', 20, 'buy'],
+    ['2026/01/15', 'VOO', 57, 580, 'USD', 1, 'buy'],
+    ['2026/01/15', 'QQQ', 37, 560, 'USD', 1, 'buy'],
+    ['2026/01/15', '00830.TW', 490, 42, 'TWD', 20, 'buy'],
+    // 2026 Q2
+    ['2026/04/15', '0050.TW', 192, 170, 'TWD', 20, 'buy'],
+    ['2026/04/15', 'VOO', 56, 595, 'USD', 1, 'buy'],
+    ['2026/04/15', 'QQQ', 36, 575, 'USD', 1, 'buy'],
+    ['2026/04/15', '00830.TW', 480, 43, 'TWD', 20, 'buy'],
+    // 2026 Q3
+    ['2026/07/15', '0050.TW', 190, 174, 'TWD', 20, 'buy'],
+    ['2026/07/15', 'VOO', 55, 610, 'USD', 1, 'buy'],
+    ['2026/07/15', 'QQQ', 37, 590, 'USD', 1, 'buy'],
+    ['2026/07/15', '00830.TW', 470, 44, 'TWD', 20, 'buy'],
+    // 2026 Q4
+    ['2026/10/15', '0050.TW', 188, 178, 'TWD', 20, 'buy'],
+    ['2026/10/15', 'VOO', 54, 625, 'USD', 1, 'buy'],
+    ['2026/10/15', 'QQQ', 36, 605, 'USD', 1, 'buy'],
+    ['2026/10/15', '00830.TW', 460, 45, 'TWD', 20, 'buy'],
   ];
 
-  const csvContent = [headers.join(','), ...sampleData.map(r => r.join(','))].join('\n')
+  const csvRows = sampleData
+  const csvContent = [headers.join(','), ...csvRows.map(r => r.join(','))].join('\n')
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -302,17 +338,49 @@ function downloadSampleCSV() {
 function closeDialog() {
   localVisible.value = false
   previewData.value = []
+  portfolioName.value = ''
+  if (fileInput.value) fileInput.value.value = ''
 }
 
 import { showLoading, hideLoading } from "@/composables/loading.js"
 
 async function confirmImport() {
-  if (!selectedPortfolioId.value) {
+  showLoading()
+  let targetPortfolioId = selectedPortfolioId.value
+  const targetPortfolioName = portfolioName.value.trim()
+
+  if (isPortfolioMode.value) {
+    if (!targetPortfolioName) {
+      toast.error(t('portfolioRequired'), '')
+      hideLoading()
+      return
+    }
+
+    try {
+      const createdPortfolio = await portfolioStore.addPortfolio({
+        name: targetPortfolioName,
+        description: '',
+        drift_threshold: 5,
+        enable_email_alert: true,
+      })
+
+      if (!createdPortfolio?.id) {
+        throw new Error(t('createPortfolioFailed'))
+      }
+
+      targetPortfolioId = createdPortfolio.id
+      portfolioStore.setCurrentPortfolio(createdPortfolio)
+    } catch (error) {
+      toast.error(t('createPortfolioFailed'), error.message || '')
+      hideLoading()
+      return
+    }
+  } else if (!targetPortfolioId) {
     toast.error(t('pleaseSelectPortfolio'), '')
+    hideLoading()
     return
   }
 
-  showLoading()
   const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))]
   let nonexistentSymbols = []
   const symbolDetails = {}
@@ -342,7 +410,8 @@ async function confirmImport() {
 
   // 如果有不存在的 symbol，顯示錯誤並中止匯入
   if (nonexistentSymbols.length > 0) {
-    toast.error(t('symbolsNotFound'), nonexistentSymbols.join(', '))
+    toast.error(t('symbolsNotFound', { symbols: nonexistentSymbols.join(', ') }), '')
+    hideLoading()
     return
   }
 
@@ -354,9 +423,13 @@ async function confirmImport() {
   })
 
   try {
-    const result = await store.saveTransactionBulk(previewData.value, selectedPortfolioId.value)
+    const result = await store.saveTransactionBulk(previewData.value, String(targetPortfolioId))
     console.log('Bulk import result:', result)
-    toast.success(t('importSuccess'), '')
+    if (isPortfolioMode.value) {
+      toast.success(t('importPortfolioSuccess', { name: targetPortfolioName }), '')
+    } else {
+      toast.success(t('importSuccess'), '')
+    }
     closeDialog()
   } catch (e) {
     toast.error(t('importFailed'), e.message || '')

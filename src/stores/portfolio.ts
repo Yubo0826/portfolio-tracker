@@ -73,11 +73,10 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   }
   
   // 之後後端or前端可能要卡重複名稱
-  async function addPortfolio(newPortfolio: NewPortfolio): Promise<void> {
+  async function addPortfolio(newPortfolio: NewPortfolio): Promise<Portfolio | null> {
     const { name, description, drift_threshold, enable_email_alert } = newPortfolio
     if (!name) {
-      console.warn('Name are required to add a portfolio')
-      return
+      throw new Error('Name are required to add a portfolio')
     }
     try {
       const data = await api.post('/api/portfolio', {
@@ -88,8 +87,10 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         enable_email_alert
       })
       portfolios.value.push(data.portfolio)
+      return data.portfolio
     } catch (error) {
       console.error('Error adding portfolio:', error)
+      throw error
     }
   }
 

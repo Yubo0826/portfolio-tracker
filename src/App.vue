@@ -239,7 +239,7 @@
     </template>
   </Dialog>
 
-  <ImportDataDialog v-model="importDataDialogVisible" />
+  <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
   <TransactionDialog v-model="transctionDialogVisible" />
 
@@ -285,7 +285,8 @@ import SplitButton from 'primevue/splitbutton'
 const { locale, t } = useI18n()
 const confirm = useConfirm()
 const dialogVisible = ref(false)
-const importDataDialogVisible = ref(false)
+const importDialogVisible = ref(false)
+const importDialogMode = ref('transactions')
 const route = useRoute()
 const router = useRouter()
 const isAssetRoute = computed(() => ['asset', 'user-settings', 'portfolios', 'user-guide', 'cash-flow', 'cash-flows'].includes(route.name))
@@ -394,6 +395,16 @@ const openPortfolioManagement = () => {
   router.push('/portfolios')
 }
 
+const openImportTransactionsDialog = () => {
+  importDialogMode.value = 'transactions'
+  importDialogVisible.value = true
+}
+
+const openImportPortfolioDialog = () => {
+  importDialogMode.value = 'portfolio'
+  importDialogVisible.value = true
+}
+
 const buildDuplicatePortfolioName = (name) => t('portfolioCopyName', { name })
 
 const duplicatePortfolio = async (portfolio = portfolioStore.currentPortfolio) => {
@@ -478,9 +489,9 @@ const portfolioMenuItems = computed(() => {
   const openItems = [
     { separator: true },
     {
-      label: t('portfolioManagement'),
-      icon: 'pi pi-folder',
-      command: openPortfolioManagement
+      label: t('importPortfolio'),
+      icon: 'pi pi-upload',
+      command: openImportPortfolioDialog
     },
   ]
 
@@ -611,9 +622,7 @@ const tradeActionItems = computed(() => [
   {
     label: t('importTransactions'),
     icon: 'pi pi-upload',
-    command: () => {
-      importDataDialogVisible.value = true
-    },
+    command: openImportTransactionsDialog,
   },
 ])
 

@@ -154,7 +154,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     const payload = {
       uid: uid.value,
-      portfolio_id: customPortfolioId,
+      portfolio_id: Number(customPortfolioId),
       cash_account_id: form.accountId || null,
       symbol: String(form.symbol || '').toUpperCase(),
       name: form.name || '',
@@ -203,7 +203,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
     const payload = {
       uid: uid.value,
-      portfolio_id: customPortfolioId,
+      portfolio_id: Number(customPortfolioId),
       transactions: transactions.map((form) => ({
         symbol: String(form.symbol || '').toUpperCase(),
         name: form.name || '',

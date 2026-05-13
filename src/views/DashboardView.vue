@@ -2,6 +2,8 @@
   <!-- px-4 sm:px-6 lg:px-8 -->
   <!--  max-w-screen-2xl -->
   <div class="w-full mt-4">
+
+    <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card v-for="idx in skeletonStatCards" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md">
@@ -60,10 +62,63 @@
       </Card>
     </div>
 
+    <!-- Main Content -->
     <div v-else>
     <div class="flex flex-col lg:flex-row gap-6">
       <div class="w-full lg:w-3/5 flex flex-col gap-6">
-        
+        <!-- Asset Trend -->
+        <Card class="rounded-xl shadow-md">
+          <template #content>
+            <div class="mb-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('totalValue') }}</div>
+                <div v-if="totalValue" class="mt-2 inline-flex items-end leading-none">
+                  <span class="text-4xl font-extrabold tracking-tight sm:text-5xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
+                  <span class="text-2xl font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                  <span class="ml-1 pb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                </div>
+                <div v-else class="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">--</div>
+              </div>
+
+              <div class="inline-flex w-fit items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-[#1d2b3a] dark:bg-[#0f1520]">
+                <button
+                  v-for="tab in periods"
+                  :key="tab.label"
+                  @click="selectedPeriod = tab.value"
+                  class="relative cursor-pointer select-none rounded-lg px-3 py-1.5 text-xs font-medium tracking-wide transition-all duration-150"
+                  :class="selectedPeriod === tab.value
+                    ? 'bg-[var(--p-primary-color)] text-[var(--p-primary-contrast-color)] ring-1 ring-[var(--p-primary-color)] shadow-[0_0_10px_1px_color-mix(in_srgb,var(--p-primary-color)_45%,transparent)]'
+                    : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
+                >
+                  {{ tab.label }}
+                </button>
+              </div>
+            </div>
+
+            <StockChart
+              :options="areaChartOptions"
+              :height="300"
+            />
+
+            <!-- Asset Trend Period Selector -->
+            <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
+                <span>
+                  <span v-if="growthRate >= 0">+</span>
+                  <span v-else>-</span>
+                </span>
+                <span class="mr-2 font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>
+                (
+                  <span v-if="growthRate >= 0">+</span>
+                  <span v-else>-</span>
+                  <span class="font-semibold">{{ Math.abs(growthRate) }}%</span>
+                )
+              </div>
+              <span class="text-xs text-slate-500 dark:text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
+            </div>
+          </template>
+        </Card>
+
         <!-- grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <!-- Total Value -->
@@ -147,64 +202,6 @@
             </template>
           </Card>
         </div>
-
-        <!-- Asset Trend -->
-        <Card>
-          <template #title>
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
-              <div class="text-lg">{{ $t('assetTrend') }}</div>
-
-              <!-- <Tag v-if="holdingsStore.list.length > 0" :severity="growthRate >= 0 ? 'success' : 'danger'" class="whitespace-nowrap"> -->
-                <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
-                  <!-- change icon -->
-                  <span>                          
-                    <!-- <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
-                    <i v-else class="pi pi-sort-down-fill"></i> -->
-                    <span v-if="growthRate >= 0">+</span>
-                    <span v-else>-</span>
-                  </span>
-                  <span class="font-semibold mr-2">{{ Math.abs(change.toFixed(2)) }}</span>
-                  (
-                    <!-- change percent -->
-                    <span v-if="growthRate >= 0">+</span>
-                    <span v-else>-</span>
-                    <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
-                  )
-                </div>
-              <!-- </Tag> -->
-            </div>
-          </template>
-
-          <template #content>
-            <StockChart
-              :options="areaChartOptions"
-              :height="300"
-            />
-
-            <!-- Asset Trend Period Selector -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
-              <!-- Segmented pill control -->
-              <div class="inline-flex items-center rounded-xl p-1 gap-0.5
-                          bg-slate-100 border border-slate-200
-                          dark:bg-[#0f1520] dark:border-[#1d2b3a]">
-                <button
-                  v-for="tab in periods"
-                  :key="tab.label"
-                  @click="selectedPeriod = tab.value"
-                  class="relative px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer
-                         transition-all duration-150 select-none tracking-wide"
-                  :class="selectedPeriod === tab.value
-                    ? 'text-[var(--p-primary-contrast-color)] bg-[var(--p-primary-color)] ring-1 ring-[var(--p-primary-color)] shadow-[0_0_10px_1px_color-mix(in_srgb,var(--p-primary-color)_45%,transparent)]'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5'"
-                >
-                  {{ tab.label }}
-                </button>
-              </div>
-
-              <span class="text-xs text-slate-500 dark:text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
-            </div>
-          </template>
-        </Card>
       </div>
 
       <!-- Asset Allocation -->

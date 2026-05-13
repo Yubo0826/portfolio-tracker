@@ -410,6 +410,18 @@ import:
 importTransactions:
   en: Import Transactions
   zh: 匯入交易紀錄
+importPortfolio:
+  en: Import Portfolio
+  zh: 匯入投資組合
+importPortfolioDialogTitle:
+  en: Import Portfolio
+  zh: 匯入投資組合
+newPortfolioName:
+  en: New Portfolio Name
+  zh: 新投資組合名稱
+newPortfolioNamePlaceholder:
+  en: Enter portfolio name
+  zh: 請輸入投資組合名稱
 InvalidDateString:
   en: Invalid date string
   zh: 日期格式錯誤
@@ -428,6 +440,9 @@ importFailed:
 importSuccess:
   en: Import successful
   zh: 匯入成功
+importPortfolioSuccess:
+  en: Portfolio "{name}" imported successfully
+  zh: 投資組合「{name}」匯入成功
 
 # 再平衡
 deposit:
@@ -637,6 +652,15 @@ pricesRefreshed:
 pricesRefreshFailed:
   en: Failed to refresh prices.
   zh: 更新價格失敗。
+importFileRequired:
+  en: Please upload a transaction file first.
+  zh: 請先上傳交易檔案。
+unsupportedFileType:
+  en: Unsupported file type. Please upload CSV or Excel.
+  zh: 不支援的檔案格式，請上傳 CSV 或 Excel。
+createPortfolioFailed:
+  en: Failed to create portfolio.
+  zh: 建立投資組合失敗。
 loadSettingsError:
   en: Error loading settings.
   zh: 載入設定時發生錯誤。
