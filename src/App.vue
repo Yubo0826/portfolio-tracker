@@ -473,7 +473,7 @@ const portfolioMenuItems = computed(() => {
           icon: 'pi pi-plus',
           items: [
             { label: t('addPortfolio'), icon: 'pi pi-file-plus', command: openCreatePortfolioDialog },
-            { label: t('portfolioManagement'), icon: 'pi pi-folder-open', command: openPortfolioManagement },
+            { label: t('importPortfolioDialogTitle'), icon: 'pi pi-upload', command: () => openImportPortfolioDialog() },
           ],
         },
       ]
