@@ -66,6 +66,7 @@
     <div v-else>
     <div class="flex flex-col lg:flex-row gap-6">
       <div class="w-full lg:w-3/5 flex flex-col gap-6">
+        
         <!-- Asset Trend -->
         <Card class="rounded-xl shadow-md">
           <template #content>
@@ -80,6 +81,7 @@
                 <div v-else class="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">--</div>
               </div>
 
+              <!--
               <div class="inline-flex w-fit items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-[#1d2b3a] dark:bg-[#0f1520]">
                 <button
                   v-for="tab in periods"
@@ -93,6 +95,39 @@
                   {{ tab.label }}
                 </button>
               </div>
+              -->
+
+              <SelectButton
+                v-model="selectedPeriod"
+                :options="periods"
+                optionLabel="label"
+                optionValue="value"
+                size="small"
+                :allowEmpty="false"
+              />
+            </div>
+
+
+            <!-- 選擇時段的成長數值顯示 -->
+            <div class="my-4 mt-4 text-2xl">
+              <div
+                v-if="growthRateNumber !== null"
+                :class="growthRateNumber >= 0 ? 'text-green-600' : 'text-red-600'"
+                class="inline-flex items-center gap-2 font-medium"
+              >
+                <span class="font-semibold">{{ formatSignedNumber(growthRateNumber) }}%</span>
+                <span>({{ formatSignedNumber(change) }})</span>
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ selectedPeriodLabel }}</span>
+              </div>
+
+              <div
+                v-else
+                class="inline-flex items-center gap-2 font-medium text-slate-400 dark:text-slate-500"
+              >
+                <span>--</span>
+                <span>(--)</span>
+                <span class="font-semibold uppercase tracking-wide">{{ selectedPeriodLabel }}</span>
+              </div>
             </div>
 
             <StockChart
@@ -100,22 +135,6 @@
               :height="300"
             />
 
-            <!-- Asset Trend Period Selector -->
-            <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center font-medium">
-                <span>
-                  <span v-if="growthRate >= 0">+</span>
-                  <span v-else>-</span>
-                </span>
-                <span class="mr-2 font-semibold">{{ Math.abs(change.toFixed(2)) }}</span>
-                (
-                  <span v-if="growthRate >= 0">+</span>
-                  <span v-else>-</span>
-                  <span class="font-semibold">{{ Math.abs(growthRate) }}%</span>
-                )
-              </div>
-              <span class="text-xs text-slate-500 dark:text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
-            </div>
           </template>
         </Card>
 
@@ -209,7 +228,7 @@
         <Card class="w-full h-full">
           <template #title>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" />
+              <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" :allowEmpty="false" />
               <!-- unstyled  -->
               <!-- :label="$t('setTargets')"  -->
               <!-- :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" /> -->
@@ -341,16 +360,19 @@
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
               </div>
               <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
-                <div class="flex items-center gap-1 font-medium text-sm">
+                <div class="flex items-center gap-1 font-bold text-sm">
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
                   <i v-else class="pi pi-sort-down-fill"></i> -->
                   
-                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-                  <i v-else class="fas fa-arrow-right rotate-90"></i>
+                  <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
+                  <i v-else class="fas fa-arrow-right rotate-90"></i> -->
 
                   <!-- <span v-if="data.profitPercentage >= 0">+</span>
                   <span v-else>-</span> -->
                   <span>{{ Math.abs(data.profitPercentage) }}%</span>
+
+                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-45"></i>
+                  <i v-else class="fas fa-arrow-right rotate-45"></i>
                 </div>
               </div>
             </template>
@@ -387,7 +409,7 @@ import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
 import xirr from 'xirr'
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+const { t, locale } = useI18n()
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
@@ -437,18 +459,33 @@ const pieChartType = computed(() => ([
 const selectedPeriod = ref('3mo')
 
 const periods = computed(() => ([
-  { label: '7D', value: '7d' },
-  { label: '1M', value: '1mo' },
-  { label: '3M', value: '3mo' },
-  { label: '6M', value: '6mo' },
-  { label: 'YTD', value: 'ytd' },
-  { label: '1Y', value: '1y' },
-  { label: '5Y', value: '5y' }
+  { label: t('period7d'), value: '7d' },
+  { label: t('period1mo'), value: '1mo' },
+  { label: t('period3mo'), value: '3mo' },
+  { label: t('period6mo'), value: '6mo' },
+  { label: t('periodYTD'), value: 'ytd' },
+  { label: t('period1y'), value: '1y' },
+  { label: t('period5y'), value: '5y' }
 ]))
 
 const chartSeries = ref([{ name: t('totalPrice'), data: [] }])
 const growthRate = ref(null)
 const change = ref(0)
+const periodLabelMap = {
+  '7d': '7D',
+  '1mo': '1M',
+  '3mo': '3M',
+  '6mo': '6M',
+  ytd: 'YTD',
+  '1y': '1Y',
+  '5y': '5Y',
+}
+
+const selectedPeriodLabel = computed(() => periodLabelMap[selectedPeriod.value] || String(selectedPeriod.value || '').toUpperCase())
+const growthRateNumber = computed(() => {
+  const n = Number(growthRate.value)
+  return Number.isFinite(n) ? n : null
+})
 
 /* =========================
  *  Utils / Formatters
@@ -546,23 +583,33 @@ function splitNativePriceWithCode(value, currency) {
   }
 }
 
+function formatSignedNumber(value, digits = 2) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '--'
+  const sign = n >= 0 ? '+' : '-'
+  return `${sign}${Math.abs(n).toFixed(digits)}`
+}
+
 const startDate = ref('')
 const endDate = ref('')
 
 function getPeriodRange(range) {
   const today = new Date()
   const e = formatDate(today)
+  const localeCode = locale.value || 'en'
 
   const daysMap = { '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
   if (range === 'ytd') {
     const start = new Date(today.getFullYear(), 0, 1)
+    startDate.value = formatStrDate(formatDate(start), localeCode)
+    endDate.value = formatStrDate(e, localeCode)
     return { period1: formatDate(start), period2: e }
   }
   const days = daysMap[range] || 30
   const start = new Date()
   start.setDate(start.getDate() - days)
-  startDate.value = formatDate(start) // formatStrDate(formatDate(start))
-  endDate.value = e // formatStrDate(e)
+  startDate.value = formatStrDate(formatDate(start), localeCode)
+  endDate.value = formatStrDate(e, localeCode)
   return { period1: formatDate(start), period2: e }
 }
 
@@ -807,6 +854,22 @@ const areaChartOptions = computed(() => {
   const gridColor = isDark.value ? '#374151' : '#eee'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const yValues = chartSeries.value[0].data
+    .map(d => Number(d.y))
+    .filter(v => Number.isFinite(v))
+  const yMin = yValues.length ? Math.min(...yValues) : null
+  const yMax = yValues.length ? Math.max(...yValues) : null
+  const yRange = yMin !== null && yMax !== null ? yMax - yMin : 0
+  const yPadding = yMin !== null && yMax !== null
+    ? (yRange > 0 ? yRange * 0.08 : Math.max(Math.abs(yMax), 1) * 0.02)
+    : 0
+  const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
+  const chartDateFormatter = new Intl.DateTimeFormat(
+    chartLocale,
+    locale.value.startsWith('zh')
+      ? { month: 'numeric', day: 'numeric' }
+      : { month: 'short', day: 'numeric' }
+  )
 
   return {
     chart: { type: 'area', backgroundColor: 'transparent', animation: { duration: 300 } },
@@ -815,12 +878,21 @@ const areaChartOptions = computed(() => {
     legend: { enabled: false },
     xAxis: {
       type: 'datetime',
-      labels: { style: { fontSize: '12px', color: axisColor } },
+      labels: {
+        formatter: function () {
+          return chartDateFormatter.format(new Date(this.value))
+        },
+        style: { fontSize: '12px', color: axisColor }
+      },
       lineColor: gridColor,
       tickColor: gridColor,
     },
     yAxis: {
       title: { text: null },
+      min: yMin !== null ? yMin - yPadding : undefined,
+      max: yMax !== null ? yMax + yPadding : undefined,
+      startOnTick: false,
+      endOnTick: false,
       labels: {
         formatter: function () { return `$${this.value.toFixed(2)}` },
         style: { fontSize: '12px', color: axisColor },
@@ -838,6 +910,8 @@ const areaChartOptions = computed(() => {
     },
     plotOptions: {
       area: {
+        threshold: null,
+        softThreshold: false,
         fillColor: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [[0, fillFrom], [1, 'rgba(255,255,255,0)']],
@@ -860,11 +934,15 @@ const areaChartOptions = computed(() => {
 })
 
 function calculateGrowthRate() {
-  if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
+  if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) {
+    growthRate.value = null
+    change.value = 0
+    return null
+  }
   const firstPrice = chartSeries.value[0].data[0].y
   const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
   change.value = lastPrice - firstPrice
-  growthRate.value = (((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2)
+  growthRate.value = Number((((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2))
 }
 
 async function fetchChartData() {
@@ -910,5 +988,9 @@ watch(() => transactionsStore.list, async () => {
 
 watch(selectedPeriod, (newVal, oldVal) => {
   if (newVal !== oldVal) fetchChartData()
+})
+
+watch(locale, () => {
+  getPeriodRange(selectedPeriod.value)
 })
 </script>

@@ -1,6 +1,6 @@
 <template> 
   <div class="relative w-full ">
-    <div class="search-shell bg-amber-50 dark:bg-[#141f34] py-4">
+    <div class="search-shell bg-[#f2f2f2] dark:bg-[#141f34] py-4">
       <i class="pi pi-search text-xs text-neutral-400 shrink-0"></i>
       <input
         ref="inputEl"

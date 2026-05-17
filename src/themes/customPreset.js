@@ -29,16 +29,18 @@ export default definePreset(Aura, {
             activeColor: '{primary.700}'
           },
           content: {
-            background: '{zinc.50}',
+            // background: '{zinc.50}',
+            background: '#f1f5f9',
             focusBackground: '{zinc.700}',
             color: '{zinc.900}',
             focusColor: '{zinc.900}',
             borderColor: '{zinc.300}'
           },
           surface: {
-              background: '#ffffff',
+              // background: '#ffffff',
               // background: '#f4f6fe',
               // background: '#f1f5f9',
+              background: '#dae4ec', // 原本的淺灰色
               card: '#ffffff',
               0: '#ffffff',
               50: '{zinc.50}',

@@ -26,27 +26,30 @@
               <div>
                 <div class="flex items-center justify-between">
                   <div class="flex items-center mb-2">
-                      <div class="text-3xl font-bold mr-4 inline-flex items-end">
+                      <div class="text-4xl font-bold mr-4 inline-flex items-end">
                         <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
-                        <span class="text-slate-400 dark:text-slate-500">{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
-                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-amber-500">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
+                        <!-- 灰色字 text-slate-400 dark:text-slate-500 -->
+                        <span>{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
+                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
                       </div>
-                      <Tag :severity="growthRate >=0 ? 'success' : 'danger'">
-                        <div :class="growthRate >= 0 ? 'text-green-600' : 'text-red-600'" class="flex items-center text-lg">
-                          <!-- 變化數值 -->
-                          <span class="mr-2">                          
-                            <i v-if="growthRate >= 0" class="pi pi-sort-up-fill"></i>
-                            <i v-else class="pi pi-sort-down-fill"></i>
-                          </span>
-                          <span class="font-semibold mr-4">{{ formatChange(change) }}</span>
-                          (
-                            <!-- 變化%數 -->
-                            <span v-if="growthRate >= 0">+</span>
-                            <span v-else>-</span>
-                            <span class="font-semibold">{{  Math.abs(growthRate) }}%</span>
-                          )
-                        </div>
-                      </Tag>
+                      <div
+                        v-if="growthRateNumber !== null"
+                        :class="growthRateNumber >= 0 ? 'text-green-600' : 'text-red-600'"
+                        class="inline-flex items-center gap-2 text-lg"
+                      >
+                        <span class="font-semibold">{{ formatSignedNumber(growthRateNumber) }}%</span>
+                        <span>({{ formatSignedNumber(change) }})</span>
+                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ selectedRangeLabel }}</span>
+                      </div>
+
+                      <div
+                        v-else
+                        class="inline-flex items-center gap-2 text-lg text-slate-400 dark:text-slate-500"
+                      >
+                        <span>--</span>
+                        <span>(--)</span>
+                        <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedRangeLabel }}</span>
+                      </div>
                   </div>
     
                   <!-- 選擇圖表類型 -->
@@ -57,6 +60,7 @@
                       optionLabel="label"
                       optionValue="value"
                       class="text-sm"
+                      :allowEmpty="false"
                     >
                       <template #option="slotProps">
                         <div class="flex items-center space-x-2">
@@ -94,28 +98,19 @@
                 </div> -->
                 
                 <!-- 切換期間按鈕 -->
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
-                  <!-- Segmented pill control -->
-                  <div class="inline-flex items-center rounded-xl p-1 gap-0.5
-                              bg-[#0f1520] border border-[#1d2b3a]
-                              dark:bg-[#0f1520] dark:border-[#1d2b3a]">
-                    <button
-                      v-for="tab in rangeOptions"
-                      :key="tab.label"
-                      @click="currentRange = tab.value"
-                      class="relative px-3 py-1.5 text-xs font-medium rounded-lg cursor-pointer
-                             transition-all duration-150 select-none tracking-wide"
-                      :class="currentRange === tab.value
-                        ? 'text-[#030609] bg-[#003cff] shadow-[0_0_10px_2px_rgba(0,245,255,0.45)]'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'"
-                    >
-                      {{ tab.label }}
-                    </button>
-                  </div>
+                <div class="flex justify-end my-4">
+                  <SelectButton
+                    v-model="currentRange"
+                    :options="rangeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    size="small"
+                    :allowEmpty="false"
+                  />
 
-                  <div>
-                    <span class="text-xs text-slate-400">{{ startDate }} ~ {{ endDate }}</span>
-                  </div>
+                  <!-- <div>
+                    <span class="text-xs text-slate-400">{{ startDate }} {{ locale.startsWith('zh') ? '～' : '-' }} {{ endDate }}</span>
+                  </div> -->
                 </div>
     
                 <!-- 圖表區 -->
@@ -177,7 +172,7 @@
 <script setup>
 import { ref, onMounted, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+const { t, locale } = useI18n()
 import Breadcrumb from 'primevue/breadcrumb';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
@@ -191,7 +186,7 @@ import { useCurrency } from '@/composables/useCurrency'
 import { useTheme } from '@/composables/useTheme.js'
 const { isDark } = useTheme()
 
-const { formatPrice, formatChange, formatPriceWithCode, displayCurrency } = useCurrency()
+const { formatPrice, formatPriceWithCode, displayCurrency } = useCurrency()
 
 const route  = useRoute()
 const symbol = computed(() => route.params.symbol)
@@ -234,15 +229,25 @@ watch(chartType, (newType) => {
 })
 
 const currentRange = ref('3mo')
+const periodLabelMap = {
+  '7d': '7D',
+  '1mo': '1M',
+  '3mo': '3M',
+  '6mo': '6M',
+  ytd: 'YTD',
+  '1y': '1Y',
+  '5y': '5Y',
+}
+const selectedRangeLabel = computed(() => periodLabelMap[currentRange.value] || String(currentRange.value || '').toUpperCase())
 
 const rangeOptions = computed(() => ([
-  { label: '7D', value: '7d' },
-  { label: '1M', value: '1mo' },
-  { label: '3M', value: '3mo' },
-  { label: '6M', value: '6mo' },
-  { label: 'YTD', value: 'ytd' },
-  { label: '1Y', value: '1y' },
-  { label: '5Y', value: '5y' }
+  { label: t('period7d'), value: '7d' },
+  { label: t('period1mo'), value: '1mo' },
+  { label: t('period3mo'), value: '3mo' },
+  { label: t('period6mo'), value: '6mo' },
+  { label: t('periodYTD'), value: 'ytd' },
+  { label: t('period1y'), value: '1y' },
+  { label: t('period5y'), value: '5y' }
 ]))
 
 const highAreaOptions = computed(() => {
@@ -253,6 +258,22 @@ const highAreaOptions = computed(() => {
   const gridColor = isDark.value ? '#374151' : '#eee'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const yValues = chartSeries.value[0].data
+    .map(d => Number(d.y))
+    .filter(v => Number.isFinite(v))
+  const yMin = yValues.length ? Math.min(...yValues) : null
+  const yMax = yValues.length ? Math.max(...yValues) : null
+  const yRange = yMin !== null && yMax !== null ? yMax - yMin : 0
+  const yPadding = yMin !== null && yMax !== null
+    ? (yRange > 0 ? yRange * 0.08 : Math.max(Math.abs(yMax), 1) * 0.02)
+    : 0
+  const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
+  const chartDateFormatter = new Intl.DateTimeFormat(
+    chartLocale,
+    locale.value.startsWith('zh')
+      ? { month: 'numeric', day: 'numeric' }
+      : { month: 'short', day: 'numeric' }
+  )
 
   return {
     chart: { type: 'area', backgroundColor: 'transparent', animation: { duration: 400 } },
@@ -261,12 +282,21 @@ const highAreaOptions = computed(() => {
     legend: { enabled: false },
     xAxis: {
       type: 'datetime',
-      labels: { style: { fontSize: '12px', color: axisColor } },
+      labels: {
+        formatter: function () {
+          return chartDateFormatter.format(new Date(this.value))
+        },
+        style: { fontSize: '12px', color: axisColor },
+      },
       lineColor: gridColor,
       tickColor: gridColor,
     },
     yAxis: {
       title: { text: t('stockPriceUSD'), style: { color: axisColor } },
+      min: yMin !== null ? yMin - yPadding : undefined,
+      max: yMax !== null ? yMax + yPadding : undefined,
+      startOnTick: false,
+      endOnTick: false,
       labels: {
         formatter: function () { return `$${this.value.toFixed(2)}` },
         style: { fontSize: '12px', color: axisColor },
@@ -284,6 +314,8 @@ const highAreaOptions = computed(() => {
     },
     plotOptions: {
       area: {
+        threshold: null,
+        softThreshold: false,
         fillColor: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [[0, fillFrom], [1, 'rgba(255,255,255,0)']],
@@ -310,6 +342,13 @@ const highCandleOptions = computed(() => {
   const gridColor = isDark.value ? '#374151' : '#eee'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
+  const chartDateFormatter = new Intl.DateTimeFormat(
+    chartLocale,
+    locale.value.startsWith('zh')
+      ? { month: 'numeric', day: 'numeric' }
+      : { month: 'short', day: 'numeric' }
+  )
 
   return {
     chart: { type: 'candlestick', backgroundColor: 'transparent', animation: { duration: 400 } },
@@ -318,7 +357,12 @@ const highCandleOptions = computed(() => {
     legend: { enabled: false },
     xAxis: {
       type: 'datetime',
-      labels: { style: { color: axisColor } },
+      labels: {
+        formatter: function () {
+          return chartDateFormatter.format(new Date(this.value))
+        },
+        style: { color: axisColor },
+      },
     },
     yAxis: {
       title: { text: t('priceUSD'), style: { color: axisColor } },
@@ -378,13 +422,28 @@ const items = ref([
 // 計算區間的成長率和變化量
 const growthRate = ref(null)
 const change = ref(0)
+const growthRateNumber = computed(() => {
+  const n = Number(growthRate.value)
+  return Number.isFinite(n) ? n : null
+})
+
+function formatSignedNumber(value, digits = 2) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '--'
+  const sign = n >= 0 ? '+' : '-'
+  return `${sign}${Math.abs(n).toFixed(digits)}`
+}
 
 function calculateGrowthRate() {
-  if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) return null
+  if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) {
+    growthRate.value = null
+    change.value = 0
+    return null
+  }
   const firstPrice = chartSeries.value[0].data[0].y
   const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
   change.value = lastPrice - firstPrice
-  growthRate.value = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2)
+  growthRate.value = Number((((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2))
 }
 
 function getPeriodRange(range) {
@@ -426,8 +485,6 @@ function formatDate(date) {
 
 function formatStrDate(dateStr, locale = 'en-US') {
   const date = new Date(dateStr);
-
-  console.log('formatStrDate:', date, locale)
 
   // 英文：Aug 17, 20
   if (locale.startsWith('en')) {
@@ -471,9 +528,10 @@ const endDate = ref('')
 
 async function fetchChartData(symbol) {
   const { period1, period2 } = getPeriodRange(currentRange.value)
+  const localeCode = locale.value || 'en-US'
 
-  startDate.value = period1 // formatStrDate(period1)
-  endDate.value = period2 // formatStrDate(period2)
+  startDate.value = formatStrDate(period1, localeCode)
+  endDate.value = formatStrDate(period2, localeCode)
 
   try {
     const data = await api.get(`/api/yahoo/chart?symbol=${symbol}&period1=${period1}&period2=${period2}`)
@@ -550,6 +608,13 @@ if (newValue !== oldValue) {
   fetchChartData(symbol.value);
 }
 });
+
+watch(locale, () => {
+  const { period1, period2 } = getPeriodRange(currentRange.value)
+  const localeCode = locale.value || 'en-US'
+  startDate.value = formatStrDate(period1, localeCode)
+  endDate.value = formatStrDate(period2, localeCode)
+})
 
 watch(chartType, () => {
   fetchChartData(symbol.value);
