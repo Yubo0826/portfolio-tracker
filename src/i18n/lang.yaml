@@ -368,6 +368,93 @@ period1y:
 period5y:
   en: 5Y
   zh: 5年
+compareAssets:
+  en: Compare
+  zh: 對比標的
+comparisonLimitHint:
+  en: Up to {max} symbols
+  zh: 最多 {max} 檔
+addComparison:
+  en: Add
+  zh: 新增對比
+clearComparisons:
+  en: Clear
+  zh: 清空對比
+comparisonReturnRate:
+  en: Return (%)
+  zh: 報酬率 (%)
+comparisonDisabledForCandlestick:
+  en: Comparison is available in Area chart only.
+  zh: 對比功能僅支援面積圖。
+comparisonCannotMatchPrimary:
+  en: Cannot compare with the current symbol.
+  zh: 不能加入目前標的作為對比。
+comparisonDuplicate:
+  en: This symbol is already in comparison list.
+  zh: 此標的已在對比清單中。
+comparisonMaxReached:
+  en: You can compare up to {max} symbols.
+  zh: 最多只能對比 {max} 檔標的。
+comparisonPartialLoadFailed:
+  en: Failed to load {count} comparison symbol(s).
+  zh: 有 {count} 檔對比標的載入失敗。
+comparisonNoData:
+  en: No comparison data in this period.
+  zh: 此期間無可用對比資料。
+comparisonLoadFailed:
+  en: Failed to load comparison data.
+  zh: 對比資料載入失敗。
+recommendedStocks:
+  en: Recommended
+  zh: 推薦股票
+recommendationScore:
+  en: score {score}
+  zh: 分數 {score}
+recommendationDailyChange:
+  en: 1D
+  zh: 單日
+recommendationEmpty:
+  en: No recommendation data.
+  zh: 目前沒有推薦資料。
+recommendationLoadFailed:
+  en: Failed to load recommendation data.
+  zh: 推薦資料載入失敗。
+recommendationPartialHint:
+  en: "{count} recommendation item(s) were partially loaded."
+  zh: 有 {count} 檔推薦資料不完整。
+addToComparison:
+  en: Add to Compare
+  zh: 加入對比
+companyBasicInfo:
+  en: Company Info
+  zh: 公司基本資訊
+companySector:
+  en: Sector
+  zh: 產業別
+companyIndustry:
+  en: Industry
+  zh: 產業
+companyEmployees:
+  en: Employees
+  zh: 員工數
+companyMarketCap:
+  en: Market Cap
+  zh: 市值
+companyLocation:
+  en: Location
+  zh: 所在地
+companyWebsite:
+  en: Website
+  zh: 官網
+companySummary:
+  en: Summary
+  zh: 公司簡介
+companyInfoLoadFailed:
+  en: Failed to load company profile.
+  zh: 公司基本資訊載入失敗。
+companyInfoEmpty:
+  en: No company profile data available.
+  zh: 目前沒有公司基本資訊。
 
 # 圓餅圖/配置
 actualAllocation:
