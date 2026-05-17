@@ -51,11 +51,11 @@
             <button
               @click="openSearchBox"
               aria-label="Search"
-              class="hidden lg:flex items-center w-[16rem] gap-3 px-4 py-2.5 rounded-full bg-[#f2f2f2] dark:bg-[#22232b] hover:bg-[#e0e0e0] dark:hover:bg-[#33333b] transition-colors text-sm text-[var(--p-text-muted-color)] cursor-pointer"
+              class="hidden lg:flex items-center w-[16rem] gap-3 px-4 py-2.5 rounded-full bg-[#f2f2f2] dark:bg-[#141f34] transition-colors text-sm text-[var(--p-text-muted-color)] cursor-text"
             >
               <i class="pi pi-search text-xs"></i>
               <span class="truncate">{{ $t('search') }}</span>
-              <span class="ml-auto inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-full border border-[var(--p-content-border-color)] text-sm leading-none text-[var(--p-text-muted-color)]">/</span>
+              <span class="ml-auto inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-[5px] border border-[var(--p-content-border-color)] text-sm leading-none text-[var(--p-text-muted-color)]">/</span>
             </button>
 
             <Button
@@ -224,20 +224,22 @@
     <Footer />
   </div>
 
-  <!-- Search Dialog -->
-  <Dialog
-    v-model:visible="searchBoxVisible"
-    modal
-    dismissableMask
-    position="top"
-    :style="{ width: '90vw', maxWidth: '25rem', top: '5rem' }"
-    :closeOnEscape="true"
-    :showHeader="false"
-  >
-    <template #container>
-      <SearchBox ref="searchBoxRef" @close="searchBoxVisible = false" />
-    </template>
-  </Dialog>
+  <!-- Search Overlay -->
+  <Teleport to="body">
+    <Transition name="search-overlay-fade">
+      <div
+        v-if="searchBoxVisible"
+        class="search-overlay"
+        role="dialog"
+        aria-modal="true"
+        @click.self="closeSearchBox"
+      >
+        <div class="search-overlay-panel">
+          <SearchBox ref="searchBoxRef" @close="closeSearchBox" />
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
@@ -512,6 +514,10 @@ const searchBoxRef = ref(null)
 const portfolioMenu = ref()
 const portfolioMenuVisible = ref(false)
 
+const closeSearchBox = () => {
+  searchBoxVisible.value = false
+}
+
 const openSearchBox = async () => {
   searchBoxVisible.value = true
   await nextTick()
@@ -527,6 +533,12 @@ const isEditableTarget = (target) => {
 
 const onGlobalSearchShortcut = (event) => {
   if (event.isComposing || event.repeat) return
+  if (event.key === 'Escape' && searchBoxVisible.value) {
+    event.preventDefault()
+    closeSearchBox()
+    return
+  }
+
   const isCommandShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'
   const isSlashShortcut = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && event.key === '/'
   if (!isCommandShortcut && !isSlashShortcut) return
@@ -576,6 +588,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onGlobalSearchShortcut)
+  document.body.style.removeProperty('overflow')
 })
 
 watch(
@@ -598,7 +611,12 @@ watch(dialogVisible, (visible) => {
 })
 
 watch(searchBoxVisible, async (visible) => {
-  if (!visible) return
+  if (!visible) {
+    document.body.style.removeProperty('overflow')
+    return
+  }
+
+  document.body.style.overflow = 'hidden'
   await nextTick()
   searchBoxRef.value?.focusInput?.()
 })
@@ -700,6 +718,32 @@ header {
 .page-main-leave-active {
   transition: opacity 0.32s ease, transform 0.32s ease;
   will-change: opacity, transform;
+}
+
+.search-overlay-fade-enter-active,
+.search-overlay-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.search-overlay-fade-enter-from,
+.search-overlay-fade-leave-to {
+  opacity: 0;
+}
+
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1.5rem 1rem 1rem;
+  background: rgba(9, 14, 24, 0.48);
+  backdrop-filter: blur(2px);
+}
+
+.search-overlay-panel {
+  width: min(90vw, 65rem);
 }
 
 .page-main-enter-from,

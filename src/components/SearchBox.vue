@@ -1,15 +1,16 @@
-<template>
-  <div class="relative w-full">
-    <div class="search-shell">
+<template> 
+  <div class="relative w-full ">
+    <div class="search-shell bg-amber-50 dark:bg-[#141f34] py-4">
       <i class="pi pi-search text-xs text-neutral-400 shrink-0"></i>
       <input
         ref="inputEl"
         v-model="query"
+        @focus="onFocus"
         @keydown="onKeydown"
         @input="onInput"
         type="text"
         :placeholder="$t('searchPlaceholder')"
-        class="flex-1 min-w-0 bg-transparent text-sm outline-none
+        class="flex-1 min-w-0 bg-transparent text-md outline-none
                text-[var(--p-text-color)] placeholder-neutral-500"
         autocomplete="off"
         aria-autocomplete="list"
@@ -24,8 +25,7 @@
     <div
       v-if="results.length || (query.trim().length > 0 && !loading) || loading"
       class="absolute top-full mt-2 left-0 right-0 rounded-[1.25rem] shadow-xl
-             border border-[var(--p-content-border-color)]
-             bg-[var(--p-surface-0)] dark:bg-[var(--p-surface-900)]
+             bg-[var(--p-surface-0)] dark:bg-[#121c2b]
              overflow-hidden"
     >
       <div class="max-h-80 overflow-auto">
@@ -33,7 +33,7 @@
           v-if="results.length"
           class="px-4 pt-3 text-xs font-semibold uppercase tracking-wider text-neutral-500"
         >
-          {{ t('searchResults') }}
+          {{ isShowingHistory ? t('recentlyUsed') : t('searchResults') }}
         </div>
 
         <ul v-if="results.length" id="resultsList" role="listbox" class="py-2">
@@ -51,14 +51,34 @@
               activeIndex === idx ? 'bg-neutral-100 dark:bg-white/10' : ''
             ]"
           >
-            <div class="flex flex-col py-1">
-              <span class="search-item-symbol text-sm font-semibold">{{ item.symbol }}</span>
-              <span class="search-item-name text-xs">
-                {{ item.name }}
-                <template v-if="item.assetType">
-                  ({{ item.assetType }})
-                </template>
-              </span>
+            <div class="flex w-full items-center gap-2">
+              <table class="w-full table-fixed">
+                <tbody>
+                  <tr>
+                    <td class="w-28 pr-3 text-[#3a8dff] text-sm font-semibold truncate">
+                      {{ item.symbol }}
+                    </td>
+                    <td class="pr-3 text-[#100000] dark:text-[#cbd5e1] text-sm truncate">
+                      {{ item.longname || item.shortname || item.name || '' }}
+                    </td>
+                    <td class="w-26 text-sm truncate">
+                      <span class="mr-4 text-[#100000] dark:text-[#cbd5e1] text-xs">{{ item.quoteType || item.assetType || '' }}</span>
+                      <span>{{ item.exchDisp || '' }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <button
+                v-if="isShowingHistory"
+                type="button"
+                class="history-remove-btn"
+                :aria-label="`${t('delete')} ${item.symbol}`"
+                @mousedown.prevent
+                @click.stop="removeHistoryItem(idx)"
+              >
+                <i class="pi pi-times text-xs"></i>
+              </button>
             </div>
           </li>
         </ul>
@@ -79,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
@@ -94,6 +114,86 @@ const inputEl = ref(null)
 const results = ref([])
 const activeIndex = ref(-1)
 const loading = ref(false)
+
+const SEARCH_HISTORY_KEY = 'portfolio-tracker-search-history'
+const SEARCH_HISTORY_LIMIT = 5
+const isShowingHistory = computed(() => query.value.trim().length === 0)
+
+function normalizeSearchItem(item) {
+  if (!item?.symbol) return null
+  return {
+    symbol: String(item.symbol).toUpperCase(),
+    longname: item.longname || item.longName || item.name || item.shortname || item.shortName || '',
+    shortname: item.shortname || item.shortName || item.longname || item.longName || item.name || '',
+    quoteType: item.quoteType || item.assetType || item.typeDisp || '',
+    assetType: item.assetType || item.typeDisp || item.quoteType || '',
+    exchDisp: item.exchDisp || item.fullExchangeName || item.exchange || '',
+  }
+}
+
+function readSearchHistory() {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+
+    return parsed
+      .map(normalizeSearchItem)
+      .filter(Boolean)
+      .slice(0, SEARCH_HISTORY_LIMIT)
+  } catch (err) {
+    return []
+  }
+}
+
+function writeSearchHistory(items) {
+  try {
+    localStorage.setItem(
+      SEARCH_HISTORY_KEY,
+      JSON.stringify(items.slice(0, SEARCH_HISTORY_LIMIT))
+    )
+  } catch (err) {
+    // noop
+  }
+}
+
+function showSearchHistory() {
+  const history = readSearchHistory()
+  results.value = history
+  activeIndex.value = history.length ? 0 : -1
+}
+
+function saveSearchHistory(item) {
+  const normalized = normalizeSearchItem(item)
+  if (!normalized) return
+
+  const current = readSearchHistory().filter(h => h.symbol !== normalized.symbol)
+  const next = [normalized, ...current].slice(0, SEARCH_HISTORY_LIMIT)
+  writeSearchHistory(next)
+}
+
+function removeHistoryItem(idx) {
+  if (!isShowingHistory.value) return
+
+  const item = results.value[idx]
+  if (!item?.symbol) return
+
+  const next = readSearchHistory().filter(h => h.symbol !== item.symbol)
+  writeSearchHistory(next)
+  results.value = next
+
+  if (!next.length) {
+    activeIndex.value = -1
+    return
+  }
+
+  if (activeIndex.value === idx) {
+    activeIndex.value = Math.min(idx, next.length - 1)
+  } else if (activeIndex.value > idx) {
+    activeIndex.value -= 1
+  }
+}
 
 async function focusInput() {
   await nextTick()
@@ -111,18 +211,14 @@ function close() {
 const search = async () => {
   const q = query.value.trim()
   if (!q.length) {
-    results.value = []
+    showSearchHistory()
     return
   }
 
   loading.value = true
   try {
     const data = await api.get('/api/yahoo/symbol?query=' + q)
-    results.value = data.map(item => ({
-      symbol: item.symbol,
-      name: item.longname,
-      assetType: item.typeDisp,
-    }))
+    results.value = Array.isArray(data) ? data : []
     activeIndex.value = results.value.length ? 0 : -1
   } catch (err) {
     results.value = []
@@ -134,7 +230,18 @@ const search = async () => {
 const debouncedSearch = debounce(search, 300)
 
 function onInput() {
+  if (!query.value.trim().length) {
+    debouncedSearch.cancel()
+    showSearchHistory()
+    return
+  }
   debouncedSearch()
+}
+
+function onFocus() {
+  if (!query.value.trim().length) {
+    showSearchHistory()
+  }
 }
 
 function setActive(idx) {
@@ -144,6 +251,7 @@ function setActive(idx) {
 function select(idx) {
   const item = results.value[idx]
   if (!item) return
+  saveSearchHistory(item)
   router.push({ name: 'asset', params: { symbol: item.symbol } })
   close()
 }
@@ -175,9 +283,7 @@ defineExpose({ focusInput })
   gap: 0.75rem;
   min-height: 3.25rem;
   padding: 0.875rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--p-form-field-background) 94%, transparent);
+  border-radius: 40px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
@@ -189,7 +295,7 @@ defineExpose({ focusInput })
   height: 2rem;
   padding: 0 0.65rem;
   border: 1px solid color-mix(in srgb, var(--p-content-border-color) 92%, transparent);
-  border-radius: 999px;
+  border-radius: 5px;
   background: color-mix(in srgb, var(--p-surface-0) 3%, transparent);
   color: var(--p-text-muted-color);
   font-size: 0.95rem;
@@ -202,6 +308,27 @@ defineExpose({ focusInput })
   transition: background-color 0.2s ease;
 }
 
+.history-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 9999px;
+  color: #6b7280;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.history-remove-btn:hover {
+  background-color: rgba(15, 23, 42, 0.08);
+  color: #111827;
+}
+
+.dark .history-remove-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
 .dark .search-shell {
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -210,14 +337,5 @@ defineExpose({ focusInput })
 .dark .search-shortcut-indicator {
   border-color: rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
-}
-
-
-.search-item-symbol {
-  color: var(--p-text-color);
-}
-
-.search-item-name {
-  color: var(--p-text-muted-color);
 }
 </style>
