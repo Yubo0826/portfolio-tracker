@@ -1,8 +1,7 @@
 <template>
-  <Dialog v-model:visible="localVisible" modal :style="{ width: '40rem' }">
+  <Dialog v-model:visible="localVisible" modal :style="{ width: 'min(52rem, 92vw)' }">
     <template #header>
       <div class="inline-flex items-center gap-2">
-        <i class="pi pi-upload text-[var(--p-primary-500)]"></i>
         <span class="font-bold">{{ isPortfolioMode ? $t('importPortfolioDialogTitle') : $t('importTransactionDataTo') }}</span>
 
         <!-- 選擇投資組合 -->
@@ -33,7 +32,9 @@
     </template>
 
     <div v-if="isPortfolioMode" class="mb-4">
-      <label for="import-portfolio-name" class="font-medium">{{ $t('newPortfolioName') }}</label>
+      <label for="import-portfolio-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {{ $t('newPortfolioName') }}
+        </label>
       <InputText
         id="import-portfolio-name"
         v-model.trim="portfolioName"
@@ -43,40 +44,34 @@
       />
     </div>
 
+    <!-- 格式說明 -->
+      <div class="px-1 pt-4 pb-2 flex justify-between items-center">
+        <p class="dark:text-[#a1a1a1]">
+          {{ $t('importFileHint1') }}
+          <button @click="downloadSampleCSV" class="py-1 text-[#5b9cf6] text-md cursor-pointer hover:underline transition">
+            {{ $t('downloadSampleCSV') }}
+          </button>
+        </p>
+      </div>
+      
+
     <!-- 拖拉區 -->
     <div
-      class="border-2 border-dashed rounded-lg p-10 text-center flex flex-col items-center justify-center cursor-pointer transition hover:bg-[var(--p-primary-50)]"
-      :style="{ borderColor: 'var(--p-primary-400)' }"
+      class="border-2 border-dashed border-[var(--p-inputtext-border-color)] rounded-lg p-8 text-center flex flex-col items-center justify-center cursor-pointer transition duration-200 hover:border-[var(--p-primary-500)]"
       @dragover.prevent
       @drop.prevent="handleDrop"
       @click="triggerFileInput"
     >
       <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
-      <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('ImportFile') }}</p>
+      <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('uploadTransactions') }}</p>
       <p class="text-gray-500">{{ $t('dropOrClickToUpload') }}</p>
       <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
     </div>
     
 
-    <!-- 格式說明 -->
-    <Message severity="info" class="mt-4">
-      <div class="flex justify-between text-sm">
-        <span>
-          <!-- 檔案需包含以下欄位：date, symbol, name, shares, price, currency, fee, type(交易類型：buy 或 sell) -->
-          {{ $t('importFileHint1') }}
-        </span>
-        <button
-          @click="downloadSampleCSV"
-          class="ml-4 px-3 py-1 border rounded border-[var(--p-primary-400)] bg-[var(--p-primary-100)] hover:bg-[var(--p-primary-200)] text-[var(--p-primary-700)] text-sm"
-        >
-          {{ $t('downloadSampleCSV') }}
-        </button>
-      </div>
-    </Message>
-
     <!-- 預覽區 -->
     <div v-if="previewData.length" class="mt-6">
-      <div class="flex items-center justify-between mb-2">
+      <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 class="font-semibold">{{ $t('previewData') }}：</h3>
 
         <Paginator
@@ -86,10 +81,19 @@
           @page="onPage"
           template=" PrevPageLink CurrentPageReport NextPageLink "
           currentPageReportTemplate="{first} to {last} of {totalRecords}"
+          class="import-preview-paginator"
+          :pt="previewPaginatorPt"
         />
       </div>
 
-      <DataTable :value="paginatedData" size="small" responsiveLayout="scroll">
+      <DataTable
+        :value="paginatedData"
+        size="small"
+        scrollable
+        tableStyle="min-width: 42rem"
+        class="import-preview-table"
+        :pt="previewTablePt"
+      >
         <Column field="date" :header="$t('date')"></Column>
         <Column field="symbol" :header="$t('symbol')"></Column>
         <Column field="shares" :header="$t('shares')"></Column>
@@ -103,7 +107,7 @@
 
     <template #footer>
       <Button :label="$t('cancel')" severity="secondary" @click="closeDialog" />
-      <Button :label="isPortfolioMode ? $t('importPortfolio') : $t('import')" icon="pi pi-check" severity="success" :disabled="!previewData.length" @click="confirmImport" />
+      <Button :label="$t('import')" :disabled="!previewData.length" @click="confirmImport" />
     </template>
   </Dialog>
 </template>
@@ -138,7 +142,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'import'])
 const localVisible = ref(false)
 watch(() => props.modelValue, v => (localVisible.value = v), { immediate: true })
-watch(localVisible, v => emit('update:modelValue', v))
+watch(localVisible, v => {
+  emit('update:modelValue', v)
+
+  if (!v) {
+    resetDialogState()
+  }
+})
 
 const fileInput = ref(null)
 const previewData = ref([])
@@ -162,6 +172,19 @@ watch(
 const first = ref(0)
 const rowsPerPage = ref(5)
 const paginatedData = computed(() => previewData.value.slice(first.value, first.value + rowsPerPage.value))
+const transparentSurfaceClass = '!bg-transparent !shadow-none'
+const previewPaginatorPt = {
+  root: { class: transparentSurfaceClass },
+  paginatorContainer: { class: transparentSurfaceClass },
+  content: { class: transparentSurfaceClass },
+}
+const previewTablePt = {
+  root: { class: transparentSurfaceClass },
+  tableContainer: { class: '!bg-transparent overflow-x-auto' },
+  header: { class: '!bg-transparent' },
+  bodyRow: { class: '!bg-transparent' },
+  footer: { class: '!bg-transparent' },
+}
 
 function triggerFileInput() {
   fileInput.value.click()
@@ -335,11 +358,16 @@ function downloadSampleCSV() {
   URL.revokeObjectURL(url)
 }
 
-function closeDialog() {
-  localVisible.value = false
+function resetDialogState() {
   previewData.value = []
   portfolioName.value = ''
+  first.value = 0
+
   if (fileInput.value) fileInput.value.value = ''
+}
+
+function closeDialog() {
+  localVisible.value = false
 }
 
 import { showLoading, hideLoading } from "@/composables/loading.js"
@@ -443,3 +471,25 @@ function onPage(event) {
   rowsPerPage.value = event.rows
 }
 </script>
+
+<style scoped>
+.import-preview-paginator :deep(.p-paginator),
+.import-preview-paginator :deep(.p-paginator-content),
+.import-preview-paginator :deep(.p-paginator-current),
+.import-preview-paginator :deep(.p-paginator-page),
+.import-preview-paginator :deep(.p-paginator-prev),
+.import-preview-paginator :deep(.p-paginator-next) {
+  background: transparent !important;
+  user-select: none;
+}
+
+.import-preview-table :deep(.p-datatable),
+.import-preview-table :deep(.p-datatable-table-container),
+.import-preview-table :deep(.p-datatable-table),
+.import-preview-table :deep(.p-datatable-thead > tr > th),
+.import-preview-table :deep(.p-datatable-tbody > tr),
+.import-preview-table :deep(.p-datatable-tbody > tr > td) {
+  background: transparent !important;
+  user-select: none;
+}
+</style>

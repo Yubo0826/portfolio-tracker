@@ -215,6 +215,15 @@ duplicatePortfolio:
 createNewPortfolio:
   en: Create new portfolio
   zh: 建立新的投資組合
+manuallyAddPortfolio:
+  en: Manually add portfolio
+  zh: 手動新增投資組合
+uploadPortfolio:
+  en: Upload portfolio
+  zh: 上傳投資組合
+uploadTransactions:
+  en: Upload transactions
+  zh: 上傳交易紀錄
 recentlyUsed:
   en: Recently used
   zh: 最近使用
@@ -694,8 +703,8 @@ dropOrClickToUpload:
   en: Drag or click to upload CSV / Excel
   zh: 拖曳或點擊以上傳 CSV / Excel
 importFileHint1:
-  en: "The file must contain the following columns: date, symbol, name, shares, price, fee, type (transaction type: buy or sell)"
-  zh: "檔案需包含以下欄位：date, symbol, name, shares, price, fee, type(交易類型：buy 或 sell)"
+  en: "CSV / Excel file must contain the following columns: date, symbol, name, shares, currency, price, fee, type (buy or sell)"
+  zh: "CSV / Excel 檔案需包含以下欄位：date, symbol, name, shares, currency, price, fee, type（buy or sell）"
 downloadSampleCSV:
   en: Download Sample
   zh: 下載範例
