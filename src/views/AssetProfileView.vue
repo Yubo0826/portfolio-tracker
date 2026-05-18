@@ -881,13 +881,7 @@ function toCandleSeriesFromQuotes(quotes) {
     .sort((a, b) => a.x - b.x)
 }
 
-function normalizeToReturnSeries(points) {
-  const firstPoint = points.find(point => Number.isFinite(Number(point.y)))
-  if (!firstPoint) return []
-
-  const base = Number(firstPoint.y)
-  if (!Number.isFinite(base) || base === 0) return []
-
+function toPriceSeries(points) {
   return points
     .map(point => {
       const pointDate = point.x instanceof Date ? point.x : new Date(point.x)
@@ -896,7 +890,7 @@ function normalizeToReturnSeries(points) {
 
       return {
         x: pointDate,
-        y: Number((((price - base) / base) * 100).toFixed(2)),
+        y: Number(price.toFixed(2)),
       }
     })
     .filter(Boolean)
@@ -919,7 +913,7 @@ function calculateGrowthRate() {
 const areaSeries = computed(() => {
   const merged = []
   const primarySymbol = String(symbol.value || '').toUpperCase() || t('closePrice')
-  const primarySeries = normalizeToReturnSeries(chartSeries.value[0].data)
+  const primarySeries = toPriceSeries(chartSeries.value[0].data)
   const primaryColor = getSeriesColor(0)
 
   if (primarySeries.length) {
@@ -937,12 +931,12 @@ const areaSeries = computed(() => {
   }
 
   compareRawSeries.value.forEach((item, index) => {
-    const normalized = normalizeToReturnSeries(item.data)
-    if (!normalized.length) return
+    const priceSeries = toPriceSeries(item.data)
+    if (!priceSeries.length) return
     merged.push({
       type: 'line',
       name: item.symbol,
-      data: normalized.map(point => [point.x.getTime(), point.y]),
+      data: priceSeries.map(point => [point.x.getTime(), point.y]),
       color: getSeriesColor(index + 1),
       lineWidth: 2,
     })
@@ -996,14 +990,14 @@ const highAreaOptions = computed(() => {
       tickColor: gridColor,
     },
     yAxis: {
-      title: { text: t('comparisonReturnRate'), style: { color: axisColor } },
+      title: { text: t('closePrice'), style: { color: axisColor } },
       min: yMin !== null ? yMin - yPadding : undefined,
       max: yMax !== null ? yMax + yPadding : undefined,
       startOnTick: false,
       endOnTick: false,
       labels: {
         formatter: function () {
-          return `${this.value.toFixed(2)}%`
+          return formatPrice(this.value)
         },
         style: { fontSize: '12px', color: axisColor },
       },
@@ -1013,7 +1007,6 @@ const highAreaOptions = computed(() => {
     tooltip: {
       xDateFormat: '%Y/%m/%d',
       valueDecimals: 2,
-      valueSuffix: '%',
       shared: true,
       backgroundColor: tooltipBg,
       style: { color: tooltipFg },
