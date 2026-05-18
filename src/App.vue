@@ -55,7 +55,7 @@
             >
               <i class="pi pi-search text-xs"></i>
               <span class="truncate">{{ $t('search') }}</span>
-              <span class="ml-auto inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-[5px] border border-[var(--p-content-border-color)] text-sm leading-none text-[var(--p-text-muted-color)]">/</span>
+              <span class="ml-auto inline-flex items-center justify-center min-w-8 h-6 px-2 rounded-[5px] border border-[var(--p-content-border-color)] text-sm leading-none text-[var(--p-text-muted-color)]">/</span>
             </button>
 
             <Button

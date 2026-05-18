@@ -174,7 +174,7 @@
                 <div>
                   <div class="flex items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t('recommendedStocks') }}</span>
-                    <span class="recommend-muted text-xs">{{ t('comparisonLimitHint', { max: MAX_RECOMMENDATION_CARDS }) }}</span>
+                    <!-- <span class="recommend-muted text-xs">{{ t('comparisonLimitHint', { max: MAX_RECOMMENDATION_CARDS }) }}</span> -->
                   </div>
 
                   <p
@@ -245,9 +245,9 @@
                           </div>
                         </div>
 
-                        <span class="recommend-score-badge rounded-full px-2 py-0.5 text-[10px] font-semibold">
+                        <!-- <span class="recommend-score-badge rounded-full px-2 py-0.5 text-[10px] font-semibold">
                           {{ t('recommendationScore', { score: card.score.toFixed(3) }) }}
-                        </span>
+                        </span> -->
                       </div>
 
                       <div class="mt-3 inline-flex items-end gap-1">
@@ -260,7 +260,7 @@
                         class="mt-2 text-xs font-semibold"
                         :class="recommendationGrowthClass(card.regularMarketChangePercent)"
                       >
-                        {{ t('recommendationDailyChange') }}:
+                        <!-- {{ t('recommendationDailyChange') }}: -->
                         {{ formatSignedNumber(card.regularMarketChangePercent) }}%
                         <span class="ml-1">({{ formatSignedNumber(card.regularMarketChange) }})</span>
                       </div>
@@ -268,7 +268,6 @@
                       <Button
                         class="mt-4 w-full"
                         size="small"
-                        severity="secondary"
                         :label="t('addToComparison')"
                         :disabled="isComparisonDisabled || !canAddRecommendationSymbol(card.symbol)"
                         @click.stop="addComparisonBySymbol(card)"
@@ -285,24 +284,24 @@
             <Card class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
-                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>前次收盤價</span>
-                    <span class="font-semibold">{{ info.chartPreviousClose }}</span>
+                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                    <span>{{ t('assetPreviousClose') }}</span>
+                    <span class="font-semibold">{{ formatPrice(info.chartPreviousClose) }}</span>
                   </div>
-                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>單日股價範圍</span>
+                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                    <span>{{ t('assetDayRange') }}</span>
                     <span class="font-semibold">{{ formatPrice(info.regularMarketDayLow) }} - {{ formatPrice(info.regularMarketDayHigh) }}</span>
                   </div>
-                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>一年股價範圍</span>
+                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                    <span>{{ t('assetYearRange') }}</span>
                     <span class="font-semibold">{{ formatPrice(info.fiftyTwoWeekLow) }} - {{ formatPrice(info.fiftyTwoWeekHigh) }}</span>
                   </div>
-                  <div class="flex justify-between border-b border-gray-300 py-4 px-0">
-                    <span>今日交易量</span>
+                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                    <span>{{ t('assetTodayVolume') }}</span>
                     <span class="font-semibold">{{ info.regularMarketVolume }}</span>
                   </div>
                   <div class="flex justify-between border-gray-300 py-4 px-0">
-                    <span>主要交易所</span>
+                    <span>{{ t('assetPrimaryExchange') }}</span>
                     <span class="font-semibold">{{ info.fullExchangeName }}</span>
                   </div>
                 </div>
@@ -312,11 +311,6 @@
             <Card class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm font-semibold">{{ t('companyBasicInfo') }}</span>
-                    <span v-if="companyInfoLoading" class="text-xs text-slate-500 dark:text-slate-400">{{ t('loading') }}</span>
-                  </div>
-
                   <p
                     v-if="companyInfoError"
                     class="text-xs text-red-600 dark:text-red-300"
@@ -324,49 +318,31 @@
                     {{ t('companyInfoLoadFailed') }}
                   </p>
 
-                  <div class="flex justify-between border-b border-gray-300 py-3 px-0">
-                    <span>{{ t('companySector') }}</span>
-                    <span class="font-semibold text-right">{{ companyInfo.sector || '--' }}</span>
+                  <div class="pt-3">
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3">{{ t('companyKeyStats') }}</p>
+
+                    <div
+                      v-for="(row, index) in companyKeyStatsRows"
+                      :key="row.label"
+                      class="flex justify-between py-3 px-0"
+                      :class="index === companyKeyStatsRows.length - 1 ? '' : 'border-b border-gray-300 dark:border-gray-700'"
+                    >
+                      <span>{{ t(row.label) }}</span>
+                      <span class="font-semibold text-right">{{ row.value }}</span>
+                    </div>
+
+                    <p
+                      v-if="!companyKeyStatsRows.length"
+                      class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+                    >
+                      {{ t('companyKeyStatsEmpty') }}
+                    </p>
                   </div>
 
-                  <div class="flex justify-between border-b border-gray-300 py-3 px-0">
-                    <span>{{ t('companyIndustry') }}</span>
-                    <span class="font-semibold text-right">{{ companyInfo.industry || '--' }}</span>
-                  </div>
-
-                  <div class="flex justify-between border-b border-gray-300 py-3 px-0">
-                    <span>{{ t('companyEmployees') }}</span>
-                    <span class="font-semibold text-right">{{ companyEmployeesText }}</span>
-                  </div>
-
-                  <div class="flex justify-between border-b border-gray-300 py-3 px-0">
-                    <span>{{ t('companyMarketCap') }}</span>
-                    <span class="font-semibold text-right">{{ companyMarketCapText }}</span>
-                  </div>
-
-                  <div class="flex justify-between border-b border-gray-300 py-3 px-0">
-                    <span>{{ t('companyLocation') }}</span>
-                    <span class="font-semibold text-right">{{ companyLocationText }}</span>
-                  </div>
-
-                  <div class="flex justify-between py-3 px-0">
-                    <span>{{ t('companyWebsite') }}</span>
-                    <span v-if="companyWebsiteHref" class="font-semibold text-right">
-                      <a
-                        :href="companyWebsiteHref"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="company-link"
-                      >
-                        {{ companyInfo.website }}
-                      </a>
-                    </span>
-                    <span v-else class="font-semibold text-right">--</span>
-                  </div>
-
+                  <!-- 公司簡介 -->
                   <div
                     v-if="companyInfo.longBusinessSummary"
-                    class="border-t border-gray-300 pt-3"
+                    class="pt-3"
                   >
                     <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t('companySummary') }}</p>
                     <p class="company-summary mt-2 text-xs">{{ companyInfo.longBusinessSummary }}</p>
@@ -482,6 +458,21 @@ const companyInfo = reactive({
   website: '',
   fullTimeEmployees: null,
   marketCap: null,
+  beta: null,
+  beta3Year: null,
+  forwardPE: null,
+  priceToBook: null,
+  dividendYield: null,
+  earningsQuarterlyGrowth: null,
+  shortPercentOfFloat: null,
+  category: '',
+  fundFamily: '',
+  legalType: '',
+  totalAssets: null,
+  ytdReturn: null,
+  threeYearAverageReturn: null,
+  fiveYearAverageReturn: null,
+  quoteType: '',
   currency: '',
   city: '',
   state: '',
@@ -542,24 +533,8 @@ const recommendationErrorText = computed(() => {
   return t(recommendationErrorKey.value)
 })
 
-const companyLocationText = computed(() => {
-  const chunks = [companyInfo.city, companyInfo.state, companyInfo.country]
-    .map(item => String(item || '').trim())
-    .filter(Boolean)
-
-  return chunks.length ? chunks.join(', ') : '--'
-})
-
-const companyEmployeesText = computed(() => {
-  const normalized = Number(companyInfo.fullTimeEmployees)
-  if (!Number.isFinite(normalized)) return '--'
-
-  const formatterLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
-  return new Intl.NumberFormat(formatterLocale).format(normalized)
-})
-
-const companyMarketCapText = computed(() => {
-  const normalized = Number(companyInfo.marketCap)
+const companyTotalAssetsText = computed(() => {
+  const normalized = Number(companyInfo.totalAssets)
   if (!Number.isFinite(normalized)) return '--'
 
   const formatterLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
@@ -584,10 +559,45 @@ const companyMarketCapText = computed(() => {
   }).format(normalized)
 })
 
-const companyWebsiteHref = computed(() => {
-  const website = String(companyInfo.website || '').trim()
-  if (!website) return ''
-  return /^https?:\/\//i.test(website) ? website : `https://${website}`
+const companyBetaText = computed(() => formatMetricNumber(companyInfo.beta, 2))
+const companyForwardPEText = computed(() => formatMetricNumber(companyInfo.forwardPE, 2))
+const companyPriceToBookText = computed(() => formatMetricNumber(companyInfo.priceToBook, 2))
+const companyDividendYieldText = computed(() => formatMetricPercent(companyInfo.dividendYield, 2))
+const companyEarningsQuarterlyGrowthText = computed(() => formatMetricPercent(companyInfo.earningsQuarterlyGrowth, 2))
+const companyShortPercentOfFloatText = computed(() => formatMetricPercent(companyInfo.shortPercentOfFloat, 2))
+const companyYtdReturnText = computed(() => formatMetricPercent(companyInfo.ytdReturn, 2))
+const companyThreeYearAverageReturnText = computed(() => formatMetricPercent(companyInfo.threeYearAverageReturn, 2))
+const companyFiveYearAverageReturnText = computed(() => formatMetricPercent(companyInfo.fiveYearAverageReturn, 2))
+
+const isFundQuote = computed(() => {
+  const quoteType = String(companyInfo.quoteType || '').toUpperCase()
+  return quoteType === 'ETF' || quoteType === 'MUTUALFUND'
+})
+
+const companyKeyStatsRows = computed(() => {
+  const stockRows = [
+    { label: 'companyBeta', value: companyBetaText.value },
+    { label: 'companyForwardPE', value: companyForwardPEText.value },
+    { label: 'companyPriceToBook', value: companyPriceToBookText.value },
+    { label: 'companyDividendYield', value: companyDividendYieldText.value },
+    { label: 'companyEarningsQuarterlyGrowth', value: companyEarningsQuarterlyGrowthText.value },
+    { label: 'companyShortPercentOfFloat', value: companyShortPercentOfFloatText.value },
+  ]
+
+  const fundRows = [
+    { label: 'companyCategory', value: companyInfo.category || '--' },
+    { label: 'companyFundFamily', value: companyInfo.fundFamily || '--' },
+    { label: 'companyLegalType', value: companyInfo.legalType || '--' },
+    { label: 'companyTotalAssets', value: companyTotalAssetsText.value },
+    { label: 'companyDividendYield', value: companyDividendYieldText.value },
+    { label: 'companyYtdReturn', value: companyYtdReturnText.value },
+    { label: 'companyThreeYearAverageReturn', value: companyThreeYearAverageReturnText.value },
+    { label: 'companyFiveYearAverageReturn', value: companyFiveYearAverageReturnText.value },
+    { label: 'companyBeta3Year', value: formatMetricNumber(companyInfo.beta3Year, 2) },
+  ]
+
+  const baseRows = isFundQuote.value ? fundRows : stockRows
+  return baseRows.filter(row => row.value !== '--')
 })
 
 const hasCompanyInfo = computed(() => {
@@ -598,10 +608,29 @@ const hasCompanyInfo = computed(() => {
     companyInfo.city,
     companyInfo.state,
     companyInfo.country,
+    companyInfo.category,
+    companyInfo.fundFamily,
+    companyInfo.legalType,
     companyInfo.longBusinessSummary,
   ].some(item => String(item || '').trim().length > 0)
 
-  return hasText || Number.isFinite(Number(companyInfo.fullTimeEmployees)) || Number.isFinite(Number(companyInfo.marketCap))
+  const hasNumeric = [
+    companyInfo.fullTimeEmployees,
+    companyInfo.marketCap,
+    companyInfo.beta,
+    companyInfo.beta3Year,
+    companyInfo.forwardPE,
+    companyInfo.priceToBook,
+    companyInfo.dividendYield,
+    companyInfo.earningsQuarterlyGrowth,
+    companyInfo.shortPercentOfFloat,
+    companyInfo.totalAssets,
+    companyInfo.ytdReturn,
+    companyInfo.threeYearAverageReturn,
+    companyInfo.fiveYearAverageReturn,
+  ].some(item => Number.isFinite(Number(item)))
+
+  return hasText || hasNumeric
 })
 
 const isComparisonDisabled = computed(() => chartType.value === 'candlestick')
@@ -630,6 +659,20 @@ function toNullableNumber(value) {
   return Number.isFinite(normalized) ? normalized : null
 }
 
+function formatMetricNumber(value, digits = 2) {
+  const normalized = Number(value)
+  if (!Number.isFinite(normalized)) return '--'
+
+  return normalized.toFixed(digits)
+}
+
+function formatMetricPercent(value, digits = 2) {
+  const normalized = Number(value)
+  if (!Number.isFinite(normalized)) return '--'
+
+  return `${(normalized * 100).toFixed(digits)}%`
+}
+
 function resetCompanyInfo() {
   Object.assign(companyInfo, {
     sector: '',
@@ -637,6 +680,21 @@ function resetCompanyInfo() {
     website: '',
     fullTimeEmployees: null,
     marketCap: null,
+    beta: null,
+    beta3Year: null,
+    forwardPE: null,
+    priceToBook: null,
+    dividendYield: null,
+    earningsQuarterlyGrowth: null,
+    shortPercentOfFloat: null,
+    category: '',
+    fundFamily: '',
+    legalType: '',
+    totalAssets: null,
+    ytdReturn: null,
+    threeYearAverageReturn: null,
+    fiveYearAverageReturn: null,
+    quoteType: '',
     currency: '',
     city: '',
     state: '',
@@ -806,8 +864,15 @@ async function fetchCompanyBasicInfo(targetSymbol = symbol.value) {
     if (requestId !== companyRequestId) return
 
     const summaryProfile = data?.summaryProfile || {}
+    const summaryDetail = data?.summaryDetail || {}
     const financialData = data?.financialData || {}
+    const keyStatistics = data?.defaultKeyStatistics || {}
     const priceData = data?.price || {}
+    const dividendYield = summaryDetail.dividendYield
+      ?? summaryDetail.trailingAnnualDividendYield
+      ?? keyStatistics.yield
+    const beta3Year = toNullableNumber(keyStatistics.beta3Year)
+    const beta = toNullableNumber(keyStatistics.beta ?? summaryDetail.beta ?? beta3Year)
 
     Object.assign(companyInfo, {
       sector: summaryProfile.sector || '',
@@ -815,6 +880,21 @@ async function fetchCompanyBasicInfo(targetSymbol = symbol.value) {
       website: summaryProfile.website || '',
       fullTimeEmployees: toNullableNumber(summaryProfile.fullTimeEmployees),
       marketCap: toNullableNumber(priceData.marketCap ?? financialData.marketCap),
+      beta,
+      beta3Year,
+      forwardPE: toNullableNumber(keyStatistics.forwardPE ?? summaryDetail.forwardPE),
+      priceToBook: toNullableNumber(keyStatistics.priceToBook),
+      dividendYield: toNullableNumber(dividendYield),
+      earningsQuarterlyGrowth: toNullableNumber(keyStatistics.earningsQuarterlyGrowth ?? financialData.earningsGrowth),
+      shortPercentOfFloat: toNullableNumber(keyStatistics.shortPercentOfFloat),
+      category: keyStatistics.category || '',
+      fundFamily: keyStatistics.fundFamily || '',
+      legalType: keyStatistics.legalType || '',
+      totalAssets: toNullableNumber(keyStatistics.totalAssets),
+      ytdReturn: toNullableNumber(keyStatistics.ytdReturn),
+      threeYearAverageReturn: toNullableNumber(keyStatistics.threeYearAverageReturn),
+      fiveYearAverageReturn: toNullableNumber(keyStatistics.fiveYearAverageReturn),
+      quoteType: priceData.quoteType || '',
       currency: priceData.currency || financialData.financialCurrency || '',
       city: summaryProfile.city || '',
       state: summaryProfile.state || '',
@@ -1355,7 +1435,7 @@ watch(locale, () => {
 
 .recommend-card:hover {
   border-color: var(--p-primary-color);
-  transform: translateY(-1px);
+  /* transform: translateY(-1px); */
   box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
 }
 

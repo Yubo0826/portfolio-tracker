@@ -368,6 +368,21 @@ period1y:
 period5y:
   en: 5Y
   zh: 5年
+assetPreviousClose:
+  en: Previous Close
+  zh: 前次收盤價
+assetDayRange:
+  en: Day Range
+  zh: 單日股價範圍
+assetYearRange:
+  en: 52 Week Range
+  zh: 一年股價範圍
+assetTodayVolume:
+  en: Today's Volume
+  zh: 今日交易量
+assetPrimaryExchange:
+  en: Primary Exchange
+  zh: 主要交易所
 compareAssets:
   en: Compare
   zh: 對比標的
@@ -443,6 +458,54 @@ companyMarketCap:
 companyLocation:
   en: Location
   zh: 所在地
+companyKeyStats:
+  en: Key Statistics
+  zh: 關鍵指標
+companyBeta:
+  en: Beta
+  zh: Beta
+companyForwardPE:
+  en: Forward P/E
+  zh: 前瞻本益比
+companyPriceToBook:
+  en: Price/Book
+  zh: 股價淨值比
+companyDividendYield:
+  en: Dividend Yield
+  zh: 殖利率
+companyEarningsQuarterlyGrowth:
+  en: Quarterly Earnings Growth
+  zh: 季度盈餘成長率
+companyShortPercentOfFloat:
+  en: Short % of Float
+  zh: 放空占流通股比
+companyCategory:
+  en: Category
+  zh: 類別
+companyFundFamily:
+  en: Fund Family
+  zh: 基金公司
+companyLegalType:
+  en: Legal Type
+  zh: 法律型態
+companyTotalAssets:
+  en: Total Assets
+  zh: 總資產
+companyYtdReturn:
+  en: YTD Return
+  zh: 年初至今報酬
+companyThreeYearAverageReturn:
+  en: 3Y Avg Return
+  zh: 3年平均報酬
+companyFiveYearAverageReturn:
+  en: 5Y Avg Return
+  zh: 5年平均報酬
+companyBeta3Year:
+  en: Beta (3Y)
+  zh: Beta（3年）
+companyKeyStatsEmpty:
+  en: No key statistics available.
+  zh: 目前沒有可用的關鍵指標。
 companyWebsite:
   en: Website
   zh: 官網
