@@ -70,6 +70,7 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
+import { buildPrimaryNavigation } from './navigation.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -78,74 +79,7 @@ const { t } = useI18n()
 const portfolioStore = usePortfolioStore()
 const activeMenu = ref(null)
 
-const navLinks = computed(() => [
-  {
-    key: 'dashboard',
-    label: t('dashboard'),
-    to: '/dashboard',
-    activePaths: ['/dashboard'],
-    hasMenu: false,
-  },
-  {
-    key: 'portfolio',
-    label: t('portfolio'),
-    to: '/portfolio/holdings',
-    activePaths: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends', '/portfolios'],
-    hasMenu: true,
-    menuGroups: [
-      {
-        label: t('portfolio'),
-        items: [
-          { label: t('holdings'), to: '/portfolio/holdings', icon: 'pi pi-briefcase' },
-          { label: t('transactions'), to: '/portfolio/transactions', icon: 'pi pi-list' },
-          { label: t('dividends'), to: '/portfolio/dividends', icon: 'pi pi-wallet' },
-        ],
-      },
-      {
-        label: t('portfolios'),
-        noDivider: true,
-        items: [
-          {
-            label: t('portfolioManagement'),
-            to: '/portfolios',
-            icon: 'pi pi-folder',
-            sub: portfolioStore.currentPortfolio?.name || undefined,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'cashflow',
-    label: t('cashFlowNav'),
-    to: '/cash-flow',
-    activePaths: ['/cash-flow', '/cash-flows'],
-    hasMenu: false,
-  },
-  {
-    key: 'tools',
-    label: t('functions'),
-    to: '/allocation',
-    activePaths: ['/allocation', '/rebalancing', '/backtesting'],
-    hasMenu: true,
-    menuGroups: [
-      {
-        label: t('functions'),
-        items: [
-          { label: t('rebalance'), to: '/rebalancing', icon: 'pi pi-sync' },
-          { label: t('backtesting'), to: '/backtesting', icon: 'pi pi-chart-line' },
-        ],
-      },
-      {
-        label: t('setTargets'),
-        noDivider: true,
-        items: [
-          { label: t('setTargets'), to: '/allocation', icon: 'pi pi-cog' },
-        ],
-      },
-    ],
-  },
-])
+const navLinks = computed(() => buildPrimaryNavigation(t, portfolioStore.currentPortfolio?.name))
 
 const go = (to) => {
   activeMenu.value = null

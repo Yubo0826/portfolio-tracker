@@ -63,182 +63,130 @@
     </div>
 
     <!-- Main Content -->
-    <div v-else>
-    <div class="flex flex-col lg:flex-row gap-6">
-      <div class="w-full lg:w-3/5 flex flex-col gap-6">
-        
-        <!-- Asset Trend -->
-        <Card class="rounded-xl shadow-md">
-          <template #content>
-            <div class="mb-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div class="text-sm text-slate-500 dark:text-slate-400">{{ $t('totalValue') }}</div>
-                <div v-if="totalValue" class="mt-2 inline-flex items-end leading-none">
-                  <span class="text-4xl font-extrabold tracking-tight sm:text-5xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
-                  <span class="text-2xl font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                  <span class="ml-1 pb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
-                </div>
-                <div v-else class="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">--</div>
-              </div>
-
-              <!--
-              <div class="inline-flex w-fit items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-[#1d2b3a] dark:bg-[#0f1520]">
-                <button
-                  v-for="tab in periods"
-                  :key="tab.label"
-                  @click="selectedPeriod = tab.value"
-                  class="relative cursor-pointer select-none rounded-lg px-3 py-1.5 text-xs font-medium tracking-wide transition-all duration-150"
-                  :class="selectedPeriod === tab.value
-                    ? 'bg-[var(--p-primary-color)] text-[var(--p-primary-contrast-color)] ring-1 ring-[var(--p-primary-color)] shadow-[0_0_10px_1px_color-mix(in_srgb,var(--p-primary-color)_45%,transparent)]'
-                    : 'text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'"
-                >
-                  {{ tab.label }}
-                </button>
-              </div>
-              -->
-
-              <SelectButton
-                v-model="selectedPeriod"
-                :options="periods"
-                optionLabel="label"
-                optionValue="value"
-                size="small"
-                :allowEmpty="false"
-              />
-            </div>
-
-
-            <!-- 選擇時段的成長數值顯示 -->
-            <div class="my-4 mt-4 text-2xl">
-              <div
-                v-if="growthRateNumber !== null"
-                :class="growthRateNumber >= 0 ? 'text-green-600' : 'text-red-600'"
-                class="inline-flex items-center gap-2 font-medium"
-              >
-                <span class="font-semibold">{{ formatSignedNumber(growthRateNumber) }}%</span>
-                <span>({{ formatSignedNumber(change) }})</span>
-                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ selectedPeriodLabel }}</span>
-              </div>
-
-              <div
-                v-else
-                class="inline-flex items-center gap-2 font-medium text-slate-400 dark:text-slate-500"
-              >
-                <span>--</span>
-                <span>(--)</span>
-                <span class="font-semibold uppercase tracking-wide">{{ selectedPeriodLabel }}</span>
-              </div>
-            </div>
-
-            <StockChart
-              :options="areaChartOptions"
-              :height="300"
-            />
-
-          </template>
-        </Card>
-
-        <!-- grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <!-- Total Value -->
-          <Card class="rounded-xl shadow-md">
-            <template #title>
-              <div class="flex items-center">
-                <Button icon="pi pi-wallet" rounded size="small" disabled />
-                <div class="text-sm ml-2">{{ $t('totalValue') }}</div>
-              </div>
-            </template>
+    <div v-else class="space-y-6">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 xl:col-span-8 space-y-6">
+          <Card class="dashboard-panel dashboard-panel--hero">
             <template #content>
-              <div class="flex justify-between items-center mt-2">
-                <div v-if="totalValue" class="text-2xl font-bold inline-flex items-end">
-                  <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
-                  <span class="text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                  <span class="ml-1 text-[10px] pb-0.5 font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
+              <div class="mb-6 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                  <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
+                  <div v-if="totalValue" class="mt-3 inline-flex max-w-full items-end gap-1 overflow-hidden leading-none">
+                    <span class="truncate text-4xl font-black tracking-tight sm:text-5xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
+                    <span class="text-2xl font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                    <span class="mb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                  </div>
+                  <div v-else class="mt-3 text-4xl font-black tracking-tight sm:text-5xl">--</div>
+
+                  <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div
+                      v-if="growthRateNumber !== null"
+                      :class="growthRateNumber >= 0 ? 'text-emerald-500' : 'text-rose-500'"
+                      class="inline-flex items-center gap-2 text-base font-semibold"
+                    >
+                      <span>{{ formatSignedNumber(growthRateNumber) }}%</span>
+                      <span class="text-sm opacity-80">({{ formatSignedNumber(change) }})</span>
+                    </div>
+                    <div v-else class="inline-flex items-center gap-2 text-base font-semibold text-slate-400 dark:text-slate-500">
+                      <span>--</span>
+                      <span class="text-sm opacity-80">(--)</span>
+                    </div>
+
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                      <span>{{ selectedPeriodLabel }}</span>
+                      <span class="h-1 w-1 rounded-full bg-current opacity-40"></span>
+                      <span>{{ chartWindowLabel }}</span>
+                    </div>
+                  </div>
                 </div>
-                <div v-else class="text-2xl font-bold">--</div>
+
+                <SelectButton
+                  v-model="selectedPeriod"
+                  :options="periods"
+                  optionLabel="label"
+                  optionValue="value"
+                  size="small"
+                  :allowEmpty="false"
+                />
               </div>
-            </template>
-            <template #footer>
-              <div class="text-sm mt-2 sm:mt-4">
-                {{ $t('baseCurrency', { code: displayCurrency }) }}
-              </div>
+
+              <StockChart :options="areaChartOptions" :height="320" />
             </template>
           </Card>
 
-          <!-- Total Profit -->
-          <Card class="rounded-xl shadow-md">
-            <template #title>
-              <div class="flex items-center">
-                <Button icon="pi pi-chart-line" rounded size="small" disabled />
-                <div class="text-sm ml-2 flex items-center justify-end gap-2">
-                  {{ $t('totalProfit') }}
-                  <i class="pi pi-question-circle" v-tooltip.bottom="$t('totalProfitHint')"></i>
-                </div>
-              </div>
-            </template>
-            <template #content>
-              <div class="flex justify-between items-center mt-2">
-                <div v-if="totalProfit" class="text-2xl font-bold inline-flex items-end">
-                  <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                  <span class="text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                  <span class="ml-1 text-[10px] pb-0.5 font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
-                </div>
-                <div v-else class="text-2xl font-bold">--</div>
-              </div>
-            </template>
-            <template #footer>
-              <div class="text-sm mt-2 sm:mt-4">
-                {{ $t('roi') }}
-                <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                  {{ annualReturn.toFixed(2) }}%
-                </span>
-                <span v-else>--</span>
-              </div>
-            </template>
-          </Card>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card class="dashboard-panel dashboard-metric-card">
+              <template #content>
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="dashboard-kicker">{{ $t('totalProfit') }}</p>
+                    <div v-if="totalProfit" class="mt-3 inline-flex items-end text-3xl font-bold tracking-tight">
+                      <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
+                      <span class="text-xl text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                      <span class="ml-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+                    </div>
+                    <div v-else class="mt-3 text-3xl font-bold tracking-tight">--</div>
+                  </div>
 
-          <!-- XIRR -->
-          <Card class="rounded-xl shadow-md">
-            <template #title>
-              <div class="flex items-center">
-                <Button icon="pi pi-calendar" rounded size="small" disabled />
-                <div class="text-sm ml-2 flex items-center justify-end gap-2">
-                  {{ $t('irr') }}
-                  <i class="pi pi-question-circle" v-tooltip.bottom="$t('xirrHint')" />
+                  <Button icon="pi pi-chart-line" rounded size="small" disabled />
                 </div>
-              </div>
-            </template>
+
+                <div class="dashboard-footnote mt-6">
+                  {{ $t('roi') }}
+                  <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+                    {{ annualReturn.toFixed(2) }}%
+                  </span>
+                  <span v-else>--</span>
+                </div>
+              </template>
+            </Card>
+
+            <Card class="dashboard-panel dashboard-metric-card">
+              <template #content>
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="dashboard-kicker">{{ $t('irr') }}</p>
+                    <div v-if="irr" class="mt-3 text-3xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
+                    <div v-else class="mt-3 text-3xl font-bold tracking-tight text-slate-400">--</div>
+                  </div>
+
+                  <Button icon="pi pi-calendar" rounded size="small" disabled />
+                </div>
+
+                <div class="dashboard-footnote mt-6 flex items-center gap-2">
+                  <i class="pi pi-info-circle" v-tooltip.bottom="$t('xirrHint')" />
+                  <span>{{ $t('xirrHint') }}</span>
+                </div>
+              </template>
+            </Card>
+          </div>
+
+          <Card class="dashboard-panel dashboard-summary-strip">
             <template #content>
-              <div v-if="irr" class="flex justify-between items-center mt-2">
-                <div class="text-2xl font-bold">{{ irr }}%</div>
-              </div>
-              <div v-else class="text-2xl font-bold text-gray-400 mt-2">--</div>
-            </template>
-            <template #footer>
-              <div class="text-sm mt-2 sm:mt-4 opacity-0">
-                1
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div class="dashboard-summary-item">
+                  <p class="dashboard-kicker">{{ $t('holdings') }}</p>
+                  <p class="mt-2 text-2xl font-bold">{{ holdingsStore.list.length }}</p>
+                </div>
+                <div class="dashboard-summary-item">
+                  <p class="dashboard-kicker">{{ $t('rebalance') }}</p>
+                  <p class="mt-2 text-2xl font-bold">{{ rebalanceRows.length }}</p>
+                </div>
+                <div class="dashboard-summary-item">
+                  <p class="dashboard-kicker">{{ $t('date') }}</p>
+                  <p class="mt-2 text-base font-semibold leading-relaxed text-[var(--p-text-color)]">{{ chartWindowLabel }}</p>
+                </div>
               </div>
             </template>
           </Card>
         </div>
-      </div>
 
-      <!-- Asset Allocation -->
-      <div class="w-full lg:w-2/5">
-        <Card class="w-full h-full">
+        <div class="col-span-12 xl:col-span-4">
+          <Card class="dashboard-panel h-full">
           <template #title>
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
               <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" :allowEmpty="false" />
-              <!-- unstyled  -->
-              <!-- :label="$t('setTargets')"  -->
-              <!-- :pt="{ root: { class: 'whitespace-nowrap inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 ' + 'text-sm font-medium text-slate-700 ' + 'shadow-[0_4px_12px_rgba(2,6,23,0.08)] hover:border-slate-300 hover:shadow-[0_8px_20px_rgba(2,6,23,0.12)] active:shadow-sm ' + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 ' + 'transition' + ' cursor-pointer' }, icon: { class: 'order-0 mr-0 text-slate-600 text-[18px]' }, label: { class: 'order-1' } }" /> -->
-              <!-- <Button
-                icon="pi pi-cog"
-                variant="text" rounded
-                @click="$router.push('allocation')" 
-              /> -->
-
-              <p @click="$router.push('allocation')" class="cursor-pointer text-sm text-blue-500 hover:underline">設置目標比例 ⭢</p>
+              <button @click="$router.push('allocation')" class="text-sm font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
             </div>
           </template>
 
@@ -302,13 +250,28 @@
               </div>
             </div>
           </template>
-        </Card>
+          </Card>
+        </div>
       </div>
-    </div>
 
-    <!-- Holdings Table -->
-    <Card class="mb-8 mt-8 p-4">
+      <!-- Holdings Table -->
+      <Card class="dashboard-panel dashboard-table-panel mb-8 p-4">
       <template #content>
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p class="dashboard-kicker">{{ $t('currentAsset') }}</p>
+            <h2 class="mt-1 text-lg font-semibold">{{ $t('holdings') }}</h2>
+          </div>
+
+          <button
+            type="button"
+            class="text-sm font-semibold text-[var(--p-primary-color)] hover:underline"
+            @click="$router.push('/portfolio/holdings')"
+          >
+            {{ $t('holdings') }} ⭢
+          </button>
+        </div>
+
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
@@ -391,7 +354,7 @@
           </template>
         </DataTable>
       </template>
-    </Card>
+      </Card>
     </div>
   </div>
 </template>
@@ -485,6 +448,10 @@ const selectedPeriodLabel = computed(() => periodLabelMap[selectedPeriod.value] 
 const growthRateNumber = computed(() => {
   const n = Number(growthRate.value)
   return Number.isFinite(n) ? n : null
+})
+const chartWindowLabel = computed(() => {
+  if (startDate.value && endDate.value) return `${startDate.value} - ${endDate.value}`
+  return selectedPeriodLabel.value
 })
 
 /* =========================
@@ -994,3 +961,67 @@ watch(locale, () => {
   getPeriodRange(selectedPeriod.value)
 })
 </script>
+
+<style scoped>
+.dashboard-panel {
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 82%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--p-content-background) 94%, transparent), color-mix(in srgb, var(--p-content-background) 86%, transparent));
+  box-shadow: 0 18px 36px rgba(10, 14, 24, 0.08);
+}
+
+.dashboard-panel--hero {
+  overflow: hidden;
+}
+
+.dashboard-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--p-text-muted-color);
+}
+
+.dashboard-footnote {
+  font-size: 0.88rem;
+  color: var(--p-text-muted-color);
+}
+
+.dashboard-summary-strip {
+  overflow: hidden;
+}
+
+.dashboard-summary-item {
+  position: relative;
+  padding-right: 1rem;
+}
+
+.dashboard-summary-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0.25rem;
+  right: 0;
+  width: 1px;
+  height: calc(100% - 0.5rem);
+  background: color-mix(in srgb, var(--p-content-border-color) 76%, transparent);
+}
+
+.dashboard-table-panel :deep(.p-datatable-header-cell) {
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .dashboard-summary-item {
+    padding-right: 0;
+    padding-bottom: 1rem;
+  }
+
+  .dashboard-summary-item:not(:last-child)::after {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+  }
+}
+</style>
