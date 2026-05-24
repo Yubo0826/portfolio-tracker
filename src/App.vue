@@ -111,117 +111,25 @@
     </aside>
 
     <div class="flex min-h-screen flex-col lg:pl-[17rem]">
-      <header class="app-shell__topbar">
-        <div class="flex min-h-[5rem] items-center gap-3 px-4 sm:px-6 lg:px-8 xl:px-10">
-          <Button
-            @click="sidebarVisible = true"
-            icon="pi pi-bars"
-            class="lg:hidden"
-            size="small"
-            variant="outlined"
-            severity="secondary"
-          />
-
-          <div class="min-w-0 shrink-0">
-            <div class="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--p-text-muted-color)]">{{ currentPortfolioName }}</div>
-            <div class="truncate text-lg font-semibold sm:text-xl">{{ currentPageLabel }}</div>
-          </div>
-
-          <button @click="openSearchBox" aria-label="Search" class="app-shell__search ml-auto hidden md:flex">
-            <i class="pi pi-search text-xs"></i>
-            <span class="truncate">{{ $t('search') }}</span>
-            <span class="ml-auto inline-flex min-w-8 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-2 py-1 text-[11px] font-semibold text-[var(--p-text-muted-color)]">/</span>
-          </button>
-
-          <button
-            aria-label="Search"
-            @click="openSearchBox"
-            class="flex h-10 w-10 items-center justify-center rounded-full text-[var(--p-text-muted-color)] transition-colors hover:bg-[var(--p-content-background)] md:hidden"
-          >
-            <i class="pi pi-search text-sm"></i>
-          </button>
-
-          <div class="flex items-center gap-2">
-            <template v-if="showAddTradeButtonBar && auth.user.uid !== 'demo-user'">
-              <Button
-                v-if="portfolioStore.portfolios.length === 0"
-                @click="dialogVisible = true"
-                size="small"
-                :label="$t('addPortfolio')"
-                icon="pi pi-plus"
-                class="hidden sm:inline-flex"
-              />
-              <Button
-                v-else
-                @click="transctionDialogVisible = true"
-                icon="pi pi-plus"
-                rounded
-                severity="contrast"
-                class="sm:hidden"
-              />
-              <SplitButton
-                v-if="portfolioStore.portfolios.length > 0"
-                @click="transctionDialogVisible = true"
-                class="trade-actions-split hidden sm:inline-flex"
-                size="small"
-                :label="$t('addInvestment')"
-                icon="pi pi-plus"
-                :model="tradeActionItems"
-                appendTo="self"
-                severity="contrast"
-              />
-            </template>
-
-            <Button
-              v-else-if="auth.user.uid === 'demo-user'"
-              @click="auth.login"
-              label="Get Started"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              size="small"
-              class="hidden sm:inline-flex"
-            />
-
-            <Button
-              :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-              @click="toggleTheme"
-              aria-label="Toggle Dark Mode"
-              size="small"
-              text
-              rounded
-              severity="secondary"
-            />
-
-            <button type="button" class="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-[var(--p-content-background)]" @click="toggleMenu">
-              <Avatar :image="auth.user.photoURL" shape="circle" size="normal" />
-            </button>
-
-            <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
-              <template #start>
-                <div v-if="auth.user.uid !== 'demo-user'" class="user-info-item flex items-center p-4">
-                  <Avatar :image="auth.user.photoURL" shape="circle" class="mr-3" />
-                  <div class="flex flex-col">
-                    <span class="font-medium">{{ displayUserName }}</span>
-                    <span class="text-sm text-gray-500">{{ auth.user.email }}</span>
-                  </div>
-                </div>
-              </template>
-
-              <template #item="{ item, props }">
-                <a v-ripple class="flex items-center w-full" v-bind="props.action">
-                  <span class="ml-2">{{ item.label }}</span>
-                  <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
-                  <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
-                    <span v-if="item.suffix">{{ item.suffix }}</span>
-                    <i class="pi pi-chevron-right text-xs"></i>
-                  </span>
-                  <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
-                </a>
-              </template>
-            </TieredMenu>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        ref="appHeader"
+        :currentPageLabel="currentPageLabel"
+        :isDark="isDark"
+        :showAddTradeButtonBar="showAddTradeButtonBar"
+        :isDemoUser="auth.user?.uid === 'demo-user'"
+        :hasPortfolios="portfolioStore.portfolios.length > 0"
+        :displayUserName="displayUserName"
+        :userEmail="auth.user?.email || ''"
+        :userPhotoUrl="auth.user?.photoURL || ''"
+        :menuItems="menuItems"
+        :tradeActionItems="tradeActionItems"
+        @open-sidebar="sidebarVisible = true"
+        @open-search="openSearchBox"
+        @create-portfolio="dialogVisible = true"
+        @open-transaction="transctionDialogVisible = true"
+        @login="auth.login"
+        @toggle-theme="toggleTheme"
+      />
 
       <main class="app-shell__content flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
         <RouterView />
@@ -261,8 +169,8 @@
     @clear:editPortfolio="resetEditPortfolio()"
   />
 
-  <!-- Mobile Sidebar -->
-  <MobileSidebar
+  <!-- Sidebar -->
+  <Sidebar
     v-model:visible="sidebarVisible"
     :currentPortfolioName="currentPortfolioName"
     :portfolioMenuItems="portfolioMenuItems"
@@ -281,14 +189,14 @@ import { useConfirm } from 'primevue/useconfirm'
 import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
-import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
 import TieredMenu from 'primevue/tieredmenu'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
-import MobileSidebar from './layouts/MobileSidebar.vue'
+import AppHeader from './layouts/AppHeader.vue'
+import Sidebar from './layouts/Sidebar.vue'
 import Footer from './layouts/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
@@ -298,7 +206,6 @@ import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
 import { showLoading, hideLoading } from "@/composables/loading.js"
 import * as toast from '@/composables/toast'
-import SplitButton from 'primevue/splitbutton'
 import { buildSidebarSections } from './layouts/navigation.js'
 
 const { locale, t } = useI18n()
@@ -543,6 +450,7 @@ async function getPortfolios() {
 
 const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
+const appHeader = ref(null)
 const portfolioMenu = ref()
 const portfolioMenuVisible = ref(false)
 
@@ -653,8 +561,7 @@ watch(searchBoxVisible, async (visible) => {
   searchBoxRef.value?.focusInput?.()
 })
 
-const menu = ref()
-const toggleMenu = (event) => menu.value.toggle(event)
+const toggleMenu = (event) => appHeader.value?.toggleMenu(event)
 const languageSubItems = computed(() =>
   languageOptions.map(option => ({
     label: `${option.flag} ${option.label}`,
@@ -802,10 +709,8 @@ const menuItems = computed(() => {
   z-index: 40;
   width: 17rem;
   flex-direction: column;
-  border-right: 1px solid color-mix(in srgb, var(--p-content-border-color) 88%, transparent);
-  background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--p-primary-color) 10%, transparent), transparent 36%),
-    color-mix(in srgb, var(--p-surface-card) 88%, var(--p-surface-background));
+  border-right: 1px solid rgb(30, 43, 70);
+  background: var(--p-surface-background);
   backdrop-filter: blur(18px);
 }
 
@@ -831,9 +736,9 @@ const menuItems = computed(() => {
   width: 100%;
   justify-content: space-between;
   padding: 0.85rem 1rem;
-  border: 1px solid var(--p-content-border-color);
+  border: 1px solid rgb(30, 43, 70);
   border-radius: 1rem;
-  background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
+  background: rgb(20 31 52 / var(--tw-bg-opacity, 1));
 }
 
 .app-shell__section-label {
@@ -845,47 +750,11 @@ const menuItems = computed(() => {
   color: var(--p-text-muted-color);
 }
 
-.app-shell__nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  min-height: 2.9rem;
-  margin-bottom: 0.25rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 0.95rem;
-  color: color-mix(in srgb, var(--p-text-color) 78%, transparent);
-  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
-}
-
-.app-shell__nav-item:hover {
-  background: #1a2e51;
-  color: var(--p-primary-color);
-}
-
-.app-shell__nav-item.is-active {
-  background: #1a2e51;
-  color: var(--p-primary-color);
-}
-
-.app-shell__nav-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.7rem;
-  color: inherit;
-  transition: color 0.16s ease;
-}
-
-.app-shell__material-icon {
-  font-size: 1.25rem;
-  color: inherit;
-}
-
 .app-shell__topbar {
   position: sticky;
   top: 0;
   z-index: 30;
-  border-bottom: 1px solid color-mix(in srgb, var(--p-content-border-color) 82%, transparent);
+  border-bottom: 1px solid rgb(30, 43, 70);
   background: color-mix(in srgb, var(--p-surface-background) 82%, transparent);
   backdrop-filter: blur(18px);
 }
@@ -895,7 +764,6 @@ const menuItems = computed(() => {
   gap: 0.75rem;
   width: min(24rem, 100%);
   padding: 0.85rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 84%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--p-content-background) 94%, transparent);
   color: var(--p-text-muted-color);
@@ -904,8 +772,8 @@ const menuItems = computed(() => {
 }
 
 .app-shell__search:hover {
-  border-color: color-mix(in srgb, var(--p-primary-color) 25%, var(--p-content-border-color));
   color: var(--p-text-color);
+  cursor: text;
 }
 
 .app-shell__content {
@@ -934,101 +802,6 @@ const menuItems = computed(() => {
   border: 1px solid rgb(121, 121, 121) !important;
 }
 
-.portfolio-menu-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: fit-content;
-  padding: 0.4rem 0.65rem;
-  border: 0;
-  border-radius: 0.9rem;
-  background: transparent;
-  color: var(--p-text-color);
-  cursor: pointer;
-  transition: background-color 0.16s ease, color 0.16s ease;
-}
-
-.portfolio-menu-trigger:hover,
-.portfolio-menu-trigger.is-open {
-  background: color-mix(in srgb, var(--p-surface-hover) 82%, transparent);
-}
-
-.portfolio-menu-trigger__label {
-  font-size: clamp(1.75rem, 1.2rem + 1.2vw, 2.4rem);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.04em;
-}
-
-.portfolio-tiered-menu.p-tieredmenu,
-.portfolio-tiered-menu .p-tieredmenu-submenu {
-  min-width: 17rem;
-  padding: 0.375rem;
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #303030);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--p-surface-card) 92%, #1b1b1b);
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
-}
-
-.portfolio-tiered-menu .p-tieredmenu-root-list,
-.portfolio-tiered-menu .p-tieredmenu-submenu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.portfolio-tiered-menu .p-tieredmenu-separator {
-  margin: 0.375rem 0.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #3a3a3a);
-}
-
-.portfolio-menu-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.875rem 0.875rem 0.625rem;
-  color: var(--p-text-color);
-}
-
-.portfolio-menu-current__label {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.portfolio-menu-section {
-  padding: 0.5rem 0.875rem 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--p-text-muted-color);
-}
-
-.portfolio-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem 0.875rem;
-  border-radius: 0.7rem;
-  color: var(--p-text-color);
-  transition: background-color 0.14s ease, color 0.14s ease;
-}
-
-.portfolio-menu-item:hover {
-  background: color-mix(in srgb, var(--p-surface-hover) 80%, transparent);
-}
-
-.portfolio-menu-item.is-active {
-  background: rgba(255, 255, 255, 0.92);
-  color: #111827;
-}
-
-.portfolio-menu-item.is-danger {
-  color: #ef4444;
-}
-
 .trade-actions-split {
   position: relative;
 }
@@ -1038,39 +811,6 @@ const menuItems = computed(() => {
   right: 0 !important;
   left: auto !important;
   max-width: calc(100vw - 1rem);
-}
-
-.portfolio-menu-item__label {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.portfolio-menu-item__suffix {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-left: auto;
-  color: var(--p-text-muted-color);
-}
-
-.dark .portfolio-tiered-menu.p-tieredmenu,
-.dark .portfolio-tiered-menu .p-tieredmenu-submenu {
-  border-color: #383838;
-  background: #242424;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
-}
-
-.dark .portfolio-tiered-menu .p-tieredmenu-separator {
-  border-top-color: #3a3a3a;
-}
-
-.dark .portfolio-menu-trigger:hover,
-.dark .portfolio-menu-trigger.is-open {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.dark .portfolio-menu-item:hover {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .language-menu {

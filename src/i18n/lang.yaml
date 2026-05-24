@@ -30,8 +30,8 @@ symbol:
   en: Symbol
   zh: 代號
 rate:
-  en: Rate
-  zh: 占比
+  en: weight
+  zh: 比重
 name:
   en: Name
   zh: 名稱
@@ -60,8 +60,8 @@ search:
   en: Search
   zh: 搜尋
 searchPlaceholder:
-  en: Enter stock/ETF symbol or name
-  zh: 輸入股票、ETF代號或名稱
+  en: Search by symbol or name
+  zh: 搜尋股票代號或名稱
 # 通用
 refresh:
   en: Refresh
@@ -244,13 +244,13 @@ dashboard:
   zh: 儀表板
 holdings:
   en: Holdings
-  zh: 目前持有
+  zh: 持有資產
 transactions:
   en: Transactions
-  zh: 交易紀錄
+  zh: 交易
 dividends:
   en: Dividends
-  zh: 配息記錄
+  zh: 配息
 allocation:
   en: Allocation
   zh: 資產配置
@@ -554,7 +554,7 @@ diffLegend:
 # 資產表
 currentAsset:
   en: Asset
-  zh: 持有資產
+  zh: 資產
 allocationRatio:
   en: Proportion
   zh: 配置比例

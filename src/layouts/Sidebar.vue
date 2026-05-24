@@ -195,3 +195,172 @@ const go = (to, closeCallback) => {
   router.push(to)
 }
 </script>
+
+<style>
+.app-shell__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 2.9rem;
+  margin-bottom: 0.25rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.95rem;
+  color: color-mix(in srgb, var(--p-text-color) 78%, transparent);
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.app-shell__nav-item:hover {
+  background: color-mix(in srgb, var(--p-primary-color) 8%, var(--p-surface-card));
+  color: var(--p-text-color);
+}
+
+.app-shell__nav-item.is-active {
+  background: color-mix(in srgb, var(--p-primary-color) 16%, var(--p-surface-card));
+  color: var(--p-primary-color);
+}
+
+.app-shell__nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  color: inherit;
+  transition: color 0.16s ease;
+}
+
+.app-shell__material-icon {
+  font-size: 1.25rem;
+  color: inherit;
+}
+
+.portfolio-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  padding: 0.4rem 0.65rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: transparent;
+  color: var(--p-text-color);
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.portfolio-menu-trigger:hover,
+.portfolio-menu-trigger.is-open {
+  background: color-mix(in srgb, var(--p-surface-hover) 82%, transparent);
+}
+
+.portfolio-tiered-menu.p-tieredmenu,
+.portfolio-tiered-menu .p-tieredmenu-submenu {
+  min-width: 17rem;
+  padding: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #303030);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--p-surface-card) 92%, #1b1b1b);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+}
+
+.portfolio-tiered-menu .p-tieredmenu-root-list,
+.portfolio-tiered-menu .p-tieredmenu-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.portfolio-tiered-menu .p-tieredmenu-separator {
+  margin: 0.375rem 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #3a3a3a);
+}
+
+.portfolio-menu-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 0.875rem 0.625rem;
+  color: var(--p-text-color);
+}
+
+.portfolio-menu-current__label {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.portfolio-menu-section {
+  padding: 0.5rem 0.875rem 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--p-text-muted-color);
+}
+
+.portfolio-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.7rem;
+  color: var(--p-text-color);
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.portfolio-menu-item:hover {
+  background: color-mix(in srgb, var(--p-surface-hover) 80%, transparent);
+}
+
+.portfolio-menu-item.is-active {
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+}
+
+.portfolio-menu-item.is-danger {
+  color: #ef4444;
+}
+
+.portfolio-menu-item__label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.portfolio-menu-item__suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  color: var(--p-text-muted-color);
+}
+
+.dark .portfolio-tiered-menu.p-tieredmenu,
+.dark .portfolio-tiered-menu .p-tieredmenu-submenu {
+  border-color: #383838;
+  background: #242424;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
+}
+
+.dark .portfolio-tiered-menu .p-tieredmenu-separator {
+  border-top-color: #3a3a3a;
+}
+
+.dark .portfolio-menu-trigger:hover,
+.dark .portfolio-menu-trigger.is-open {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark .portfolio-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .app-shell__nav-item:hover {
+  background: color-mix(in srgb, var(--p-primary-color) 16%, var(--p-surface-card));
+  color: color-mix(in srgb, var(--p-text-color) 92%, transparent);
+}
+
+.dark .app-shell__nav-item.is-active {
+  background: color-mix(in srgb, var(--p-primary-color) 24%, var(--p-surface-card));
+  color: color-mix(in srgb, white 92%, var(--p-primary-color));
+}
+</style>

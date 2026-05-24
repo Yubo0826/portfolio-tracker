@@ -27,7 +27,7 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
-  --font-family-base: 'Futura PT', Futura, 'Trebuchet MS', sans-serif;
+  --font-family-base: 'Montserrat', 'Trebuchet MS', sans-serif;
 
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
