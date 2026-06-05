@@ -234,8 +234,8 @@ portfolioCopyName:
   en: "{name} Copy"
   zh: "{name} 副本"
 addInvestment:
-  en: Add Trade
-  zh: 新增交易
+  en: New Trade
+  zh: 新交易
 rebalance:
   en: Rebalance
   zh: 再平衡

@@ -18,6 +18,8 @@ const i18n = createI18n({
   messages
 })
 
+import SvgIcon from './components/SvgIcon.vue'
+
 // PrimeVue Setup
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
@@ -76,6 +78,7 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(ConfirmationService)
+app.component('SvgIcon', SvgIcon)
 
 // Directives
 app.directive('tooltip', Tooltip)

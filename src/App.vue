@@ -4,111 +4,16 @@
   <ConfirmDialog />
 
   <div class="app-shell min-h-screen bg-[var(--p-surface-background)] text-[var(--p-text-color)]">
-    <aside class="app-shell__sidebar hidden lg:flex">
-      <div class="flex items-center justify-between px-6 pt-6">
-        <button type="button" class="app-shell__brand" @click="$router.push('/dashboard')">
-          <span class="app-shell__brand-stock">Stock</span>
-          <span class="app-shell__brand-bar">Bar</span>
-        </button>
-      </div>
-
-      <div class="px-4 pt-6">
-        <button
-          type="button"
-          class="portfolio-menu-trigger app-shell__portfolio-trigger"
-          :class="{ 'is-open': portfolioMenuVisible }"
-          :aria-label="t('openPortfolioMenu')"
-          :aria-expanded="portfolioMenuVisible"
-          @click="togglePortfolioMenu"
-        >
-          <div class="flex min-w-0 flex-col items-start text-left">
-            <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--p-text-muted-color)]">{{ t('portfolio') }}</span>
-            <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
-          </div>
-          <i class="pi pi-chevron-down text-xs portfolio-menu-trigger__icon"></i>
-        </button>
-
-        <TieredMenu
-          ref="portfolioMenu"
-          :model="portfolioMenuItems"
-          :popup="true"
-          class="portfolio-tiered-menu"
-          @show="portfolioMenuVisible = true"
-          @hide="portfolioMenuVisible = false"
-        >
-          <template #start>
-            <div class="portfolio-menu-current">
-              <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
-              <i class="pi pi-chevron-up text-xs"></i>
-            </div>
-          </template>
-
-          <template #item="{ item, props }">
-            <div v-if="item.kind === 'section'" class="portfolio-menu-section">
-              {{ item.label }}
-            </div>
-
-            <a
-              v-else
-              v-ripple
-              class="portfolio-menu-item"
-              :class="{
-                'is-active': item.kind === 'portfolio' && item.active,
-                'is-danger': item.kind === 'danger'
-              }"
-              v-bind="props.action"
-            >
-              <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
-              <span class="portfolio-menu-item__label">{{ item.label }}</span>
-              <span v-if="item.items" class="portfolio-menu-item__suffix">
-                <span v-if="item.suffix">{{ item.suffix }}</span>
-                <i class="pi pi-chevron-right text-xs"></i>
-              </span>
-              <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
-              <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
-            </a>
-          </template>
-        </TieredMenu>
-
-        <div
-          v-if="auth.user?.uid === 'demo-user'"
-          class="mt-3 flex items-start gap-2 rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-3 py-2 text-xs text-[var(--p-text-muted-color)]"
-        >
-          <i class="pi pi-info-circle mt-0.5"></i>
-          <span>{{ $t('demoUserMessage') }}</span>
-        </div>
-      </div>
-
-      <nav class="flex-1 overflow-y-auto px-3 pb-6 pt-8">
-        <div v-for="section in sidebarSections" :key="section.key" class="mb-6 last:mb-0">
-          <div v-if="section.label" class="app-shell__section-label">{{ section.label }}</div>
-
-          <RouterLink
-            v-for="item in section.items"
-            :key="item.key"
-            :to="item.to"
-            class="app-shell__nav-item"
-            :class="{ 'is-active': isNavItemActive(item) }"
-          >
-            <span class="app-shell__nav-icon">
-              <span class="material-symbols-outlined app-shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span>
-            </span>
-            <span class="truncate">{{ item.label }}</span>
-          </RouterLink>
-        </div>
-      </nav>
-
-      <div class="mt-auto border-t border-[var(--p-content-border-color)] px-4 py-4">
-        <button type="button" class="app-shell__profile" @click="toggleMenu">
-          <Avatar :image="auth.user.photoURL" shape="circle" class="shrink-0" />
-          <div class="min-w-0 flex-1 text-left">
-            <p class="truncate text-sm font-semibold">{{ displayUserName }}</p>
-            <p class="truncate text-xs text-[var(--p-text-muted-color)]">{{ auth.user.email }}</p>
-          </div>
-          <i class="pi pi-ellipsis-v text-xs text-[var(--p-text-muted-color)]"></i>
-        </button>
-      </div>
-    </aside>
+    <Sidebar
+      persistent
+      :currentPortfolioName="currentPortfolioName"
+      :portfolioMenuItems="portfolioMenuItems"
+      :isDemoUser="auth.user?.uid === 'demo-user'"
+      :userDisplayName="displayUserName"
+      :userEmail="auth.user?.email || ''"
+      :userPhotoUrl="auth.user?.photoURL || ''"
+      @toggle-menu="toggleMenu"
+    />
 
     <div class="flex min-h-screen flex-col lg:pl-[17rem]">
       <AppHeader
@@ -189,8 +94,6 @@ import { useConfirm } from 'primevue/useconfirm'
 import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
-import Avatar from 'primevue/avatar'
-import TieredMenu from 'primevue/tieredmenu'
 import 'primeicons/primeicons.css'
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
@@ -451,8 +354,6 @@ async function getPortfolios() {
 const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
 const appHeader = ref(null)
-const portfolioMenu = ref()
-const portfolioMenuVisible = ref(false)
 
 const closeSearchBox = () => {
   searchBoxVisible.value = false
@@ -463,8 +364,6 @@ const openSearchBox = async () => {
   await nextTick()
   searchBoxRef.value?.focusInput?.()
 }
-
-const togglePortfolioMenu = (event) => portfolioMenu.value.toggle(event)
 
 const isEditableTarget = (target) => {
   if (!(target instanceof HTMLElement)) return false
@@ -703,53 +602,6 @@ const menuItems = computed(() => {
 </style>
 
 <style>
-.app-shell__sidebar {
-  position: fixed;
-  inset: 0 auto 0 0;
-  z-index: 40;
-  width: 17rem;
-  flex-direction: column;
-  border-right: 1px solid rgb(30, 43, 70);
-  background: var(--p-surface-background);
-  backdrop-filter: blur(18px);
-}
-
-.app-shell__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.1rem;
-  font-size: 1.8rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
-
-.app-shell__brand-stock {
-  color: color-mix(in srgb, var(--p-text-color) 80%, transparent);
-}
-
-.app-shell__brand-bar {
-  color: var(--p-primary-color);
-}
-
-.app-shell__portfolio-trigger {
-  width: 100%;
-  justify-content: space-between;
-  padding: 0.85rem 1rem;
-  border: 1px solid rgb(30, 43, 70);
-  border-radius: 1rem;
-  background: rgb(20 31 52 / var(--tw-bg-opacity, 1));
-}
-
-.app-shell__section-label {
-  padding: 0 0.75rem 0.6rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--p-text-muted-color);
-}
-
 .app-shell__topbar {
   position: sticky;
   top: 0;
@@ -778,24 +630,6 @@ const menuItems = computed(() => {
 
 .app-shell__content {
   min-height: calc(100vh - 5rem);
-}
-
-.app-shell__profile {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 78%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
-  color: var(--p-text-color);
-  transition: background-color 0.16s ease, border-color 0.16s ease;
-}
-
-.app-shell__profile:hover {
-  background: color-mix(in srgb, var(--p-content-background) 100%, transparent);
-  border-color: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-border-color));
 }
 
 .custom-select-root:hover {

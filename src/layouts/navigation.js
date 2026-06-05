@@ -4,7 +4,7 @@ export function buildPrimaryNavigation(t, currentPortfolioName) {
       key: 'dashboard',
       label: t('dashboard'),
       to: '/dashboard',
-      icon: 'pi pi-home',
+      icon: 'dashboard',
       activePaths: ['/dashboard'],
       hasMenu: false,
     },
@@ -19,7 +19,7 @@ export function buildPrimaryNavigation(t, currentPortfolioName) {
         {
           label: t('portfolio'),
           items: [
-            { label: t('holdings'), to: '/portfolio/holdings', icon: 'pi pi-briefcase' },
+            { label: t('holdings'), to: '/portfolio/holdings', icon: 'bank' },
             { label: t('transactions'), to: '/portfolio/transactions', icon: 'pi pi-list' },
             { label: t('dividends'), to: '/portfolio/dividends', icon: 'pi pi-wallet' },
           ],
@@ -95,8 +95,8 @@ export function buildSidebarSections(t) {
           key: 'holdings',
           label: t('holdings'),
           to: '/portfolio/holdings',
-          icon: 'account_balance',
-          activePaths: ['/portfolio', '/portfolio/holdings', '/holdings'],
+          icon: 'bank',
+          activePaths: ['/portfolio/holdings', '/holdings'],
         },
         {
           key: 'transactions',

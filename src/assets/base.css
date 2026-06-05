@@ -27,7 +27,8 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
-  --font-family-base: 'Montserrat', 'Trebuchet MS', sans-serif;
+  /* --font-family-base: 'Montserrat', 'Trebuchet MS', sans-serif; */
+  --font-family-base: 'Segoe UI', sans-serif;
 
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
@@ -68,7 +69,7 @@ body {
   /* background-color: rgb(202, 202, 202); */
   line-height: 1.6;
   font-family: var(--font-family-base);
-  font-size: 15px;
+  font-size: 12px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

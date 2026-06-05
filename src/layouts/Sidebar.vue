@@ -1,5 +1,127 @@
 <template>
-  <Drawer v-model:visible="visible" position="left" class="w-[19rem] max-w-[88vw]">
+  <!-- Desktop: fixed sidebar -->
+  <aside
+    v-if="persistent"
+    class="shell__sidebar hidden lg:flex"
+  >
+    <div class="flex items-center justify-between px-6 pt-6">
+      <button type="button" class="shell__brand" @click="goDashboard">
+        <span class="shell__brand-stock">Stock</span>
+        <span class="shell__brand-bar">Bar</span>
+      </button>
+    </div>
+
+    <div class="px-4 pt-6">
+      <button
+        type="button"
+        class="portfolio-menu-trigger shell__portfolio-trigger"
+        :class="{ 'is-open': portfolioMenuVisible }"
+        :aria-label="t('openPortfolioMenu')"
+        :aria-expanded="portfolioMenuVisible"
+        @click="togglePortfolioMenu"
+      >
+        <div class="flex min-w-0 flex-col items-start text-left">
+          <span class="text-[8px] font-semibold uppercase tracking-[0.18em] text-[var(--p-text-muted-color)]">{{ t('portfolio') }}</span>
+          <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
+        </div>
+        <SvgIcon name="chevron-down" class="portfolio-menu-trigger__icon" />
+      </button>
+
+      <TieredMenu
+        ref="portfolioMenu"
+        :model="portfolioMenuItems"
+        :popup="true"
+        class="portfolio-tiered-menu"
+        @show="portfolioMenuVisible = true"
+        @hide="portfolioMenuVisible = false"
+      >
+        <template #start>
+          <div class="portfolio-menu-current">
+            <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
+            <i class="pi pi-chevron-up text-xs"></i>
+          </div>
+        </template>
+
+        <template #item="{ item, props }">
+          <div v-if="item.kind === 'section'" class="portfolio-menu-section">
+            {{ item.label }}
+          </div>
+
+          <a
+            v-else
+            v-ripple
+            class="portfolio-menu-item"
+            :class="{
+              'is-active': item.kind === 'portfolio' && item.active,
+              'is-danger': item.kind === 'danger'
+            }"
+            v-bind="props.action"
+          >
+            <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
+            <span class="portfolio-menu-item__label">{{ item.label }}</span>
+            <span v-if="item.items" class="portfolio-menu-item__suffix">
+              <span v-if="item.suffix">{{ item.suffix }}</span>
+              <i class="pi pi-chevron-right text-xs"></i>
+            </span>
+            <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
+            <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
+          </a>
+        </template>
+      </TieredMenu>
+
+      <div
+        v-if="isDemoUser"
+        class="mt-3 flex items-start gap-2 rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-3 py-2 text-xs text-[var(--p-text-muted-color)]"
+      >
+        <i class="pi pi-info-circle mt-0.5"></i>
+        <span>{{ $t('demoUserMessage') }}</span>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-3 pb-6 pt-8">
+      <div
+        v-for="section in sidebarSections"
+        :key="section.key"
+        class="mb-6 last:mb-0"
+      >
+        <div v-if="section.label" class="shell__section-label">{{ section.label }}</div>
+        <div :class="{ 'pl-6': section.label }">
+          <RouterLink
+            v-for="item in section.items"
+            :key="item.key"
+            :to="item.to"
+            class="shell__nav-item"
+            :class="{ 'is-active': isNavItemActive(item), 'shell__nav-item--sub': section.label }"
+          >
+            <span class="shell__nav-icon">
+              <!-- <span class="material-symbols-outlined shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span> -->
+              <SvgIcon :name="item.icon" class="shell__nav-icon" />
+            </span>
+            <span class="truncate">{{ item.label }}</span>
+          </RouterLink>
+        </div>
+      </div>
+    </nav>
+
+    <div class="mt-auto border-t border-[var(--p-content-border-color)] px-4 py-4">
+      <button type="button" class="shell__profile" @click="$emit('toggle-menu')">
+        <Avatar :image="userPhotoUrl" shape="circle" class="shrink-0" />
+        <div class="min-w-0 flex-1 text-left">
+          <p class="truncate text-sm font-semibold">{{ userDisplayName }}</p>
+          <p class="truncate text-xs text-[var(--p-text-muted-color)]">{{ userEmail }}</p>
+        </div>
+        <i class="pi pi-ellipsis-v text-xs text-[var(--p-text-muted-color)]"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile: drawer sidebar -->
+  <Drawer
+    v-else
+    v-model:visible="visible"
+    position="left"
+    class="w-[19rem] max-w-[88vw]"
+  >
     <template #container="{ closeCallback }">
       <div class="flex h-full flex-col bg-[var(--p-surface-card)] text-[var(--p-text-color)]">
         <div class="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
@@ -99,12 +221,12 @@
               v-for="item in section.items"
               :key="item.key"
               type="button"
-              class="app-shell__nav-item w-full"
-              :class="{ 'is-active': isNavItemActive(item) }"
+              class="shell__nav-item w-full"
+              :class="{ 'is-active': isNavItemActive(item), 'shell__nav-item--sub': section.label }"
               @click="go(item.to, closeCallback)"
             >
-              <span class="app-shell__nav-icon">
-                <span class="material-symbols-outlined app-shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span>
+              <span class="shell__nav-icon">
+                <span class="material-symbols-outlined shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span>
               </span>
               <span class="truncate">{{ item.label }}</span>
             </button>
@@ -133,6 +255,7 @@ import Drawer from 'primevue/drawer'
 import Avatar from 'primevue/avatar'
 import TieredMenu from 'primevue/tieredmenu'
 
+import SvgIcon from '@/components/SvgIcon.vue'
 import { buildSidebarSections } from './navigation.js'
 
 const { t } = useI18n()
@@ -140,9 +263,13 @@ const route = useRoute()
 const router = useRouter()
 
 const props = defineProps({
+  persistent: {
+    type: Boolean,
+    default: false,
+  },
   visible: {
     type: Boolean,
-    required: true
+    default: false,
   },
   currentPortfolioName: {
     type: String,
@@ -170,7 +297,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:visible'])
+const emit = defineEmits(['update:visible', 'toggle-menu'])
 
 const visible = computed({
   get: () => props.visible,
@@ -194,50 +321,148 @@ const go = (to, closeCallback) => {
   closeCallback?.()
   router.push(to)
 }
+
+const goDashboard = () => {
+  router.push('/dashboard')
+}
 </script>
 
 <style>
-.app-shell__nav-item {
-  display: flex;
+/* ===== Desktop sidebar layout ===== */
+.shell__sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: 17rem;
+  flex-direction: column;
+  border-right: 1px solid rgb(30, 43, 70);
+  background: var(--p-content-background);
+  backdrop-filter: blur(18px);
+}
+
+.shell__brand {
+  display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
-  min-height: 2.9rem;
-  margin-bottom: 0.25rem;
-  padding: 0.7rem 0.85rem;
-  border-radius: 0.95rem;
-  color: color-mix(in srgb, var(--p-text-color) 78%, transparent);
-  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+  gap: 0.1rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
-.app-shell__nav-item:hover {
-  background: color-mix(in srgb, var(--p-primary-color) 8%, var(--p-surface-card));
-  color: var(--p-text-color);
+.shell__brand-stock {
+  color: color-mix(in srgb, var(--p-text-color) 80%, transparent);
 }
 
-.app-shell__nav-item.is-active {
-  background: color-mix(in srgb, var(--p-primary-color) 16%, var(--p-surface-card));
+.shell__brand-bar {
   color: var(--p-primary-color);
 }
 
-.app-shell__nav-icon {
+.shell__portfolio-trigger {
+  width: 100%;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgb(30, 43, 70);
+  border-radius: 1rem;
+  background: rgb(20 31 52 / var(--tw-bg-opacity, 1));
+}
+
+.shell__section-label {
+  padding: 0 0.75rem 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--p-text-muted-color);
+}
+
+.shell__profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 78%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
+  color: var(--p-text-color);
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.shell__profile:hover {
+  background: color-mix(in srgb, var(--p-content-background) 100%, transparent);
+  border-color: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-border-color));
+}
+
+/* ===== Shared nav items ===== */
+.shell__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  /* min-height: 2.6rem; */
+  /* margin-bottom: 0.125rem; */
+  padding: 0.25rem 0.8rem;
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  /* font-weight: 500; */
+  color: color-mix(in srgb, var(--p-text-color) 72%, transparent);
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.shell__nav-item--sub {
+  border-left: 1px solid #424242;
+  border-radius: 0 1rem 1rem 0;
+}
+
+.shell__nav-item:hover {
+  /* background: color-mix(in srgb, var(--p-text-color) 6%, transparent); */
+  color: var(--p-text-color);
+}
+
+.shell__nav-item--sub:hover {
+  border-left-color: #747474;
+}
+
+.shell__nav-item.is-active {
+  /* background: color-mix(in srgb, var(--p-primary-color) 14%, var(--p-surface-card)); */
+  color: var(--p-primary-color);
+  font-weight: 500;
+}
+
+.shell__nav-item--sub.is-active {
+  border-left-color: #c2c2c2;
+}
+
+.dark .shell__nav-item:hover {
+  /* background: color-mix(in srgb, var(--p-text-color) 8%, transparent); */
+  color: var(--p-text-color);
+}
+
+.dark .shell__nav-item.is-active {
+  /* background: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-surface-card)); */
+  color: color-mix(in srgb, white 94%, var(--p-primary-color));
+}
+
+.shell__nav-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.7rem;
+  width: 1.5rem;
   color: inherit;
-  transition: color 0.16s ease;
+  transition: color 0.14s ease;
 }
 
-.app-shell__material-icon {
-  font-size: 1.25rem;
+.shell__material-icon {
+  font-size: 1rem;
   color: inherit;
 }
 
+/* ===== Portfolio menu shared ===== */
 .portfolio-menu-trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  width: fit-content;
+  width: 100%;
   padding: 0.4rem 0.65rem;
   border: 0;
   border-radius: 0.9rem;
@@ -352,15 +577,5 @@ const go = (to, closeCallback) => {
 
 .dark .portfolio-menu-item:hover {
   background: rgba(255, 255, 255, 0.05);
-}
-
-.dark .app-shell__nav-item:hover {
-  background: color-mix(in srgb, var(--p-primary-color) 16%, var(--p-surface-card));
-  color: color-mix(in srgb, var(--p-text-color) 92%, transparent);
-}
-
-.dark .app-shell__nav-item.is-active {
-  background: color-mix(in srgb, var(--p-primary-color) 24%, var(--p-surface-card));
-  color: color-mix(in srgb, white 92%, var(--p-primary-color));
 }
 </style>
