@@ -1,116 +1,140 @@
-<template>
+﻿<template>
   <!-- Desktop: fixed sidebar -->
   <aside
     v-if="persistent"
     class="shell__sidebar hidden lg:flex"
+    :class="{ 'is-collapsed': collapsed }"
   >
-    <div class="flex items-center justify-between px-6 pt-6">
-      <button type="button" class="shell__brand" @click="goDashboard">
+  <!-- Logo Section -->
+    <div class="flex items-center px-6 pt-6" :class="collapsed ? 'justify-center px-2' : 'justify-between'">
+      <button v-if="!collapsed" type="button" class="shell__brand" @click="goDashboard">
         <span class="shell__brand-stock">Stock</span>
         <span class="shell__brand-bar">Bar</span>
       </button>
-    </div>
-
-    <div class="px-4 pt-6">
       <button
         type="button"
-        class="portfolio-menu-trigger shell__portfolio-trigger"
-        :class="{ 'is-open': portfolioMenuVisible }"
-        :aria-label="t('openPortfolioMenu')"
-        :aria-expanded="portfolioMenuVisible"
-        @click="togglePortfolioMenu"
+        class="shell__collapse-btn"
+        :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        @click="collapsed = !collapsed"
       >
-        <div class="flex min-w-0 flex-col items-start text-left">
-          <span class="text-[8px] font-semibold uppercase tracking-[0.18em] text-[var(--p-text-muted-color)]">{{ t('portfolio') }}</span>
-          <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
-        </div>
-        <SvgIcon name="chevron-down" class="portfolio-menu-trigger__icon" />
+        <SvgIcon :name="collapsed ? 'sidebar' : 'sidebar'" class="shell__collapse-icon" />
       </button>
-
-      <TieredMenu
-        ref="portfolioMenu"
-        :model="portfolioMenuItems"
-        :popup="true"
-        class="portfolio-tiered-menu"
-        @show="portfolioMenuVisible = true"
-        @hide="portfolioMenuVisible = false"
-      >
-        <template #start>
-          <div class="portfolio-menu-current">
-            <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
-            <i class="pi pi-chevron-up text-xs"></i>
-          </div>
-        </template>
-
-        <template #item="{ item, props }">
-          <div v-if="item.kind === 'section'" class="portfolio-menu-section">
-            {{ item.label }}
-          </div>
-
-          <a
-            v-else
-            v-ripple
-            class="portfolio-menu-item"
-            :class="{
-              'is-active': item.kind === 'portfolio' && item.active,
-              'is-danger': item.kind === 'danger'
-            }"
-            v-bind="props.action"
-          >
-            <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
-            <span class="portfolio-menu-item__label">{{ item.label }}</span>
-            <span v-if="item.items" class="portfolio-menu-item__suffix">
-              <span v-if="item.suffix">{{ item.suffix }}</span>
-              <i class="pi pi-chevron-right text-xs"></i>
-            </span>
-            <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
-            <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
-          </a>
-        </template>
-      </TieredMenu>
-
-      <div
-        v-if="isDemoUser"
-        class="mt-3 flex items-start gap-2 rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-3 py-2 text-xs text-[var(--p-text-muted-color)]"
-      >
-        <i class="pi pi-info-circle mt-0.5"></i>
-        <span>{{ $t('demoUserMessage') }}</span>
-      </div>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-3 pb-6 pt-8">
+    <!-- Portfolio Menu -->
+    <template v-if="!collapsed">
+      <div class="px-4 pt-6">
+        <button
+          type="button"
+          class="portfolio-menu-trigger shell__portfolio-trigger"
+          :class="{ 'is-open': portfolioMenuVisible }"
+          :aria-label="t('openPortfolioMenu')"
+          :aria-expanded="portfolioMenuVisible"
+          @click="togglePortfolioMenu"
+        >
+          <div class="flex min-w-0 flex-col items-start text-left">
+            <span class="text-[8px] font-semibold uppercase tracking-[0.18em] text-[var(--p-text-muted-color)]">{{ t('portfolio') }}</span>
+            <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
+          </div>
+          <SvgIcon name="chevron-down" class="portfolio-menu-trigger__icon" />
+        </button>
+
+        <TieredMenu
+          ref="portfolioMenu"
+          :model="portfolioMenuItems"
+          :popup="true"
+          class="portfolio-tiered-menu"
+          @show="portfolioMenuVisible = true"
+          @hide="portfolioMenuVisible = false"
+        >
+          <template #start>
+            <div class="portfolio-menu-current">
+              <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
+              <i class="pi pi-chevron-up text-xs"></i>
+            </div>
+          </template>
+
+          <template #item="{ item, props }">
+            <div v-if="item.kind === 'section'" class="portfolio-menu-section">
+              {{ item.label }}
+            </div>
+
+            <a
+              v-else
+              v-ripple
+              class="portfolio-menu-item"
+              :class="{
+                'is-active': item.kind === 'portfolio' && item.active,
+                'is-danger': item.kind === 'danger'
+              }"
+              v-bind="props.action"
+            >
+              <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
+              <span class="portfolio-menu-item__label">{{ item.label }}</span>
+              <span v-if="item.items" class="portfolio-menu-item__suffix">
+                <span v-if="item.suffix">{{ item.suffix }}</span>
+                <i class="pi pi-chevron-right text-xs"></i>
+              </span>
+              <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
+              <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
+            </a>
+          </template>
+        </TieredMenu>
+
+        <div
+          v-if="isDemoUser"
+          class="mt-3 flex items-start gap-2 rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-3 py-2 text-xs text-[var(--p-text-muted-color)]"
+        >
+          <i class="pi pi-info-circle mt-0.5"></i>
+          <span>{{ $t('demoUserMessage') }}</span>
+        </div>
+      </div>
+    </template>
+    <!-- Collapsed spacer: preserves vertical space without DOM content -->
+    <div v-else class="flex justify-center pt-6">
+      <div class="h-[3.25rem] w-0"></div>
+    </div>
+
+    <!-- Navigation Section -->
+    <nav class="flex-1 overflow-y-auto px-1 pb-6 pt-4">
       <div
         v-for="section in sidebarSections"
         :key="section.key"
         class="mb-6 last:mb-0"
+        :class="{ 'mb-2': collapsed }"
       >
-        <div v-if="section.label" class="shell__section-label">{{ section.label }}</div>
-        <div :class="{ 'pl-6': section.label }">
+        <div v-if="section.label && !collapsed" class="shell__section-label">{{ section.label }}</div>
+        <div class="flex flex-col gap-1">
           <RouterLink
             v-for="item in section.items"
             :key="item.key"
             :to="item.to"
             class="shell__nav-item"
-            :class="{ 'is-active': isNavItemActive(item), 'shell__nav-item--sub': section.label }"
+            :class="{
+              'is-active': isNavItemActive(item),
+              'shell__nav-item--sub': section.label && !collapsed,
+              'shell__nav-item--collapsed': collapsed
+            }"
+            :title="collapsed ? item.label : undefined"
           >
             <span class="shell__nav-icon">
-              <!-- <span class="material-symbols-outlined shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span> -->
               <SvgIcon :name="item.icon" class="shell__nav-icon" />
             </span>
-            <span class="truncate">{{ item.label }}</span>
+            <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
           </RouterLink>
         </div>
       </div>
     </nav>
 
-    <div class="mt-auto border-t border-[var(--p-content-border-color)] px-4 py-4">
-      <button type="button" class="shell__profile" @click="$emit('toggle-menu')">
+    <div class="mt-auto border-t border-[var(--p-content-border-color)] px-4 py-4" :class="{ 'px-2': collapsed }">
+      <button type="button" class="shell__profile" :class="{ 'shell__profile--collapsed': collapsed }" @click="$emit('toggle-menu')">
         <Avatar :image="userPhotoUrl" shape="circle" class="shrink-0" />
-        <div class="min-w-0 flex-1 text-left">
+        <div v-if="!collapsed" class="min-w-0 flex-1 text-left">
           <p class="truncate text-sm font-semibold">{{ userDisplayName }}</p>
           <p class="truncate text-xs text-[var(--p-text-muted-color)]">{{ userEmail }}</p>
         </div>
-        <i class="pi pi-ellipsis-v text-xs text-[var(--p-text-muted-color)]"></i>
+        <i v-if="!collapsed" class="pi pi-ellipsis-v text-xs text-[var(--p-text-muted-color)]"></i>
       </button>
     </div>
   </aside>
@@ -217,6 +241,7 @@
               {{ section.label }}
             </div>
 
+            <div class="flex flex-col gap-1">
             <button
               v-for="item in section.items"
               :key="item.key"
@@ -230,6 +255,7 @@
               </span>
               <span class="truncate">{{ item.label }}</span>
             </button>
+            </div>
           </div>
         </div>
 
@@ -271,6 +297,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  collapsed: {
+    type: Boolean,
+    default: false,
+  },
   currentPortfolioName: {
     type: String,
     required: true,
@@ -297,11 +327,16 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:visible', 'toggle-menu'])
+const emit = defineEmits(['update:visible', 'update:collapsed', 'toggle-menu'])
 
 const visible = computed({
   get: () => props.visible,
   set: (value) => emit('update:visible', value)
+})
+
+const collapsed = computed({
+  get: () => props.collapsed,
+  set: (value) => emit('update:collapsed', value)
 })
 
 const portfolioMenu = ref()
@@ -335,9 +370,10 @@ const goDashboard = () => {
   z-index: 40;
   width: 17rem;
   flex-direction: column;
-  border-right: 1px solid rgb(30, 43, 70);
+  border-right: 1px solid var(--p-content-border-color);
   background: var(--p-content-background);
   backdrop-filter: blur(18px);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .shell__brand {
@@ -362,18 +398,19 @@ const goDashboard = () => {
   width: 100%;
   justify-content: space-between;
   padding: 0.85rem 1rem;
-  border: 1px solid rgb(30, 43, 70);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 1rem;
-  background: rgb(20 31 52 / var(--tw-bg-opacity, 1));
+  background: color-mix(in srgb, var(--p-content-background) 70%, var(--p-surface-background));
 }
 
 .shell__section-label {
-  padding: 0 0.75rem 0.6rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  padding: 0 0.75rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--p-text-muted-color);
+  opacity: 0.65;
 }
 
 .shell__profile {
@@ -394,53 +431,30 @@ const goDashboard = () => {
   border-color: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-border-color));
 }
 
-/* ===== Shared nav items ===== */
+/* nav items */
 .shell__nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  /* min-height: 2.6rem; */
-  /* margin-bottom: 0.125rem; */
-  padding: 0.25rem 0.8rem;
-  border-radius: 0.6rem;
-  font-size: 0.9rem;
-  /* font-weight: 500; */
-  color: color-mix(in srgb, var(--p-text-color) 72%, transparent);
-  transition: background-color 0.14s ease, color 0.14s ease;
-}
-
-.shell__nav-item--sub {
-  border-left: 1px solid #424242;
-  border-radius: 0 1rem 1rem 0;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .shell__nav-item:hover {
-  /* background: color-mix(in srgb, var(--p-text-color) 6%, transparent); */
+  background-color: color-mix(in srgb, var(--p-text-color) 5%, transparent);
   color: var(--p-text-color);
-}
-
-.shell__nav-item--sub:hover {
-  border-left-color: #747474;
 }
 
 .shell__nav-item.is-active {
-  /* background: color-mix(in srgb, var(--p-primary-color) 14%, var(--p-surface-card)); */
-  color: var(--p-primary-color);
-  font-weight: 500;
-}
-
-.shell__nav-item--sub.is-active {
-  border-left-color: #c2c2c2;
-}
-
-.dark .shell__nav-item:hover {
-  /* background: color-mix(in srgb, var(--p-text-color) 8%, transparent); */
+  background-color: color-mix(in srgb, var(--p-text-color) 18%, transparent);
   color: var(--p-text-color);
 }
 
-.dark .shell__nav-item.is-active {
-  /* background: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-surface-card)); */
-  color: color-mix(in srgb, white 94%, var(--p-primary-color));
+.shell__nav-item.is-active .shell__nav-icon {
+  color: var(--p-primary-color);
 }
 
 .shell__nav-icon {
@@ -448,8 +462,9 @@ const goDashboard = () => {
   align-items: center;
   justify-content: center;
   width: 1.5rem;
+  height: 1.5rem;
   color: inherit;
-  transition: color 0.14s ease;
+  flex-shrink: 0;
 }
 
 .shell__material-icon {
@@ -474,17 +489,17 @@ const goDashboard = () => {
 
 .portfolio-menu-trigger:hover,
 .portfolio-menu-trigger.is-open {
-  background: color-mix(in srgb, var(--p-surface-hover) 82%, transparent);
+  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
 }
 
 .portfolio-tiered-menu.p-tieredmenu,
 .portfolio-tiered-menu .p-tieredmenu-submenu {
   min-width: 17rem;
   padding: 0.375rem;
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #303030);
+  border: 1px solid var(--p-content-border-color);
   border-radius: 1rem;
-  background: color-mix(in srgb, var(--p-surface-card) 92%, #1b1b1b);
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+  background: var(--p-surface-card);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.12);
 }
 
 .portfolio-tiered-menu .p-tieredmenu-root-list,
@@ -496,7 +511,7 @@ const goDashboard = () => {
 
 .portfolio-tiered-menu .p-tieredmenu-separator {
   margin: 0.375rem 0.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--p-content-border-color) 90%, #3a3a3a);
+  border-top: 1px solid var(--p-content-border-color);
 }
 
 .portfolio-menu-current {
@@ -534,12 +549,12 @@ const goDashboard = () => {
 }
 
 .portfolio-menu-item:hover {
-  background: color-mix(in srgb, var(--p-surface-hover) 80%, transparent);
+  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
 }
 
 .portfolio-menu-item.is-active {
-  background: rgba(255, 255, 255, 0.92);
-  color: #111827;
+  background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
+  color: var(--p-primary-color);
 }
 
 .portfolio-menu-item.is-danger {
@@ -562,7 +577,7 @@ const goDashboard = () => {
 .dark .portfolio-tiered-menu.p-tieredmenu,
 .dark .portfolio-tiered-menu .p-tieredmenu-submenu {
   border-color: #383838;
-  background: #242424;
+  background: #2a313c;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
 }
 
@@ -576,6 +591,65 @@ const goDashboard = () => {
 }
 
 .dark .portfolio-menu-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark .portfolio-menu-item.is-active {
+  background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+  color: var(--p-primary-color);
+}
+
+/* ===== Collapsed sidebar ===== */
+.shell__sidebar.is-collapsed {
+  width: 4rem;
+}
+
+.shell__collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--p-text-muted-color);
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+  flex-shrink: 0;
+}
+
+.shell__collapse-btn:hover {
+  background: color-mix(in srgb, var(--p-text-color) 10%, transparent);
+  color: var(--p-text-color);
+}
+
+.shell__collapse-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.shell__nav-item--collapsed {
+  justify-content: center;
+  padding: 0.6rem 0;
+  border-radius: 0.6rem;
+}
+
+.shell__nav-item--collapsed .shell__nav-icon {
+  width: auto;
+  margin: 0;
+}
+
+.shell__profile--collapsed {
+  justify-content: center;
+  padding: 0.6rem;
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.shell__profile--collapsed:hover {
+  border-radius: 50%;
 }
 </style>

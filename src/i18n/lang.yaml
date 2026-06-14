@@ -68,7 +68,7 @@ refresh:
   zh: 重新整理
 holding:
   en: Holdings
-  zh: 持有資產
+  zh: 當前持有
 Notification:
   en: Notification
   zh: 通知
@@ -244,7 +244,7 @@ dashboard:
   zh: 儀表板
 holdings:
   en: Holdings
-  zh: 持有資產
+  zh: 當前持有
 transactions:
   en: Transactions
   zh: 交易

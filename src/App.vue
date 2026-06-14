@@ -6,6 +6,7 @@
   <div class="app-shell min-h-screen bg-[var(--p-surface-background)] text-[var(--p-text-color)]">
     <Sidebar
       persistent
+      v-model:collapsed="sidebarCollapsed"
       :currentPortfolioName="currentPortfolioName"
       :portfolioMenuItems="portfolioMenuItems"
       :isDemoUser="auth.user?.uid === 'demo-user'"
@@ -15,7 +16,7 @@
       @toggle-menu="toggleMenu"
     />
 
-    <div class="flex min-h-screen flex-col lg:pl-[17rem]">
+    <div class="flex min-h-screen flex-col lg:pl-[17rem]" :class="{ 'lg:!pl-[4rem]': sidebarCollapsed }">
       <AppHeader
         ref="appHeader"
         :currentPageLabel="currentPageLabel"
@@ -409,6 +410,13 @@ const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'reb
 
 // Mobile sidebar state
 const sidebarVisible = ref(false)
+
+// Desktop sidebar collapsed state (persisted)
+const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed'
+const sidebarCollapsed = ref(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true')
+watch(sidebarCollapsed, (val) => {
+  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(val))
+})
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')

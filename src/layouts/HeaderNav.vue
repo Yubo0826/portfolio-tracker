@@ -31,7 +31,7 @@
       >
         <div
           v-if="link.hasMenu && activeMenu === link.key"
-          class="absolute top-full left-0 mt-2 w-52 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl py-2 z-[60]"
+          class="absolute top-full left-0 mt-2 w-52 bg-[var(--p-surface-card)] border border-[var(--p-content-border-color)] shadow-xl rounded-xl py-2 z-[60]"
         >
           <div v-for="group in link.menuGroups" :key="group.label" class="mb-2 last:mb-0">
             <!-- <div class="px-4 py-2 text-[10px] uppercase tracking-widest text-[var(--p-text-muted-color)]">
