@@ -1,13 +1,17 @@
-﻿<template>
+<template>
   <!-- Desktop: fixed sidebar -->
   <aside
     v-if="persistent"
     class="shell__sidebar hidden lg:flex"
     :class="{ 'is-collapsed': collapsed }"
   >
-  <!-- Logo Section -->
-    <div class="flex items-center px-6 pt-6" :class="collapsed ? 'justify-center px-2' : 'justify-between'">
-      <button v-if="!collapsed" type="button" class="shell__brand" @click="goDashboard">
+    <!-- Header: Brand + Toggle in same row -->
+    <div class="shell__sidebar-header">
+      <button
+        class="shell__brand"
+        :class="{ 'shell__brand--hidden': collapsed }"
+        @click="goDashboard"
+      >
         <span class="shell__brand-stock">Stock</span>
         <span class="shell__brand-bar">Bar</span>
       </button>
@@ -18,13 +22,13 @@
         :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
         @click="collapsed = !collapsed"
       >
-        <SvgIcon :name="collapsed ? 'sidebar' : 'sidebar'" class="shell__collapse-icon" />
+        <SvgIcon name="sidebar" class="shell__collapse-icon" />
       </button>
     </div>
 
     <!-- Portfolio Menu -->
     <template v-if="!collapsed">
-      <div class="px-4 pt-6">
+      <div class="px-3 pb-2">
         <button
           type="button"
           class="portfolio-menu-trigger shell__portfolio-trigger"
@@ -91,43 +95,35 @@
         </div>
       </div>
     </template>
-    <!-- Collapsed spacer: preserves vertical space without DOM content -->
-    <div v-else class="flex justify-center pt-6">
-      <div class="h-[3.25rem] w-0"></div>
-    </div>
 
     <!-- Navigation Section -->
-    <nav class="flex-1 overflow-y-auto px-1 pb-6 pt-4">
+    <nav class="flex-1 overflow-y-auto px-3 pb-4 pt-2">
       <div
         v-for="section in sidebarSections"
         :key="section.key"
-        class="mb-6 last:mb-0"
-        :class="{ 'mb-2': collapsed }"
+        class="mb-1 last:mb-0"
       >
         <div v-if="section.label && !collapsed" class="shell__section-label">{{ section.label }}</div>
-        <div class="flex flex-col gap-1">
-          <RouterLink
-            v-for="item in section.items"
-            :key="item.key"
-            :to="item.to"
-            class="shell__nav-item"
-            :class="{
-              'is-active': isNavItemActive(item),
-              'shell__nav-item--sub': section.label && !collapsed,
-              'shell__nav-item--collapsed': collapsed
-            }"
-            :title="collapsed ? item.label : undefined"
-          >
-            <span class="shell__nav-icon">
-              <SvgIcon :name="item.icon" class="shell__nav-icon" />
-            </span>
-            <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
-          </RouterLink>
-        </div>
+        <RouterLink
+          v-for="item in section.items"
+          :key="item.key"
+          :to="item.to"
+          class="shell__nav-item"
+          :class="{
+            'is-active': isNavItemActive(item),
+            'shell__nav-item--collapsed': collapsed,
+          }"
+          :title="collapsed ? item.label : undefined"
+        >
+          <span class="shell__nav-icon">
+            <SvgIcon :name="item.icon" class="shell__nav-icon" />
+          </span>
+          <span class="shell__nav-text" :class="{ 'shell__nav-text--hidden': collapsed }">{{ item.label }}</span>
+        </RouterLink>
       </div>
     </nav>
 
-    <div class="mt-auto border-t border-[var(--p-content-border-color)] px-4 py-4" :class="{ 'px-2': collapsed }">
+    <div class="mt-auto border-t border-[var(--p-content-border-color)] px-3 py-3">
       <button type="button" class="shell__profile" :class="{ 'shell__profile--collapsed': collapsed }" @click="$emit('toggle-menu')">
         <Avatar :image="userPhotoUrl" shape="circle" class="shrink-0" />
         <div v-if="!collapsed" class="min-w-0 flex-1 text-left">
@@ -148,7 +144,7 @@
   >
     <template #container="{ closeCallback }">
       <div class="flex h-full flex-col bg-[var(--p-surface-card)] text-[var(--p-text-color)]">
-        <div class="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
+        <div class="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
           <button
             type="button"
             class="inline-flex items-center gap-1 text-left text-2xl font-bold"
@@ -228,33 +224,33 @@
           </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-3 pb-6 pt-6">
+        <div class="flex-1 overflow-y-auto px-3 pb-6 pt-4">
           <div
             v-for="section in sidebarSections"
             :key="section.key"
-            class="mb-6 last:mb-0"
+            class="mb-2 last:mb-0"
           >
             <div
               v-if="section.label"
-              class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--p-text-muted-color)]"
+              class="shell__section-label px-1 pb-1"
             >
               {{ section.label }}
             </div>
 
-            <div class="flex flex-col gap-1">
-            <button
-              v-for="item in section.items"
-              :key="item.key"
-              type="button"
-              class="shell__nav-item w-full"
-              :class="{ 'is-active': isNavItemActive(item), 'shell__nav-item--sub': section.label }"
-              @click="go(item.to, closeCallback)"
-            >
-              <span class="shell__nav-icon">
-                <span class="material-symbols-outlined shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span>
-              </span>
-              <span class="truncate">{{ item.label }}</span>
-            </button>
+            <div class="flex flex-col">
+              <button
+                v-for="item in section.items"
+                :key="item.key"
+                type="button"
+                class="shell__nav-item w-full"
+                :class="{ 'is-active': isNavItemActive(item) }"
+                @click="go(item.to, closeCallback)"
+              >
+                <span class="shell__nav-icon shell__nav-icon--expanded">
+                  <span class="material-symbols-outlined shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span>
+                </span>
+                <span class="truncate">{{ item.label }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -373,9 +369,25 @@ const goDashboard = () => {
   border-right: 1px solid var(--p-content-border-color);
   background: var(--p-content-background);
   backdrop-filter: blur(18px);
+  overflow: hidden;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.shell__sidebar.is-collapsed {
+  width: 4.5rem;
+}
+
+/* ===== Sidebar header: brand + toggle in same row ===== */
+.shell__sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.5rem;
+  padding: 0 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ===== Brand ===== */
 .shell__brand {
   display: inline-flex;
   align-items: center;
@@ -384,6 +396,16 @@ const goDashboard = () => {
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 10rem;
+  transition: opacity 0.15s ease, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shell__brand--hidden {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
 }
 
 .shell__brand-stock {
@@ -394,6 +416,33 @@ const goDashboard = () => {
   color: var(--p-primary-color);
 }
 
+/* ===== Toggle / collapse button ===== */
+.shell__collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--p-text-muted-color);
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+  flex-shrink: 0;
+}
+
+.shell__collapse-btn:hover {
+  background: color-mix(in srgb, var(--p-text-color) 10%, transparent);
+  color: var(--p-text-color);
+}
+
+.shell__collapse-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ===== Portfolio trigger ===== */
 .shell__portfolio-trigger {
   width: 100%;
   justify-content: space-between;
@@ -403,22 +452,21 @@ const goDashboard = () => {
   background: color-mix(in srgb, var(--p-content-background) 70%, var(--p-surface-background));
 }
 
+/* ===== Section labels ===== */
 .shell__section-label {
-  padding: 0 0.75rem 0.4rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  padding: 0.875rem 0 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--p-text-muted-color);
-  opacity: 0.65;
 }
 
+/* ===== Profile section ===== */
 .shell__profile {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.85rem;
+  padding: 0.75rem;
   border: 1px solid color-mix(in srgb, var(--p-content-border-color) 78%, transparent);
   border-radius: 1rem;
   background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
@@ -431,25 +479,38 @@ const goDashboard = () => {
   border-color: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-border-color));
 }
 
-/* nav items */
+.shell__profile--collapsed {
+  justify-content: center;
+  padding: 0.6rem;
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.shell__profile--collapsed:hover {
+  border-radius: 50%;
+}
+
+/* ===== Navigation items: pill shape ===== */
 .shell__nav-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  height: 3rem;
+  padding: 0 0.75rem;
+  border-radius: 1.5rem;
+  margin-bottom: 0.25rem;
   font-size: 0.9375rem;
   font-weight: 500;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .shell__nav-item:hover {
-  background-color: color-mix(in srgb, var(--p-text-color) 5%, transparent);
+  background-color: color-mix(in srgb, var(--p-text-color) 6%, transparent);
   color: var(--p-text-color);
 }
 
 .shell__nav-item.is-active {
-  background-color: color-mix(in srgb, var(--p-text-color) 18%, transparent);
+  background-color: color-mix(in srgb, var(--p-text-color) 14%, transparent);
   color: var(--p-text-color);
 }
 
@@ -457,19 +518,51 @@ const goDashboard = () => {
   color: var(--p-primary-color);
 }
 
+/* ===== Collapsed nav item: explicit square so border-radius becomes a circle ===== */
+.shell__nav-item--collapsed {
+  width: 3rem;
+  padding: 0;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.shell__nav-item--collapsed .shell__nav-icon {
+  margin-right: 0;
+}
+
+/* ===== Nav icon: fixed position — never moves during animation ===== */
 .shell__nav-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 1.5rem;
   width: 1.5rem;
   height: 1.5rem;
   color: inherit;
   flex-shrink: 0;
+  margin-right: 1.25rem;
 }
 
 .shell__material-icon {
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: inherit;
+}
+
+/* ===== Nav text: opacity + max-width fade on collapse ===== */
+.shell__nav-text {
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  max-width: 12rem;
+  transition: opacity 0.15s ease, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shell__nav-text--hidden {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
 }
 
 /* ===== Portfolio menu shared ===== */
@@ -597,59 +690,5 @@ const goDashboard = () => {
 .dark .portfolio-menu-item.is-active {
   background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
   color: var(--p-primary-color);
-}
-
-/* ===== Collapsed sidebar ===== */
-.shell__sidebar.is-collapsed {
-  width: 4rem;
-}
-
-.shell__collapse-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 0;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--p-text-muted-color);
-  cursor: pointer;
-  transition: background-color 0.16s ease, color 0.16s ease;
-  flex-shrink: 0;
-}
-
-.shell__collapse-btn:hover {
-  background: color-mix(in srgb, var(--p-text-color) 10%, transparent);
-  color: var(--p-text-color);
-}
-
-.shell__collapse-icon {
-  width: 1.1rem;
-  height: 1.1rem;
-  transition: transform 0.2s ease;
-}
-
-.shell__nav-item--collapsed {
-  justify-content: center;
-  padding: 0.6rem 0;
-  border-radius: 0.6rem;
-}
-
-.shell__nav-item--collapsed .shell__nav-icon {
-  width: auto;
-  margin: 0;
-}
-
-.shell__profile--collapsed {
-  justify-content: center;
-  padding: 0.6rem;
-  border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
-}
-
-.shell__profile--collapsed:hover {
-  border-radius: 50%;
 }
 </style>
