@@ -75,6 +75,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html:not(.dark) body {
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+.dark body {
+  background-color: #070a12;
+  color: #94a3b8;
+}
+
 button,
 input,
 textarea,

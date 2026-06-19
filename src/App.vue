@@ -3,31 +3,26 @@
   <GlobalLoading />
   <ConfirmDialog />
 
-  <div class="app-shell min-h-screen bg-[var(--p-surface-background)] text-[var(--p-text-color)]">
+  <div class="app-shell min-h-screen">
     <Sidebar
       persistent
-      v-model:collapsed="sidebarCollapsed"
       :currentPortfolioName="currentPortfolioName"
       :portfolioMenuItems="portfolioMenuItems"
+      :menuItems="menuItems"
       :isDemoUser="auth.user?.uid === 'demo-user'"
       :userDisplayName="displayUserName"
       :userEmail="auth.user?.email || ''"
       :userPhotoUrl="auth.user?.photoURL || ''"
-      @toggle-menu="toggleMenu"
+      @open-search="openSearchBox"
     />
 
-    <div class="flex min-h-screen flex-col lg:pl-[17rem]" :class="{ 'lg:!pl-[4rem]': sidebarCollapsed }">
+    <div class="flex min-h-screen flex-col lg:pl-[260px] app-shell__main">
       <AppHeader
-        ref="appHeader"
         :currentPageLabel="currentPageLabel"
         :isDark="isDark"
         :showAddTradeButtonBar="showAddTradeButtonBar"
         :isDemoUser="auth.user?.uid === 'demo-user'"
         :hasPortfolios="portfolioStore.portfolios.length > 0"
-        :displayUserName="displayUserName"
-        :userEmail="auth.user?.email || ''"
-        :userPhotoUrl="auth.user?.photoURL || ''"
-        :menuItems="menuItems"
         :tradeActionItems="tradeActionItems"
         @open-sidebar="sidebarVisible = true"
         @open-search="openSearchBox"
@@ -37,7 +32,7 @@
         @toggle-theme="toggleTheme"
       />
 
-      <main class="app-shell__content flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+      <main class="app-shell__content mx-auto w-full max-w-[1680px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
         <RouterView />
       </main>
 
@@ -80,10 +75,12 @@
     v-model:visible="sidebarVisible"
     :currentPortfolioName="currentPortfolioName"
     :portfolioMenuItems="portfolioMenuItems"
+    :menuItems="menuItems"
     :isDemoUser="auth.user?.uid === 'demo-user'"
     :userDisplayName="displayUserName"
     :userEmail="auth.user?.email || ''"
     :userPhotoUrl="auth.user?.photoURL || ''"
+    @open-search="openSearchBox"
   />
 </template>
 
@@ -130,9 +127,7 @@ const { isDark, toggleTheme } = useTheme()
 
 // Currency settings
 import { useSettingsStore } from '@/stores/settings'
-import { storeToRefs } from 'pinia'
 const settingsStore = useSettingsStore()
-const { displayCurrency, exchangeRate } = storeToRefs(settingsStore)
 
 // Fetch exchange rate on mount
 onMounted(() => {
@@ -354,7 +349,6 @@ async function getPortfolios() {
 
 const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
-const appHeader = ref(null)
 
 const closeSearchBox = () => {
   searchBoxVisible.value = false
@@ -388,35 +382,11 @@ const onGlobalSearchShortcut = (event) => {
   openSearchBox()
 }
 
-const languageOptions = [
-  { label: 'English', value: 'en', flag: '🇺🇸' },
-  { label: '繁體中文', value: 'zh-TW', flag: '🇹🇼' }
-]
-
-const currentLanguage = ref(locale.value)
-
-const setCurrency = (value) => {
-  settingsStore.setDisplayCurrency(value)
-}
-
-const selectLanguage = (value) => {
-  locale.value = value
-  currentLanguage.value = value
-  localStorage.setItem('locale', value)
-}
-
 // 顯示新增交易按鈕列的條件: 在 portfolios, backtesting, rebalancing 頁面不顯示
 const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'rebalancing'].includes(route.name))
 
 // Mobile sidebar state
 const sidebarVisible = ref(false)
-
-// Desktop sidebar collapsed state (persisted)
-const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed'
-const sidebarCollapsed = ref(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true')
-watch(sidebarCollapsed, (val) => {
-  localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(val))
-})
 
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
@@ -427,7 +397,6 @@ onMounted(() => {
   const savedLocale = localStorage.getItem('locale')
   if (savedLocale && savedLocale !== locale.value) {
     locale.value = savedLocale
-    currentLanguage.value = savedLocale
   }
 
   window.addEventListener('keydown', onGlobalSearchShortcut)
@@ -468,20 +437,6 @@ watch(searchBoxVisible, async (visible) => {
   searchBoxRef.value?.focusInput?.()
 })
 
-const toggleMenu = (event) => appHeader.value?.toggleMenu(event)
-const languageSubItems = computed(() =>
-  languageOptions.map(option => ({
-    label: `${option.flag} ${option.label}`,
-    active: currentLanguage.value === option.value,
-    command: () => selectLanguage(option.value),
-  }))
-)
-
-const currencySubItems = computed(() => [
-  { label: 'USD', active: displayCurrency.value === 'USD', command: () => setCurrency('USD') },
-  { label: 'TWD', active: displayCurrency.value === 'TWD', command: () => setCurrency('TWD') },
-])
-
 const tradeActionItems = computed(() => [
   {
     label: t('importTransactions'),
@@ -490,22 +445,13 @@ const tradeActionItems = computed(() => [
   },
 ])
 
-const currentLanguageLabel = computed(() => {
-  const lang = languageOptions.find(opt => opt.value === currentLanguage.value)
-  return lang ? lang.label : currentLanguage.value
-})
-
 const menuItems = computed(() => {
   const list = [
-    { label: t('language'), icon: 'pi pi-language', items: languageSubItems.value, suffix: currentLanguageLabel.value },
-    { label: t('currency.label'), icon: 'pi pi-dollar', items: currencySubItems.value, suffix: displayCurrency.value },
-    { separator: true },
     { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
   ]
   if (auth.user.uid !== 'demo-user') {
-    list.unshift({ separator: true })
     list.push({ separator: true })
-    list.push({ label: t('logout'), icon: 'pi pi-sign-out', command: () => auth.logout() })
+    list.push({ label: t('logout'), icon: 'pi pi-sign-out', kind: 'danger', command: () => auth.logout() })
   } else {
     list.push({ separator: true })
     list.push({ label: t('login'), icon: 'pi pi-sign-in', command: () => auth.login() })
@@ -610,13 +556,31 @@ const menuItems = computed(() => {
 </style>
 
 <style>
+html:not(.dark) .app-shell {
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+html:not(.dark) .app-shell__topbar {
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f3f3f3;
+  backdrop-filter: none;
+}
+
 .app-shell__topbar {
   position: sticky;
   top: 0;
   z-index: 30;
   border-bottom: 1px solid rgb(30, 43, 70);
-  background: color-mix(in srgb, var(--p-surface-background) 82%, transparent);
   backdrop-filter: blur(18px);
+  padding: 16px;
+}
+
+html:not(.dark) .app-shell__search {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  border-radius: 6px;
 }
 
 .app-shell__search {
@@ -631,9 +595,55 @@ const menuItems = computed(() => {
   transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
 }
 
+html:not(.dark) .app-shell__search:hover {
+  color: #334155;
+}
+
 .app-shell__search:hover {
   color: var(--p-text-color);
   cursor: text;
+}
+
+html:not(.dark) .app-shell__content {
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+html:not(.dark) .app-shell__main {
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+.dark .app-shell {
+  background-color: #070a12;
+  color: #94a3b8;
+}
+
+.dark .app-shell__topbar {
+  border-bottom: 1px solid #1e293b;
+  background-color: #070a12;
+  backdrop-filter: none;
+}
+
+.dark .app-shell__search {
+  background-color: #1e293b;
+  border: 1px solid #1e293b;
+  color: #64748b;
+  border-radius: 6px;
+}
+
+.dark .app-shell__search:hover {
+  color: #94a3b8;
+}
+
+.dark .app-shell__content {
+  background-color: #070a12;
+  color: #94a3b8;
+}
+
+.dark .app-shell__main {
+  background-color: #070a12;
+  color: #94a3b8;
 }
 
 .app-shell__content {
@@ -729,21 +739,6 @@ const menuItems = computed(() => {
 
 .language-menu :deep(.active-language:hover) {
   color: var(--p-primary-color) !important;
-}
-
-/* 用戶選單頭像樣式 */
-.p-menu :deep(.user-info-item) {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.p-menu :deep(.user-info-item):hover {
-  background: none !important;
-  cursor: default !important;
-}
-
-.p-menu :deep(.user-info-item) .p-menuitem-content {
-  padding: 0 !important;
 }
 
 

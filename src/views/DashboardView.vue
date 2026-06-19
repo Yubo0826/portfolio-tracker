@@ -112,24 +112,24 @@
                 <div class="min-w-0">
                   <!-- 總資產金額 -->
                   <div v-if="totalValue" class="mt-3 inline-flex max-w-full items-end gap-1 overflow-hidden leading-none">
-                    <span class="truncate text-4xl font-black tracking-tight sm:text-5xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
-                    <span class="text-2xl font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                    <span class="truncate text-3xl font-black tracking-tight sm:text-4xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
+                    <span class="text-xl font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
                     <span class="mb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
                   </div>
-                  <div v-else class="mt-3 text-4xl font-black tracking-tight sm:text-5xl">--</div>
+                  <div v-else class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">--</div>
 
                   <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                     <div
                       v-if="growthRateNumber !== null"
                       :class="growthRateNumber >= 0 ? 'text-emerald-500' : 'text-rose-500'"
-                      class="inline-flex items-center gap-2 text-base font-semibold"
+                      class="inline-flex items-center gap-2 text-sm font-semibold"
                     >
                       <span>{{ formatSignedNumber(growthRateNumber) }}%</span>
                       <!-- <span class="text-sm opacity-80">({{ formatSignedNumber(change) }})</span> -->
                     </div>
-                    <div v-else class="inline-flex items-center gap-2 text-base font-semibold text-slate-400 dark:text-slate-500">
+                    <div v-else class="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 dark:text-slate-500">
                       <span>--</span>
-                      <span class="text-sm opacity-80">(--)</span>
+                      <span class="text-xs opacity-80">(--)</span>
                     </div>
 
                     <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
@@ -153,7 +153,7 @@
             <template #title>
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" :allowEmpty="false" />
-                <button @click="$router.push('allocation')" class="text-sm font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
+                <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
               </div>
             </template>
 
@@ -161,7 +161,7 @@
               <div v-if="holdingsStore.list.length > 0" class="dashboard-allocation-content py-2">
                 <div v-if="selectedPieType === 'target' && !hasTargetAllocation" class="flex flex-col items-center text-center gap-3 py-8">
                   <img class="w-56 h-56 sm:w-64 sm:h-64" src="/src/assets/undraw_report_k55w.svg" alt="">
-                  <h2 class="text-lg font-semibold">{{ $t('allocationNoSettings') }}</h2>
+                  <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
                 </div>
 
                 <div v-else class="dashboard-allocation-layout">
@@ -195,8 +195,8 @@
 
               <div v-else class="flex flex-col items-center text-center gap-3 py-8">
                 <img class="w-60 h-60 sm:w-80 sm:h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
-                <h2 class="text-lg sm:text-xl font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
-                <p class="text-sm sm:text-base text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
+                <h2 class="text-base sm:text-lg font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
+                <p class="text-xs sm:text-sm text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
               </div>
             </template>
           </Card>
@@ -221,12 +221,12 @@
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="dashboard-kicker">{{ $t('totalProfit') }}</p>
-                    <div v-if="totalProfit" class="mt-3 inline-flex items-end text-3xl font-bold tracking-tight">
+                    <div v-if="totalProfit" class="mt-3 inline-flex items-end text-2xl font-bold tracking-tight">
                       <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                      <span class="text-xl text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                      <span class="text-lg text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
                       <span class="ml-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
                     </div>
-                    <div v-else class="mt-3 text-3xl font-bold tracking-tight">--</div>
+                    <div v-else class="mt-3 text-2xl font-bold tracking-tight">--</div>
                   </div>
 
                   <Button icon="pi pi-chart-line" rounded size="small" disabled />
@@ -247,8 +247,8 @@
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="dashboard-kicker">{{ $t('irr') }}</p>
-                    <div v-if="irr" class="mt-3 text-3xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
-                    <div v-else class="mt-3 text-3xl font-bold tracking-tight text-slate-400">--</div>
+                    <div v-if="irr" class="mt-3 text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
+                    <div v-else class="mt-3 text-2xl font-bold tracking-tight text-slate-400">--</div>
                   </div>
 
                   <Button icon="pi pi-calendar" rounded size="small" disabled />
@@ -269,12 +269,12 @@
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
             <p class="dashboard-kicker">{{ $t('currentAsset') }}</p>
-            <h2 class="mt-1 text-lg font-semibold">{{ $t('holdings') }}</h2>
+            <h2 class="mt-1 text-base font-semibold">{{ $t('holdings') }}</h2>
           </div>
 
           <button
             type="button"
-            class="text-sm font-semibold text-[var(--p-primary-color)] hover:underline"
+            class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline"
             @click="$router.push('/portfolio/holdings')"
           >
             {{ $t('holdings') }} ⭢
@@ -290,7 +290,7 @@
                 <StockIcon :symbol="data.symbol" class="mr-8" />
                 <div class="truncate">
                   <span class="font-medium">{{ data.symbol }}</span>
-                  <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
+                  <div class="text-xs text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
               </div>
             </template>
@@ -332,7 +332,7 @@
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
               </div>
               <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
-                <div class="flex items-center gap-1 font-bold text-sm">
+                <div class="flex items-center gap-1 font-bold text-xs">
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
                   <i v-else class="pi pi-sort-down-fill"></i> -->
                   
@@ -844,7 +844,7 @@ const selectedAllocationChart = computed(() => ({
       const secondaryLabel = selectedPieType.value === 'actual' ? t('chartValue') : t('totalValue')
 
       return `
-        <div style="min-width: 120px; font-size: 12px; line-height: 1.5;">
+        <div style="min-width: 120px; font-size: 11px; line-height: 1.5;">
           <div style="font-weight: 700; margin-bottom: 2px;">${this.point.name}</div>
           <div style="font-weight: 600;">${formatAllocationPercentage(percentage)}</div>
           <div style="opacity: 0.75;">${secondaryLabel}: ${formatCompactAmount(amount)}</div>
@@ -989,7 +989,7 @@ const areaChartOptions = computed(() => {
         formatter: function () {
           return chartDateFormatter.format(new Date(this.value))
         },
-        style: { fontSize: '12px', color: axisColor }
+        style: { fontSize: '11px', color: axisColor }
       },
       lineColor: gridColor,
       tickColor: gridColor,
@@ -1002,7 +1002,7 @@ const areaChartOptions = computed(() => {
       endOnTick: false,
       labels: {
         formatter: function () { return `$${this.value.toFixed(2)}` },
-        style: { fontSize: '12px', color: axisColor },
+        style: { fontSize: '11px', color: axisColor },
       },
       gridLineDashStyle: 'Dash',
       gridLineColor: gridColor,
@@ -1127,7 +1127,7 @@ watch(locale, () => {
 }
 
 .dashboard-kicker {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1135,7 +1135,7 @@ watch(locale, () => {
 }
 
 .dashboard-footnote {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--p-text-muted-color);
 }
 
@@ -1221,7 +1221,7 @@ watch(locale, () => {
 }
 
 .dashboard-allocation-total-label {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1231,7 +1231,7 @@ watch(locale, () => {
 .dashboard-allocation-total-value {
   margin-top: 0.35rem;
   max-width: 7rem;
-  font-size: 1.125rem;
+  font-size: 0.95rem;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -1271,14 +1271,14 @@ watch(locale, () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.84rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--p-text-color);
 }
 
 .dashboard-allocation-percentage {
   margin-left: auto;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--p-text-muted-color);
 }
@@ -1300,6 +1300,11 @@ watch(locale, () => {
 
 .dashboard-table-panel :deep(.p-datatable-header-cell) {
   white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.dashboard-table-panel :deep(.p-datatable-tbody > tr > td) {
+  font-size: 0.8125rem;
 }
 
 .dashboard-weight-cell {
@@ -1329,7 +1334,7 @@ watch(locale, () => {
 .dashboard-weight-value {
   min-width: 2.8rem;
   text-align: right;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--p-text-muted-color);
 }

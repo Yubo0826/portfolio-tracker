@@ -1,6 +1,6 @@
 <template>
   <header class="app-shell__topbar">
-    <div class="flex min-h-[5rem] items-center gap-3 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <div class="flex min-h-[1rem] items-center gap-3 px-4 sm:px-6 lg:px-8 xl:px-10">
 
         <!-- 窄屏: 顯示側邊攔按鈕 -->
       <div class="lg:hidden">
@@ -15,11 +15,7 @@
 
 
       <!-- 搜尋欄位 -->
-      <div class="flex min-w-0 flex-1 items-center gap-3 md:gap-4">
-        <!-- <div class="min-w-0">
-          <div class="truncate text-lg font-semibold sm:text-xl">{{ currentPageLabel }}</div>
-        </div> -->
-
+      <!-- <div class="flex min-w-0 flex-1 items-center gap-3 md:gap-4">
         <button
           aria-label="Search"
           class="app-shell__search hidden md:flex"
@@ -37,7 +33,9 @@
         @click="$emit('open-search')"
       >
         <i class="pi pi-search text-sm"></i>
-      </button>
+      </button> -->
+
+      <div class="flex-1" />
 
       <div class="ml-auto flex items-center gap-2">
         <template v-if="showAddTradeButtonBar && !isDemoUser">
@@ -73,6 +71,64 @@
         />
 
         <Button
+          :label="`${currentLanguageShort} · ${displayCurrency}`"
+          icon="pi pi-language"
+          :aria-label="t('language')"
+          size="small"
+          text
+          rounded
+          severity="secondary"
+          class="hidden sm:inline-flex"
+          @click="toggleLangCurrencyMenu"
+        />
+        <Button
+          icon="pi pi-language"
+          :aria-label="t('language')"
+          size="small"
+          text
+          rounded
+          severity="secondary"
+          class="sm:hidden"
+          @click="toggleLangCurrencyMenu"
+        />
+        <Menu
+          ref="langCurrencyMenu"
+          :popup="true"
+          class="lang-currency-menu language-menu"
+        >
+          <template #start>
+            <div class="p-2">
+              <div class="menu-panel-title text-xs font-semibold uppercase tracking-wide px-1 pb-2">{{ t('language') }}</div>
+              <div class="flex flex-col gap-1.5 mb-3">
+                <button
+                  v-for="option in languageOptions"
+                  :key="option.value"
+                  type="button"
+                  class="menu-panel-item w-full px-3 py-2 text-sm text-left"
+                  :class="{ 'is-active': locale === option.value }"
+                  @click="selectLanguage(option.value)"
+                >
+                  {{ option.flag }} {{ option.label }}
+                </button>
+              </div>
+              <div class="menu-panel-title text-xs font-semibold uppercase tracking-wide px-1 pb-2">{{ t('currency.label') }}</div>
+              <div class="flex flex-col gap-1.5">
+                <button
+                  v-for="currency in currencyOptions"
+                  :key="currency"
+                  type="button"
+                  class="menu-panel-item w-full px-3 py-2 text-sm text-left"
+                  :class="{ 'is-active': displayCurrency === currency }"
+                  @click="setCurrency(currency)"
+                >
+                  {{ currency }}
+                </button>
+              </div>
+            </div>
+          </template>
+        </Menu>
+
+        <Button
           :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
           aria-label="Toggle Dark Mode"
           size="small"
@@ -81,42 +137,51 @@
           severity="secondary"
           @click="$emit('toggle-theme')"
         />
-
-        <TieredMenu ref="menu" :model="menuItems" :popup="true" class="user-tiered-menu">
-          <template #start>
-            <div v-if="!isDemoUser" class="user-info-item flex items-center p-4">
-              <Avatar :image="userPhotoUrl" shape="circle" class="mr-3" />
-              <div class="flex flex-col">
-                <span class="font-medium">{{ displayUserName }}</span>
-                <span class="text-sm text-gray-500">{{ userEmail }}</span>
-              </div>
-            </div>
-          </template>
-
-          <template #item="{ item, props }">
-            <a v-ripple class="flex items-center w-full" v-bind="props.action">
-              <span class="ml-2">{{ item.label }}</span>
-              <span v-if="item.suffix && !item.items" class="ml-auto text-sm text-gray-500">{{ item.suffix }}</span>
-              <span v-if="item.items" class="ml-auto flex items-center gap-1 text-sm text-gray-500">
-                <span v-if="item.suffix">{{ item.suffix }}</span>
-                <i class="pi pi-chevron-right text-xs"></i>
-              </span>
-              <i v-if="item.active" class="pi pi-check ml-auto text-xs"></i>
-            </a>
-          </template>
-        </TieredMenu>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Avatar from 'primevue/avatar'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import SplitButton from 'primevue/splitbutton'
-import TieredMenu from 'primevue/tieredmenu'
+import Menu from 'primevue/menu'
+import { useSettingsStore } from '@/stores/settings'
+
+const { locale, t } = useI18n()
+const settingsStore = useSettingsStore()
+const { displayCurrency } = storeToRefs(settingsStore)
+
+const langCurrencyMenu = ref()
+const currencyOptions = ['USD', 'TWD']
+
+const languageOptions = [
+  { label: 'English', value: 'en', flag: '🇺🇸' },
+  { label: '繁體中文', value: 'zh-TW', flag: '🇹🇼' },
+]
+
+const currentLanguageShort = computed(() => {
+  if (locale.value === 'zh-TW') return '中文'
+  return 'EN'
+})
+
+const toggleLangCurrencyMenu = (event) => {
+  langCurrencyMenu.value?.toggle(event)
+}
+
+const selectLanguage = (value) => {
+  locale.value = value
+  localStorage.setItem('locale', value)
+  langCurrencyMenu.value?.hide()
+}
+
+const setCurrency = (value) => {
+  settingsStore.setDisplayCurrency(value)
+  langCurrencyMenu.value?.hide()
+}
 
 defineEmits(['open-sidebar', 'open-search', 'create-portfolio', 'open-transaction', 'login', 'toggle-theme'])
 
@@ -141,34 +206,9 @@ defineProps({
     type: Boolean,
     required: true,
   },
-  displayUserName: {
-    type: String,
-    required: true,
-  },
-  userEmail: {
-    type: String,
-    default: '',
-  },
-  userPhotoUrl: {
-    type: String,
-    default: '',
-  },
-  menuItems: {
-    type: Array,
-    required: true,
-  },
   tradeActionItems: {
     type: Array,
     required: true,
   },
-})
-
-const { t } = useI18n()
-const menu = ref()
-
-const toggleMenu = (event) => menu.value?.toggle(event)
-
-defineExpose({
-  toggleMenu,
 })
 </script>

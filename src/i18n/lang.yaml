@@ -206,6 +206,9 @@ currentPortfolio:
 openPortfolioMenu:
   en: Open portfolio menu
   zh: 開啟投資組合選單
+openUserMenu:
+  en: Open user menu
+  zh: 開啟使用者選單
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合

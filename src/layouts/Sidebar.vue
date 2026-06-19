@@ -2,46 +2,44 @@
   <!-- Desktop: fixed sidebar -->
   <aside
     v-if="persistent"
-    class="shell__sidebar hidden lg:flex"
-    :class="{ 'is-collapsed': collapsed }"
+    class="sidebar hidden lg:flex"
   >
-    <!-- Header: Brand + Toggle in same row -->
-    <div class="shell__sidebar-header">
-      <button
-        class="shell__brand"
-        :class="{ 'shell__brand--hidden': collapsed }"
-        @click="goDashboard"
-      >
-        <span class="shell__brand-stock">Stock</span>
-        <span class="shell__brand-bar">Bar</span>
+    <div class="sidebar-top">
+      <button type="button" class="back-btn" @click="goDashboard">
+        <span class="sidebar-brand">
+          <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
+        </span>
       </button>
-      <button
-        type="button"
-        class="shell__collapse-btn"
-        :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-        :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-        @click="collapsed = !collapsed"
-      >
-        <SvgIcon name="sidebar" class="shell__collapse-icon" />
-      </button>
-    </div>
 
-    <!-- Portfolio Menu -->
-    <template v-if="!collapsed">
-      <div class="px-3 pb-2">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          :placeholder="t('searchPlaceholder')"
+          readonly
+          @click="$emit('open-search')"
+          @keydown.enter.prevent="$emit('open-search')"
+        />
+      </div>
+
+      <!-- Portfolio Menu -->
+      <div class="sidebar-portfolio">
         <button
           type="button"
-          class="portfolio-menu-trigger shell__portfolio-trigger"
+          class="portfolio-menu-trigger menu-item sidebar-portfolio__trigger"
           :class="{ 'is-open': portfolioMenuVisible }"
           :aria-label="t('openPortfolioMenu')"
           :aria-expanded="portfolioMenuVisible"
           @click="togglePortfolioMenu"
         >
-          <div class="flex min-w-0 flex-col items-start text-left">
-            <span class="text-[8px] font-semibold uppercase tracking-[0.18em] text-[var(--p-text-muted-color)]">{{ t('portfolio') }}</span>
-            <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
-          </div>
-          <SvgIcon name="chevron-down" class="portfolio-menu-trigger__icon" />
+          <span class="menu-item-left">
+            <i class="fa-solid fa-briefcase"></i>
+            <span class="sidebar-portfolio__text">
+              <span class="sidebar-portfolio__label">{{ t('portfolio') }}</span>
+              <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
+            </span>
+          </span>
+          <i class="fa-solid fa-chevron-down portfolio-menu-trigger__icon"></i>
         </button>
 
         <TieredMenu
@@ -49,8 +47,8 @@
           :model="portfolioMenuItems"
           :popup="true"
           class="portfolio-tiered-menu"
-          @show="portfolioMenuVisible = true"
-          @hide="portfolioMenuVisible = false"
+          @show="onPortfolioMenuShow"
+          @hide="onPortfolioMenuHide"
         >
           <template #start>
             <div class="portfolio-menu-current">
@@ -88,50 +86,91 @@
 
         <div
           v-if="isDemoUser"
-          class="mt-3 flex items-start gap-2 rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-3 py-2 text-xs text-[var(--p-text-muted-color)]"
+          class="sidebar-demo-notice"
         >
-          <i class="pi pi-info-circle mt-0.5"></i>
+          <i class="pi pi-info-circle"></i>
           <span>{{ $t('demoUserMessage') }}</span>
         </div>
       </div>
-    </template>
 
-    <!-- Navigation Section -->
-    <nav class="flex-1 overflow-y-auto px-3 pb-4 pt-2">
-      <div
-        v-for="section in sidebarSections"
-        :key="section.key"
-        class="mb-1 last:mb-0"
-      >
-        <div v-if="section.label && !collapsed" class="shell__section-label">{{ section.label }}</div>
-        <RouterLink
-          v-for="item in section.items"
-          :key="item.key"
-          :to="item.to"
-          class="shell__nav-item"
-          :class="{
-            'is-active': isNavItemActive(item),
-            'shell__nav-item--collapsed': collapsed,
-          }"
-          :title="collapsed ? item.label : undefined"
-        >
-          <span class="shell__nav-icon">
-            <SvgIcon :name="item.icon" class="shell__nav-icon" />
-          </span>
-          <span class="shell__nav-text" :class="{ 'shell__nav-text--hidden': collapsed }">{{ item.label }}</span>
-        </RouterLink>
-      </div>
-    </nav>
+      <template v-for="(section, index) in sidebarSections" :key="section.key">
+        <div v-if="index > 0" class="menu-divider"></div>
 
-    <div class="mt-auto border-t border-[var(--p-content-border-color)] px-3 py-3">
-      <button type="button" class="shell__profile" :class="{ 'shell__profile--collapsed': collapsed }" @click="$emit('toggle-menu')">
-        <Avatar :image="userPhotoUrl" shape="circle" class="shrink-0" />
-        <div v-if="!collapsed" class="min-w-0 flex-1 text-left">
-          <p class="truncate text-sm font-semibold">{{ userDisplayName }}</p>
-          <p class="truncate text-xs text-[var(--p-text-muted-color)]">{{ userEmail }}</p>
+        <div class="menu-group">
+          <RouterLink
+            v-for="item in section.items"
+            :key="item.key"
+            :to="item.to"
+            class="menu-item"
+            :class="{ active: isNavItemActive(item) }"
+          >
+            <span class="menu-item-left">
+              <i :class="navIconClass(item.icon)"></i>
+              {{ item.label }}
+            </span>
+          </RouterLink>
         </div>
-        <i v-if="!collapsed" class="pi pi-ellipsis-v text-xs text-[var(--p-text-muted-color)]"></i>
+      </template>
+    </div>
+
+    <div class="sidebar-user">
+      <button
+        type="button"
+        class="user-profile"
+        :class="{ 'is-open': userMenuVisible }"
+        :aria-label="t('openUserMenu')"
+        :aria-expanded="userMenuVisible"
+        @click="toggleUserMenu"
+      >
+        <div class="user-info">
+          <div v-if="userPhotoUrl" class="avatar avatar--image">
+            <img :src="userPhotoUrl" :alt="userDisplayName" />
+          </div>
+          <div v-else class="avatar">{{ userInitial }}</div>
+          <div>
+            <div class="user-name">{{ userDisplayName }}</div>
+            <div class="user-plan">{{ userEmail }}</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-up user-profile__chevron"></i>
       </button>
+
+      <TieredMenu
+        ref="userMenu"
+        :model="menuItems"
+        :popup="true"
+        class="portfolio-tiered-menu"
+        @show="onUserMenuShow"
+        @hide="onUserMenuHide"
+      >
+        <template #start>
+          <div class="portfolio-menu-current">
+            <span class="portfolio-menu-current__label">{{ userDisplayName }}</span>
+            <i class="pi pi-chevron-up text-xs"></i>
+          </div>
+        </template>
+
+        <template #item="{ item, props }">
+          <a
+            v-ripple
+            class="portfolio-menu-item"
+            :class="{
+              'is-active': item.active,
+              'is-danger': item.kind === 'danger'
+            }"
+            v-bind="props.action"
+          >
+            <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
+            <span class="portfolio-menu-item__label">{{ item.label }}</span>
+            <span v-if="item.items" class="portfolio-menu-item__suffix">
+              <span v-if="item.suffix">{{ item.suffix }}</span>
+              <i class="pi pi-chevron-right text-xs"></i>
+            </span>
+            <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
+            <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
+          </a>
+        </template>
+      </TieredMenu>
     </div>
   </aside>
 
@@ -140,65 +179,167 @@
     v-else
     v-model:visible="visible"
     position="left"
-    class="w-[19rem] max-w-[88vw]"
+    class="sidebar-drawer w-[19rem] max-w-[88vw]"
   >
     <template #container="{ closeCallback }">
-      <div class="flex h-full flex-col bg-[var(--p-surface-card)] text-[var(--p-text-color)]">
-        <div class="flex items-center justify-between px-4 pt-4 pb-3 shrink-0">
+      <div class="sidebar sidebar--drawer">
+        <div class="sidebar-top">
           <button
             type="button"
-            class="inline-flex items-center gap-1 text-left text-2xl font-bold"
+            class="back-btn"
             @click="go('/dashboard', closeCallback)"
           >
-            <span class="text-[var(--p-text-color)] opacity-75">Stock</span>
-            <span class="text-[var(--p-primary-color)]">Bar</span>
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="sidebar-brand">
+              <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
+            </span>
           </button>
 
-          <Button type="button" @click="closeCallback" icon="pi pi-times" rounded variant="text" severity="secondary"></Button>
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+              type="text"
+              :placeholder="t('searchPlaceholder')"
+              readonly
+              @click="openSearchAndClose(closeCallback)"
+              @keydown.enter.prevent="openSearchAndClose(closeCallback)"
+            />
+          </div>
+
+          <div class="sidebar-portfolio">
+            <button
+              type="button"
+              class="portfolio-menu-trigger menu-item sidebar-portfolio__trigger"
+              :class="{ 'is-open': portfolioMenuVisible }"
+              :aria-label="t('openPortfolioMenu')"
+              :aria-expanded="portfolioMenuVisible"
+              @click="togglePortfolioMenu"
+            >
+              <span class="menu-item-left">
+                <i class="fa-solid fa-briefcase"></i>
+                <span class="sidebar-portfolio__text">
+                  <span class="sidebar-portfolio__label">{{ t('portfolio') }}</span>
+                  <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
+                </span>
+              </span>
+              <i class="fa-solid fa-chevron-down portfolio-menu-trigger__icon"></i>
+            </button>
+
+            <TieredMenu
+              ref="portfolioMenuMobile"
+              :model="portfolioMenuItems"
+              :popup="true"
+              class="portfolio-tiered-menu"
+              @show="onPortfolioMenuShow"
+              @hide="onPortfolioMenuHide"
+            >
+              <template #start>
+                <div class="portfolio-menu-current">
+                  <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
+                  <i class="pi pi-chevron-up text-xs"></i>
+                </div>
+              </template>
+
+              <template #item="{ item, props }">
+                <div v-if="item.kind === 'section'" class="portfolio-menu-section">
+                  {{ item.label }}
+                </div>
+
+                <a
+                  v-else
+                  v-ripple
+                  class="portfolio-menu-item"
+                  :class="{
+                    'is-active': item.kind === 'portfolio' && item.active,
+                    'is-danger': item.kind === 'danger'
+                  }"
+                  v-bind="props.action"
+                >
+                  <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
+                  <span class="portfolio-menu-item__label">{{ item.label }}</span>
+                  <span v-if="item.items" class="portfolio-menu-item__suffix">
+                    <span v-if="item.suffix">{{ item.suffix }}</span>
+                    <i class="pi pi-chevron-right text-xs"></i>
+                  </span>
+                  <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
+                  <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
+                </a>
+              </template>
+            </TieredMenu>
+
+            <div
+              v-if="isDemoUser"
+              class="sidebar-demo-notice"
+            >
+              <i class="pi pi-info-circle"></i>
+              <span>{{ $t('demoUserMessage') }}</span>
+            </div>
+          </div>
+
+          <template v-for="(section, index) in sidebarSections" :key="section.key">
+            <div v-if="index > 0" class="menu-divider"></div>
+
+            <div class="menu-group">
+              <button
+                v-for="item in section.items"
+                :key="item.key"
+                type="button"
+                class="menu-item w-full"
+                :class="{ active: isNavItemActive(item) }"
+                @click="go(item.to, closeCallback)"
+              >
+                <span class="menu-item-left">
+                  <i :class="navIconClass(item.icon)"></i>
+                  {{ item.label }}
+                </span>
+              </button>
+            </div>
+          </template>
         </div>
 
-        <div class="px-4 pt-2 shrink-0">
+        <div class="sidebar-user">
           <button
             type="button"
-            class="portfolio-menu-trigger w-full justify-between rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-4 py-3"
-            :class="{ 'is-open': portfolioMenuVisible }"
-            :aria-label="t('openPortfolioMenu')"
-            :aria-expanded="portfolioMenuVisible"
-            @click="togglePortfolioMenu"
+            class="user-profile"
+            :class="{ 'is-open': userMenuVisible }"
+            :aria-label="t('openUserMenu')"
+            :aria-expanded="userMenuVisible"
+            @click="toggleUserMenu"
           >
-            <div class="flex min-w-0 flex-col items-start text-left">
-              <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--p-text-muted-color)]">{{ t('portfolio') }}</span>
-              <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
+            <div class="user-info">
+              <div v-if="userPhotoUrl" class="avatar avatar--image">
+                <img :src="userPhotoUrl" :alt="userDisplayName" />
+              </div>
+              <div v-else class="avatar">{{ userInitial }}</div>
+              <div>
+                <div class="user-name">{{ userDisplayName }}</div>
+                <div class="user-plan">{{ userEmail }}</div>
+              </div>
             </div>
-            <i class="pi pi-chevron-down text-xs portfolio-menu-trigger__icon"></i>
+            <i class="fa-solid fa-chevron-up user-profile__chevron"></i>
           </button>
 
           <TieredMenu
-            ref="portfolioMenu"
-            :model="portfolioMenuItems"
+            ref="userMenuMobile"
+            :model="menuItems"
             :popup="true"
             class="portfolio-tiered-menu"
-            @show="portfolioMenuVisible = true"
-            @hide="portfolioMenuVisible = false"
+            @show="onUserMenuShow"
+            @hide="onUserMenuHide"
           >
             <template #start>
               <div class="portfolio-menu-current">
-                <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
+                <span class="portfolio-menu-current__label">{{ userDisplayName }}</span>
                 <i class="pi pi-chevron-up text-xs"></i>
               </div>
             </template>
 
             <template #item="{ item, props }">
-              <div v-if="item.kind === 'section'" class="portfolio-menu-section">
-                {{ item.label }}
-              </div>
-
               <a
-                v-else
                 v-ripple
                 class="portfolio-menu-item"
                 :class="{
-                  'is-active': item.kind === 'portfolio' && item.active,
+                  'is-active': item.active,
                   'is-danger': item.kind === 'danger'
                 }"
                 v-bind="props.action"
@@ -214,55 +355,6 @@
               </a>
             </template>
           </TieredMenu>
-
-          <div
-            v-if="isDemoUser"
-            class="mt-3 flex items-start gap-2 rounded-2xl border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] px-3 py-2 text-xs text-[var(--p-text-muted-color)]"
-          >
-            <i class="pi pi-info-circle mt-0.5"></i>
-            <span>{{ $t('demoUserMessage') }}</span>
-          </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto px-3 pb-6 pt-4">
-          <div
-            v-for="section in sidebarSections"
-            :key="section.key"
-            class="mb-2 last:mb-0"
-          >
-            <div
-              v-if="section.label"
-              class="shell__section-label px-1 pb-1"
-            >
-              {{ section.label }}
-            </div>
-
-            <div class="flex flex-col">
-              <button
-                v-for="item in section.items"
-                :key="item.key"
-                type="button"
-                class="shell__nav-item w-full"
-                :class="{ 'is-active': isNavItemActive(item) }"
-                @click="go(item.to, closeCallback)"
-              >
-                <span class="shell__nav-icon shell__nav-icon--expanded">
-                  <span class="material-symbols-outlined shell__material-icon" :data-icon="item.icon">{{ item.icon }}</span>
-                </span>
-                <span class="truncate">{{ item.label }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-auto border-t border-[var(--p-content-border-color)] px-4 py-4">
-          <div class="flex items-center gap-3 rounded-2xl bg-[var(--p-content-background)] px-3 py-3">
-            <Avatar :image="userPhotoUrl" shape="circle" class="shrink-0" />
-            <div class="flex min-w-0 flex-col text-left">
-              <span class="truncate text-sm font-semibold">{{ userDisplayName }}</span>
-              <span class="truncate text-xs text-[var(--p-text-muted-color)]">{{ userEmail }}</span>
-            </div>
-          </div>
         </div>
       </div>
     </template>
@@ -270,15 +362,26 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Drawer from 'primevue/drawer'
-import Avatar from 'primevue/avatar'
 import TieredMenu from 'primevue/tieredmenu'
 
-import SvgIcon from '@/components/SvgIcon.vue'
 import { buildSidebarSections } from './navigation.js'
+
+const NAV_ICON_MAP = {
+  dashboard: 'fa-solid fa-gauge',
+  bank: 'fa-solid fa-building-columns',
+  receipt: 'fa-solid fa-receipt',
+  savings: 'fa-solid fa-piggy-bank',
+  cash: 'fa-solid fa-money-bill-wave',
+  'pie-chart': 'fa-solid fa-bullseye',
+  piechart: 'fa-solid fa-arrows-rotate',
+  history: 'fa-solid fa-clock-rotate-left',
+  folder: 'fa-solid fa-folder',
+  book: 'fa-solid fa-book',
+}
 
 const { t } = useI18n()
 const route = useRoute()
@@ -293,15 +396,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  collapsed: {
-    type: Boolean,
-    default: false,
-  },
   currentPortfolioName: {
     type: String,
     required: true,
   },
   portfolioMenuItems: {
+    type: Array,
+    required: true,
+  },
+  menuItems: {
     type: Array,
     required: true,
   },
@@ -323,29 +426,116 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:visible', 'update:collapsed', 'toggle-menu'])
+const emit = defineEmits(['update:visible', 'open-search'])
 
 const visible = computed({
   get: () => props.visible,
   set: (value) => emit('update:visible', value)
 })
 
-const collapsed = computed({
-  get: () => props.collapsed,
-  set: (value) => emit('update:collapsed', value)
-})
-
 const portfolioMenu = ref()
+const portfolioMenuMobile = ref()
 const portfolioMenuVisible = ref(false)
+const userMenu = ref()
+const userMenuMobile = ref()
+const userMenuVisible = ref(false)
 const sidebarSections = computed(() => buildSidebarSections(t))
+
+const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUpperCase())
+
+const navIconClass = (icon) => NAV_ICON_MAP[icon] || 'fa-solid fa-circle'
 
 const isNavItemActive = (item) => {
   return item.activePaths.some((path) => route.path === path || route.path.startsWith(`${path}/`))
 }
 
 const togglePortfolioMenu = (event) => {
-  portfolioMenu.value?.toggle(event)
+  const menuRef = props.persistent ? portfolioMenu.value : portfolioMenuMobile.value
+  menuRef?.toggle(event)
 }
+
+const toggleUserMenu = (event) => {
+  const menuRef = props.persistent ? userMenu.value : userMenuMobile.value
+  menuRef?.toggle(event)
+}
+
+let menuPositionCleanup = null
+
+const clearMenuPositionLock = () => {
+  menuPositionCleanup?.()
+  menuPositionCleanup = null
+}
+
+const lockPopupMenuPosition = (menuRef) => {
+  clearMenuPositionLock()
+
+  nextTick(() => {
+    const menu = menuRef.value
+    if (!menu?.container || !menu?.target) return
+
+    const reposition = () => {
+      if (!menu.visible || !menu.container || !menu.target) return
+
+      const target = menu.target.getBoundingClientRect()
+      const container = menu.container
+      const gap = 4
+      const containerHeight = container.offsetHeight
+      const containerWidth = container.offsetWidth
+      const viewportHeight = window.innerHeight
+      const viewportWidth = window.innerWidth
+
+      let top = target.bottom + gap
+      if (top + containerHeight > viewportHeight && target.top - containerHeight - gap > 0) {
+        top = target.top - containerHeight - gap
+      }
+
+      let left = target.left
+      if (left + containerWidth > viewportWidth) {
+        left = Math.max(gap, viewportWidth - containerWidth - gap)
+      }
+
+      container.style.position = 'fixed'
+      container.style.top = `${top}px`
+      container.style.left = `${left}px`
+      container.style.minWidth = `${target.width}px`
+    }
+
+    reposition()
+
+    const sidebarScroll = menu.target.closest('.sidebar-top')
+    const onScroll = () => reposition()
+
+    window.addEventListener('scroll', onScroll, true)
+    sidebarScroll?.addEventListener('scroll', onScroll, { passive: true })
+
+    menuPositionCleanup = () => {
+      window.removeEventListener('scroll', onScroll, true)
+      sidebarScroll?.removeEventListener('scroll', onScroll)
+    }
+  })
+}
+
+const onPortfolioMenuShow = () => {
+  portfolioMenuVisible.value = true
+  lockPopupMenuPosition(props.persistent ? portfolioMenu : portfolioMenuMobile)
+}
+
+const onPortfolioMenuHide = () => {
+  portfolioMenuVisible.value = false
+  clearMenuPositionLock()
+}
+
+const onUserMenuShow = () => {
+  userMenuVisible.value = true
+  lockPopupMenuPosition(props.persistent ? userMenu : userMenuMobile)
+}
+
+const onUserMenuHide = () => {
+  userMenuVisible.value = false
+  clearMenuPositionLock()
+}
+
+onBeforeUnmount(clearMenuPositionLock)
 
 const go = (to, closeCallback) => {
   emit('update:visible', false)
@@ -356,233 +546,357 @@ const go = (to, closeCallback) => {
 const goDashboard = () => {
   router.push('/dashboard')
 }
+
+const openSearchAndClose = (closeCallback) => {
+  emit('update:visible', false)
+  closeCallback?.()
+  emit('open-search')
+}
 </script>
 
 <style>
-/* ===== Desktop sidebar layout ===== */
-.shell__sidebar {
+/* Reference light-mode palette (Cursor Settings) */
+html:not(.dark) .sidebar {
+  --bg-sidebar: #f0f4f8;
+  --bg-main: #f8fafc;
+  --bg-card: #f1f5f9;
+  --text-main: #334155;
+  --text-muted: #64748b;
+  --accent-color: #3b82f6;
+  --border-color: #e2e8f0;
+
+  --sidebar-bg: var(--bg-sidebar);
+  --sidebar-border: var(--border-color);
+  --sidebar-text: var(--text-main);
+  --sidebar-text-muted: var(--text-muted);
+  --sidebar-active-bg: #e2e8f0;
+  --sidebar-active-text: #334155;
+  --sidebar-input-bg: #ffffff;
+  --sidebar-avatar-bg: #cbd5e1;
+  --sidebar-hover-bg: #e2e8f0;
+}
+
+.sidebar {
+  --sidebar-bg: color-mix(in srgb, var(--p-surface-background) 88%, var(--p-content-border-color));
+  --sidebar-border: var(--p-content-border-color);
+  --sidebar-text: var(--p-text-color);
+  --sidebar-text-muted: var(--p-text-muted-color);
+  --sidebar-active-bg: color-mix(in srgb, var(--p-text-color) 12%, transparent);
+  --sidebar-input-bg: var(--p-content-background);
+  --sidebar-avatar-bg: color-mix(in srgb, var(--p-text-muted-color) 35%, transparent);
+  --sidebar-hover-bg: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 40;
-  width: 17rem;
+  width: 260px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--p-content-border-color);
-  background: var(--p-content-background);
-  backdrop-filter: blur(18px);
+  padding: 16px;
+  padding-top: 0px;
+  justify-content: space-between;
   overflow: hidden;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.shell__sidebar.is-collapsed {
-  width: 4.5rem;
+.sidebar--drawer {
+  position: static;
+  width: 100%;
+  height: 100%;
+  z-index: auto;
 }
 
-/* ===== Sidebar header: brand + toggle in same row ===== */
-.shell__sidebar-header {
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.back-btn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 3.5rem;
-  padding: 0 0.75rem;
-  flex-shrink: 0;
-}
-
-/* ===== Brand ===== */
-.shell__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.1rem;
-  font-size: 1.8rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: 10rem;
-  transition: opacity 0.15s ease, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.shell__brand--hidden {
-  opacity: 0;
-  max-width: 0;
-  pointer-events: none;
-}
-
-.shell__brand-stock {
-  color: color-mix(in srgb, var(--p-text-color) 80%, transparent);
-}
-
-.shell__brand-bar {
-  color: var(--p-primary-color);
-}
-
-/* ===== Toggle / collapse button ===== */
-.shell__collapse-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--p-text-muted-color);
+  gap: 8px;
+  padding: 8px;
+  color: var(--sidebar-text-muted);
+  background: none;
+  border: none;
+  font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.16s ease, color 0.16s ease;
-  flex-shrink: 0;
+  text-align: left;
 }
 
-.shell__collapse-btn:hover {
-  background: color-mix(in srgb, var(--p-text-color) 10%, transparent);
-  color: var(--p-text-color);
+.back-btn:hover {
+  color: var(--sidebar-text);
 }
 
-.shell__collapse-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+html:not(.dark) .back-btn:hover {
+  color: #64748b;
 }
 
-/* ===== Portfolio trigger ===== */
-.shell__portfolio-trigger {
-  width: 100%;
-  justify-content: space-between;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--p-content-background) 70%, var(--p-surface-background));
+.sidebar-brand {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
-/* ===== Section labels ===== */
-.shell__section-label {
-  padding: 0.875rem 0 0.375rem 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--p-text-muted-color);
+.sidebar-brand__stock {
+  color: color-mix(in srgb, var(--sidebar-text) 80%, transparent);
 }
 
-/* ===== Profile section ===== */
-.shell__profile {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 78%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
-  color: var(--p-text-color);
-  transition: background-color 0.16s ease, border-color 0.16s ease;
+html:not(.dark) .sidebar-brand__stock {
+  color: #334155;
 }
 
-.shell__profile:hover {
-  background: color-mix(in srgb, var(--p-content-background) 100%, transparent);
-  border-color: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-border-color));
-}
-
-.shell__profile--collapsed {
-  justify-content: center;
-  padding: 0.6rem;
-  border-radius: 50%;
-  width: 2.75rem;
-  height: 2.75rem;
-}
-
-.shell__profile--collapsed:hover {
-  border-radius: 50%;
-}
-
-/* ===== Navigation items: pill shape ===== */
-.shell__nav-item {
-  display: flex;
-  align-items: center;
-  height: 3rem;
-  padding: 0 0.75rem;
-  border-radius: 1.5rem;
-  margin-bottom: 0.25rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.shell__nav-item:hover {
-  background-color: color-mix(in srgb, var(--p-text-color) 6%, transparent);
-  color: var(--p-text-color);
-}
-
-.shell__nav-item.is-active {
-  background-color: color-mix(in srgb, var(--p-text-color) 14%, transparent);
-  color: var(--p-text-color);
-}
-
-.shell__nav-item.is-active .shell__nav-icon {
+.sidebar-brand__bar {
   color: var(--p-primary-color);
 }
 
-/* ===== Collapsed nav item: explicit square so border-radius becomes a circle ===== */
-.shell__nav-item--collapsed {
-  width: 3rem;
-  padding: 0;
-  justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
+html:not(.dark) .sidebar-brand__bar {
+  color: #3b82f6;
 }
 
-.shell__nav-item--collapsed .shell__nav-icon {
-  margin-right: 0;
+.search-box {
+  position: relative;
+  margin: 8px 0;
 }
 
-/* ===== Nav icon: fixed position — never moves during animation ===== */
-.shell__nav-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  color: inherit;
-  flex-shrink: 0;
-  margin-right: 1.25rem;
-}
-
-.shell__material-icon {
-  font-size: 1.25rem;
-  color: inherit;
-}
-
-/* ===== Nav text: opacity + max-width fade on collapse ===== */
-.shell__nav-text {
-  white-space: nowrap;
-  overflow: hidden;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  max-width: 12rem;
-  transition: opacity 0.15s ease, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.shell__nav-text--hidden {
-  opacity: 0;
-  max-width: 0;
+.search-box i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sidebar-text-muted);
+  font-size: 14px;
   pointer-events: none;
 }
 
-/* ===== Portfolio menu shared ===== */
+.search-box input {
+  width: 100%;
+  padding: 8px 8px 8px 32px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  background-color: var(--sidebar-input-bg);
+  font-size: 13px;
+  color: var(--sidebar-text);
+  cursor: pointer;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--border-color, var(--sidebar-border));
+}
+
+html:not(.dark) .search-box input:focus {
+  border-color: #e2e8f0;
+}
+
+.sidebar-portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-portfolio__trigger {
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidebar-portfolio__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.sidebar-portfolio__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sidebar-text-muted);
+}
+
+.sidebar-demo-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  background-color: var(--sidebar-input-bg);
+  font-size: 12px;
+  color: var(--sidebar-text-muted);
+}
+
+.menu-group {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.16s ease;
+}
+
+.menu-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.menu-item i {
+  width: 16px;
+  color: var(--sidebar-text-muted);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background-color: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, var(--sidebar-text));
+}
+
+.menu-item.active {
+  font-weight: 500;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: var(--sidebar-border);
+  margin: 12px 0;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  width: 100%;
+  flex-shrink: 0;
+  transition: background-color 0.16s ease;
+}
+
+.user-profile:hover,
+.user-profile.is-open {
+  background-color: var(--sidebar-hover-bg);
+}
+
+html:not(.dark) .user-profile:hover,
+html:not(.dark) .user-profile.is-open {
+  background-color: transparent;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background-color: var(--sidebar-avatar-bg);
+  color: var(--sidebar-avatar-text, var(--sidebar-text));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.avatar--image {
+  overflow: hidden;
+  background: none;
+}
+
+.avatar--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sidebar-user-name, var(--sidebar-text));
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-plan {
+  font-size: 11px;
+  color: var(--sidebar-text-muted);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-profile__chevron {
+  font-size: 12px;
+  color: var(--sidebar-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.16s ease;
+}
+
+.user-profile.is-open .user-profile__chevron {
+  transform: rotate(180deg);
+}
+
 .portfolio-menu-trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  width: 100%;
-  padding: 0.4rem 0.65rem;
-  border: 0;
-  border-radius: 0.9rem;
-  background: transparent;
-  color: var(--p-text-color);
-  cursor: pointer;
+  color: var(--sidebar-text);
   transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .portfolio-menu-trigger:hover,
 .portfolio-menu-trigger.is-open {
-  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+  background: var(--sidebar-hover-bg);
+}
+
+html:not(.dark) .portfolio-menu-trigger:hover,
+html:not(.dark) .portfolio-menu-trigger.is-open {
+  background: #e2e8f0;
+}
+
+.portfolio-menu-trigger__icon {
+  font-size: 10px;
+  color: var(--sidebar-text-muted);
+  transition: transform 0.16s ease;
+}
+
+.portfolio-menu-trigger.is-open .portfolio-menu-trigger__icon {
+  transform: rotate(180deg);
 }
 
 .portfolio-tiered-menu.p-tieredmenu,
@@ -595,11 +909,44 @@ const goDashboard = () => {
   box-shadow: 0 22px 44px rgba(0, 0, 0, 0.12);
 }
 
+.portfolio-tiered-menu.p-tieredmenu {
+  position: fixed;
+}
+
+html:not(.dark) .portfolio-tiered-menu.p-tieredmenu,
+html:not(.dark) .portfolio-tiered-menu .p-tieredmenu-submenu {
+  border-color: #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.08);
+}
+
 .portfolio-tiered-menu .p-tieredmenu-root-list,
 .portfolio-tiered-menu .p-tieredmenu-submenu {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
+}
+
+.portfolio-tiered-menu .p-tieredmenu-item-content {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  color: inherit;
+}
+
+.portfolio-tiered-menu .p-tieredmenu-item-link {
+  background: transparent;
+  border-radius: 0;
+  color: inherit;
+}
+
+.portfolio-tiered-menu .p-tieredmenu-item-content:hover,
+.portfolio-tiered-menu .p-tieredmenu-item-content.p-focus,
+.portfolio-tiered-menu .p-tieredmenu-item.p-focus > .p-tieredmenu-item-content,
+.portfolio-tiered-menu .p-tieredmenu-item-link:hover,
+.portfolio-tiered-menu .p-tieredmenu-item-link.p-focus {
+  background: transparent;
+  color: inherit;
 }
 
 .portfolio-tiered-menu .p-tieredmenu-separator {
@@ -616,6 +963,10 @@ const goDashboard = () => {
   color: var(--p-text-color);
 }
 
+html:not(.dark) .portfolio-menu-current {
+  color: #334155;
+}
+
 .portfolio-menu-current__label {
   font-size: 1rem;
   font-weight: 700;
@@ -630,6 +981,10 @@ const goDashboard = () => {
   color: var(--p-text-muted-color);
 }
 
+html:not(.dark) .portfolio-menu-section {
+  color: #64748b;
+}
+
 .portfolio-menu-item {
   display: flex;
   align-items: center;
@@ -641,13 +996,26 @@ const goDashboard = () => {
   transition: background-color 0.14s ease, color 0.14s ease;
 }
 
+html:not(.dark) .portfolio-menu-item {
+  color: #334155;
+}
+
 .portfolio-menu-item:hover {
   background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+}
+
+html:not(.dark) .portfolio-menu-item:hover {
+  background: #f1f5f9;
 }
 
 .portfolio-menu-item.is-active {
   background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
   color: var(--p-primary-color);
+}
+
+html:not(.dark) .portfolio-menu-item.is-active {
+  background: #e2e8f0;
+  color: #334155;
 }
 
 .portfolio-menu-item.is-danger {
@@ -667,28 +1035,96 @@ const goDashboard = () => {
   color: var(--p-text-muted-color);
 }
 
+html:not(.dark) .portfolio-menu-item__suffix {
+  color: #64748b;
+}
+
+html:not(.dark) .portfolio-tiered-menu .p-tieredmenu-separator {
+  border-top-color: #e2e8f0;
+}
+
+/* Reference dark-mode palette (Cursor Settings) */
+.dark .sidebar {
+  --bg-sidebar: #0b121f;
+  --bg-main: #070a12;
+  --bg-card: #0f172a;
+  --bg-input: #1e293b;
+  --border-color: #1e293b;
+  --text-main: #94a3b8;
+  --text-muted: #64748b;
+  --text-title: #f8fafc;
+  --accent-blue: #38bdf8;
+  --accent-bg: #1e293b;
+  --control-btn-hover: #334155;
+
+  --sidebar-bg: var(--bg-sidebar);
+  --sidebar-border: var(--border-color);
+  --sidebar-text: var(--text-main);
+  --sidebar-text-muted: var(--text-muted);
+  --sidebar-active-bg: var(--accent-bg);
+  --sidebar-active-text: var(--text-title);
+  --sidebar-input-bg: var(--bg-input);
+  --sidebar-avatar-bg: #cbd5e1;
+  --sidebar-avatar-text: #334155;
+  --sidebar-user-name: var(--text-title);
+  --sidebar-hover-bg: var(--control-btn-hover);
+}
+
+.dark .back-btn:hover {
+  color: #64748b;
+}
+
+.dark .sidebar-brand__stock {
+  color: #f8fafc;
+}
+
+.dark .sidebar-brand__bar {
+  color: #38bdf8;
+}
+
+.dark .user-profile:hover,
+.dark .user-profile.is-open {
+  background-color: transparent;
+}
+
 .dark .portfolio-tiered-menu.p-tieredmenu,
 .dark .portfolio-tiered-menu .p-tieredmenu-submenu {
-  border-color: #383838;
-  background: #2a313c;
+  border-color: #1e293b;
+  background: #0f172a;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
 }
 
 .dark .portfolio-tiered-menu .p-tieredmenu-separator {
-  border-top-color: #3a3a3a;
+  border-top-color: #1e293b;
 }
 
 .dark .portfolio-menu-trigger:hover,
 .dark .portfolio-menu-trigger.is-open {
-  background: rgba(255, 255, 255, 0.08);
+  background: #334155;
+}
+
+.dark .portfolio-menu-current {
+  color: #f8fafc;
+}
+
+.dark .portfolio-menu-section {
+  color: #64748b;
+}
+
+.dark .portfolio-menu-item {
+  color: #94a3b8;
 }
 
 .dark .portfolio-menu-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #334155;
 }
 
 .dark .portfolio-menu-item.is-active {
-  background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
-  color: var(--p-primary-color);
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.dark .portfolio-menu-item__suffix {
+  color: #64748b;
 }
 </style>

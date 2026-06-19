@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "npm --prefix ../portfolio-backend start",
+    "dev:all": "concurrently -k -n web,api -c cyan,yellow \"npm run dev\" \"npm run dev:api\"",
     "build": "vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
@@ -40,6 +42,7 @@
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/test-utils": "^2.4.6",
+    "concurrently": "^10.0.3",
     "jsdom": "^26.0.0",
     "typescript": "^5.9.3",
     "vite": "^6.2.4",

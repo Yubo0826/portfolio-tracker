@@ -321,7 +321,7 @@ watch(
 }
 
 .holding-card__symbol {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--p-text-color);
 }
@@ -331,15 +331,15 @@ watch(
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   color: var(--p-text-muted-color);
 }
 
 .holding-card__change {
   flex-shrink: 0;
   border-radius: 999px;
-  padding: 0.32rem 0.65rem;
-  font-size: 0.92rem;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
@@ -368,7 +368,7 @@ watch(
 }
 
 .holding-card__price {
-  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.03em;
