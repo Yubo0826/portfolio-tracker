@@ -206,17 +206,6 @@
         </div>
       </div>
 
-      <!-- 個股資訊小卡 -->
-      <section v-if="featuredHoldings.length" class="space-y-4">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <DashboardHoldingCard
-            v-for="holding in featuredHoldings"
-            :key="holding.id"
-            :holding="holding"
-          />
-        </div>
-      </section>
-
       <!-- 資產配置 -->
       <div>
         <AppCard class="dashboard-panel dashboard-allocation-card">
@@ -425,7 +414,6 @@ import { ref, watch, computed } from 'vue'
 import Skeleton from 'primevue/skeleton'
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
-import DashboardHoldingCard from '@/components/DashboardHoldingCard.vue'
 import api from '@/utils/api'
 import xirr from 'xirr'
 import { useI18n } from 'vue-i18n'
@@ -469,12 +457,6 @@ const totalValue = computed(() => {
 const totalProfit = computed(() => {
   return holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
 })
-const featuredHoldings = computed(() => {
-  return [...holdingsStore.list]
-    .sort((left, right) => right.currentValue - left.currentValue)
-    .slice(0, 4)
-})
-
 const selectedPieType = ref('actual')
 const pieChartType = computed(() => ([
   { label: t('currentAsset'), value: 'actual' },
