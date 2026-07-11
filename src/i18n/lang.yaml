@@ -295,6 +295,27 @@ baseCurrency:
 totalProfitHint:
   en: Total Profit = Current Market Value − Total Cost (excluding fees)
   zh: 總損益 = 當前市值 − 總成本（未計入手續費）
+unrealizedProfit:
+  en: Unrealized P/L
+  zh: 未實現損益
+realizedProfit:
+  en: Realized P/L
+  zh: 已實現損益
+realizedProfitHint:
+  en: Realized Profit = Total proceeds from sells − average cost basis of shares sold (includes fees)
+  zh: 已實現損益 = 賣出交易的總收入 − 已賣出股數的平均成本（已計入手續費）
+totalAssets:
+  en: Total Assets
+  zh: 總資產
+holdingValue:
+  en: Holding Value
+  zh: 持倉價值
+targetAmount:
+  en: Target Amount
+  zh: 目標金額
+distribution:
+  en: Distribution
+  zh: 分配
 roi:
   en: Return on Investment
   zh: 投資報酬率：

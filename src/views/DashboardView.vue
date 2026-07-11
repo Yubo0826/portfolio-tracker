@@ -152,72 +152,54 @@
           </AppCard>
         </div>
 
-        <!-- 比例區塊 -->
-        <div class="col-span-12 xl:col-span-4">
-          <AppCard class="dashboard-panel dashboard-allocation-card h-full">
-            <template #title>
-              <div class="dashboard-allocation-head">
-                <div class="flex items-center justify-between gap-3">
-                  <h3 class="dashboard-allocation-title">{{ $t('allocation') }}</h3>
-                  <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
-                </div>
+        <!-- 損益資訊小卡 -->
+        <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
+          <AppCard class="dashboard-panel dashboard-metric-card flex-1">
+            <template #content>
+              <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
+              <div v-if="totalProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
+                <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
+                <span class="text-sm text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+              </div>
+              <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
 
-                <SelectButton
-                  v-model="selectedPieType"
-                  :options="pieChartType"
-                  optionLabel="label"
-                  optionValue="value"
-                  size="small"
-                  :allowEmpty="false"
-                  class="dashboard-allocation-toggle"
-                />
-
-                <p class="dashboard-allocation-desc">
-                  {{ selectedPieType === 'actual' ? $t('actualAllocationDesc') : $t('targetAllocationDesc') }}
-                </p>
+              <div class="dashboard-footnote mt-3">
+                {{ $t('roi') }}
+                <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+                  {{ annualReturn.toFixed(2) }}%
+                </span>
+                <span v-else>--</span>
               </div>
             </template>
+          </AppCard>
 
+          <AppCard class="dashboard-panel dashboard-metric-card flex-1">
             <template #content>
-              <div v-if="holdingsStore.list.length > 0" class="dashboard-allocation-content py-2">
-                <div v-if="selectedPieType === 'target' && !hasTargetAllocation" class="flex flex-col items-center text-center gap-3 py-8">
-                  <img class="w-56 h-56 sm:w-64 sm:h-64" src="/src/assets/undraw_report_k55w.svg" alt="">
-                  <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
-                </div>
-
-                <div v-else class="dashboard-allocation-layout">
-                  <div class="dashboard-allocation-figure">
-                    <highcharts
-                      :options="selectedAllocationChart"
-                      class="dashboard-allocation-chart"
-                    />
-
-                    <div class="dashboard-allocation-total">
-                      <span class="dashboard-allocation-total-label">{{ allocationSummary.label }}</span>
-                      <span class="dashboard-allocation-total-value">{{ allocationSummary.value }}</span>
-                    </div>
-                  </div>
-
-                  <div class="dashboard-allocation-list">
-                    <div
-                      v-for="item in selectedAllocationBreakdown"
-                      :key="`${selectedPieType}-${item.key}`"
-                      class="dashboard-allocation-item"
-                    >
-                      <div class="dashboard-allocation-item-main">
-                        <span class="dashboard-allocation-dot" :style="{ backgroundColor: item.color }"></span>
-                        <span class="dashboard-allocation-symbol">{{ item.name }}</span>
-                      </div>
-                      <span class="dashboard-allocation-percentage">{{ formatAllocationPercentage(item.percentage) }}</span>
-                    </div>
-                  </div>
-                </div>
+              <p class="dashboard-kicker">{{ $t('realizedProfit') }}</p>
+              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
+                <span>{{ splitAmountForEmphasis(realizedProfit).main }}</span>
+                <span class="text-sm text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
+                <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
               </div>
+              <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
 
-              <div v-else class="flex flex-col items-center text-center gap-3 py-8">
-                <img class="w-60 h-60 sm:w-80 sm:h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
-                <h2 class="text-base sm:text-lg font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
-                <p class="text-xs sm:text-sm text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
+              <div class="dashboard-footnote mt-3 flex items-center gap-2">
+                <i class="pi pi-info-circle" v-tooltip.bottom="$t('realizedProfitHint')" />
+                <span>{{ $t('realizedProfitHint') }}</span>
+              </div>
+            </template>
+          </AppCard>
+
+          <AppCard class="dashboard-panel dashboard-metric-card flex-1">
+            <template #content>
+              <p class="dashboard-kicker">{{ $t('irr') }}</p>
+              <div v-if="irr" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
+              <div v-else class="mt-2 text-xl font-bold tracking-tight text-slate-600">--</div>
+
+              <div class="dashboard-footnote mt-3 flex items-center gap-2">
+                <i class="pi pi-info-circle" v-tooltip.bottom="$t('xirrHint')" />
+                <span>{{ $t('xirrHint') }}</span>
               </div>
             </template>
           </AppCard>
@@ -235,53 +217,95 @@
         </div>
       </section>
 
-      <div class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AppCard class="dashboard-panel dashboard-metric-card h-full">
-              <template #content>
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <p class="dashboard-kicker">{{ $t('totalProfit') }}</p>
-                    <div v-if="totalProfit" class="mt-3 inline-flex items-end text-2xl font-bold tracking-tight">
-                      <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                      <span class="text-lg text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                      <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+      <!-- 資產配置 -->
+      <div>
+        <AppCard class="dashboard-panel dashboard-allocation-card">
+          <template #title>
+            <div class="dashboard-allocation-head">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="dashboard-allocation-title">{{ $t('allocation') }}</h3>
+                <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
+              </div>
+
+              <div class="dashboard-allocation-tabs" role="tablist">
+                <button
+                  v-for="option in pieChartType"
+                  :key="option.value"
+                  type="button"
+                  role="tab"
+                  class="dashboard-allocation-tab"
+                  :class="{ 'dashboard-allocation-tab--active': selectedPieType === option.value }"
+                  :aria-selected="selectedPieType === option.value"
+                  @click="selectedPieType = option.value"
+                >
+                  {{ option.label }}
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <template #content>
+            <div v-if="holdingsStore.list.length > 0" class="dashboard-allocation-content py-2">
+              <div v-if="selectedPieType === 'target' && !hasTargetAllocation" class="flex flex-col items-center text-center gap-3 py-8">
+                <img class="w-56 h-56 sm:w-64 sm:h-64" src="/src/assets/undraw_report_k55w.svg" alt="">
+                <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
+              </div>
+
+              <div v-else class="dashboard-allocation-layout">
+                <div class="dashboard-allocation-figure">
+                  <highcharts
+                    :options="selectedAllocationChart"
+                    class="dashboard-allocation-chart"
+                  />
+
+                  <div class="dashboard-allocation-total">
+                    <span class="dashboard-allocation-total-value">{{ allocationItemCount }}</span>
+                    <span class="dashboard-allocation-total-label">{{ $t('totalAssets') }}</span>
+                  </div>
+                </div>
+
+                <div class="dashboard-allocation-table" :class="{ 'dashboard-allocation-table--with-profit': selectedPieType === 'actual' }">
+                  <div class="dashboard-allocation-table-row dashboard-allocation-table-head">
+                    <span>{{ $t('currentAsset') }}</span>
+                    <span class="dashboard-allocation-cell--num">{{ selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount') }}</span>
+                    <span class="dashboard-allocation-cell--num">{{ $t('distribution') }}</span>
+                    <span v-if="selectedPieType === 'actual'" class="dashboard-allocation-cell--num">{{ $t('unrealizedProfit') }}</span>
+                  </div>
+
+                  <div
+                    v-for="item in selectedAllocationBreakdown"
+                    :key="`${selectedPieType}-${item.key}`"
+                    class="dashboard-allocation-table-row"
+                  >
+                    <div class="dashboard-allocation-item-main">
+                      <span class="dashboard-allocation-dot" :style="{ backgroundColor: item.color }"></span>
+                      <StockIcon :symbol="item.key" class="dashboard-allocation-icon" />
+                      <span class="dashboard-allocation-symbol">{{ item.name }}</span>
                     </div>
-                    <div v-else class="mt-3 text-2xl font-bold tracking-tight">--</div>
+
+                    <span class="dashboard-allocation-cell--num dashboard-allocation-value">{{ formatAmountWithCode(item.amount) }}</span>
+
+                    <span class="dashboard-allocation-cell--num dashboard-allocation-percentage">{{ formatPreciseAllocationPercentage(item.percentage) }}</span>
+
+                    <span
+                      v-if="selectedPieType === 'actual'"
+                      class="dashboard-allocation-cell--num dashboard-allocation-profit"
+                      :class="item.profit >= 0 ? 'dashboard-allocation-profit--up' : 'dashboard-allocation-profit--down'"
+                    >
+                      {{ formatAmountWithCode(item.profit) }}
+                    </span>
                   </div>
-
-                  <Button icon="pi pi-chart-line" rounded size="small" disabled />
                 </div>
+              </div>
+            </div>
 
-                <div class="dashboard-footnote mt-6">
-                  {{ $t('roi') }}
-                  <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'">
-                    {{ annualReturn.toFixed(2) }}%
-                  </span>
-                  <span v-else>--</span>
-                </div>
-              </template>
-            </AppCard>
-
-            <AppCard class="dashboard-panel dashboard-metric-card h-full">
-              <template #content>
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <p class="dashboard-kicker">{{ $t('irr') }}</p>
-                    <div v-if="irr" class="mt-3 text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
-                    <div v-else class="mt-3 text-2xl font-bold tracking-tight text-slate-600">--</div>
-                  </div>
-
-                  <Button icon="pi pi-calendar" rounded size="small" disabled />
-                </div>
-
-                <div class="dashboard-footnote mt-6 flex items-center gap-2">
-                  <i class="pi pi-info-circle" v-tooltip.bottom="$t('xirrHint')" />
-                  <span>{{ $t('xirrHint') }}</span>
-                </div>
-              </template>
-            </AppCard>
-          </div>
+            <div v-else class="flex flex-col items-center text-center gap-3 py-8">
+              <img class="w-60 h-60 sm:w-80 sm:h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
+              <h2 class="text-base sm:text-lg font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
+              <p class="text-xs sm:text-sm text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
+            </div>
+          </template>
+        </AppCard>
       </div>
 
       <!-- Holdings Table -->
@@ -398,7 +422,6 @@
  *  Imports & Stores
  * =======================*/
 import { ref, watch, computed } from 'vue'
-import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
@@ -454,7 +477,7 @@ const featuredHoldings = computed(() => {
 
 const selectedPieType = ref('actual')
 const pieChartType = computed(() => ([
-  { label: t('actualAllocation'), value: 'actual' },
+  { label: t('currentAsset'), value: 'actual' },
   { label: t('targetAllocation'), value: 'target' }
 ]))
 
@@ -615,6 +638,12 @@ function formatAllocationPercentage(value) {
   return `${n.toFixed(digits)}%`
 }
 
+function formatPreciseAllocationPercentage(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '--'
+  return `${n.toFixed(2)}%`
+}
+
 function getHoldingWeightPercentage(holding) {
   const portfolioTotal = Number(totalValue.value)
   const holdingValue = Number(holding?.currentValue)
@@ -660,12 +689,15 @@ function buildAllocationBreakdown(items, mapItem) {
   const remainingItems = normalized.slice(3)
   if (!remainingItems.length) return primaryItems
 
+  const hasProfit = remainingItems.some(item => item.profit !== undefined)
+
   primaryItems.push({
     key: 'others',
     name: locale.value.startsWith('zh') ? '其他' : 'Others',
     value: remainingItems.reduce((sum, item) => sum + item.value, 0),
     percentage: remainingItems.reduce((sum, item) => sum + item.percentage, 0),
     amount: remainingItems.reduce((sum, item) => sum + item.amount, 0),
+    profit: hasProfit ? remainingItems.reduce((sum, item) => sum + (item.profit || 0), 0) : undefined,
     color: allocationPalette[3],
   })
 
@@ -809,6 +841,7 @@ const actualAllocationBreakdown = computed(() => {
   return buildAllocationBreakdown(holdingsStore.list, holding => {
     const amount = Number(holding.currentValue)
     const percentage = total > 0 ? (amount / total) * 100 : 0
+    const profit = amount - Number(holding.avgCost) * Number(holding.shares)
 
     return {
       key: holding.symbol,
@@ -816,6 +849,7 @@ const actualAllocationBreakdown = computed(() => {
       value: amount,
       percentage,
       amount,
+      profit,
     }
   })
 })
@@ -844,26 +878,17 @@ const selectedAllocationBreakdown = computed(() => {
     : targetAllocationBreakdown.value
 })
 
-const allocationSummary = computed(() => {
-  if (selectedPieType.value === 'actual') {
-    return {
-      label: t('totalValue'),
-      value: formatCompactAmount(totalValue.value),
-    }
-  }
-
-  const targetTotal = targetAllocationBreakdown.value.reduce((sum, item) => sum + item.percentage, 0)
-  return {
-    label: t('target'),
-    value: formatAllocationPercentage(targetTotal),
-  }
+const allocationItemCount = computed(() => {
+  return selectedPieType.value === 'actual'
+    ? holdingsStore.list.length
+    : (allocation.value || []).length
 })
 
 const selectedAllocationChart = computed(() => ({
   chart: {
     type: 'pie',
     backgroundColor: 'transparent',
-    spacing: [0, 0, 0, 0],
+    spacing: [8, 8, 8, 8],
     height: 260,
     animation: { duration: 350 },
   },
@@ -895,12 +920,39 @@ const selectedAllocationChart = computed(() => ({
   plotOptions: {
     pie: {
       innerSize: '78%',
-      size: '100%',
+      size: '92%',
       borderWidth: 4,
       borderColor: isDark.value ? '#0f172a' : '#ffffff',
       slicedOffset: 0,
-      dataLabels: { enabled: false },
       showInLegend: false,
+      dataLabels: [
+        {
+          enabled: true,
+          distance: '-30%',
+          format: '{point.percentage:.0f}%',
+          filter: { property: 'percentage', operator: '>', value: 3 },
+          style: {
+            color: '#ffffff',
+            fontWeight: '700',
+            fontSize: '13px',
+            textOutline: 'none',
+          },
+        },
+        {
+          enabled: true,
+          distance: 14,
+          format: '{point.name}',
+          allowOverlap: false,
+          connectorColor: isDark.value ? '#475569' : '#cbd5e1',
+          filter: { property: 'percentage', operator: '>', value: 3 },
+          style: {
+            color: isDark.value ? '#cbd5e1' : '#475569',
+            fontWeight: '600',
+            fontSize: '12px',
+            textOutline: 'none',
+          },
+        },
+      ],
       states: {
         hover: {
           halo: { size: 0 },
@@ -929,6 +981,38 @@ const annualReturn = computed(() => {
   const curr = holdingsStore.list.reduce((s, h) => s + h.currentValue, 0)
   if (totalCost === 0) return 0
   return ((curr - totalCost) / totalCost) * 100
+})
+
+const realizedProfit = computed(() => {
+  if (!transactionsStore.list.length) return 0
+
+  const costBasisBySymbol = new Map()
+  let realizedGain = 0
+
+  const sortedTransactions = [...transactionsStore.list].sort((a, b) => new Date(a.date) - new Date(b.date))
+
+  sortedTransactions.forEach(tx => {
+    const shares = Number(tx.shares) || 0
+    const state = costBasisBySymbol.get(tx.symbol) || { shares: 0, costBasis: 0 }
+
+    if (tx.transactionType === 'buy') {
+      state.shares += shares
+      state.costBasis += convertAmountFromCurrency(tx.price * shares + tx.fee, tx.currency)
+    } else if (tx.transactionType === 'sell' && state.shares > 0) {
+      const soldShares = Math.min(shares, state.shares)
+      const avgCost = state.costBasis / state.shares
+      const costOfSoldShares = avgCost * soldShares
+      const proceeds = convertAmountFromCurrency(tx.price * soldShares - tx.fee, tx.currency)
+
+      realizedGain += proceeds - costOfSoldShares
+      state.shares -= soldShares
+      state.costBasis -= costOfSoldShares
+    }
+
+    costBasisBySymbol.set(tx.symbol, state)
+  })
+
+  return realizedGain
 })
 
 const irr = computed(() => {
@@ -1315,45 +1399,38 @@ watch(locale, () => {
   color: var(--p-text-color);
 }
 
-.dashboard-allocation-card :deep(.dashboard-allocation-toggle) {
-  display: flex;
-  width: 100%;
+.dashboard-allocation-tabs {
+  display: inline-flex;
+  align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--p-content-border-color) 35%, transparent);
 }
 
-.dashboard-allocation-card :deep(.dashboard-allocation-toggle .p-togglebutton) {
-  flex: 1 1 0;
-  justify-content: center;
+.dashboard-allocation-tab {
   border: none;
-  border-radius: 999px;
-  background: transparent;
-  box-shadow: none;
-  color: var(--p-text-muted-color);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-}
-
-.dashboard-allocation-card :deep(.dashboard-allocation-toggle .p-togglebutton-checked) {
-  background: var(--p-content-background);
-  color: var(--p-text-color);
-  box-shadow:
-    0 1px 2px rgba(10, 14, 24, 0.12),
-    0 0 0 1px color-mix(in srgb, var(--p-content-border-color) 60%, transparent);
-}
-
-.dashboard-allocation-card :deep(.dashboard-allocation-toggle .p-togglebutton-content) {
-  justify-content: center;
-}
-
-.dashboard-allocation-desc {
-  font-size: 0.78rem;
   color: var(--p-text-muted-color);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dashboard-allocation-tab:hover {
+  color: var(--p-text-color);
+}
+
+.dashboard-allocation-tab--active {
+  background: color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
+  color: var(--p-text-color);
 }
 
 .dashboard-allocation-content {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   flex: 1;
 }
 
@@ -1376,11 +1453,10 @@ watch(locale, () => {
 
 .dashboard-allocation-layout {
   display: grid;
-  grid-template-columns: minmax(0, 220px) minmax(10.5rem, 13rem);
-  justify-content: center;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
   align-items: center;
   align-content: center;
-  gap: 1.5rem;
+  gap: 2.5rem;
   min-height: 100%;
   width: 100%;
   flex: 1;
@@ -1388,7 +1464,7 @@ watch(locale, () => {
 
 .dashboard-allocation-figure {
   position: relative;
-  width: min(100%, 240px);
+  width: min(100%, 260px);
   margin-inline: auto;
 }
 
@@ -1409,67 +1485,108 @@ watch(locale, () => {
   pointer-events: none;
 }
 
-.dashboard-allocation-total-label {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--p-text-muted-color);
-}
-
 .dashboard-allocation-total-value {
-  margin-top: 0.35rem;
-  max-width: 7rem;
-  font-size: 0.95rem;
+  font-size: 1.75rem;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--p-text-color);
 }
 
-.dashboard-allocation-list {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.85rem;
-  width: min(100%, 13rem);
+.dashboard-allocation-total-label {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
 }
 
-.dashboard-allocation-item {
+.dashboard-allocation-table {
   display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.dashboard-allocation-table-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1.4fr) repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--p-content-border-color) 65%, transparent);
+}
+
+.dashboard-allocation-table--with-profit .dashboard-allocation-table-row {
+  grid-template-columns: minmax(9rem, 1.4fr) repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-allocation-table-row:last-child {
+  border-bottom: none;
+}
+
+.dashboard-allocation-table-head {
+  padding-top: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--p-text-muted-color);
+}
+
+.dashboard-allocation-cell--num {
+  text-align: right;
 }
 
 .dashboard-allocation-item-main {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.6rem;
 }
 
 .dashboard-allocation-dot {
-  width: 0.625rem;
-  height: 0.625rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 999px;
   flex-shrink: 0;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--p-content-background) 55%, transparent);
+}
+
+.dashboard-allocation-icon {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  margin: 0 !important;
+  flex-shrink: 0;
 }
 
 .dashboard-allocation-symbol {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.75rem;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  color: var(--p-text-color);
+  background: color-mix(in srgb, var(--p-content-border-color) 35%, transparent);
+}
+
+.dashboard-allocation-value,
+.dashboard-allocation-percentage {
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--p-text-color);
 }
 
-.dashboard-allocation-percentage {
-  margin-left: auto;
-  font-size: 0.72rem;
+.dashboard-allocation-profit {
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--p-text-muted-color);
+}
+
+.dashboard-allocation-profit--up {
+  color: #059669;
+}
+
+.dashboard-allocation-profit--down {
+  color: #e11d48;
 }
 
 .dashboard-summary-item {
@@ -1534,9 +1651,17 @@ watch(locale, () => {
     gap: 1rem;
   }
 
-  .dashboard-allocation-list {
-    width: min(100%, 18rem);
-    margin-inline: auto;
+  .dashboard-allocation-table-row {
+    grid-template-columns: minmax(7rem, 1.2fr) repeat(2, minmax(4.5rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .dashboard-allocation-table--with-profit .dashboard-allocation-table-row {
+    grid-template-columns: minmax(7rem, 1.2fr) repeat(3, minmax(4.5rem, 1fr));
+  }
+
+  .dashboard-allocation-symbol {
+    padding: 0.15rem 0.4rem;
   }
 
   .dashboard-summary-item {
