@@ -1061,8 +1061,17 @@ function calculateGrowthRate() {
   growthRate.value = Number((((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2))
 }
 
-async function fetchChartData() {
-  if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id || holdingsStore.list.length === 0) {
+const rawChartPoints = ref([])
+
+function filterPointsByRange(points, period1Str, period2Str) {
+  const start = new Date(period1Str)
+  const end = new Date(period2Str)
+  end.setHours(23, 59, 59, 999)
+  return points.filter(p => p.x >= start && p.x <= end)
+}
+
+function applySelectedPeriod() {
+  if (!rawChartPoints.value.length) {
     chartSeries.value = [{ name: t('totalPrice'), data: [] }]
     growthRate.value = null
     change.value = 0
@@ -1072,14 +1081,32 @@ async function fetchChartData() {
   }
 
   const { period1, period2 } = getPeriodRange(selectedPeriod.value)
-  try {
-    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${period1}&period2=${period2}`)
-    const lineData = data.map(item => ({ x: new Date(item.date), y: item.close }))
-    const normalizedLineData = normalizeChartDataForPeriod(lineData, selectedPeriod.value)
+  const rangeFiltered = filterPointsByRange(rawChartPoints.value, period1, period2)
+  const normalizedLineData = normalizeChartDataForPeriod(rangeFiltered, selectedPeriod.value)
 
-    chartSeries.value = [{ name: t('closePrice'), data: normalizedLineData }]
-    setChartWindowFromPoints(normalizedLineData)
-    calculateGrowthRate()
+  chartSeries.value = [{ name: t('closePrice'), data: normalizedLineData }]
+  setChartWindowFromPoints(normalizedLineData)
+  calculateGrowthRate()
+}
+
+async function fetchChartData() {
+  if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id || holdingsStore.list.length === 0) {
+    rawChartPoints.value = []
+    chartSeries.value = [{ name: t('totalPrice'), data: [] }]
+    growthRate.value = null
+    change.value = 0
+    startDate.value = ''
+    endDate.value = ''
+    return
+  }
+
+  try {
+    // 不帶 period1/period2，後端會回傳「最早交易日 ~ 今天」的完整資料；切換時間區間時改為在前端切片，避免重打 API
+    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
+    rawChartPoints.value = data
+      .map(item => ({ x: new Date(item.date), y: item.close }))
+      .sort((a, b) => a.x - b.x)
+    applySelectedPeriod()
   } catch (e) {
     console.error('Error fetching total value chart data:', e)
   }
@@ -1115,11 +1142,11 @@ watch(() => transactionsStore.list, async () => {
 })
 
 watch(selectedPeriod, (newVal, oldVal) => {
-  if (newVal !== oldVal) fetchChartData()
+  if (newVal !== oldVal) applySelectedPeriod()
 })
 
 watch(locale, () => {
-  getPeriodRange(selectedPeriod.value)
+  applySelectedPeriod()
 })
 </script>
 
