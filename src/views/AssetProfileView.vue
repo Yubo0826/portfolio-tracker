@@ -225,12 +225,14 @@
               </template>
             </AppCard>
 
+          </div>
+
+          <div class="flex flex-col gap-4">
             <AppCard class="w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t('recommendedStocks') }}</span>
-                    <!-- <span class="recommend-muted text-xs">{{ t('comparisonLimitHint', { max: MAX_RECOMMENDATION_CARDS }) }}</span> -->
                   </div>
 
                   <p
@@ -247,28 +249,24 @@
                     {{ recommendationErrorText }}
                   </p>
 
-                  <Carousel
+                  <div
                     v-if="recommendLoading"
-                    :value="recommendSkeletonItems"
-                    :numVisible="RECOMMENDATION_VISIBLE_DESKTOP"
-                    :numScroll="1"
-                    :showNavigators="false"
-                    :showIndicators="false"
-                    :responsiveOptions="recommendResponsiveOptions"
-                    class="recommend-carousel mt-3"
+                    class="recommend-list mt-3"
                   >
-                    <template #item="{ index }">
-                      <div
-                        :key="`recommend-skeleton-${index}`"
-                        class="recommend-card recommend-card--skeleton animate-pulse"
-                      >
-                        <div class="recommend-skeleton-line w-1/2" />
-                        <div class="recommend-skeleton-line mt-3 w-2/3" />
-                        <div class="recommend-skeleton-line mt-2 w-1/3" />
-                        <div class="recommend-skeleton-line mt-4 h-7 w-full" />
+                    <div
+                      v-for="item in recommendSkeletonItems"
+                      :key="`recommend-skeleton-${item.id}`"
+                      class="recommend-list-item recommend-list-item--skeleton animate-pulse"
+                    >
+                      <div class="flex items-center gap-3 min-w-0">
+                        <div class="recommend-list-icon-skeleton" />
+                        <div class="min-w-0 flex-1">
+                          <div class="recommend-skeleton-line w-2/3" />
+                          <div class="recommend-skeleton-line mt-2 w-1/3" />
+                        </div>
                       </div>
-                    </template>
-                  </Carousel>
+                    </div>
+                  </div>
 
                   <p
                     v-else-if="!recommendedCards.length"
@@ -277,66 +275,45 @@
                     {{ t('recommendationEmpty') }}
                   </p>
 
-                  <Carousel
+                  <div
                     v-else
-                    :value="recommendedCards"
-                    :numVisible="RECOMMENDATION_VISIBLE_DESKTOP"
-                    :numScroll="1"
-                    :showNavigators="recommendedCards.length > RECOMMENDATION_VISIBLE_DESKTOP"
-                    :showIndicators="recommendedCards.length > 1"
-                    :responsiveOptions="recommendResponsiveOptions"
-                    class="recommend-carousel mt-3"
+                    class="recommend-list mt-3"
                   >
-                    <template #item="{ data: card }">
-                    <article
-                      class="recommend-card"
+                    <div
+                      v-for="card in recommendedCards"
+                      :key="card.symbol"
+                      class="recommend-list-item"
+                      :class="{ 'recommend-list-item--active': isCardCompared(card.symbol) }"
                       @click="openAssetProfile(card.symbol)"
                     >
-                      <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0 flex items-center gap-2">
-                          <StockIcon :symbol="card.symbol" class="recommend-icon" />
-                          <div class="min-w-0">
-                            <div class="text-sm font-semibold">{{ card.symbol }}</div>
-                            <div class="recommend-muted truncate text-xs">{{ card.name }}</div>
+                      <div class="flex items-center gap-3 min-w-0">
+                        <StockIcon :symbol="card.symbol" class="recommend-list-icon" />
+                        <div class="min-w-0">
+                          <div class="text-sm font-semibold truncate">{{ card.name }}</div>
+                          <div
+                            class="text-xs font-semibold"
+                            :class="recommendationGrowthClass(card.regularMarketChangePercent)"
+                          >
+                            {{ formatSignedNumber(card.regularMarketChangePercent) }}%
                           </div>
                         </div>
-
-                        <!-- <span class="recommend-score-badge rounded-full px-2 py-0.5 text-[10px] font-semibold">
-                          {{ t('recommendationScore', { score: card.score.toFixed(3) }) }}
-                        </span> -->
                       </div>
 
-                      <div class="mt-3 inline-flex items-end gap-1">
-                        <span class="text-base font-semibold">{{ splitPriceForEmphasis(card.regularMarketPrice).main }}</span>
-                        <span>{{ splitPriceForEmphasis(card.regularMarketPrice).fraction }}</span>
-                        <span class="recommend-muted text-[10px] font-semibold">{{ card.currency || splitPriceForEmphasis(card.regularMarketPrice).code }}</span>
-                      </div>
-
-                      <div
-                        class="mt-2 text-xs font-semibold"
-                        :class="recommendationGrowthClass(card.regularMarketChangePercent)"
+                      <button
+                        type="button"
+                        class="recommend-list-action"
+                        :class="{ 'recommend-list-action--active': isCardCompared(card.symbol) }"
+                        :disabled="!isCardCompared(card.symbol) && (isComparisonDisabled || !canAddRecommendationSymbol(card.symbol))"
+                        @click.stop="toggleRecommendationCompare(card)"
                       >
-                        <!-- {{ t('recommendationDailyChange') }}: -->
-                        {{ formatSignedNumber(card.regularMarketChangePercent) }}%
-                        <span class="ml-1">({{ formatSignedNumber(card.regularMarketChange) }})</span>
-                      </div>
-
-                      <Button
-                        class="mt-4 w-full"
-                        size="small"
-                        :label="t('addToComparison')"
-                        :disabled="isComparisonDisabled || !canAddRecommendationSymbol(card.symbol)"
-                        @click.stop="addComparisonBySymbol(card)"
-                      />
-                    </article>
-                    </template>
-                  </Carousel>
+                        <i :class="isCardCompared(card.symbol) ? 'pi pi-check' : 'pi pi-plus'"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </template>
             </AppCard>
-          </div>
 
-          <div class="flex flex-col gap-4">
             <AppCard class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
@@ -424,7 +401,6 @@
 import { ref, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
-import Carousel from 'primevue/carousel'
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
 import StockIcon from '@/components/StockIcon.vue'
 import api from '@/utils/api'
@@ -445,26 +421,8 @@ const currentRange = ref('3mo')
 
 const MAX_COMPARE_SYMBOLS = 5
 const MAX_RECOMMENDATION_CARDS = 5
-const RECOMMENDATION_VISIBLE_DESKTOP = 4
 const comparisonColorPalette = ['#60a5fa', '#f59e0b', '#22c55e', '#ef4444', '#a855f7', '#14b8a6']
 const recommendSkeletonItems = ref(Array.from({ length: MAX_RECOMMENDATION_CARDS }, (_, idx) => ({ id: idx + 1 })))
-const recommendResponsiveOptions = [
-  {
-    breakpoint: '1600px',
-    numVisible: 3,
-    numScroll: 1,
-  },
-  {
-    breakpoint: '1100px',
-    numVisible: 2,
-    numScroll: 1,
-  },
-  {
-    breakpoint: '768px',
-    numVisible: 1,
-    numScroll: 1,
-  },
-]
 
 let mainRequestId = 0
 let compareRequestId = 0
@@ -1073,6 +1031,22 @@ function addComparisonBySymbol(payload) {
     compareNameMap[nextSymbol] = payload.name
   }
   addComparisonSymbol()
+}
+
+function isCardCompared(targetSymbol) {
+  return compareSymbols.value.includes(String(targetSymbol || '').trim().toUpperCase())
+}
+
+function toggleRecommendationCompare(card) {
+  const nextSymbol = String(card?.symbol || '').trim().toUpperCase()
+  if (!nextSymbol) return
+
+  if (compareSymbols.value.includes(nextSymbol)) {
+    removeComparisonSymbol(nextSymbol)
+    return
+  }
+
+  addComparisonBySymbol(card)
 }
 
 function toLineSeriesFromQuotes(quotes) {
@@ -1751,35 +1725,88 @@ watch(locale, () => {
   color: var(--p-primary-color);
 }
 
-.recommend-card {
-  border: 1px solid var(--p-content-border-color, #d1d5db);
+.recommend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.recommend-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   border-radius: 0.75rem;
-  padding: 0.75rem;
+  padding: 0.5rem 0.6rem;
   cursor: pointer;
-  background: var(--p-content-background, #ffffff);
-  color: var(--p-text-color, #111827);
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 162px;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.recommend-card:hover {
-  border-color: var(--p-primary-color);
-  /* transform: translateY(-1px); */
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+.recommend-list-item:hover:not(.recommend-list-item--active) {
+  background: color-mix(in srgb, var(--p-primary-color) 6%, transparent);
 }
 
-.recommend-icon {
+.recommend-list-item--active {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.18);
+}
+
+.recommend-list-item--active:hover {
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.recommend-list-icon {
   margin-right: 0 !important;
+}
+
+.recommend-list-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: var(--p-text-muted-color, #64748b);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.recommend-list-action:hover:not(:disabled):not(.recommend-list-action--active) {
+  color: var(--p-primary-color);
+  background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
+}
+
+.recommend-list-action--active:hover {
+  background: rgba(244, 63, 94, 0.14);
+}
+
+.recommend-list-action--active {
+  color: #be123c;
+}
+
+.recommend-list-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.recommend-list-icon-skeleton {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--p-text-muted-color) 18%, transparent);
+  flex-shrink: 0;
+}
+
+.recommend-list-item--skeleton {
+  cursor: default;
 }
 
 .recommend-muted {
   color: var(--p-text-muted-color, #64748b);
-}
-
-.recommend-score-badge {
-  border: 1px solid color-mix(in srgb, var(--p-primary-color) 35%, transparent);
-  background: color-mix(in srgb, var(--p-primary-color) 14%, var(--p-content-background));
-  color: color-mix(in srgb, var(--p-primary-color) 70%, var(--p-text-color));
 }
 
 .recommend-hint {
@@ -1802,52 +1829,10 @@ watch(locale, () => {
   color: var(--p-text-muted-color, #64748b);
 }
 
-.recommend-card--skeleton {
-  border-color: var(--p-content-border-color, #d1d5db);
-}
-
 .recommend-skeleton-line {
   height: 0.75rem;
   border-radius: 0.375rem;
   background: color-mix(in srgb, var(--p-text-muted-color) 18%, transparent);
-}
-
-.recommend-carousel :deep(.p-carousel-container) {
-  align-items: stretch;
-}
-
-.recommend-carousel :deep(.p-carousel-content) {
-  padding: 0.2rem 0;
-}
-
-.recommend-carousel :deep(.p-carousel-item) {
-  padding: 0 0.35rem;
-}
-
-.recommend-carousel :deep(.p-carousel-prev-button),
-.recommend-carousel :deep(.p-carousel-next-button) {
-  width: 1.8rem;
-  height: 1.8rem;
-  color: var(--p-text-muted-color, #64748b);
-  border: 1px solid var(--p-content-border-color, #d1d5db);
-  background: var(--p-content-background, #ffffff);
-}
-
-.recommend-carousel :deep(.p-carousel-prev-button:hover),
-.recommend-carousel :deep(.p-carousel-next-button:hover) {
-  color: var(--p-primary-color);
-  border-color: var(--p-primary-color);
-}
-
-.recommend-carousel :deep(.p-carousel-indicator button) {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--p-text-muted-color) 45%, transparent);
-}
-
-.recommend-carousel :deep(.p-carousel-indicator.p-highlight button) {
-  background: var(--p-primary-color);
 }
 
 .company-link {
