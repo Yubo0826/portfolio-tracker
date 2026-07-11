@@ -810,6 +810,7 @@ html:not(.dark) .sidebar-brand__bar {
 }
 
 .menu-item {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -819,6 +820,17 @@ html:not(.dark) .sidebar-brand__bar {
   text-decoration: none;
   font-size: 14px;
   transition: background-color 0.16s ease;
+}
+
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 3px;
+  background-color: var(--p-primary-color);
 }
 
 .menu-item-left {
@@ -896,6 +908,7 @@ html:not(.dark) .sidebar-brand__bar {
 }
 
 .menu-subitem {
+  position: relative;
   display: block;
   width: 100%;
   padding: 7px 12px 7px 38px;
@@ -909,6 +922,17 @@ html:not(.dark) .sidebar-brand__bar {
   cursor: pointer;
   font-family: inherit;
   transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.menu-subitem.active::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 3px;
+  background-color: var(--p-primary-color);
 }
 
 .menu-subitem:hover,

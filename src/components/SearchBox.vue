@@ -54,12 +54,7 @@
                 activeIndex === idx ? 'bg-neutral-100 dark:bg-white/10' : ''
               ]"
             >
-              <div
-                class="result-avatar shrink-0"
-                :style="{ background: avatarColor(item.symbol) }"
-              >
-                {{ item.symbol.slice(0, 2) }}
-              </div>
+              <StockIcon :symbol="item.symbol" class="!mr-0 shrink-0" />
 
               <div class="min-w-0 flex-1 flex items-baseline gap-1.5 overflow-hidden">
                 <span class="text-sm font-semibold text-[#3a8dff] shrink-0">{{ item.symbol }}</span>
@@ -115,6 +110,7 @@ import { useI18n } from 'vue-i18n'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
+import StockIcon from '@/components/StockIcon.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -149,13 +145,6 @@ function groupLabel(group) {
   if (group === 'history') return t('recentlyUsed')
   if (group === 'trending') return t('popularSymbols')
   return t('searchResults')
-}
-
-const AVATAR_COLORS = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f97316']
-
-function avatarColor(symbol) {
-  const code = String(symbol || '').split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0)
-  return AVATAR_COLORS[code % AVATAR_COLORS.length]
 }
 
 function normalizeSearchItem(item) {
@@ -379,20 +368,6 @@ defineExpose({ focusInput })
   margin: 0 0.5rem;
   border-radius: 0.625rem;
   transition: background-color 0.2s ease;
-}
-
-.result-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 .history-remove-btn {

@@ -86,56 +86,68 @@
         <div class="col-span-12 xl:col-span-8">
           <AppCard class="dashboard-panel dashboard-panel--hero h-full">
             <template #content>
-              <!-- 第一列 -->
               <div>
-                <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex flex-col mb-2">
+                    <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
 
-                <div class="min-w-0">
-                  <!-- 總資產金額 -->
-                  <div v-if="totalValue" class="inline-flex max-w-full items-end gap-1 overflow-hidden leading-none">
-                    <span class="truncate text-3xl font-black tracking-tight sm:text-4xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
-                    <span class="text-xl font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                    <span class="mb-1 text-xs font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                    <div class="mt-1 flex flex-wrap items-end gap-2">
+                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
+                        <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
+                        <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                      </div>
+                      <div v-else class="text-4xl font-bold">--</div>
 
+                      <div
+                        v-if="growthRateNumber !== null"
+                        class="inline-flex items-center gap-2 pb-1"
+                      >
+                        <span
+                          class="asset-growth-pill"
+                          :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
+                        >
+                          <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"></i>
+                          {{ formatSignedNumber(growthRateNumber) }}%
+                          <span>({{ formatSignedNumber(change) }})</span>
+                        </span>
+                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">{{ selectedPeriodLabel }}</span>
+                      </div>
 
-                    <div
-                      v-if="growthRateNumber !== null"
-                      :class="growthRateNumber >= 0 ? 'text-emerald-500' : 'text-rose-500'"
-                      class="inline-flex items-center gap-2 text-sm font-semibold"
-                    >
-                      <span>{{ formatSignedNumber(growthRateNumber) }}%</span>
-                      <!-- <span class="text-sm opacity-80">({{ formatSignedNumber(change) }})</span> -->
+                      <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-slate-600 dark:text-slate-500">
+                        <span>--</span>
+                        <span>(--)</span>
+                        <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedPeriodLabel }}</span>
+                      </div>
                     </div>
-                    <div v-else class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-500">
-                      <span>--</span>
-                      <span class="text-xs opacity-80">(--)</span>
-                    </div>
-                    <span>{{ selectedPeriodLabel }}</span>
-
                   </div>
-                  <div v-else class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">--</div>
+                </div>
+
+                <!-- 面積圖 -->
+                <div class="mt-2">
+                  <StockChart :options="areaChartOptions" :height="320" />
+                </div>
+
+                <!-- 時間範圍選擇 -->
+                <div class="asset-range-row">
+                  <button
+                    v-for="option in timeRangeOptionsWithGrowth"
+                    :key="option.value"
+                    type="button"
+                    class="asset-range-btn"
+                    :class="{ 'asset-range-btn--active': selectedPeriod === option.value }"
+                    @click="setSelectedPeriod(option.value)"
+                  >
+                    <span>{{ option.label }}</span>
+                    <span
+                      class="asset-range-btn-growth"
+                      :class="option.growth === null ? 'asset-range-btn-growth--muted' : option.growth >= 0 ? 'asset-range-btn-growth--up' : 'asset-range-btn-growth--down'"
+                    >
+                      {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                    </span>
+                  </button>
                 </div>
               </div>
-
-              <!-- 時間範圍選擇 -->
-              <div class="flex flex-wrap justify-end gap-2 mt-4">
-                <button
-                  v-for="option in timeRangeOptions"
-                  :key="option.value"
-                  type="button"
-                  :aria-pressed="selectedPeriod === option.value"
-                  class="rounded-lg px-3 py-1 text-xs font-bold transition-colors cursor-pointer"
-                  :class="selectedPeriod === option.value
-                    ? 'bg-[#25395c] text-white'
-                    : 'bg-transparent text-slate-700 hover:bg-[var(--p-surface-variant)] dark:text-slate-300'"
-                  @click="setSelectedPeriod(option.value)"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-
-              <!-- 面積圖 -->
-              <StockChart :options="areaChartOptions" :height="320" />
             </template>
           </AppCard>
         </div>
@@ -688,25 +700,44 @@ function normalizeChartDataForPeriod(points, range) {
 const startDate = ref('')
 const endDate = ref('')
 
-function getPeriodRange(range) {
+function calcPeriodRange(range) {
   const today = new Date()
   const e = formatDate(today)
-  const localeCode = locale.value || 'en'
 
   const daysMap = { '1d': 7, '1w': 7, '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
   if (range === 'ytd') {
     const start = new Date(today.getFullYear(), 0, 1)
-    startDate.value = formatStrDate(formatDate(start), localeCode)
-    endDate.value = formatStrDate(e, localeCode)
     return { period1: formatDate(start), period2: e }
   }
   const days = daysMap[range] || 30
   const start = new Date()
   start.setDate(start.getDate() - days)
-  startDate.value = formatStrDate(formatDate(start), localeCode)
-  endDate.value = formatStrDate(e, localeCode)
   return { period1: formatDate(start), period2: e }
 }
+
+function getPeriodRange(range) {
+  const { period1, period2 } = calcPeriodRange(range)
+  const localeCode = locale.value || 'en'
+  startDate.value = formatStrDate(period1, localeCode)
+  endDate.value = formatStrDate(period2, localeCode)
+  return { period1, period2 }
+}
+
+function computeRangeGrowth(range) {
+  if (!rawChartPoints.value.length) return null
+
+  const { period1, period2 } = calcPeriodRange(range)
+  const rangeFiltered = filterPointsByRange(rawChartPoints.value, period1, period2)
+  const normalized = normalizeChartDataForPeriod(rangeFiltered, range)
+  if (normalized.length < 2 || !normalized[0].y) return null
+
+  return Number((((normalized[normalized.length - 1].y - normalized[0].y) / normalized[0].y) * 100).toFixed(2))
+}
+
+const timeRangeOptionsWithGrowth = computed(() => timeRangeOptions.map(option => ({
+  ...option,
+  growth: computeRangeGrowth(option.value),
+})))
 
 /* =========================
  *  Setters (transform API -> view model)
@@ -1173,6 +1204,83 @@ watch(locale, () => {
 .dashboard-footnote {
   font-size: 0.78rem;
   color: var(--p-text-muted-color);
+}
+
+.asset-growth-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.asset-growth-pill i {
+  font-size: 0.7rem;
+}
+
+.asset-growth-pill--up {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.asset-growth-pill--down {
+  color: #be123c;
+  background: rgba(244, 63, 94, 0.14);
+}
+
+.asset-range-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--p-content-border-color, #e5e7eb);
+}
+
+.asset-range-btn {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.asset-range-btn:hover {
+  background: color-mix(in srgb, var(--p-primary-color) 10%, transparent);
+}
+
+.asset-range-btn--active {
+  background: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
+  color: var(--p-primary-color);
+}
+
+.asset-range-btn-growth {
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.asset-range-btn-growth--up {
+  color: #16a34a;
+}
+
+.asset-range-btn-growth--down {
+  color: #dc2626;
+}
+
+.asset-range-btn-growth--muted {
+  color: var(--p-text-muted-color, #64748b);
 }
 
 .dashboard-summary-strip {

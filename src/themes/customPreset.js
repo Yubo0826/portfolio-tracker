@@ -29,8 +29,8 @@ export default definePreset(Aura, {
             activeColor: '{primary.700}'
           },
           content: {
-            background: '{zinc.50}',
-            // background: '#f1f5f9',
+            // background: '{zinc.50}',
+            background: '#ffffff',
             focusBackground: '{zinc.700}',
             color: '{zinc.900}',
             focusColor: '{zinc.900}',

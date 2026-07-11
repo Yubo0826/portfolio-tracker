@@ -3,6 +3,8 @@
     v-if="!showFallback"
     :src="imageSrc"
     :alt="`${symbolText} logo`"
+    loading="lazy"
+    decoding="async"
     @error="handleImageError"
     class="w-8 h-8 mr-2 rounded-full object-cover"
   />
@@ -26,8 +28,14 @@ const props = defineProps({
   },
 })
 
+// Tried in order; on load error we advance to the next source before giving up.
+const LOGO_SOURCES = [
+  (symbol) => `https://storage.googleapis.com/iex/api/logos/${symbol}.png`,
+  (symbol) => `https://financialmodelingprep.com/image-stock/${symbol}.png`,
+]
+
 const showFallback = ref(false)
-const imageSrc = ref('')
+const sourceIndex = ref(0)
 
 const symbolText = computed(() => (props.symbol || '').toUpperCase())
 
@@ -37,18 +45,20 @@ const fallbackText = computed(() => {
   return cleaned.slice(0, 2)
 })
 
-const setImageSrc = () => {
-  imageSrc.value = `https://storage.googleapis.com/iex/api/logos/${props.symbol}.png`
+const imageSrc = computed(() => LOGO_SOURCES[sourceIndex.value]?.(props.symbol) ?? '')
+
+const resetSource = () => {
+  sourceIndex.value = 0
   showFallback.value = false
 }
 
 const handleImageError = () => {
-  showFallback.value = true
+  if (sourceIndex.value < LOGO_SOURCES.length - 1) {
+    sourceIndex.value += 1
+  } else {
+    showFallback.value = true
+  }
 }
 
-watch(
-  () => props.symbol,
-  () => setImageSrc(),
-  { immediate: true }
-)
+watch(() => props.symbol, resetSource, { immediate: true })
 </script>
