@@ -19,7 +19,7 @@
           class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm"
           :class="{ 'border-blue-500 ring-1 ring-blue-500': activeDropdown === 'date' }"
         >
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
           <span>Date Range</span>
           <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
         </button>
@@ -27,18 +27,18 @@
         <div v-if="activeDropdown === 'date'" class="absolute left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 p-4">
           <div class="flex gap-2 mb-4">
             <div>
-              <label class="text-[10px] text-gray-400 uppercase">Start date</label>
+              <label class="text-[10px] text-gray-600 uppercase">Start date</label>
               <input type="text" placeholder="MM/DD/YYYY" class="w-full border rounded p-1 text-xs outline-none focus:border-blue-500">
             </div>
             <div>
-              <label class="text-[10px] text-gray-400 uppercase">End date</label>
+              <label class="text-[10px] text-gray-600 uppercase">End date</label>
               <input type="text" placeholder="MM/DD/YYYY" class="w-full border rounded p-1 text-xs outline-none focus:border-blue-500">
             </div>
           </div>
           <div class="border-t pt-4">
             <div class="flex justify-between items-center mb-2">
               <span class="text-xs font-bold">January 2021</span>
-              <div class="flex gap-2 text-gray-400">
+              <div class="flex gap-2 text-gray-600">
                 <button class="hover:text-gray-600">&lt;</button>
                 <button class="hover:text-gray-600">&gt;</button>
               </div>
@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <button class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-500">
+      <button class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         Money Range
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
@@ -73,7 +73,7 @@
 
     <div class="bg-white border-x border-b border-gray-200 overflow-hidden shadow-sm">
         <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-widest border-b">
+            <thead class="bg-gray-50 text-gray-600 uppercase text-[10px] tracking-widest border-b">
                 <tr>
                     <th class="px-6 py-4 font-medium">Created ⇅</th>
                     <th class="px-6 py-4 font-medium">Vehicle ⇅</th>
@@ -83,10 +83,10 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 <tr v-for="i in 5" :key="i" class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-gray-500">12-4-2020</td>
+                    <td class="px-6 py-4 text-gray-700">12-4-2020</td>
                     <td class="px-6 py-4 font-medium">BMW</td>
                     <td class="px-6 py-4">BR. 30,000</td>
-                    <td class="px-6 py-4 text-xs font-bold text-gray-400">RECURING</td>
+                    <td class="px-6 py-4 text-xs font-bold text-gray-600">RECURING</td>
                 </tr>
             </tbody>
         </table>

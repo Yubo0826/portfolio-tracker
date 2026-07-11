@@ -187,14 +187,14 @@ export const useCurrency = () => {
     return formatAmount(usdPrice, {
       showSymbol: true,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 3
     })
   }
 
   const formatPriceWithCode = (usdPrice: number | null | undefined): string => {
     return formatAmountWithCode(usdPrice, {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 3
     })
   }
 

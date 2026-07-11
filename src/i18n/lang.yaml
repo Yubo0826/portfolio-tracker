@@ -17,6 +17,9 @@ portfolios:
 portfolioManagement:
   en: Portfolio Management
   zh: 投資組合管理
+analysis:
+  en: Analysis
+  zh: 分析
 totalValue:
   en: Total Value
   zh: 總價值
@@ -209,6 +212,12 @@ openPortfolioMenu:
 openUserMenu:
   en: Open user menu
   zh: 開啟使用者選單
+collapseSidebar:
+  en: Collapse sidebar
+  zh: 收合側邊欄
+expandSidebar:
+  en: Expand sidebar
+  zh: 展開側邊欄
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
@@ -237,8 +246,8 @@ portfolioCopyName:
   en: "{name} Copy"
   zh: "{name} 副本"
 addInvestment:
-  en: New Trade
-  zh: 新交易
+  en: Add Trade
+  zh: 新增交易
 rebalance:
   en: Rebalance
   zh: 再平衡
@@ -254,6 +263,9 @@ transactions:
 dividends:
   en: Dividends
   zh: 配息
+assetDetails:
+  en: Asset Details
+  zh: 資產明細
 allocation:
   en: Allocation
   zh: 資產配置
@@ -1406,3 +1418,6 @@ demoUserMessage:
 searchResults:
   en: Search results
   zh: 搜尋結果
+popularSymbols:
+  en: Popular symbols
+  zh: 熱門標的

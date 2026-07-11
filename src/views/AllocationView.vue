@@ -1,5 +1,5 @@
 <template>
-  <Card class="mt-4 pb-8">
+  <AppCard class="mt-4 pb-8">
     <template #content>
       <div class="flex justify-between mt-4">
         <h1 class="text-xl font-semibold pb-2">{{ $t('setTargets') }}</h1>
@@ -28,10 +28,10 @@
             <template #header>
               <div class="mb-4">
                 <h3 class="font-bold mr-2">{{ $t('holdings') }}</h3>
-                <p class="text-sm mt-1 text-gray-500">{{ $t('dragAndDropHint') }}</p>
+                <p class="text-sm mt-1 text-gray-700">{{ $t('dragAndDropHint') }}</p>
               </div>
               <!-- border rounded-2xl -->
-              <div class="mt-4 flex justify-between text-xs px-4 py-2 text-gray-500">
+              <div class="mt-4 flex justify-between text-xs px-4 py-2 text-gray-700">
                 <span>{{ $t('symbol') }}</span>
                 <span>{{ $t('actualPercentage') }}</span>
               </div>
@@ -56,7 +56,7 @@
                   </div> -->
                 </div>
                 <!-- 比例 -->
-                <span class="ml-2 text-xs text-gray-500">{{ element.actualRatio }}%</span>
+                <span class="ml-2 text-xs text-gray-700">{{ element.actualRatio }}%</span>
               </div>
             </template>
           </draggable>
@@ -87,11 +87,11 @@
                   </div>
                 </div>
                  
-                <p class="text-sm mt-1 text-gray-500">{{ $t('dragAndDropHint3') }}</p>
+                <p class="text-sm mt-1 text-gray-700">{{ $t('dragAndDropHint3') }}</p>
               </div>
   
               <!-- 當沒有項目時顯示提示 -->
-              <div v-if="assets.length === 0" class="text-center text-gray-500 text-sm p-4 py-16 m-auto">
+              <div v-if="assets.length === 0" class="text-center text-gray-700 text-sm p-4 py-16 m-auto">
                 <!-- 將左側的持有資產拖曳到此處，或手動新增以建立你的資產配置 -->
                 {{ $t('dragAndDropHint2') }}
               </div>
@@ -171,7 +171,7 @@
         </div>
       </div>
     </template>
-  </Card>
+  </AppCard>
 </template>
 
 

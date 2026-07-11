@@ -5,7 +5,7 @@
 
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
-      <Card class="rounded-xl shadow-md">
+      <AppCard class="rounded-xl shadow-md">
         <template #content>
           <div class="space-y-4 py-1">
             <div class="flex justify-between items-center gap-4">
@@ -19,12 +19,12 @@
             <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
           </div>
         </template>
-      </Card>
+      </AppCard>
 
       <div class="grid grid-cols-12 gap-6 items-stretch">
         <div class="col-span-12 xl:col-span-8 space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Card v-for="idx in skeletonStatCards.slice(0, 2)" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md h-full">
+            <AppCard v-for="idx in skeletonStatCards.slice(0, 2)" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md h-full">
               <template #content>
                 <div class="space-y-3 py-2">
                   <Skeleton width="6rem" height="1rem" />
@@ -32,10 +32,10 @@
                   <Skeleton width="8rem" height="0.85rem" />
                 </div>
               </template>
-            </Card>
+            </AppCard>
           </div>
 
-          <Card class="rounded-xl shadow-md">
+          <AppCard class="rounded-xl shadow-md">
           <template #content>
             <div class="space-y-3 py-2">
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -43,10 +43,10 @@
               </div>
             </div>
           </template>
-          </Card>
+          </AppCard>
         </div>
 
-        <Card class="col-span-12 xl:col-span-4 rounded-xl shadow-md h-full">
+        <AppCard class="col-span-12 xl:col-span-4 rounded-xl shadow-md h-full">
           <template #content>
             <div class="space-y-4 py-1">
               <div class="flex justify-between items-center gap-4">
@@ -57,10 +57,10 @@
               <Skeleton width="100%" height="9rem" borderRadius="0.75rem" />
             </div>
           </template>
-        </Card>
+        </AppCard>
       </div>
 
-      <Card class="mb-8 p-4">
+      <AppCard class="mb-8 p-4">
         <template #content>
           <div class="space-y-3">
             <Skeleton width="12rem" height="1rem" />
@@ -75,7 +75,7 @@
             </div>
           </div>
         </template>
-      </Card>
+      </AppCard>
     </div>
 
     <!-- Main Content -->
@@ -84,41 +84,20 @@
       <div class="grid grid-cols-12 gap-6 items-stretch">
         <!-- 總資產走勢圖 -->
         <div class="col-span-12 xl:col-span-8">
-          <Card class="dashboard-panel dashboard-panel--hero h-full">
+          <AppCard class="dashboard-panel dashboard-panel--hero h-full">
             <template #content>
               <!-- 第一列 -->
               <div>
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
-
-                  <!-- 時間範圍選擇 -->
-                  <div class="flex flex-wrap gap-2 sm:justify-end">
-                    <button
-                      v-for="option in timeRangeOptions"
-                      :key="option.value"
-                      type="button"
-                      :aria-pressed="selectedPeriod === option.value"
-                      class="rounded-lg px-3 py-1 text-xs font-bold transition-colors cursor-pointer"
-                      :class="selectedPeriod === option.value
-                        ? 'bg-[#25395c] text-white'
-                        : 'bg-transparent text-slate-500 hover:bg-[var(--p-surface-variant)] dark:text-slate-300'"
-                      @click="setSelectedPeriod(option.value)"
-                    >
-                      {{ option.label }}
-                    </button>
-                  </div>
-                </div>
+                <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
 
                 <div class="min-w-0">
                   <!-- 總資產金額 -->
-                  <div v-if="totalValue" class="mt-3 inline-flex max-w-full items-end gap-1 overflow-hidden leading-none">
+                  <div v-if="totalValue" class="inline-flex max-w-full items-end gap-1 overflow-hidden leading-none">
                     <span class="truncate text-3xl font-black tracking-tight sm:text-4xl">{{ splitAmountForEmphasis(totalValue).main }}</span>
-                    <span class="text-xl font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                    <span class="mb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
-                  </div>
-                  <div v-else class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">--</div>
+                    <span class="text-xl font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                    <span class="mb-1 text-xs font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
 
-                  <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+
                     <div
                       v-if="growthRateNumber !== null"
                       :class="growthRateNumber >= 0 ? 'text-emerald-500' : 'text-rose-500'"
@@ -127,33 +106,63 @@
                       <span>{{ formatSignedNumber(growthRateNumber) }}%</span>
                       <!-- <span class="text-sm opacity-80">({{ formatSignedNumber(change) }})</span> -->
                     </div>
-                    <div v-else class="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 dark:text-slate-500">
+                    <div v-else class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-500">
                       <span>--</span>
                       <span class="text-xs opacity-80">(--)</span>
                     </div>
+                    <span>{{ selectedPeriodLabel }}</span>
 
-                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                      <span>{{ selectedPeriodLabel }}</span>
-                      <span class="h-1 w-1 rounded-full bg-current opacity-40"></span>
-                      <span>{{ chartWindowLabel }}</span>
-                    </div>
                   </div>
+                  <div v-else class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">--</div>
                 </div>
+              </div>
+
+              <!-- 時間範圍選擇 -->
+              <div class="flex flex-wrap justify-end gap-2 mt-4">
+                <button
+                  v-for="option in timeRangeOptions"
+                  :key="option.value"
+                  type="button"
+                  :aria-pressed="selectedPeriod === option.value"
+                  class="rounded-lg px-3 py-1 text-xs font-bold transition-colors cursor-pointer"
+                  :class="selectedPeriod === option.value
+                    ? 'bg-[#25395c] text-white'
+                    : 'bg-transparent text-slate-700 hover:bg-[var(--p-surface-variant)] dark:text-slate-300'"
+                  @click="setSelectedPeriod(option.value)"
+                >
+                  {{ option.label }}
+                </button>
               </div>
 
               <!-- 面積圖 -->
               <StockChart :options="areaChartOptions" :height="320" />
             </template>
-          </Card>
+          </AppCard>
         </div>
 
         <!-- 比例區塊 -->
         <div class="col-span-12 xl:col-span-4">
-          <Card class="dashboard-panel dashboard-allocation-card h-full">
+          <AppCard class="dashboard-panel dashboard-allocation-card h-full">
             <template #title>
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <SelectButton v-model="selectedPieType" :options="pieChartType" optionLabel="label" optionValue="value" size="small" :allowEmpty="false" />
-                <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
+              <div class="dashboard-allocation-head">
+                <div class="flex items-center justify-between gap-3">
+                  <h3 class="dashboard-allocation-title">{{ $t('allocation') }}</h3>
+                  <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
+                </div>
+
+                <SelectButton
+                  v-model="selectedPieType"
+                  :options="pieChartType"
+                  optionLabel="label"
+                  optionValue="value"
+                  size="small"
+                  :allowEmpty="false"
+                  class="dashboard-allocation-toggle"
+                />
+
+                <p class="dashboard-allocation-desc">
+                  {{ selectedPieType === 'actual' ? $t('actualAllocationDesc') : $t('targetAllocationDesc') }}
+                </p>
               </div>
             </template>
 
@@ -199,7 +208,7 @@
                 <p class="text-xs sm:text-sm text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
               </div>
             </template>
-          </Card>
+          </AppCard>
         </div>
       </div>
 
@@ -216,15 +225,15 @@
 
       <div class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card class="dashboard-panel dashboard-metric-card h-full">
+            <AppCard class="dashboard-panel dashboard-metric-card h-full">
               <template #content>
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="dashboard-kicker">{{ $t('totalProfit') }}</p>
                     <div v-if="totalProfit" class="mt-3 inline-flex items-end text-2xl font-bold tracking-tight">
                       <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                      <span class="text-lg text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                      <span class="ml-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+                      <span class="text-lg text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                      <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
                     </div>
                     <div v-else class="mt-3 text-2xl font-bold tracking-tight">--</div>
                   </div>
@@ -240,15 +249,15 @@
                   <span v-else>--</span>
                 </div>
               </template>
-            </Card>
+            </AppCard>
 
-            <Card class="dashboard-panel dashboard-metric-card h-full">
+            <AppCard class="dashboard-panel dashboard-metric-card h-full">
               <template #content>
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <p class="dashboard-kicker">{{ $t('irr') }}</p>
                     <div v-if="irr" class="mt-3 text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
-                    <div v-else class="mt-3 text-2xl font-bold tracking-tight text-slate-400">--</div>
+                    <div v-else class="mt-3 text-2xl font-bold tracking-tight text-slate-600">--</div>
                   </div>
 
                   <Button icon="pi pi-calendar" rounded size="small" disabled />
@@ -259,12 +268,12 @@
                   <span>{{ $t('xirrHint') }}</span>
                 </div>
               </template>
-            </Card>
+            </AppCard>
           </div>
       </div>
 
       <!-- Holdings Table -->
-      <Card class="dashboard-panel dashboard-table-panel mb-8 p-4">
+      <AppCard class="dashboard-panel dashboard-table-panel mb-8 p-4">
       <template #content>
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
@@ -366,7 +375,7 @@
           </template>
         </DataTable>
       </template>
-      </Card>
+      </AppCard>
     </div>
   </div>
 </template>
@@ -1143,24 +1152,69 @@ watch(locale, () => {
   overflow: hidden;
 }
 
-.dashboard-allocation-card :deep(.p-card),
-.dashboard-allocation-card :deep(.p-card-body) {
+.dashboard-allocation-card,
+.dashboard-allocation-card :deep(.app-card-body) {
   height: 100%;
 }
 
-.dashboard-allocation-card :deep(.p-card-body) {
+.dashboard-allocation-card :deep(.app-card-body) {
   display: flex;
   flex-direction: column;
 }
 
-.dashboard-allocation-card :deep(.p-card-content) {
+.dashboard-allocation-card :deep(.app-card-content) {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.dashboard-allocation-card :deep(.p-card-title) {
-  margin-bottom: 0;
+.dashboard-allocation-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dashboard-allocation-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+}
+
+.dashboard-allocation-card :deep(.dashboard-allocation-toggle) {
+  display: flex;
+  width: 100%;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--p-content-border-color) 35%, transparent);
+}
+
+.dashboard-allocation-card :deep(.dashboard-allocation-toggle .p-togglebutton) {
+  flex: 1 1 0;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--p-text-muted-color);
+  font-weight: 600;
+}
+
+.dashboard-allocation-card :deep(.dashboard-allocation-toggle .p-togglebutton-checked) {
+  background: var(--p-content-background);
+  color: var(--p-text-color);
+  box-shadow:
+    0 1px 2px rgba(10, 14, 24, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--p-content-border-color) 60%, transparent);
+}
+
+.dashboard-allocation-card :deep(.dashboard-allocation-toggle .p-togglebutton-content) {
+  justify-content: center;
+}
+
+.dashboard-allocation-desc {
+  font-size: 0.78rem;
+  color: var(--p-text-muted-color);
 }
 
 .dashboard-allocation-content {

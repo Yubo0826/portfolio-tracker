@@ -3,7 +3,7 @@
   <GlobalLoading />
   <ConfirmDialog />
 
-  <div class="app-shell min-h-screen">
+  <div class="app-shell h-screen overflow-hidden">
     <Sidebar
       persistent
       :currentPortfolioName="currentPortfolioName"
@@ -13,11 +13,11 @@
       :userDisplayName="displayUserName"
       :userEmail="auth.user?.email || ''"
       :userPhotoUrl="auth.user?.photoURL || ''"
-      @open-search="openSearchBox"
     />
 
-    <div class="flex min-h-screen flex-col lg:pl-[260px] app-shell__main">
+    <div class="flex h-screen flex-col app-shell__main">
       <AppHeader
+        ref="appHeaderRef"
         :currentPageLabel="currentPageLabel"
         :isDark="isDark"
         :showAddTradeButtonBar="showAddTradeButtonBar"
@@ -32,12 +32,15 @@
         @toggle-theme="toggleTheme"
       />
 
-      <main class="app-shell__content mx-auto w-full max-w-[1680px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
-        <RouterView />
-      </main>
+      <div class="app-shell__scroll flex-1 overflow-y-auto">
+        <main class="app-shell__content mx-auto max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+          <PageBreadcrumb :items="breadcrumbItems" />
+          <RouterView />
+        </main>
 
-      <div class="px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
-        <Footer />
+        <div class="px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
+          <Footer />
+        </div>
       </div>
     </div>
   </div>
@@ -48,15 +51,21 @@
       <div
         v-if="searchBoxVisible"
         class="search-overlay"
-        role="dialog"
-        aria-modal="true"
-        @click.self="closeSearchBox"
-      >
-        <div class="search-overlay-panel">
-          <SearchBox ref="searchBoxRef" @close="closeSearchBox" />
-        </div>
-      </div>
+        aria-hidden="true"
+        @click="closeSearchBox"
+      ></div>
     </Transition>
+
+    <div
+      v-if="searchBoxVisible"
+      class="search-overlay-panel"
+      :class="{ 'search-overlay-panel--expanded': searchPanelExpanded }"
+      :style="searchPanelStyle"
+      role="dialog"
+      aria-modal="true"
+    >
+      <SearchBox ref="searchBoxRef" @close="closeSearchBox" />
+    </div>
   </Teleport>
 
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
@@ -80,7 +89,6 @@
     :userDisplayName="displayUserName"
     :userEmail="auth.user?.email || ''"
     :userPhotoUrl="auth.user?.photoURL || ''"
-    @open-search="openSearchBox"
   />
 </template>
 
@@ -102,6 +110,7 @@ import Footer from './layouts/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
 import GlobalLoading from "@/components/GlobalLoading.vue"
+import PageBreadcrumb from '@/components/PageBreadcrumb.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
@@ -185,10 +194,59 @@ const currentPageLabel = computed(() => {
   if (route.name === 'asset') return String(route.params.symbol || t('currentAsset'))
   if (route.name === 'user-settings') return t('userSettings')
 
-  const activeItem = sidebarSections.value.flatMap((section) => section.items).find(isNavItemActive)
+  const activeItem = sidebarSections.value
+    .flatMap((section) => section.items)
+    .flatMap((item) => (item.type === 'group' ? item.children : item))
+    .find(isNavItemActive)
   if (activeItem) return activeItem.label
 
   return currentPortfolioName.value
+})
+
+const PORTFOLIO_TAB_LABELS = {
+  holdings: () => t('holding'),
+  transactions: () => t('transactions'),
+  dividends: () => t('dividends'),
+}
+
+const breadcrumbItems = computed(() => {
+  const portfolioRoot = { label: t('portfolio'), to: '/portfolios' }
+
+  switch (route.name) {
+    case 'portfolios':
+      return [{ label: t('portfolio') }]
+    case 'dashboard':
+      return [portfolioRoot, { label: t('dashboard') }]
+    case 'portfolio':
+    case 'holdings':
+    case 'transactions':
+    case 'dividends': {
+      const tabKey = route.name === 'portfolio' ? (route.params.tab || 'holdings') : route.name
+      const tabLabel = (PORTFOLIO_TAB_LABELS[tabKey] || PORTFOLIO_TAB_LABELS.holdings)()
+      return [
+        portfolioRoot,
+        { label: currentPortfolioName.value, to: '/portfolio/holdings' },
+        { label: tabLabel },
+      ]
+    }
+    case 'allocation':
+      return [portfolioRoot, { label: t('setTargets') }]
+    case 'rebalancing':
+      return [portfolioRoot, { label: t('rebalance') }]
+    case 'backtesting':
+      return [portfolioRoot, { label: t('backtesting') }]
+    case 'cash-flow':
+    case 'cash-flows':
+      return [portfolioRoot, { label: t('cashFlowNav') }]
+    case 'asset':
+      return [portfolioRoot, { label: String(route.params.symbol || t('currentAsset')) }]
+    case 'user-settings':
+      return [portfolioRoot, { label: t('userSettings') }]
+    case 'user-guide':
+      return [portfolioRoot, { label: t('userGuide') }]
+    default:
+      return []
+  }
 })
 
 const recentPortfolios = computed(() =>
@@ -349,13 +407,41 @@ async function getPortfolios() {
 
 const searchBoxVisible = ref(false)
 const searchBoxRef = ref(null)
+const appHeaderRef = ref(null)
+const searchPanelStyle = ref({})
+const searchPanelExpanded = ref(false)
+
+const getVisibleSearchTrigger = () => {
+  const desktop = appHeaderRef.value?.desktopSearchTriggerRef
+  const mobile = appHeaderRef.value?.mobileSearchTriggerRef
+  if (desktop?.offsetParent !== null) return desktop
+  if (mobile?.offsetParent !== null) return mobile
+  return desktop || mobile || null
+}
+
+const captureSearchTriggerRect = () => {
+  const trigger = getVisibleSearchTrigger()
+  if (!trigger) {
+    return { top: '1rem', left: '1rem', width: 'min(24rem, calc(100vw - 2rem))' }
+  }
+  const rect = trigger.getBoundingClientRect()
+  return {
+    top: `${rect.top}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
+  }
+}
 
 const closeSearchBox = () => {
+  searchPanelExpanded.value = false
   searchBoxVisible.value = false
 }
 
 const openSearchBox = async () => {
+  searchPanelStyle.value = captureSearchTriggerRect()
+  searchPanelExpanded.value = true
   searchBoxVisible.value = true
+
   await nextTick()
   searchBoxRef.value?.focusInput?.()
 }
@@ -522,16 +608,24 @@ const menuItems = computed(() => {
   position: fixed;
   inset: 0;
   z-index: 1200;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 1.5rem 1rem 1rem;
   background: rgba(9, 14, 24, 0.48);
   backdrop-filter: blur(2px);
 }
 
 .search-overlay-panel {
-  width: min(90vw, 65rem);
+  position: fixed;
+  z-index: 1201;
+  max-width: calc(100vw - 2rem);
+  border-radius: 999px;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.search-overlay-panel--expanded {
+  width: min(38rem, calc(100vw - 2rem)) !important;
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.4);
+  overflow: visible;
 }
 
 .page-main-enter-from,
@@ -557,13 +651,12 @@ const menuItems = computed(() => {
 
 <style>
 html:not(.dark) .app-shell {
-  background-color: #f8fafc;
+  background-color: #f0f4f8;
   color: #334155;
 }
 
 html:not(.dark) .app-shell__topbar {
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f3f3f3;
+  background-color: #f0f4f8;
   backdrop-filter: none;
 }
 
@@ -571,23 +664,21 @@ html:not(.dark) .app-shell__topbar {
   position: sticky;
   top: 0;
   z-index: 30;
-  border-bottom: 1px solid rgb(30, 43, 70);
   backdrop-filter: blur(18px);
-  padding: 16px;
+  padding: 10px 16px 10px 0;
 }
 
 html:not(.dark) .app-shell__search {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
   color: #64748b;
-  border-radius: 6px;
 }
 
 .app-shell__search {
   align-items: center;
   gap: 0.75rem;
   width: min(24rem, 100%);
-  padding: 0.85rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--p-content-background) 94%, transparent);
   color: var(--p-text-muted-color);
@@ -605,23 +696,23 @@ html:not(.dark) .app-shell__search:hover {
 }
 
 html:not(.dark) .app-shell__content {
-  background-color: #f8fafc;
+  background-color: #ffffff;
   color: #334155;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
 html:not(.dark) .app-shell__main {
-  background-color: #f8fafc;
+  background-color: #f0f4f8;
   color: #334155;
 }
 
 .dark .app-shell {
-  background-color: #070a12;
+  background-color: #0b121f;
   color: #94a3b8;
 }
 
 .dark .app-shell__topbar {
-  border-bottom: 1px solid #1e293b;
-  background-color: #070a12;
+  background-color: #0b121f;
   backdrop-filter: none;
 }
 
@@ -629,7 +720,6 @@ html:not(.dark) .app-shell__main {
   background-color: #1e293b;
   border: 1px solid #1e293b;
   color: #64748b;
-  border-radius: 6px;
 }
 
 .dark .app-shell__search:hover {
@@ -637,17 +727,33 @@ html:not(.dark) .app-shell__main {
 }
 
 .dark .app-shell__content {
-  background-color: #070a12;
+  background-color: #0f172a;
   color: #94a3b8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .dark .app-shell__main {
-  background-color: #070a12;
+  background-color: #0b121f;
   color: #94a3b8;
+}
+
+@media (min-width: 1024px) {
+  .app-shell__main {
+    padding-left: var(--sidebar-width, 260px);
+    transition: padding-left 0.18s ease;
+  }
 }
 
 .app-shell__content {
   min-height: calc(100vh - 5rem);
+  margin: 16px 16px 16px 0;
+  border-radius: 16px;
+}
+
+@media (max-width: 1023px) {
+  .app-shell__content {
+    margin: 12px;
+  }
 }
 
 .custom-select-root:hover {
@@ -664,83 +770,6 @@ html:not(.dark) .app-shell__main {
   left: auto !important;
   max-width: calc(100vw - 1rem);
 }
-
-.language-menu {
-  z-index: 1000;
-}
-
-.lang-currency-menu {
-  min-width: 200px;
-}
-
-.lang-currency-menu :deep(.p-menu-item-content) {
-  padding: 0 !important;
-}
-
-.lang-currency-menu.p-menu {
-  padding: 0.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--p-content-border-color);
-  background: var(--p-surface-card);
-  box-shadow: 0 14px 30px rgba(7, 10, 18, 0.16);
-}
-
-.lang-currency-menu .p-menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.menu-panel-title {
-  color: var(--p-text-color);
-}
-
-.menu-panel-item {
-  border-radius: 0.5rem;
-  border: 1px solid var(--p-content-border-color);
-  color: var(--p-text-color);
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.menu-panel-item:hover {
-  background: var(--p-surface-hover);
-}
-
-.menu-panel-item.is-active {
-  border-color: color-mix(in srgb, var(--p-primary-color) 55%, white);
-  background: color-mix(in srgb, var(--p-primary-color) 18%, white);
-  color: var(--p-primary-color);
-}
-
-.dark .lang-currency-menu.p-menu {
-  background: color-mix(in srgb, var(--p-surface-card) 88%, black);
-  border-color: color-mix(in srgb, var(--p-content-border-color) 85%, #1d2436);
-  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
-}
-
-.dark .menu-panel-item {
-  border-color: color-mix(in srgb, var(--p-content-border-color) 80%, #1c2438);
-}
-
-.dark .menu-panel-item:hover {
-  background: color-mix(in srgb, var(--p-primary-color) 14%, transparent);
-}
-
-.dark .menu-panel-item.is-active {
-  border-color: color-mix(in srgb, var(--p-primary-color) 72%, #6f7cff);
-  background: color-mix(in srgb, var(--p-primary-color) 62%, #3644b3);
-  color: #ffffff;
-}
-
-.language-menu :deep(.active-language) {
-  color: var(--p-primary-color) !important;
-  font-weight: 600;
-}
-
-.language-menu :deep(.active-language:hover) {
-  color: var(--p-primary-color) !important;
-}
-
 
 /* 自訂 Primevue DataTable 排序圖示 */
 

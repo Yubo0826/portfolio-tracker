@@ -14,7 +14,7 @@
         <span>
             {{ new Date(regularMarketTime) }}
         </span>
-        <!-- <div class="text-sm text-gray-500 mb-4">
+        <!-- <div class="text-sm text-gray-700 mb-4">
             盤前： ${{ premarketPrice }} <span :class="premarketChangePercent >= 0 ? 'text-green-600' : 'text-red-600'">({{ premarketChangePercent.toFixed(2) }}%)</span>
         </div> -->
 

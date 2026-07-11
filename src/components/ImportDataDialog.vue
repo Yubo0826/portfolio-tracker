@@ -64,7 +64,7 @@
     >
       <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
       <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('uploadTransactions') }}</p>
-      <p class="text-gray-500">{{ $t('dropOrClickToUpload') }}</p>
+      <p class="text-gray-700">{{ $t('dropOrClickToUpload') }}</p>
       <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
     </div>
     

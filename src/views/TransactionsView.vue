@@ -1,8 +1,6 @@
 <template>
   <ConfirmDialog></ConfirmDialog>
   <div>
-    <Card>
-      <template #content>
         <div class="flex flex-wrap items-center gap-2 mb-8">
           <!-- showClear -->
           <MultiSelect
@@ -126,8 +124,6 @@
             <NoData />
           </template>
         </DataTable>
-      </template>
-    </Card>
 
   </div>
 </template>

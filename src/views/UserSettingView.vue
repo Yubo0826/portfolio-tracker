@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md mx-auto mt-10">
-    <Card class="p-6 shadow-lg rounded-2xl">
+    <AppCard class="p-6 shadow-lg rounded-2xl">
       <template #title>
         <h2 class="text-xl font-semibold text-gray-700">
           使用者設定
@@ -21,7 +21,7 @@
               suffix="%"
               class="w-full"
             />
-            <small class="text-gray-500">
+            <small class="text-gray-700">
               當實際配置偏離超過此百分比時，系統會發出警示。
             </small>
           </div>
@@ -34,7 +34,7 @@
           />
         </div>
       </template>
-    </Card>
+    </AppCard>
 
     <Button @click="sendEmail">發送測試郵件</Button>
     <Button @click="checkPortfolioDrift">投資組合偏移檢查測試</Button>

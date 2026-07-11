@@ -61,7 +61,7 @@ const VALID_TABS = ['holdings', 'transactions', 'dividends']
 const normalize = (t) => (VALID_TABS.includes(t) ? t : 'holdings')
 
 // PrimeVue SelectButton 選項
-const options = ref([
+const options = computed(() => [
   { label: t('holding'), value: 'holdings' },
   { label: t('transactions'), value: 'transactions' },
   { label: t('dividends'), value: 'dividends' },

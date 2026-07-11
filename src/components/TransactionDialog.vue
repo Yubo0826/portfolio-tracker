@@ -46,23 +46,6 @@
         />
       </div>
 
-      <!-- Account -->
-      <div class="mb-4">
-        <label for="accountId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {{ $t('cashFlow.tradingAccount') }}
-        </label>
-        <Select
-          id="accountId"
-          v-model="form.accountId"
-          :options="cashAccounts"
-          optionLabel="name"
-          optionValue="id"
-          :placeholder="$t('cashFlow.selectAccount')"
-          class="w-full"
-          showClear
-        />
-      </div>
-
       <!-- Date -->
       <div class="mb-4">
         <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -101,16 +84,18 @@
           {{ $t('pleaseInputPrice') }} <span class="text-red-500">*</span>
         </label>
         <div class="flex items-stretch rounded-lg">
-          <InputNumber 
+          <InputNumber
             id="price"
-            v-model="form.price" 
-            class="w-full" 
-            autocomplete="off" 
+            v-model="form.price"
+            class="w-full"
+            autocomplete="off"
             showButtons
             mode="currency"
             :currency="form.currency || 'USD'"
             :currencyDisplay="'code'"
-            :placeholder="form.currency || 'USD'" 
+            :minFractionDigits="0"
+            :maxFractionDigits="3"
+            :placeholder="form.currency || 'USD'"
           />
           <!-- <span class="inline-flex min-w-16 items-center justify-center rounded-r-lg border border-l-0 border-surface-300 bg-surface-100 px-3 text-sm font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300">
             {{ form.currency || 'USD' }}
@@ -180,11 +165,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { storeToRefs } from 'pinia';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
-import { useCashFlowStore } from '@/stores/cashflow';
 import * as toast from '@/composables/toast';
 import { useI18n } from 'vue-i18n';
 
@@ -204,8 +187,6 @@ const emit = defineEmits(['update:modelValue', 'saved']);
 
 const store = useTransactionsStore();
 const portfolioStore = usePortfolioStore();
-const cashFlowStore = useCashFlowStore();
-const { cashAccounts } = storeToRefs(cashFlowStore);
 
 const transactionType = computed(() => [
   { name: t('buy'), code: 'buy' },

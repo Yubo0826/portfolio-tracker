@@ -36,6 +36,13 @@ export default definePreset(Aura, {
             focusColor: '{zinc.900}',
             borderColor: '{zinc.300}'
           },
+          text: {
+            color: '{zinc.800}',
+            hoverColor: '{zinc.900}',
+            // 次要文字（icon、說明文字、次要標籤等）預設 zinc.500 對比度過低（約 4.6:1），偏淡不易閱讀，改用 zinc.600 (約 7:1)
+            mutedColor: '{zinc.600}',
+            hoverMutedColor: '{zinc.700}'
+          },
           surface: {
               // background: '#ffffff',
               // background: '#f4f6fe',
@@ -121,26 +128,6 @@ export default definePreset(Aura, {
             color: '{primary.color}'
           },
           hoverBorderColor: '{primary.hoverColor}'
-        }
-      },
-      card: {
-        colorScheme: {
-          light: {
-            root: {
-              background: '{surface.card}',
-              color:      '{text.color}',
-              borderColor: '{border.color}',
-              shadow:     '{custom.shadow}'
-            }
-          },
-          dark: {
-            root: {
-              background: '{surface.card}',
-              color:      '{text.color}',
-              borderColor: '{border.color}',
-              shadow:     '{custom.shadow}'
-            }
-          }
         }
       },
     }

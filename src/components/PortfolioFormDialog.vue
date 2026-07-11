@@ -30,7 +30,7 @@
     <div class="mb-4">
       <label for="driftThreshold" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         {{ $t('driftThreshold') }}
-        <i class="pi pi-info-circle ml-1 text-gray-400" v-tooltip.bottom="$t('emailAlertHint')" />
+        <i class="pi pi-info-circle ml-1 text-gray-600" v-tooltip.bottom="$t('emailAlertHint')" />
       </label>
       <InputNumber 
         id="driftThreshold" 

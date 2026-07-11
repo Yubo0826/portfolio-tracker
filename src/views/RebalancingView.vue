@@ -1,5 +1,5 @@
 <template>
-  <Card class="mt-4 p-6 min-h-90">
+  <AppCard class="mt-4 p-6 min-h-90">
     <template #content>
     <h2 class="text-xl font-semibold mb-8">{{ $t('rebalanceTitle') }}</h2>
 
@@ -36,7 +36,7 @@
             <span v-if="isRebalancing">&nbsp;→&nbsp;</span>
             <span v-if="isRebalancing">{{ (Number(slotProps.data.actualPctAfter) * 100).toFixed(2) }}</span>
             <br />
-            <span class="text-xs text-gray-500">
+            <span class="text-xs text-gray-700">
               ({{ $t('target') }}: {{ slotProps.data.target }})
             </span>
           </div>
@@ -84,7 +84,7 @@
       />
     </div> -->
   </template>
-</Card>
+</AppCard>
 
   <TransactionDialog v-model="transactionDialog" :formData="newTransaction" />
 </template>

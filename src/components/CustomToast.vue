@@ -29,7 +29,7 @@
           :class="
             dark
               ? 'text-gray-400 hover:text-white hover:bg-white/10'
-              : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
           "
           @click="closeCallback"
         >

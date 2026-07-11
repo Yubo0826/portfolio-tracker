@@ -57,7 +57,7 @@
     </div>
 
     <!-- 結果 -->
-    <Card v-if="result">
+    <AppCard v-if="result">
       <template #title>{{ $t('resultTitle') }}</template>
       <template #content>
         <div class="grid md:grid-cols-2 gap-4 mb-6">
@@ -103,30 +103,30 @@
           </div>
         </div>
       </template>
-    </Card>
+    </AppCard>
     <!-- 資產走勢圖 -->
-    <Card class="my-6" v-if="lineData.length">
+    <AppCard class="my-6" v-if="lineData.length">
       <template #title>{{ $t('chartTitle') }}</template>
       <template #content>
-        <p class="text-sm text-gray-500 mb-2">{{ $t('chartSubtitle') }}</p>
+        <p class="text-sm text-gray-700 mb-2">{{ $t('chartSubtitle') }}</p>
         <highcharts
           :options="highLineOptions"
           style="width: 100%; height: 400px;"
         />
       </template>
-    </Card>
+    </AppCard>
 
     <!-- 年度報酬率圖 -->
-    <Card class="my-6" v-if="annualReturnsData.length">
+    <AppCard class="my-6" v-if="annualReturnsData.length">
       <template #title>{{ $t('annualReturnChart') }}</template>
       <template #content>
-        <p class="text-sm text-gray-500 mb-2">{{ $t('annualReturnHint') }}</p>
+        <p class="text-sm text-gray-700 mb-2">{{ $t('annualReturnHint') }}</p>
         <highcharts
           :options="highBarOptions"
           style="width: 100%; height: 400px;"
         />
       </template>
-    </Card>
+    </AppCard>
   </div>
 </template>
 

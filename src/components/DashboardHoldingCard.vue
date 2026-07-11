@@ -19,7 +19,7 @@
         <div class="flex items-center gap-4">
             <p class="holding-card__price">
               {{ nativePriceAmountLabel }}
-              <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">{{ nativePriceCurrencyLabel }}</span>
+              <span class="text-xs font-semibold text-slate-600 dark:text-slate-500">{{ nativePriceCurrencyLabel }}</span>
             </p>
             <span class="holding-card__change" :class="trendClass">{{ trendLabel }}</span>
         <!-- <p class="holding-card__meta">{{ totalValueLabel }}</p> -->

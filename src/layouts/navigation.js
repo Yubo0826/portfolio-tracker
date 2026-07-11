@@ -19,9 +19,7 @@ export function buildPrimaryNavigation(t, currentPortfolioName) {
         {
           label: t('portfolio'),
           items: [
-            { label: t('holdings'), to: '/portfolio/holdings', icon: 'bank' },
-            { label: t('transactions'), to: '/portfolio/transactions', icon: 'receipt' },
-            { label: t('dividends'), to: '/portfolio/dividends', icon: 'pi pi-wallet' },
+            { label: t('assetDetails'), to: '/portfolio/holdings', icon: 'detail' },
           ],
         },
         {
@@ -37,14 +35,6 @@ export function buildPrimaryNavigation(t, currentPortfolioName) {
           ],
         },
       ],
-    },
-    {
-      key: 'cashflow',
-      label: t('cashFlowNav'),
-      to: '/cash-flow',
-      icon: 'pi pi-wallet',
-      activePaths: ['/cash-flow', '/cash-flows'],
-      hasMenu: false,
     },
     {
       key: 'tools',
@@ -85,72 +75,50 @@ export function buildSidebarSections(t) {
           icon: 'dashboard',
           activePaths: ['/dashboard'],
         },
-      ],
-    },
-    {
-      key: 'portfolio',
-      label: t('portfolio'),
-      items: [
         {
-          key: 'holdings',
-          label: t('holdings'),
+          key: 'asset-details',
+          label: t('assetDetails'),
           to: '/portfolio/holdings',
-          icon: 'bank',
-          activePaths: ['/portfolio/holdings', '/holdings'],
+          icon: 'detail',
+          activePaths: [
+            '/portfolio/holdings',
+            '/portfolio/transactions',
+            '/portfolio/dividends',
+            '/holdings',
+            '/transactions',
+            '/dividends',
+          ],
         },
         {
-          key: 'transactions',
-          label: t('transactions'),
-          to: '/portfolio/transactions',
-          icon: 'receipt',
-          activePaths: ['/portfolio/transactions', '/transactions'],
-        },
-        {
-          key: 'dividends',
-          label: t('dividends'),
-          to: '/portfolio/dividends',
-          icon: 'savings',
-          activePaths: ['/portfolio/dividends', '/dividends'],
-        },
-        {
-          key: 'cashflow',
-          label: t('cashFlowNav'),
-          to: '/cash-flow',
-          icon: 'cash',
-          activePaths: ['/cash-flow', '/cash-flows'],
-        },
-      ],
-    },
-    {
-      key: 'tools',
-      label: t('functions'),
-      items: [
-        {
-          key: 'allocation',
-          label: t('setTargets'),
-          to: '/allocation',
-          icon: 'pie-chart',
-          activePaths: ['/allocation'],
-        },
-        {
-          key: 'rebalancing',
-          label: t('rebalance'),
-          to: '/rebalancing',
-          icon: 'piechart',
-          activePaths: ['/rebalancing'],
-        },
-        {
-          key: 'backtesting',
-          label: t('backtesting'),
-          to: '/backtesting',
-          icon: 'history',
-          activePaths: ['/backtesting'],
+          key: 'analysis',
+          label: t('analysis'),
+          icon: 'analysis',
+          type: 'group',
+          children: [
+            {
+              key: 'allocation',
+              label: t('setTargets'),
+              to: '/allocation',
+              activePaths: ['/allocation'],
+            },
+            {
+              key: 'rebalancing',
+              label: t('rebalance'),
+              to: '/rebalancing',
+              activePaths: ['/rebalancing'],
+            },
+            {
+              key: 'backtesting',
+              label: t('backtesting'),
+              to: '/backtesting',
+              activePaths: ['/backtesting'],
+            },
+          ],
         },
       ],
     },
     {
       key: 'manage',
-      label: t('portfolios'),
       items: [
         {
           key: 'portfolios',
@@ -158,13 +126,6 @@ export function buildSidebarSections(t) {
           to: '/portfolios',
           icon: 'folder',
           activePaths: ['/portfolios'],
-        },
-        {
-          key: 'guide',
-          label: t('userGuide'),
-          to: '/user-guide',
-          icon: 'book',
-          activePaths: ['/user-guide'],
         },
       ],
     },

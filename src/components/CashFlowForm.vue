@@ -20,7 +20,7 @@
           <div class="flex justify-between items-center w-full">
             <div>
               <span>{{ slotProps.option.name }}</span>
-              <small class="text-gray-500 dark:text-gray-400 ml-2">({{ slotProps.option.currency }})</small>
+              <small class="text-gray-700 dark:text-gray-400 ml-2">({{ slotProps.option.currency }})</small>
             </div>
             <span class="font-semibold">
               ${{ slotProps.option.balance.toLocaleString() }}
@@ -76,7 +76,7 @@
         />
       </div>
       <small v-if="errors.amount" class="p-error">{{ errors.amount }}</small>
-      <small class="text-gray-500 dark:text-gray-400">
+      <small class="text-gray-700 dark:text-gray-400">
         {{ amountType === 'income' ? $t('cashFlow.incomeHint') : $t('cashFlow.expenseHint') }}
       </small>
     </div>
@@ -97,7 +97,7 @@
         required
       />
       <small v-if="errors.description" class="p-error">{{ errors.description }}</small>
-      <small class="text-gray-500 dark:text-gray-400">
+      <small class="text-gray-700 dark:text-gray-400">
         {{ form.description?.length || 0 }}/200
       </small>
     </div>
@@ -113,7 +113,7 @@
         :placeholder="$t('cashFlow.relatedStockPlaceholder')"
         class="w-full"
       />
-      <small class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.relatedStockHint') }}</small>
+      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.relatedStockHint') }}</small>
     </div>
 
     <!-- 日期時間 -->
@@ -130,7 +130,7 @@
         showTime
         hourFormat="24"
       />
-      <small class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.dateHint') }}</small>
+      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.dateHint') }}</small>
     </div>
 
     <!-- 預覽 -->

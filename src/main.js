@@ -19,6 +19,7 @@ const i18n = createI18n({
 })
 
 import SvgIcon from './components/SvgIcon.vue'
+import AppCard from './components/AppCard.vue'
 
 // PrimeVue Setup
 import PrimeVue from 'primevue/config'
@@ -40,7 +41,6 @@ import DatePicker from 'primevue/datepicker'
 import ConfirmDialog from 'primevue/confirmdialog'
 import Toast from 'primevue/toast'
 import SelectButton from 'primevue/selectbutton'
-import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import MultiSelect from 'primevue/multiselect'
 
@@ -79,6 +79,7 @@ app.use(PrimeVue, {
 app.use(ToastService)
 app.use(ConfirmationService)
 app.component('SvgIcon', SvgIcon)
+app.component('AppCard', AppCard)
 
 // Directives
 app.directive('tooltip', Tooltip)
@@ -97,7 +98,6 @@ const components = {
   ConfirmDialog,
   Toast,
   SelectButton,
-  Card,
   Tag,
   MultiSelect
 }

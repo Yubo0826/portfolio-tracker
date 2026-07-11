@@ -22,11 +22,11 @@
         {{ $t('cashFlow.currency') }}
       </label>
       <div class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md">
-        <i class="pi pi-lock text-gray-400"></i>
+        <i class="pi pi-lock text-gray-600"></i>
         <span class="font-medium text-gray-700 dark:text-gray-200">USD (美元)</span>
         <Tag value="Fixed" severity="info" class="text-xs" />
       </div>
-      <small class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.currencyFixedHint') }}</small>
+      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.currencyFixedHint') }}</small>
     </div>
 
     <!-- 初始餘額 -->
@@ -45,7 +45,7 @@
         :min="0"
       />
       <small v-if="errors.balance" class="p-error">{{ errors.balance }}</small>
-      <small class="text-gray-500 dark:text-gray-400">{{ $t('cashFlow.initialBalanceHint') }}</small>
+      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.initialBalanceHint') }}</small>
     </div>
 
     <!-- 帳戶描述 -->
@@ -61,7 +61,7 @@
         rows="3"
         :maxlength="200"
       />
-      <small class="text-gray-500 dark:text-gray-400">
+      <small class="text-gray-700 dark:text-gray-400">
         {{ form.description?.length || 0 }}/200
       </small>
     </div>
@@ -77,7 +77,7 @@
         {{ $t('cashFlow.activeAccount') }}
       </label>
     </div>
-    <small class="text-gray-500 dark:text-gray-400 block">{{ $t('cashFlow.activeAccountHint') }}</small> -->
+    <small class="text-gray-700 dark:text-gray-400 block">{{ $t('cashFlow.activeAccountHint') }}</small> -->
 
     <!-- 按鈕 -->
     <div class="flex justify-end gap-3 pt-4 border-t">

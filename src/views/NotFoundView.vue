@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
         {{ $t('notFound.title') }}
       </h1>
-      <p class="text-gray-500 dark:text-gray-400 mb-8">
+      <p class="text-gray-700 dark:text-gray-400 mb-8">
         {{ $t('notFound.description') }}
       </p>
       <Button :label="$t('notFound.goHome')" icon="pi pi-home" @click="router.push('/')" />

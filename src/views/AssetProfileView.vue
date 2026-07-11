@@ -1,19 +1,5 @@
 <template>
   <div>
-    <Breadcrumb :home="home" :model="items">
-      <template #item="{ item, props }">
-        <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-          <a :href="href" v-bind="props.action" @click="navigate">
-            <span :class="[item.icon, 'text-color']" />
-            <span class="text-primary font-semibold">{{ item.label }}</span>
-          </a>
-        </router-link>
-        <a v-else :href="item.url" :target="item.target" v-bind="props.action">
-          <span class="text-surface-700 dark:text-surface-0">{{ item.label }}</span>
-        </a>
-      </template>
-    </Breadcrumb>
-
     <div class="pl-4 pr-4 mt-4">
       <div class="flex items-center">
         <h1 class="text-2xl">{{ info.fullName }}</h1>
@@ -21,7 +7,7 @@
       <div class="chart-container">
         <div class="grid grid-cols-3 gap-8">
           <div class="col-span-2 flex flex-col gap-4">
-            <Card class="w-full">
+            <AppCard class="w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between">
@@ -38,10 +24,10 @@
                       >
                         <span class="font-semibold">{{ formatSignedNumber(growthRateNumber) }}%</span>
                         <span>({{ formatSignedNumber(change) }})</span>
-                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ selectedRangeLabel }}</span>
+                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">{{ selectedRangeLabel }}</span>
                       </div>
 
-                      <div v-else class="inline-flex items-center gap-2 text-lg text-slate-400 dark:text-slate-500">
+                      <div v-else class="inline-flex items-center gap-2 text-lg text-slate-600 dark:text-slate-500">
                         <span>--</span>
                         <span>(--)</span>
                         <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedRangeLabel }}</span>
@@ -96,14 +82,14 @@
                   </div>
                 </div>
               </template>
-            </Card>
+            </AppCard>
 
-            <Card class="w-full">
+            <AppCard class="w-full">
               <template #content>
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t('compareAssets') }}</span>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">
+                    <span class="text-xs text-slate-700 dark:text-slate-400">
                       {{ t('comparisonLimitHint', { max: MAX_COMPARE_SYMBOLS }) }}
                     </span>
                   </div>
@@ -136,7 +122,7 @@
 
                   <p
                     v-if="isComparisonDisabled && compareSymbols.length"
-                    class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+                    class="mt-2 text-xs text-slate-700 dark:text-slate-400"
                   >
                     {{ t('comparisonDisabledForCandlestick') }}
                   </p>
@@ -158,7 +144,7 @@
                       <span class="font-semibold">{{ item }}</span>
                       <span
                         v-if="compareNameMap[item] && compareNameMap[item] !== item"
-                        class="ml-1 max-w-28 truncate text-xs text-slate-500 dark:text-slate-300"
+                        class="ml-1 max-w-28 truncate text-xs text-slate-700 dark:text-slate-300"
                       >
                         {{ compareNameMap[item] }}
                       </span>
@@ -167,9 +153,9 @@
                   </div>
                 </div>
               </template>
-            </Card>
+            </AppCard>
 
-            <Card class="w-full">
+            <AppCard class="w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between gap-2">
@@ -277,11 +263,11 @@
                   </Carousel>
                 </div>
               </template>
-            </Card>
+            </AppCard>
           </div>
 
           <div class="flex flex-col gap-4">
-            <Card class="w-full">
+            <AppCard class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
@@ -306,9 +292,9 @@
                   </div>
                 </div>
               </template>
-            </Card>
+            </AppCard>
 
-            <Card class="w-full">
+            <AppCard class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <p
@@ -319,7 +305,7 @@
                   </p>
 
                   <div class="pt-3">
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 pb-3">{{ t('companyKeyStats') }}</p>
+                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-400 pb-3">{{ t('companyKeyStats') }}</p>
 
                     <div
                       v-for="(row, index) in companyKeyStatsRows"
@@ -333,7 +319,7 @@
 
                     <p
                       v-if="!companyKeyStatsRows.length"
-                      class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+                      class="mt-2 text-xs text-slate-700 dark:text-slate-400"
                     >
                       {{ t('companyKeyStatsEmpty') }}
                     </p>
@@ -344,19 +330,19 @@
                     v-if="companyInfo.longBusinessSummary"
                     class="pt-3"
                   >
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t('companySummary') }}</p>
+                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-400">{{ t('companySummary') }}</p>
                     <p class="company-summary mt-2 text-xs">{{ companyInfo.longBusinessSummary }}</p>
                   </div>
 
                   <p
                     v-else-if="!companyInfoLoading && !hasCompanyInfo"
-                    class="text-xs text-slate-500 dark:text-slate-400"
+                    class="text-xs text-slate-700 dark:text-slate-400"
                   >
                     {{ t('companyInfoEmpty') }}
                   </p>
                 </div>
               </template>
-            </Card>
+            </AppCard>
           </div>
         </div>
       </div>
@@ -367,7 +353,6 @@
 <script setup>
 import { ref, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Breadcrumb from 'primevue/breadcrumb'
 import SelectButton from 'primevue/selectbutton'
 import Carousel from 'primevue/carousel'
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
@@ -431,13 +416,6 @@ const companyInfoError = ref(false)
 
 const chartSeries = ref([{ name: '收盤價', data: [] }])
 const candleSeries = ref([{ name: 'K線圖', data: [] }])
-
-const home = ref({
-  icon: 'pi pi-home',
-  route: '/dashboard',
-})
-
-const items = ref([{ label: symbol.value }])
 
 const info = reactive({
   fullName: '',
@@ -1356,7 +1334,6 @@ function formatUTC8(isoString) {
 
 watch(symbol, nextSymbol => {
   const normalized = String(nextSymbol || '').toUpperCase()
-  items.value = [{ label: normalized }]
   compareSymbols.value = compareSymbols.value.filter(item => item !== normalized)
   fetchRecommendedSymbols(normalized)
   fetchCompanyBasicInfo(normalized)

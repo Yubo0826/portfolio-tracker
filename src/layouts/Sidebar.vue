@@ -3,23 +3,24 @@
   <aside
     v-if="persistent"
     class="sidebar hidden lg:flex"
+    :class="{ 'sidebar--collapsed': isCollapsed }"
   >
     <div class="sidebar-top">
-      <button type="button" class="back-btn" @click="goDashboard">
-        <span class="sidebar-brand">
-          <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
-        </span>
-      </button>
+      <div class="sidebar-top-row">
+        <button v-show="!isCollapsed" type="button" class="back-btn" :title="t('dashboard')" @click="goDashboard">
+          <span class="sidebar-brand">
+            <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
+          </span>
+        </button>
 
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input
-          type="text"
-          :placeholder="t('searchPlaceholder')"
-          readonly
-          @click="$emit('open-search')"
-          @keydown.enter.prevent="$emit('open-search')"
-        />
+        <button
+          type="button"
+          class="sidebar-collapse-btn"
+          :aria-label="isCollapsed ? t('expandSidebar') : t('collapseSidebar')"
+          @click="toggleCollapsed"
+        >
+          <i :class="isCollapsed ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'"></i>
+        </button>
       </div>
 
       <!-- Portfolio Menu -->
@@ -28,18 +29,19 @@
           type="button"
           class="portfolio-menu-trigger menu-item sidebar-portfolio__trigger"
           :class="{ 'is-open': portfolioMenuVisible }"
+          :title="isCollapsed ? currentPortfolioName : null"
           :aria-label="t('openPortfolioMenu')"
           :aria-expanded="portfolioMenuVisible"
           @click="togglePortfolioMenu"
         >
           <span class="menu-item-left">
             <i class="fa-solid fa-briefcase"></i>
-            <span class="sidebar-portfolio__text">
+            <span v-show="!isCollapsed" class="sidebar-portfolio__text">
               <span class="sidebar-portfolio__label">{{ t('portfolio') }}</span>
               <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
             </span>
           </span>
-          <i class="fa-solid fa-chevron-down portfolio-menu-trigger__icon"></i>
+          <i v-show="!isCollapsed" class="fa-solid fa-chevron-down portfolio-menu-trigger__icon"></i>
         </button>
 
         <TieredMenu
@@ -85,7 +87,7 @@
         </TieredMenu>
 
         <div
-          v-if="isDemoUser"
+          v-if="isDemoUser && !isCollapsed"
           class="sidebar-demo-notice"
         >
           <i class="pi pi-info-circle"></i>
@@ -97,18 +99,54 @@
         <div v-if="index > 0" class="menu-divider"></div>
 
         <div class="menu-group">
-          <RouterLink
-            v-for="item in section.items"
-            :key="item.key"
-            :to="item.to"
-            class="menu-item"
-            :class="{ active: isNavItemActive(item) }"
-          >
-            <span class="menu-item-left">
-              <i :class="navIconClass(item.icon)"></i>
-              {{ item.label }}
-            </span>
-          </RouterLink>
+          <template v-for="item in section.items" :key="item.key">
+            <template v-if="item.type === 'group'">
+              <button
+                type="button"
+                class="menu-item menu-item--group w-full"
+                :class="{ 'is-expanded': !isCollapsed && isGroupExpanded(item) }"
+                :title="isCollapsed ? item.label : null"
+                :aria-expanded="isGroupExpanded(item)"
+                @click="onGroupTriggerClick(item)"
+              >
+                <span class="menu-item-left">
+                  <SvgIcon :name="item.icon" class="menu-item-icon" />
+                  <span v-show="!isCollapsed">{{ item.label }}</span>
+                </span>
+                <i v-show="!isCollapsed" class="fa-solid fa-chevron-right menu-item-group__chevron"></i>
+              </button>
+              <div
+                v-show="!isCollapsed"
+                class="menu-subgroup-wrapper"
+                :class="{ 'is-expanded': isGroupExpanded(item) }"
+              >
+                <div class="menu-subgroup">
+                  <RouterLink
+                    v-for="child in item.children"
+                    :key="child.key"
+                    :to="child.to"
+                    class="menu-subitem"
+                    :class="{ active: isNavItemActive(child) }"
+                  >
+                    {{ child.label }}
+                  </RouterLink>
+                </div>
+              </div>
+            </template>
+
+            <RouterLink
+              v-else
+              :to="item.to"
+              class="menu-item"
+              :class="{ active: isNavItemActive(item) }"
+              :title="isCollapsed ? item.label : null"
+            >
+              <span class="menu-item-left">
+                <SvgIcon :name="item.icon" class="menu-item-icon" />
+                <span v-show="!isCollapsed">{{ item.label }}</span>
+              </span>
+            </RouterLink>
+          </template>
         </div>
       </template>
     </div>
@@ -118,6 +156,7 @@
         type="button"
         class="user-profile"
         :class="{ 'is-open': userMenuVisible }"
+        :title="isCollapsed ? userDisplayName : null"
         :aria-label="t('openUserMenu')"
         :aria-expanded="userMenuVisible"
         @click="toggleUserMenu"
@@ -127,12 +166,12 @@
             <img :src="userPhotoUrl" :alt="userDisplayName" />
           </div>
           <div v-else class="avatar">{{ userInitial }}</div>
-          <div>
+          <div v-show="!isCollapsed">
             <div class="user-name">{{ userDisplayName }}</div>
             <div class="user-plan">{{ userEmail }}</div>
           </div>
         </div>
-        <i class="fa-solid fa-chevron-up user-profile__chevron"></i>
+        <i v-show="!isCollapsed" class="fa-solid fa-chevron-up user-profile__chevron"></i>
       </button>
 
       <TieredMenu
@@ -194,17 +233,6 @@
               <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
             </span>
           </button>
-
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              :placeholder="t('searchPlaceholder')"
-              readonly
-              @click="openSearchAndClose(closeCallback)"
-              @keydown.enter.prevent="openSearchAndClose(closeCallback)"
-            />
-          </div>
 
           <div class="sidebar-portfolio">
             <button
@@ -280,19 +308,50 @@
             <div v-if="index > 0" class="menu-divider"></div>
 
             <div class="menu-group">
-              <button
-                v-for="item in section.items"
-                :key="item.key"
-                type="button"
-                class="menu-item w-full"
-                :class="{ active: isNavItemActive(item) }"
-                @click="go(item.to, closeCallback)"
-              >
-                <span class="menu-item-left">
-                  <i :class="navIconClass(item.icon)"></i>
-                  {{ item.label }}
-                </span>
-              </button>
+              <template v-for="item in section.items" :key="item.key">
+                <template v-if="item.type === 'group'">
+                  <button
+                    type="button"
+                    class="menu-item menu-item--group w-full"
+                    :class="{ 'is-expanded': isGroupExpanded(item) }"
+                    :aria-expanded="isGroupExpanded(item)"
+                    @click="toggleGroup(item)"
+                  >
+                    <span class="menu-item-left">
+                      <SvgIcon :name="item.icon" class="menu-item-icon" />
+                      {{ item.label }}
+                    </span>
+                    <i class="fa-solid fa-chevron-right menu-item-group__chevron"></i>
+                  </button>
+                  <div class="menu-subgroup-wrapper" :class="{ 'is-expanded': isGroupExpanded(item) }">
+                    <div class="menu-subgroup">
+                      <button
+                        v-for="child in item.children"
+                        :key="child.key"
+                        type="button"
+                        class="menu-subitem w-full"
+                        :class="{ active: isNavItemActive(child) }"
+                        @click="go(child.to, closeCallback)"
+                      >
+                        {{ child.label }}
+                      </button>
+                    </div>
+                  </div>
+                </template>
+
+                <button
+                  v-else
+                  type="button"
+                  class="menu-item w-full"
+                  :class="{ active: isNavItemActive(item) }"
+                  @click="go(item.to, closeCallback)"
+                >
+                  <span class="menu-item-left">
+                    <SvgIcon :name="item.icon" class="menu-item-icon" />
+                    {{ item.label }}
+                  </span>
+                </button>
+              </template>
             </div>
           </template>
         </div>
@@ -367,21 +426,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Drawer from 'primevue/drawer'
 import TieredMenu from 'primevue/tieredmenu'
+import SvgIcon from '@/components/SvgIcon.vue'
 
 import { buildSidebarSections } from './navigation.js'
-
-const NAV_ICON_MAP = {
-  dashboard: 'fa-solid fa-gauge',
-  bank: 'fa-solid fa-building-columns',
-  receipt: 'fa-solid fa-receipt',
-  savings: 'fa-solid fa-piggy-bank',
-  cash: 'fa-solid fa-money-bill-wave',
-  'pie-chart': 'fa-solid fa-bullseye',
-  piechart: 'fa-solid fa-arrows-rotate',
-  history: 'fa-solid fa-clock-rotate-left',
-  folder: 'fa-solid fa-folder',
-  book: 'fa-solid fa-book',
-}
+import { useSidebarCollapse } from '@/composables/useSidebarCollapse.js'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -426,7 +474,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:visible', 'open-search'])
+const emit = defineEmits(['update:visible'])
 
 const visible = computed({
   get: () => props.visible,
@@ -440,13 +488,32 @@ const userMenu = ref()
 const userMenuMobile = ref()
 const userMenuVisible = ref(false)
 const sidebarSections = computed(() => buildSidebarSections(t))
+const { isCollapsed, toggleCollapsed } = useSidebarCollapse()
 
 const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUpperCase())
 
-const navIconClass = (icon) => NAV_ICON_MAP[icon] || 'fa-solid fa-circle'
-
 const isNavItemActive = (item) => {
   return item.activePaths.some((path) => route.path === path || route.path.startsWith(`${path}/`))
+}
+
+const expandedGroups = ref({})
+
+const isGroupExpanded = (item) => {
+  const override = expandedGroups.value[item.key]
+  if (override !== undefined) return override
+  return true
+}
+
+const toggleGroup = (item) => {
+  expandedGroups.value = { ...expandedGroups.value, [item.key]: !isGroupExpanded(item) }
+}
+
+const onGroupTriggerClick = (item) => {
+  if (props.persistent && isCollapsed.value) {
+    router.push(item.children[0].to)
+    return
+  }
+  toggleGroup(item)
 }
 
 const togglePortfolioMenu = (event) => {
@@ -497,7 +564,6 @@ const lockPopupMenuPosition = (menuRef) => {
       container.style.position = 'fixed'
       container.style.top = `${top}px`
       container.style.left = `${left}px`
-      container.style.minWidth = `${target.width}px`
     }
 
     reposition()
@@ -546,12 +612,6 @@ const go = (to, closeCallback) => {
 const goDashboard = () => {
   router.push('/dashboard')
 }
-
-const openSearchAndClose = (closeCallback) => {
-  emit('update:visible', false)
-  closeCallback?.()
-  emit('open-search')
-}
 </script>
 
 <style>
@@ -561,7 +621,7 @@ html:not(.dark) .sidebar {
   --bg-main: #f8fafc;
   --bg-card: #f1f5f9;
   --text-main: #334155;
-  --text-muted: #64748b;
+  --text-muted: #626a73;
   --accent-color: #3b82f6;
   --border-color: #e2e8f0;
 
@@ -589,15 +649,15 @@ html:not(.dark) .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 40;
-  width: 260px;
+  width: var(--sidebar-width, 260px);
   background-color: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
   padding: 16px;
   padding-top: 0px;
   justify-content: space-between;
   overflow: hidden;
+  transition: width 0.18s ease;
 }
 
 .sidebar--drawer {
@@ -616,6 +676,44 @@ html:not(.dark) .sidebar {
   overflow-y: auto;
 }
 
+.sidebar-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 64px;
+}
+
+.sidebar--collapsed {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.sidebar--collapsed .sidebar-top-row {
+  justify-content: center;
+}
+
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--sidebar-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.sidebar-collapse-btn:hover {
+  background-color: var(--sidebar-hover-bg);
+  color: var(--sidebar-text);
+}
+
 .back-btn {
   display: flex;
   align-items: center;
@@ -627,6 +725,8 @@ html:not(.dark) .sidebar {
   font-size: 14px;
   cursor: pointer;
   text-align: left;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .back-btn:hover {
@@ -641,7 +741,9 @@ html:not(.dark) .back-btn:hover {
   font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.04em;
+  white-space: nowrap;
 }
+
 
 .sidebar-brand__stock {
   color: color-mix(in srgb, var(--sidebar-text) 80%, transparent);
@@ -657,41 +759,6 @@ html:not(.dark) .sidebar-brand__stock {
 
 html:not(.dark) .sidebar-brand__bar {
   color: #3b82f6;
-}
-
-.search-box {
-  position: relative;
-  margin: 8px 0;
-}
-
-.search-box i {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--sidebar-text-muted);
-  font-size: 14px;
-  pointer-events: none;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 8px 8px 8px 32px;
-  border: 1px solid var(--sidebar-border);
-  border-radius: 6px;
-  background-color: var(--sidebar-input-bg);
-  font-size: 13px;
-  color: var(--sidebar-text);
-  cursor: pointer;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: var(--border-color, var(--sidebar-border));
-}
-
-html:not(.dark) .search-box input:focus {
-  border-color: #e2e8f0;
 }
 
 .sidebar-portfolio {
@@ -768,6 +835,13 @@ html:not(.dark) .search-box input:focus {
   flex-shrink: 0;
 }
 
+.menu-item-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--sidebar-text-muted) !important;
+  flex-shrink: 0;
+}
+
 .menu-item:hover,
 .menu-item.active {
   background-color: var(--sidebar-active-bg);
@@ -778,10 +852,102 @@ html:not(.dark) .search-box input:focus {
   font-weight: 500;
 }
 
+.menu-item--group {
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.menu-item-group__chevron {
+  font-size: 11px;
+  color: var(--sidebar-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.16s ease;
+}
+
+.menu-item--group.is-expanded .menu-item-group__chevron {
+  transform: rotate(90deg);
+}
+
+.menu-subgroup-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.menu-subgroup-wrapper.is-expanded {
+  grid-template-rows: 1fr;
+}
+
+.menu-subgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.menu-subgroup-wrapper.is-expanded .menu-subitem {
+  animation: menu-subitem-fade-in 0.22s ease both;
+}
+
+.menu-subitem {
+  display: block;
+  width: 100%;
+  padding: 7px 12px 7px 38px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  color: var(--sidebar-text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.menu-subitem:hover,
+.menu-subitem.active {
+  background-color: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text, var(--sidebar-text));
+}
+
+.menu-subitem.active {
+  font-weight: 500;
+}
+
+.sidebar--collapsed .menu-subgroup-wrapper {
+  display: none;
+}
+
+@keyframes menu-subitem-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .menu-divider {
   height: 1px;
   background-color: var(--sidebar-border);
   margin: 12px 0;
+}
+
+.sidebar--collapsed .menu-item,
+.sidebar--collapsed .portfolio-menu-trigger,
+.sidebar--collapsed .user-profile {
+  justify-content: center;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .user-profile {
