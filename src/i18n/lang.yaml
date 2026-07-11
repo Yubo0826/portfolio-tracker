@@ -534,6 +534,59 @@ companyInfoEmpty:
   en: No company profile data available.
   zh: 目前沒有公司基本資訊。
 
+# ETF/基金產業配置 heatmap
+sectorWeightingsTitle:
+  en: Sector Weightings
+  zh: 產業配置
+sectorWeightingsEmpty:
+  en: No sector weighting data available.
+  zh: 目前沒有可用的產業配置資料。
+sectorWeightingsLoadFailed:
+  en: Failed to load sector weightings.
+  zh: 產業配置資料載入失敗。
+topHoldingsTitle:
+  en: Top Holdings
+  zh: 前十大持股
+topHoldingsEmpty:
+  en: No top holdings data available.
+  zh: 目前沒有可用的前十大持股資料。
+topHoldingsLoadFailed:
+  en: Failed to load top holdings.
+  zh: 前十大持股資料載入失敗。
+sectorTechnology:
+  en: Technology
+  zh: 科技
+sectorHealthcare:
+  en: Healthcare
+  zh: 醫療保健
+sectorFinancialServices:
+  en: Financial Services
+  zh: 金融服務
+sectorConsumerCyclical:
+  en: Consumer Cyclical
+  zh: 非必需消費
+sectorIndustrials:
+  en: Industrials
+  zh: 工業
+sectorCommunicationServices:
+  en: Communication Services
+  zh: 通訊服務
+sectorConsumerDefensive:
+  en: Consumer Defensive
+  zh: 必需消費
+sectorEnergy:
+  en: Energy
+  zh: 能源
+sectorUtilities:
+  en: Utilities
+  zh: 公用事業
+sectorRealEstate:
+  en: Real Estate
+  zh: 房地產
+sectorBasicMaterials:
+  en: Basic Materials
+  zh: 原物料
+
 # 圓餅圖/配置
 actualAllocation:
   en: Actual Allocation

@@ -45,8 +45,12 @@ import Tag from 'primevue/tag'
 import MultiSelect from 'primevue/multiselect'
 
 // Chart Library
-import Highcharts from 'highcharts/highstock'
+// 'highcharts/highstock' 是獨立打包的完整實例，無法和其他 modules/* 共用同一個 Highcharts 物件，
+// 所以改用基礎 'highcharts' 搭配 modules/stock、modules/treemap 個別掛載
+import Highcharts from 'highcharts'
 import HighchartsVue from 'highcharts-vue'
+import 'highcharts/modules/stock'
+import 'highcharts/modules/treemap'
 
 Highcharts.setOptions({
   lang: {

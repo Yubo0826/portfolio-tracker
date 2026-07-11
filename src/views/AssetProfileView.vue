@@ -11,26 +11,36 @@
               <template #content>
                 <div>
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center mb-2">
-                      <div class="text-4xl font-bold mr-4 inline-flex items-end">
-                        <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
-                        <span>{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
-                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
-                      </div>
-                      <div
-                        v-if="growthRateNumber !== null"
-                        :class="growthRateNumber >= 0 ? 'text-green-600' : 'text-red-600'"
-                        class="inline-flex items-center gap-2 text-xl"
-                      >
-                        <span class="font-semibold">{{ formatSignedNumber(growthRateNumber) }}%</span>
-                        <span>({{ formatSignedNumber(change) }})</span>
-                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">{{ selectedRangeLabel }}</span>
-                      </div>
+                    <div class="flex flex-col mb-2">
+                      <p class="asset-kicker">{{ t('currentPrice') }}</p>
 
-                      <div v-else class="inline-flex items-center gap-2 text-lg text-slate-600 dark:text-slate-500">
-                        <span>--</span>
-                        <span>(--)</span>
-                        <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedRangeLabel }}</span>
+                      <div class="mt-1 flex flex-wrap items-end gap-2">
+                        <div class="text-4xl font-bold inline-flex items-end">
+                          <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
+                          <span>{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
+                          <span class="ml-1 text-[10px] leading-none pb-1 font-semibold">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
+                        </div>
+
+                        <div
+                          v-if="growthRateNumber !== null"
+                          class="inline-flex items-center gap-2 pb-1"
+                        >
+                          <span
+                            class="asset-growth-pill"
+                            :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
+                          >
+                            <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"></i>
+                            {{ formatSignedNumber(growthRateNumber) }}%
+                            <span>({{ formatSignedNumber(change) }})</span>
+                          </span>
+                          <span class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">{{ selectedRangeLabel }}</span>
+                        </div>
+
+                        <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-slate-600 dark:text-slate-500">
+                          <span>--</span>
+                          <span>(--)</span>
+                          <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedRangeLabel }}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -56,18 +66,7 @@
                     <span>已收盤：{{ formatUTC8(info.regularMarketTime) }}</span>
                   </div>
 
-                  <div class="flex justify-end my-4">
-                    <SelectButton
-                      v-model="currentRange"
-                      :options="rangeOptions"
-                      optionLabel="label"
-                      optionValue="value"
-                      size="small"
-                      :allowEmpty="false"
-                    />
-                  </div>
-
-                  <div>
+                  <div class="mt-2">
                     <highcharts
                       v-if="chartType === 'area'"
                       :options="highAreaOptions"
@@ -80,6 +79,77 @@
                       style="width: 100%; height: 300px;"
                     />
                   </div>
+
+                  <div class="asset-range-row">
+                    <button
+                      v-for="option in rangeOptionsWithGrowth"
+                      :key="option.value"
+                      type="button"
+                      class="asset-range-btn"
+                      :class="{ 'asset-range-btn--active': currentRange === option.value }"
+                      @click="currentRange = option.value"
+                    >
+                      <span>{{ option.label }}</span>
+                      <span
+                        class="asset-range-btn-growth"
+                        :class="option.growth === null ? 'asset-range-btn-growth--muted' : option.growth >= 0 ? 'asset-range-btn-growth--up' : 'asset-range-btn-growth--down'"
+                      >
+                        {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </AppCard>
+
+            <AppCard v-if="isFundQuote" class="w-full">
+              <template #content>
+                <div>
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-sm font-semibold">{{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsTitle' : 'topHoldingsTitle') }}</span>
+
+                    <SelectButton
+                      v-model="fundHoldingsTab"
+                      :options="fundHoldingsTabOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      class="text-sm"
+                      :allowEmpty="false"
+                    />
+                  </div>
+
+                  <p
+                    v-if="fundHoldingsError"
+                    class="mt-2 text-xs text-red-600 dark:text-red-300"
+                  >
+                    {{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsLoadFailed' : 'topHoldingsLoadFailed') }}
+                  </p>
+
+                  <div
+                    v-if="fundHoldingsLoading"
+                    class="mt-3 h-72 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+                  />
+
+                  <highcharts
+                    v-else-if="fundHoldingsTab === 'sector' && sectorWeightingsData.length"
+                    :options="sectorTreemapOptions"
+                    style="width: 100%; height: 300px;"
+                    class="mt-2"
+                  />
+
+                  <highcharts
+                    v-else-if="fundHoldingsTab === 'holdings' && topHoldingsData.length"
+                    :options="topHoldingsTreemapOptions"
+                    style="width: 100%; height: 300px;"
+                    class="mt-2"
+                  />
+
+                  <p
+                    v-else-if="!fundHoldingsError"
+                    class="mt-3 text-xs text-slate-700 dark:text-slate-400"
+                  >
+                    {{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsEmpty' : 'topHoldingsEmpty') }}
+                  </p>
                 </div>
               </template>
             </AppCard>
@@ -400,6 +470,7 @@ let mainRequestId = 0
 let compareRequestId = 0
 let recommendRequestId = 0
 let companyRequestId = 0
+let fundHoldingsRequestId = 0
 
 const compareInput = ref('')
 const compareSymbols = ref([])
@@ -414,8 +485,33 @@ const recommendationErrorKey = ref('')
 const companyInfoLoading = ref(false)
 const companyInfoError = ref(false)
 
-const chartSeries = ref([{ name: '收盤價', data: [] }])
-const candleSeries = ref([{ name: 'K線圖', data: [] }])
+const sectorWeightings = ref([])
+const topHoldings = ref([])
+const fundHoldingsLoading = ref(false)
+const fundHoldingsError = ref(false)
+const fundHoldingsTab = ref('sector')
+const fundHoldingsTabOptions = computed(() => [
+  { label: t('sectorWeightingsTitle'), value: 'sector' },
+  { label: t('topHoldingsTitle'), value: 'holdings' },
+])
+
+// Yahoo topHoldings.sectorWeightings 的固定色彩對應，讓同一產業在不同 ETF 之間顏色一致
+const SECTOR_META = {
+  technology: { labelKey: 'sectorTechnology', light: '#2a78d6', dark: '#3987e5' },
+  healthcare: { labelKey: 'sectorHealthcare', light: '#1baf7a', dark: '#199e70' },
+  financial_services: { labelKey: 'sectorFinancialServices', light: '#eda100', dark: '#c98500' },
+  consumer_cyclical: { labelKey: 'sectorConsumerCyclical', light: '#008300', dark: '#008300' },
+  industrials: { labelKey: 'sectorIndustrials', light: '#4a3aa7', dark: '#9085e9' },
+  communication_services: { labelKey: 'sectorCommunicationServices', light: '#e34948', dark: '#e66767' },
+  consumer_defensive: { labelKey: 'sectorConsumerDefensive', light: '#e87ba4', dark: '#d55181' },
+  energy: { labelKey: 'sectorEnergy', light: '#eb6834', dark: '#d95926' },
+  // 較少見的產業別權重通常很小，使用中性灰階以免和主要 8 色搶戲
+  utilities: { labelKey: 'sectorUtilities', light: '#6b6b66', dark: '#9a9990' },
+  realestate: { labelKey: 'sectorRealEstate', light: '#8f8d86', dark: '#b9b7ae' },
+  basic_materials: { labelKey: 'sectorBasicMaterials', light: '#52514e', dark: '#7d7b74' },
+}
+
+const rawQuotes = ref([])
 
 const info = reactive({
   fullName: '',
@@ -461,9 +557,6 @@ const companyInfo = reactive({
 const startDate = ref('')
 const endDate = ref('')
 
-const growthRate = ref(null)
-const change = ref(0)
-
 const chartTypeOptions = computed(() => [
   { label: t('areaChart'), value: 'area', icon: 'pi pi-chart-line' },
   { label: t('klineChart'), value: 'candlestick', icon: 'pi pi-chart-bar' },
@@ -491,9 +584,47 @@ const rangeOptions = computed(() => ([
   { label: t('period5y'), value: '5y' },
 ]))
 
+function filterQuotesByRange(quotes, range) {
+  const { period1, period2 } = getPeriodRange(range)
+  const start = new Date(period1)
+  const end = new Date(period2)
+  end.setHours(23, 59, 59, 999)
+
+  return quotes.filter(item => {
+    const pointDate = new Date(item?.date)
+    return !Number.isNaN(pointDate.getTime()) && pointDate >= start && pointDate <= end
+  })
+}
+
+const currentRangeQuotes = computed(() => filterQuotesByRange(rawQuotes.value, currentRange.value))
+
+const chartSeries = computed(() => [{ name: t('closePrice'), data: toLineSeriesFromQuotes(currentRangeQuotes.value) }])
+const candleSeries = computed(() => [{ name: t('klineChart'), data: toCandleSeriesFromQuotes(currentRangeQuotes.value) }])
+
+function computeRangeGrowth(range) {
+  const list = toLineSeriesFromQuotes(filterQuotesByRange(rawQuotes.value, range))
+  if (list.length < 2 || !list[0].y) return null
+
+  return Number((((list[list.length - 1].y - list[0].y) / list[0].y) * 100).toFixed(2))
+}
+
+const rangeOptionsWithGrowth = computed(() => rangeOptions.value.map(option => ({
+  ...option,
+  growth: computeRangeGrowth(option.value),
+})))
+
 const growthRateNumber = computed(() => {
-  const n = Number(growthRate.value)
-  return Number.isFinite(n) ? n : null
+  const list = chartSeries.value[0].data
+  if (!list || list.length < 2 || !list[0].y) return null
+
+  return Number((((list[list.length - 1].y - list[0].y) / list[0].y) * 100).toFixed(2))
+})
+
+const change = computed(() => {
+  const list = chartSeries.value[0].data
+  if (!list || list.length < 2) return 0
+
+  return list[list.length - 1].y - list[0].y
 })
 
 const comparisonNoticeText = computed(() => {
@@ -890,6 +1021,38 @@ async function fetchCompanyBasicInfo(targetSymbol = symbol.value) {
   }
 }
 
+async function fetchFundHoldings(targetSymbol = symbol.value) {
+  const requestId = ++fundHoldingsRequestId
+  const activeSymbol = String(targetSymbol || '').trim().toUpperCase()
+
+  if (!activeSymbol) {
+    sectorWeightings.value = []
+    topHoldings.value = []
+    fundHoldingsError.value = false
+    fundHoldingsLoading.value = false
+    return
+  }
+
+  fundHoldingsLoading.value = true
+  fundHoldingsError.value = false
+
+  try {
+    const data = await api.get(`/api/yahoo/fund-holdings?symbol=${encodeURIComponent(activeSymbol)}`)
+    if (requestId !== fundHoldingsRequestId) return
+    sectorWeightings.value = Array.isArray(data?.sectorWeightings) ? data.sectorWeightings : []
+    topHoldings.value = Array.isArray(data?.holdings) ? data.holdings : []
+  } catch (error) {
+    if (requestId !== fundHoldingsRequestId) return
+    sectorWeightings.value = []
+    topHoldings.value = []
+    fundHoldingsError.value = true
+    console.error('基金持股資料載入失敗:', error)
+  } finally {
+    if (requestId !== fundHoldingsRequestId) return
+    fundHoldingsLoading.value = false
+  }
+}
+
 function openAssetProfile(targetSymbol) {
   const nextSymbol = String(targetSymbol || '').trim().toUpperCase()
   if (!nextSymbol) return
@@ -952,20 +1115,6 @@ function toPriceSeries(points) {
       }
     })
     .filter(Boolean)
-}
-
-function calculateGrowthRate() {
-  const list = chartSeries.value[0].data
-  if (!list || list.length < 2) {
-    growthRate.value = null
-    change.value = 0
-    return
-  }
-
-  const firstPrice = list[0].y
-  const lastPrice = list[list.length - 1].y
-  change.value = lastPrice - firstPrice
-  growthRate.value = Number((((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2))
 }
 
 const areaSeries = computed(() => {
@@ -1144,6 +1293,135 @@ const highCandleOptions = computed(() => {
   }
 })
 
+const sectorWeightingsData = computed(() => sectorWeightings.value
+  .map(item => {
+    const meta = SECTOR_META[item.sector]
+    const weight = Number(item.weight)
+    if (!meta || !Number.isFinite(weight) || weight <= 0) return null
+    return {
+      name: t(meta.labelKey),
+      value: Number((weight * 100).toFixed(2)),
+      color: isDark.value ? meta.dark : meta.light,
+    }
+  })
+  .filter(Boolean)
+  .sort((a, b) => b.value - a.value))
+
+const sectorTreemapOptions = computed(() => {
+  const labelColor = isDark.value ? 'rgba(255,255,255,.87)' : '#1f2937'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const borderColor = isDark.value ? '#0f172a' : '#ffffff'
+
+  return {
+    chart: { type: 'treemap', backgroundColor: 'transparent', animation: { duration: 400 } },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    tooltip: {
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
+      formatter: function () {
+        return `<b>${this.point.name}</b><br/>${this.point.value.toFixed(2)}%`
+      },
+    },
+    series: [{
+      type: 'treemap',
+      layoutAlgorithm: 'squarified',
+      alternateStartingDirection: true,
+      borderColor,
+      borderWidth: 2,
+      dataLabels: {
+        enabled: true,
+        style: {
+          color: labelColor,
+          textOutline: 'none',
+          fontSize: '12px',
+          fontWeight: '600',
+        },
+        formatter: function () {
+          return `${this.point.name}<br/>${this.point.value.toFixed(1)}%`
+        },
+      },
+      data: sectorWeightingsData.value,
+    }],
+  }
+})
+
+// 前十大持股用單一藍色系依權重深淺呈現（權重也已經用方塊大小表達，顏色只是加強視覺對比）
+const HOLDING_COLOR_STOPS = {
+  light: ['#cde2fb', '#0d366b'],
+  dark: ['#173963', '#7fb2f5'],
+}
+
+function interpolateHoldingColor(ratio, mode) {
+  const [fromHex, toHex] = HOLDING_COLOR_STOPS[mode]
+  const from = [1, 3, 5].map(i => parseInt(fromHex.slice(i, i + 2), 16))
+  const to = [1, 3, 5].map(i => parseInt(toHex.slice(i, i + 2), 16))
+  const mixed = from.map((channel, i) => Math.round(channel + (to[i] - channel) * ratio))
+  return `#${mixed.map(v => v.toString(16).padStart(2, '0')).join('')}`
+}
+
+const topHoldingsData = computed(() => {
+  const rows = topHoldings.value
+    .map(item => {
+      const weight = Number(item.weight)
+      if (!item.symbol || !Number.isFinite(weight) || weight <= 0) return null
+      return { symbol: item.symbol, name: item.name || item.symbol, value: Number((weight * 100).toFixed(2)) }
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.value - a.value)
+
+  const maxValue = rows.length ? rows[0].value : 0
+  const mode = isDark.value ? 'dark' : 'light'
+
+  return rows.map(row => ({
+    ...row,
+    color: interpolateHoldingColor(maxValue > 0 ? row.value / maxValue : 0, mode),
+  }))
+})
+
+const topHoldingsTreemapOptions = computed(() => {
+  const labelColor = isDark.value ? 'rgba(255,255,255,.87)' : '#1f2937'
+  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
+  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const borderColor = isDark.value ? '#0f172a' : '#ffffff'
+
+  return {
+    chart: { type: 'treemap', backgroundColor: 'transparent', animation: { duration: 400 } },
+    title: { text: null },
+    credits: { enabled: false },
+    legend: { enabled: false },
+    tooltip: {
+      backgroundColor: tooltipBg,
+      style: { color: tooltipFg },
+      formatter: function () {
+        return `<b>${this.point.symbol}</b> ${this.point.name}<br/>${this.point.value.toFixed(2)}%`
+      },
+    },
+    series: [{
+      type: 'treemap',
+      layoutAlgorithm: 'squarified',
+      alternateStartingDirection: true,
+      borderColor,
+      borderWidth: 2,
+      dataLabels: {
+        enabled: true,
+        style: {
+          color: labelColor,
+          textOutline: 'none',
+          fontSize: '12px',
+          fontWeight: '600',
+        },
+        formatter: function () {
+          return `${this.point.symbol}<br/>${this.point.value.toFixed(1)}%`
+        },
+      },
+      data: topHoldingsData.value.map(row => ({ name: row.name, symbol: row.symbol, value: row.value, color: row.color })),
+    }],
+  }
+})
+
 async function fetchComparisonData(period1, period2) {
   if (chartType.value !== 'area') return
 
@@ -1205,14 +1483,23 @@ async function fetchComparisonData(period1, period2) {
   }
 }
 
+function syncComparisonData() {
+  if (chartType.value === 'candlestick') {
+    if (compareSymbols.value.length) {
+      setComparisonNotice('comparisonDisabledForCandlestick')
+    }
+    return
+  }
+
+  const { period1, period2 } = getPeriodRange(currentRange.value)
+  fetchComparisonData(period1, period2)
+}
+
 async function fetchChartData(targetSymbol) {
   const requestId = ++mainRequestId
-  const { period1, period2 } = getPeriodRange(currentRange.value)
-  const localeCode = locale.value || 'en-US'
+  // 一次抓取最大區間（5年）的原始資料，各時間範圍按鈕改為在前端切片計算，避免每次切換都重打 API
+  const { period1, period2 } = getPeriodRange('5y')
   const activeSymbol = String(targetSymbol || symbol.value || '').toUpperCase()
-
-  startDate.value = formatStrDate(period1, localeCode)
-  endDate.value = formatStrDate(period2, localeCode)
 
   try {
     const data = await api.get(`/api/yahoo/chart?symbol=${encodeURIComponent(activeSymbol)}&period1=${period1}&period2=${period2}`)
@@ -1234,23 +1521,10 @@ async function fetchChartData(targetSymbol) {
       regularMarketVolume: meta.regularMarketVolume || 0,
     })
 
-    chartSeries.value[0].data = toLineSeriesFromQuotes(quotes)
-    calculateGrowthRate()
-
-    if (chartType.value === 'candlestick') {
-      candleSeries.value[0].data = toCandleSeriesFromQuotes(quotes)
-      if (compareSymbols.value.length) {
-        setComparisonNotice('comparisonDisabledForCandlestick')
-      }
-      return
-    }
-
-    candleSeries.value[0].data = []
-    await fetchComparisonData(period1, period2)
+    rawQuotes.value = quotes
   } catch (error) {
     if (requestId !== mainRequestId) return
-    chartSeries.value[0].data = []
-    candleSeries.value[0].data = []
+    rawQuotes.value = []
     compareRawSeries.value = []
     console.error('取得資料失敗:', error)
     if (compareSymbols.value.length) {
@@ -1337,20 +1611,20 @@ watch(symbol, nextSymbol => {
   compareSymbols.value = compareSymbols.value.filter(item => item !== normalized)
   fetchRecommendedSymbols(normalized)
   fetchCompanyBasicInfo(normalized)
+  fetchFundHoldings(normalized)
+  document.querySelector('.app-shell__scroll')?.scrollTo({ top: 0 })
 }, { immediate: true })
 
-watch(
-  () => [symbol.value, currentRange.value, chartType.value],
-  () => {
-    fetchChartData(symbol.value)
-  },
-  { immediate: true }
-)
+watch(symbol, nextSymbol => {
+  fetchChartData(nextSymbol)
+}, { immediate: true })
+
+watch([currentRange, chartType], () => {
+  syncComparisonData()
+}, { immediate: true })
 
 watch(compareSymbols, () => {
-  if (chartType.value !== 'area') return
-  const { period1, period2 } = getPeriodRange(currentRange.value)
-  fetchComparisonData(period1, period2)
+  syncComparisonData()
 }, { deep: true })
 
 watch(locale, () => {
@@ -1369,6 +1643,91 @@ watch(locale, () => {
 
 .controls {
   margin-bottom: 1rem;
+}
+
+.asset-kicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--p-text-muted-color, #64748b);
+}
+
+.asset-growth-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.asset-growth-pill i {
+  font-size: 0.7rem;
+}
+
+.asset-growth-pill--up {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.asset-growth-pill--down {
+  color: #be123c;
+  background: rgba(244, 63, 94, 0.14);
+}
+
+.asset-range-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--p-content-border-color, #e5e7eb);
+}
+
+.asset-range-btn {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.asset-range-btn:hover {
+  background: color-mix(in srgb, var(--p-primary-color) 10%, transparent);
+}
+
+.asset-range-btn--active {
+  background: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
+  color: var(--p-primary-color);
+}
+
+.asset-range-btn-growth {
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.asset-range-btn-growth--up {
+  color: #16a34a;
+}
+
+.asset-range-btn-growth--down {
+  color: #dc2626;
+}
+
+.asset-range-btn-growth--muted {
+  color: var(--p-text-muted-color, #64748b);
 }
 
 .p-breadcrumb {
