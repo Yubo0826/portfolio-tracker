@@ -1308,7 +1308,7 @@ const sectorWeightingsData = computed(() => sectorWeightings.value
   .sort((a, b) => b.value - a.value))
 
 const sectorTreemapOptions = computed(() => {
-  const labelColor = isDark.value ? 'rgba(255,255,255,.87)' : '#1f2937'
+  const labelColor = '#ffffff'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
   const borderColor = isDark.value ? '#0f172a' : '#ffffff'
@@ -1335,7 +1335,7 @@ const sectorTreemapOptions = computed(() => {
         enabled: true,
         style: {
           color: labelColor,
-          textOutline: 'none',
+          textOutline: '1px rgba(0,0,0,0.45)',
           fontSize: '12px',
           fontWeight: '600',
         },
@@ -1382,7 +1382,7 @@ const topHoldingsData = computed(() => {
 })
 
 const topHoldingsTreemapOptions = computed(() => {
-  const labelColor = isDark.value ? 'rgba(255,255,255,.87)' : '#1f2937'
+  const labelColor = '#ffffff'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
   const borderColor = isDark.value ? '#0f172a' : '#ffffff'
@@ -1409,7 +1409,7 @@ const topHoldingsTreemapOptions = computed(() => {
         enabled: true,
         style: {
           color: labelColor,
-          textOutline: 'none',
+          textOutline: '1px rgba(0,0,0,0.45)',
           fontSize: '12px',
           fontWeight: '600',
         },
