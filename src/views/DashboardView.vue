@@ -444,7 +444,7 @@ const { displayCurrency } = storeToRefs(settingsStore)
 /* =========================
  *  State
  * =======================*/
-const isLoading = ref(false)
+const isLoading = ref(true)
 const skeletonStatCards = [1, 2, 3]
 const skeletonTableRows = [1, 2, 3, 4, 5, 6]
 
@@ -467,7 +467,6 @@ const pieChartType = computed(() => ([
 const allocationPalette = ['#3b82f6', '#14b8a6', '#f59e0b', '#f97316']
 
 const timeRangeOptions = [
-  { label: '1D', value: '1d' },
   { label: '1W', value: '1w' },
   { label: '1M', value: '1mo' },
   { label: '6M', value: '6mo' },
@@ -798,8 +797,6 @@ async function loadData() {
   try {
     await holdingsStore.fetchHoldings()
     if (holdingsStore.list.length === 0) {
-      totalValue.value = 0
-      totalProfit.value = 0
       chartSeries.value = [{ name: t('totalPrice'), data: [] }]
       return
     }
@@ -1217,13 +1214,18 @@ async function fetchChartData() {
 let isLoadingData = false;
 
 watch(
-  () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],
-  async ([uid, pid]) => {
+  () => [auth.user?.uid, portfolioStore.currentPortfolio?.id, portfolioStore.isInitializing],
+  async ([uid, pid, isInitializing]) => {
     console.log('Dashboard Watch User or Portfolio changed, reloading data...', isLoadingData)
+    // portfolioStore 尚未確認是否有 portfolio 前，繼續顯示 skeleton，避免閃現空狀態畫面
+    if (isInitializing) return
+
     if (uid && pid && !isLoadingData) {
       isLoadingData = true
       await loadData()
       isLoadingData = false
+    } else if (!pid) {
+      isLoading.value = false
     }
   },
   { immediate: true }

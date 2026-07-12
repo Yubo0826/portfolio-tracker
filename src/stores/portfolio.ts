@@ -29,10 +29,13 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   const auth = useAuthStore()
   const currentPortfolio: Ref<Portfolio | null> = ref(null)
   const portfolios: Ref<Portfolio[]> = ref([])
+  // 首次 fetchPortfolios 完成前為 true，讓畫面得以區分「尚未確認 portfolio」與「確認沒有 portfolio」
+  const isInitializing: Ref<boolean> = ref(true)
 
   async function fetchPortfolios(): Promise<void> {
     if (!auth.user) {
       console.warn('No user ID found, cannot fetch portfolios')
+      isInitializing.value = false
       return
     }
     try {
@@ -53,6 +56,8 @@ export const usePortfolioStore = defineStore('portfolio', () => {
       }
     } catch (error) {
       console.error('Error fetching portfolios:', error)
+    } finally {
+      isInitializing.value = false
     }
   }
 
@@ -143,6 +148,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   return {
     portfolios,
     currentPortfolio,
+    isInitializing,
     fetchPortfolios,
     setPortfolios,
     addPortfolio,
