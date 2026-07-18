@@ -383,6 +383,9 @@ assetTrend:
 closePrice:
   en: Close Price
   zh: 收盤價
+period1d:
+  en: 1D
+  zh: 1天
 period7d:
   en: 7D
   zh: 7天
@@ -437,6 +440,9 @@ comparisonReturnRate:
 comparisonDisabledForCandlestick:
   en: Comparison is available in Area chart only.
   zh: 對比功能僅支援面積圖。
+comparisonDisabledFor1d:
+  en: Comparison is not available for the 1D range.
+  zh: 對比功能不支援 1 天區間。
 comparisonCannotMatchPrimary:
   en: Cannot compare with the current symbol.
   zh: 不能加入目前標的作為對比。

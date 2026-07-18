@@ -176,31 +176,27 @@
 
           <AppCard class="dashboard-panel dashboard-metric-card flex-1">
             <template #content>
-              <p class="dashboard-kicker">{{ $t('realizedProfit') }}</p>
+              <p class="dashboard-kicker flex items-center gap-1.5">
+                {{ $t('realizedProfit') }}
+                <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
+              </p>
               <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
                 <span>{{ splitAmountForEmphasis(realizedProfit).main }}</span>
                 <span class="text-sm text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
                 <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
               </div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
-
-              <div class="dashboard-footnote mt-3 flex items-center gap-2">
-                <i class="pi pi-info-circle" v-tooltip.bottom="$t('realizedProfitHint')" />
-                <span>{{ $t('realizedProfitHint') }}</span>
-              </div>
             </template>
           </AppCard>
 
           <AppCard class="dashboard-panel dashboard-metric-card flex-1">
             <template #content>
-              <p class="dashboard-kicker">{{ $t('irr') }}</p>
+              <p class="dashboard-kicker flex items-center gap-1.5">
+                {{ $t('irr') }}
+                <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
+              </p>
               <div v-if="irr" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight text-slate-600">--</div>
-
-              <div class="dashboard-footnote mt-3 flex items-center gap-2">
-                <i class="pi pi-info-circle" v-tooltip.bottom="$t('xirrHint')" />
-                <span>{{ $t('xirrHint') }}</span>
-              </div>
             </template>
           </AppCard>
         </div>
@@ -467,7 +463,7 @@ const pieChartType = computed(() => ([
 const allocationPalette = ['#3b82f6', '#14b8a6', '#f59e0b', '#f97316']
 
 const timeRangeOptions = [
-  { label: '1W', value: '1w' },
+  { label: '5D', value: '5d' },
   { label: '1M', value: '1mo' },
   { label: '6M', value: '6mo' },
   { label: 'YTD', value: 'ytd' },
@@ -475,14 +471,14 @@ const timeRangeOptions = [
   { label: '5Y', value: '5y' },
 ]
 
-const selectedPeriod = ref('1mo')
+const selectedPeriod = ref('5d')
 
 const chartSeries = ref([{ name: t('totalPrice'), data: [] }])
 const growthRate = ref(null)
 const change = ref(0)
 const periodLabelMap = {
   '1d': '1D',
-  '1w': '1W',
+  '5d': '5D',
   '7d': '7D',
   '1mo': '1M',
   '3mo': '3M',
@@ -717,7 +713,7 @@ function calcPeriodRange(range) {
   const today = new Date()
   const e = formatDate(today)
 
-  const daysMap = { '1d': 7, '1w': 7, '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
+  const daysMap = { '1d': 7, '5d': 7, '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
   if (range === 'ytd') {
     const start = new Date(today.getFullYear(), 0, 1)
     return { period1: formatDate(start), period2: e }

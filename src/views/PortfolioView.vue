@@ -1,13 +1,20 @@
 <template>
   <div class="mt-4">
       <div class="flex mb-2 mt-6 gap-2 items-center justify-start relative">
-        <SelectButton
-          v-model="tab"
-          :options="options"
-          optionLabel="label"
-          optionValue="value"
-          :allowEmpty="false"
-        />
+        <div class="portfolio-tabs" role="tablist">
+          <button
+            v-for="option in options"
+            :key="option.value"
+            type="button"
+            role="tab"
+            class="portfolio-tab"
+            :class="{ 'portfolio-tab--active': tab === option.value }"
+            :aria-selected="tab === option.value"
+            @click="tab = option.value"
+          >
+            {{ option.label }}
+          </button>
+        </div>
         <div class="ml-auto">
           <Button
             :label="$t('refresh')"
@@ -90,4 +97,33 @@ watch(tab, (t) => {
   }
 })
 </script>
+
+<style scoped>
+.portfolio-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.portfolio-tab {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.portfolio-tab:hover {
+  color: var(--p-text-color);
+}
+
+.portfolio-tab--active {
+  background: color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
+  color: var(--p-text-color);
+}
+</style>
 

@@ -108,14 +108,20 @@
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsTitle' : 'topHoldingsTitle') }}</span>
 
-                    <SelectButton
-                      v-model="fundHoldingsTab"
-                      :options="fundHoldingsTabOptions"
-                      optionLabel="label"
-                      optionValue="value"
-                      class="text-sm"
-                      :allowEmpty="false"
-                    />
+                    <div class="asset-tabs" role="tablist">
+                      <button
+                        v-for="option in fundHoldingsTabOptions"
+                        :key="option.value"
+                        type="button"
+                        role="tab"
+                        class="asset-tab"
+                        :class="{ 'asset-tab--active': fundHoldingsTab === option.value }"
+                        :aria-selected="fundHoldingsTab === option.value"
+                        @click="fundHoldingsTab = option.value"
+                      >
+                        {{ option.label }}
+                      </button>
+                    </div>
                   </div>
 
                   <p
@@ -425,6 +431,7 @@ const comparisonColorPalette = ['#60a5fa', '#f59e0b', '#22c55e', '#ef4444', '#a8
 const recommendSkeletonItems = ref(Array.from({ length: MAX_RECOMMENDATION_CARDS }, (_, idx) => ({ id: idx + 1 })))
 
 let mainRequestId = 0
+let intradayRequestId = 0
 let compareRequestId = 0
 let recommendRequestId = 0
 let companyRequestId = 0
@@ -470,6 +477,7 @@ const SECTOR_META = {
 }
 
 const rawQuotes = ref([])
+const rawIntradayQuotes = ref([])
 
 const info = reactive({
   fullName: '',
@@ -521,6 +529,7 @@ const chartTypeOptions = computed(() => [
 ])
 
 const periodLabelMap = {
+  '1d': '1D',
   '7d': '7D',
   '1mo': '1M',
   '3mo': '3M',
@@ -533,6 +542,7 @@ const periodLabelMap = {
 const selectedRangeLabel = computed(() => periodLabelMap[currentRange.value] || String(currentRange.value || '').toUpperCase())
 
 const rangeOptions = computed(() => ([
+  { label: t('period1d'), value: '1d' },
   { label: t('period7d'), value: '7d' },
   { label: t('period1mo'), value: '1mo' },
   { label: t('period3mo'), value: '3mo' },
@@ -554,13 +564,17 @@ function filterQuotesByRange(quotes, range) {
   })
 }
 
-const currentRangeQuotes = computed(() => filterQuotesByRange(rawQuotes.value, currentRange.value))
+const currentRangeQuotes = computed(() => {
+  if (currentRange.value === '1d') return rawIntradayQuotes.value
+  return filterQuotesByRange(rawQuotes.value, currentRange.value)
+})
 
 const chartSeries = computed(() => [{ name: t('closePrice'), data: toLineSeriesFromQuotes(currentRangeQuotes.value) }])
 const candleSeries = computed(() => [{ name: t('klineChart'), data: toCandleSeriesFromQuotes(currentRangeQuotes.value) }])
 
 function computeRangeGrowth(range) {
-  const list = toLineSeriesFromQuotes(filterQuotesByRange(rawQuotes.value, range))
+  const source = range === '1d' ? rawIntradayQuotes.value : filterQuotesByRange(rawQuotes.value, range)
+  const list = toLineSeriesFromQuotes(source)
   if (list.length < 2 || !list[0].y) return null
 
   return Number((((list[list.length - 1].y - list[0].y) / list[0].y) * 100).toFixed(2))
@@ -865,6 +879,36 @@ function getPeriodRange(range) {
   }
 }
 
+function getIntradayPeriodRange() {
+  // 往前抓 5 天緩衝，避免今天遇到假日/週末時 Yahoo 回傳空資料；實際顯示範圍由 extractLatestSessionQuotes 收斂到最近一個交易日
+  const today = new Date()
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const start = new Date(today)
+  start.setDate(start.getDate() - 5)
+
+  return {
+    period1: formatDate(start),
+    period2: formatDate(tomorrow),
+  }
+}
+
+function extractLatestSessionQuotes(quotes) {
+  const SESSION_GAP_MS = 60 * 60 * 1000
+  const sorted = quotes
+    .filter(item => item?.date)
+    .map(item => ({ ...item, date: new Date(item.date) }))
+    .filter(item => !Number.isNaN(item.date.getTime()))
+    .sort((a, b) => a.date - b.date)
+
+  let sessionStartIndex = 0
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].date - sorted[i - 1].date > SESSION_GAP_MS) sessionStartIndex = i
+  }
+
+  return sorted.slice(sessionStartIndex)
+}
+
 // call 推薦股票 api
 async function fetchRecommendedSymbols(targetSymbol = symbol.value) {
   const requestId = ++recommendRequestId
@@ -1143,12 +1187,15 @@ const highAreaOptions = computed(() => {
     ? (yRange > 0 ? yRange * 0.08 : Math.max(Math.abs(yMax), 1) * 0.02)
     : 0
 
+  const isIntradayView = currentRange.value === '1d'
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
     chartLocale,
-    locale.value.startsWith('zh')
-      ? { month: 'numeric', day: 'numeric' }
-      : { month: 'short', day: 'numeric' }
+    isIntradayView
+      ? { hour: '2-digit', minute: '2-digit', hour12: false }
+      : locale.value.startsWith('zh')
+        ? { month: 'numeric', day: 'numeric' }
+        : { month: 'short', day: 'numeric' }
   )
 
   return {
@@ -1186,7 +1233,7 @@ const highAreaOptions = computed(() => {
       gridLineColor: gridColor,
     },
     tooltip: {
-      xDateFormat: '%Y/%m/%d',
+      xDateFormat: isIntradayView ? '%Y/%m/%d %H:%M' : '%Y/%m/%d',
       valueDecimals: 2,
       shared: true,
       backgroundColor: tooltipBg,
@@ -1211,12 +1258,15 @@ const highCandleOptions = computed(() => {
   const gridColor = isDark.value ? '#374151' : '#eee'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const isIntradayView = currentRange.value === '1d'
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
     chartLocale,
-    locale.value.startsWith('zh')
-      ? { month: 'numeric', day: 'numeric' }
-      : { month: 'short', day: 'numeric' }
+    isIntradayView
+      ? { hour: '2-digit', minute: '2-digit', hour12: false }
+      : locale.value.startsWith('zh')
+        ? { month: 'numeric', day: 'numeric' }
+        : { month: 'short', day: 'numeric' }
   )
 
   return {
@@ -1244,7 +1294,7 @@ const highCandleOptions = computed(() => {
       gridLineColor: gridColor,
     },
     tooltip: {
-      xDateFormat: '%Y/%m/%d',
+      xDateFormat: isIntradayView ? '%Y/%m/%d %H:%M' : '%Y/%m/%d',
       backgroundColor: tooltipBg,
       style: { color: tooltipFg },
     },
@@ -1465,6 +1515,13 @@ function syncComparisonData() {
     return
   }
 
+  if (currentRange.value === '1d') {
+    if (compareSymbols.value.length) {
+      setComparisonNotice('comparisonDisabledFor1d')
+    }
+    return
+  }
+
   const { period1, period2 } = getPeriodRange(currentRange.value)
   fetchComparisonData(period1, period2)
 }
@@ -1504,6 +1561,24 @@ async function fetchChartData(targetSymbol) {
     if (compareSymbols.value.length) {
       setComparisonNotice('comparisonLoadFailed')
     }
+  }
+}
+
+// 1D 區間走勢圖使用當日 5 分鐘線圖，與其餘區間共用的 5 年日線資料分開抓取
+async function fetchIntradayChartData(targetSymbol) {
+  const requestId = ++intradayRequestId
+  const { period1, period2 } = getIntradayPeriodRange()
+  const activeSymbol = String(targetSymbol || symbol.value || '').toUpperCase()
+
+  try {
+    const data = await api.get(`/api/yahoo/chart?symbol=${encodeURIComponent(activeSymbol)}&period1=${period1}&period2=${period2}&interval=5m`)
+    if (requestId !== intradayRequestId) return
+
+    rawIntradayQuotes.value = extractLatestSessionQuotes(data?.quotes || [])
+  } catch (error) {
+    if (requestId !== intradayRequestId) return
+    rawIntradayQuotes.value = []
+    console.error('取得當日走勢資料失敗:', error)
   }
 }
 
@@ -1591,7 +1666,12 @@ watch(symbol, nextSymbol => {
 
 watch(symbol, nextSymbol => {
   fetchChartData(nextSymbol)
+  if (currentRange.value === '1d') fetchIntradayChartData(nextSymbol)
 }, { immediate: true })
+
+watch(currentRange, nextRange => {
+  if (nextRange === '1d') fetchIntradayChartData()
+})
 
 watch([currentRange, chartType], () => {
   syncComparisonData()
@@ -1650,6 +1730,33 @@ watch(locale, () => {
 .asset-growth-pill--down {
   color: #be123c;
   background: rgba(244, 63, 94, 0.14);
+}
+
+.asset-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.asset-tab {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.asset-tab:hover {
+  color: var(--p-text-color);
+}
+
+.asset-tab--active {
+  background: color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
+  color: var(--p-text-color);
 }
 
 .asset-range-row {
