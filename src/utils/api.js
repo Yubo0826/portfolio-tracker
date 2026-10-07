@@ -1,3 +1,5 @@
+import { auth } from "@/firebase";
+
 const getAPIBaseURL = () => {
   if (window.location.hostname === 'localhost') {
     return 'http://localhost:3000';
@@ -6,10 +8,13 @@ const getAPIBaseURL = () => {
 }
 const request = async (url, method = 'GET', data = null, headers = {}) => {
     const apiURL = getAPIBaseURL() + url;
+    // 後端用這個 token 認人；未登入就不帶，後端視為 demo-user。getIdToken 會自動換新過期的 token
+    const token = await auth.currentUser?.getIdToken();
     const config = {
       method,
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...headers
       }
     };
