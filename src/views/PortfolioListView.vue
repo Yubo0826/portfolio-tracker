@@ -37,7 +37,7 @@
           @clear:editPortfolio="editPortfolio = { id: null, name: '', description: '' }"
           />
 
-      <DataTable v-model:selection="selectedPortfolios" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
+      <DataTable v-model:selection="selectedPortfolios" selectionMode="multiple" :metaKeySelection="false" :value="portfolioStore.portfolios" :loading="isLoading" dataKey="id" tableStyle="min-width: 50rem">
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
           <Column field="name" :header="$t('name')"></Column>
           <Column field="description" :header="$t('description')"></Column>

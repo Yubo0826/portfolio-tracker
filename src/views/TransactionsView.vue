@@ -54,6 +54,8 @@
 
         <DataTable
           v-model:selection="selectedAssets"
+          selectionMode="multiple"
+          :metaKeySelection="false"
           :value="filteredTransactions"
           sortField="date"
           :sortOrder="-1"

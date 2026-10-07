@@ -598,9 +598,11 @@ const goDashboard = () => {
   min-width: 0;
 }
 
+/* icon 跟著同列文字的顏色與字重 */
 .menu-item i {
   width: 16px;
-  color: var(--sidebar-text-muted);
+  color: inherit;
+  font-weight: inherit;
   text-align: center;
   flex-shrink: 0;
 }
@@ -608,7 +610,6 @@ const goDashboard = () => {
 .menu-item-icon {
   width: 16px;
   height: 16px;
-  color: var(--sidebar-text-muted) !important;
   flex-shrink: 0;
 }
 

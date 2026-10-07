@@ -33,6 +33,8 @@
 
         <DataTable
           v-model:selection="selectedHoldings"
+          selectionMode="multiple"
+          :metaKeySelection="false"
           :value="filteredHoldings"
           :loading="store.isLoading"
           sortField="currentValue"

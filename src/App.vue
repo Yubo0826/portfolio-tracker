@@ -574,6 +574,12 @@ const menuItems = computed(() => {
   max-width: calc(100vw - 1rem);
 }
 
+/* 已排序的表頭不變色，只靠排序圖示表示狀態 */
+.p-datatable {
+  --p-datatable-header-cell-selected-background: var(--p-datatable-header-cell-background);
+  --p-datatable-header-cell-selected-color: var(--p-datatable-header-cell-color);
+}
+
 /* 自訂 Primevue DataTable 排序圖示 */
 
 /* 1. 把原本的 SVG icon 藏起來 */
@@ -584,25 +590,34 @@ const menuItems = computed(() => {
 /* 2. 基本樣式：讓 sort 的 span 有空間顯示新 icon */
 .p-datatable th [data-pc-section="sort"]::before {
   display: inline-block;
+  font-family: 'primeicons';
   font-size: 0.75rem;
   width: 1em;
   text-align: center;
+  transition: transform 0.2s ease;
 }
 
-/* 3. 未排序：不顯示任何符號 */
+/* 3. 未排序：上下箭頭（pi-sort-alt），淡色 */
 .p-datatable th[aria-sort="none"] [data-pc-section="sort"]::before,
 .p-datatable th:not([aria-sort]) [data-pc-section="sort"]::before {
-  content: '';
+  content: '\e99e';
+  color: var(--p-text-muted-color);
 }
 
-/* 4. 升冪 ▲ */
-.p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before {
-  content: '▲';
-}
-
-/* 5. 降冪 ▼ */
+/* 4. 升降冪共用 pi-chevron-down，升冪旋轉 180° 讓切換時有翻轉動畫（content 本身無法 transition） */
+.p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before,
 .p-datatable th[aria-sort="descending"] [data-pc-section="sort"]::before {
-  content: '▼';
+  content: '\e902';
+}
+
+.p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p-datatable th [data-pc-section="sort"]::before {
+    transition: none;
+  }
 }
 
 </style>
