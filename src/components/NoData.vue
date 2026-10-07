@@ -1,10 +1,5 @@
 <template>
-    <div class="p-4 m-24 text-center text-muted-color">
-        <div>
-        <img class="w-48 h-48 m-auto" src="/src/assets/empty-box.png" alt="">
-        </div>
-        <span>
-        {{ $t('noData') }}
-        </span>
-    </div>
+  <div class="py-8 text-center text-muted-color">
+    {{ $t('noData') }}
+  </div>
 </template>

@@ -227,7 +227,6 @@
           <template #content>
             <div v-if="holdingsStore.list.length > 0" class="dashboard-allocation-content py-2">
               <div v-if="selectedPieType === 'target' && !hasTargetAllocation" class="flex flex-col items-center text-center gap-3 py-8">
-                <img class="w-56 h-56 sm:w-64 sm:h-64" src="/src/assets/undraw_report_k55w.svg" alt="">
                 <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
               </div>
 
@@ -270,7 +269,6 @@
             </div>
 
             <div v-else class="flex flex-col items-center text-center gap-3 py-8">
-              <img class="w-60 h-60 sm:w-80 sm:h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
               <h2 class="text-base sm:text-lg font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
               <p class="text-xs sm:text-sm text-muted-color">{{ $t('portfolioNoHoldingsDesc') }}</p>
             </div>
