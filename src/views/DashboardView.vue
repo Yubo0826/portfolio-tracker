@@ -412,7 +412,7 @@ const holdingsStore = useHoldingsStore()
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatAmountWithCode, formatPriceWithCode, convertAmountFromCurrency } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatPriceWithCode, convertAmountFromCurrency, currencySymbol } = useCurrency()
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
@@ -856,7 +856,7 @@ const areaChartOptions = computed(() => {
       startOnTick: false,
       endOnTick: false,
       labels: {
-        formatter: function () { return `$${this.value.toFixed(2)}` },
+        formatter: function () { return `${currencySymbol.value}${this.value.toFixed(2)}` },
         style: { fontSize: '11px', color: axisColor },
       },
       gridLineDashStyle: 'Dash',
@@ -864,7 +864,7 @@ const areaChartOptions = computed(() => {
     },
     tooltip: {
       xDateFormat: '%Y/%m/%d',
-      valuePrefix: '$',
+      valuePrefix: currencySymbol.value,
       valueDecimals: 2,
       shared: true,
       backgroundColor: tooltipBg,
@@ -899,7 +899,7 @@ async function fetchChartData() {
   }
 
   try {
-    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
+    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&currency=${displayCurrency.value}`)
     rawChartPoints.value = data
       .map(item => ({ x: new Date(item.date), y: item.close }))
       .sort((a, b) => a.x - b.x)
@@ -940,6 +940,11 @@ watch(() => transactionsStore.list, async () => {
   }
 
   await fetchChartData()
+})
+
+// 走勢圖由後端用歷史匯率換算，切換顯示幣別要重抓
+watch(displayCurrency, () => {
+  if (!isLoadingData) fetchChartData()
 })
 </script>
 

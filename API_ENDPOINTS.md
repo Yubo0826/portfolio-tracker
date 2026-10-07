@@ -89,7 +89,7 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | GET | `/api/yahoo/symbol` | 股票代號搜尋（自動完成） | query: `query` |
 | GET | `/api/yahoo/quote` | 即時報價 | query: `symbol` |
 | GET | `/api/yahoo/chart` | 歷史 K 線資料 | query: `symbol, period1, period2, interval` |
-| GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2` |
+| GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2, currency`（USD 或 TWD，逐日用 TWD=X 歷史匯率換算） |
 | GET | `/api/yahoo/allocation-chart` | 回傳目標配置中各標的歷史收盤價 | query: `uid, portfolio_id, period1, period2, interval` |
 | GET | `/api/yahoo/summary` | Yahoo quoteSummary（公司概況/財務資料等） | query: `symbol` |
 | GET | `/api/yahoo/trending` | 熱門漲幅股（前 5 名） | query: `region, lang` — *前端未呼叫* |

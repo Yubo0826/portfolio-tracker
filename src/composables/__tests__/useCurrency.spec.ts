@@ -33,10 +33,11 @@ describe('useCurrency', () => {
   })
 
   describe('formatPrice', () => {
-    it('應該格式化股價（2位小數）', () => {
+    it('應該格式化股價（2~3 位小數，對應 DB 的 Decimal(10,3)）', () => {
       const { formatPrice } = useCurrency()
       
-      expect(formatPrice(123.456)).toBe('$123.46')
+      expect(formatPrice(123.456)).toBe('$123.456')
+      expect(formatPrice(123.4)).toBe('$123.40')
       expect(formatPrice(0.01)).toBe('$0.01')
     })
   })

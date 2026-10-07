@@ -34,7 +34,7 @@ describe('Transactions Store', () => {
     const portfolioStore = usePortfolioStore()
     
     authStore.user = mockUser()
-    portfolioStore.currentPortfolio = mockPortfolio({ id: 'portfolio-1', name: 'Test Portfolio' })
+    portfolioStore.currentPortfolio = mockPortfolio({ id: '1', name: 'Test Portfolio' })
   })
 
   describe('fetchTransactions', () => {
@@ -63,7 +63,7 @@ describe('Transactions Store', () => {
       await store.fetchTransactions()
 
       expect(api.get).toHaveBeenCalledWith(
-        '/api/transactions?uid=demo-user&portfolio_id=portfolio-1'
+        '/api/transactions?uid=demo-user&portfolio_id=1'
       )
       expect(store.list).toHaveLength(1)
       expect(store.isLoading).toBe(false)
@@ -171,7 +171,7 @@ describe('Transactions Store', () => {
 
       expect(api.delete).toHaveBeenCalledWith('/api/transactions', {
         uid: 'demo-user',
-        portfolio_id: 'portfolio-1',
+        portfolio_id: '1',
         ids: ['tx-1']
       })
       expect(store.list).toHaveLength(1)
@@ -334,7 +334,7 @@ describe('Transactions Store', () => {
 
       expect(api.post).toHaveBeenCalledWith('/api/transactions', {
         uid: 'demo-user',
-        portfolio_id: 'portfolio-1',
+        portfolio_id: 1,
         cash_account_id: null,
         symbol: 'AAPL',
         name: 'Apple Inc.',
@@ -555,7 +555,7 @@ describe('Transactions Store', () => {
 
       expect(api.post).toHaveBeenCalledWith('/api/transactions/bulk', expect.objectContaining({
         uid: 'demo-user',
-        portfolio_id: 'portfolio-1'
+        portfolio_id: 1
       }))
       
       const callPayload = vi.mocked(api.post).mock.calls[0][1]
@@ -660,7 +660,7 @@ describe('Transactions Store', () => {
 
     it('portfolioId 應該從 portfolioStore 獲取', () => {
       const store = useTransactionsStore()
-      expect(store.portfolioId).toBe('portfolio-1')
+      expect(store.portfolioId).toBe('1')
 
       const portfolioStore = usePortfolioStore()
       portfolioStore.currentPortfolio = null
