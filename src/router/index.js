@@ -85,11 +85,6 @@ const router = createRouter({
       component: () => import('../views/AssetProfileView.vue'),
     },
     {
-      path: '/test',
-      name: 'test',
-      component: () => import('../views/TestView.vue'),
-    },
-    {
       path: '/user-settings',
       name: 'user-settings',
       component: () => import('../views/UserSettingView.vue'),

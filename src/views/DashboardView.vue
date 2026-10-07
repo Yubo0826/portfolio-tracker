@@ -129,24 +129,24 @@
                 </div>
 
                 <!-- 時間範圍選擇 -->
-                <div class="asset-range-row">
-                  <button
-                    v-for="option in timeRangeOptionsWithGrowth"
-                    :key="option.value"
-                    type="button"
-                    class="asset-range-btn"
-                    :class="{ 'asset-range-btn--active': selectedPeriod === option.value }"
-                    @click="setSelectedPeriod(option.value)"
-                  >
-                    <span>{{ option.label }}</span>
-                    <span
-                      class="asset-range-btn-growth"
-                      :class="option.growth === null ? 'asset-range-btn-growth--muted' : option.growth >= 0 ? 'asset-range-btn-growth--up' : 'asset-range-btn-growth--down'"
-                    >
-                      {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                    </span>
-                  </button>
-                </div>
+                <SelectButton
+                  v-model="selectedPeriod"
+                  :options="timeRangeOptionsWithGrowth"
+                  optionLabel="label"
+                  optionValue="value"
+                  :allowEmpty="false"
+                  fluid
+                  class="mt-4"
+                >
+                  <template #option="{ option }">
+                    <div class="flex flex-col items-center text-xs font-bold">
+                      <span>{{ option.label }}</span>
+                      <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-green-600' : 'text-red-600'">
+                        {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                      </span>
+                    </div>
+                  </template>
+                </SelectButton>
               </div>
             </template>
           </AppCard>
@@ -212,20 +212,15 @@
                 <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
               </div>
 
-              <div class="dashboard-allocation-tabs" role="tablist">
-                <button
-                  v-for="option in pieChartType"
-                  :key="option.value"
-                  type="button"
-                  role="tab"
-                  class="dashboard-allocation-tab"
-                  :class="{ 'dashboard-allocation-tab--active': selectedPieType === option.value }"
-                  :aria-selected="selectedPieType === option.value"
-                  @click="selectedPieType = option.value"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
+              <SelectButton
+                v-model="selectedPieType"
+                :options="pieChartType"
+                optionLabel="label"
+                optionValue="value"
+                :allowEmpty="false"
+                size="small"
+                class="self-start"
+              />
             </div>
           </template>
 
@@ -679,11 +674,6 @@ function buildAllocationBreakdown(items, mapItem) {
   })
 
   return primaryItems
-}
-
-function setSelectedPeriod(nextPeriod) {
-  if (selectedPeriod.value === nextPeriod) return
-  selectedPeriod.value = nextPeriod
 }
 
 function setChartWindowFromPoints(points) {
@@ -1295,58 +1285,6 @@ watch(locale, () => {
   background: rgba(244, 63, 94, 0.14);
 }
 
-.asset-range-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.25rem;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--p-content-border-color, #e5e7eb);
-}
-
-.asset-range-btn {
-  display: flex;
-  flex: 1 1 0;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  border-radius: 0.6rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--p-text-color);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.asset-range-btn:hover {
-  background: color-mix(in srgb, var(--p-primary-color) 10%, transparent);
-}
-
-.asset-range-btn--active {
-  background: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
-  color: var(--p-primary-color);
-}
-
-.asset-range-btn-growth {
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
-.asset-range-btn-growth--up {
-  color: #16a34a;
-}
-
-.asset-range-btn-growth--down {
-  color: #dc2626;
-}
-
-.asset-range-btn-growth--muted {
-  color: var(--p-text-muted-color, #64748b);
-}
-
 .dashboard-summary-strip {
   overflow: hidden;
 }
@@ -1376,33 +1314,6 @@ watch(locale, () => {
 .dashboard-allocation-title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--p-text-color);
-}
-
-.dashboard-allocation-tabs {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.dashboard-allocation-tab {
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.85rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--p-text-muted-color);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.dashboard-allocation-tab:hover {
-  color: var(--p-text-color);
-}
-
-.dashboard-allocation-tab--active {
-  background: color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
   color: var(--p-text-color);
 }
 

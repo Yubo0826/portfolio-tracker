@@ -80,24 +80,24 @@
                     />
                   </div>
 
-                  <div class="asset-range-row">
-                    <button
-                      v-for="option in rangeOptionsWithGrowth"
-                      :key="option.value"
-                      type="button"
-                      class="asset-range-btn"
-                      :class="{ 'asset-range-btn--active': currentRange === option.value }"
-                      @click="currentRange = option.value"
-                    >
-                      <span>{{ option.label }}</span>
-                      <span
-                        class="asset-range-btn-growth"
-                        :class="option.growth === null ? 'asset-range-btn-growth--muted' : option.growth >= 0 ? 'asset-range-btn-growth--up' : 'asset-range-btn-growth--down'"
-                      >
-                        {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                      </span>
-                    </button>
-                  </div>
+                  <SelectButton
+                    v-model="currentRange"
+                    :options="rangeOptionsWithGrowth"
+                    optionLabel="label"
+                    optionValue="value"
+                    :allowEmpty="false"
+                    fluid
+                    class="mt-4"
+                  >
+                    <template #option="{ option }">
+                      <div class="flex flex-col items-center text-xs font-bold">
+                        <span>{{ option.label }}</span>
+                        <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-green-600' : 'text-red-600'">
+                          {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                        </span>
+                      </div>
+                    </template>
+                  </SelectButton>
                 </div>
               </template>
             </AppCard>
@@ -108,20 +108,14 @@
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsTitle' : 'topHoldingsTitle') }}</span>
 
-                    <div class="asset-tabs" role="tablist">
-                      <button
-                        v-for="option in fundHoldingsTabOptions"
-                        :key="option.value"
-                        type="button"
-                        role="tab"
-                        class="asset-tab"
-                        :class="{ 'asset-tab--active': fundHoldingsTab === option.value }"
-                        :aria-selected="fundHoldingsTab === option.value"
-                        @click="fundHoldingsTab = option.value"
-                      >
-                        {{ option.label }}
-                      </button>
-                    </div>
+                    <SelectButton
+                      v-model="fundHoldingsTab"
+                      :options="fundHoldingsTabOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      :allowEmpty="false"
+                      size="small"
+                    />
                   </div>
 
                   <p
@@ -1730,85 +1724,6 @@ watch(locale, () => {
 .asset-growth-pill--down {
   color: #be123c;
   background: rgba(244, 63, 94, 0.14);
-}
-
-.asset-tabs {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.asset-tab {
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.85rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--p-text-muted-color);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.asset-tab:hover {
-  color: var(--p-text-color);
-}
-
-.asset-tab--active {
-  background: color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
-  color: var(--p-text-color);
-}
-
-.asset-range-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.25rem;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--p-content-border-color, #e5e7eb);
-}
-
-.asset-range-btn {
-  display: flex;
-  flex: 1 1 0;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  border-radius: 0.6rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--p-text-color);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.asset-range-btn:hover {
-  background: color-mix(in srgb, var(--p-primary-color) 10%, transparent);
-}
-
-.asset-range-btn--active {
-  background: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
-  color: var(--p-primary-color);
-}
-
-.asset-range-btn-growth {
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
-.asset-range-btn-growth--up {
-  color: #16a34a;
-}
-
-.asset-range-btn-growth--down {
-  color: #dc2626;
-}
-
-.asset-range-btn-growth--muted {
-  color: var(--p-text-muted-color, #64748b);
 }
 
 .p-breadcrumb {
