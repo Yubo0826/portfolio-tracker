@@ -244,38 +244,28 @@
                   </div>
                 </div>
 
-                <div class="dashboard-allocation-table" :class="{ 'dashboard-allocation-table--with-profit': selectedPieType === 'actual' }">
-                  <div class="dashboard-allocation-table-row dashboard-allocation-table-head">
-                    <span>{{ $t('currentAsset') }}</span>
-                    <span class="dashboard-allocation-cell--num">{{ selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount') }}</span>
-                    <span class="dashboard-allocation-cell--num">{{ $t('distribution') }}</span>
-                    <span v-if="selectedPieType === 'actual'" class="dashboard-allocation-cell--num">{{ $t('unrealizedProfit') }}</span>
-                  </div>
-
-                  <div
-                    v-for="item in selectedAllocationBreakdown"
-                    :key="`${selectedPieType}-${item.key}`"
-                    class="dashboard-allocation-table-row"
-                  >
-                    <div class="dashboard-allocation-item-main">
-                      <span class="dashboard-allocation-dot" :style="{ backgroundColor: item.color }"></span>
-                      <StockIcon :symbol="item.key" class="dashboard-allocation-icon" />
-                      <span class="dashboard-allocation-symbol">{{ item.name }}</span>
-                    </div>
-
-                    <span class="dashboard-allocation-cell--num dashboard-allocation-value">{{ formatAmountWithCode(item.amount) }}</span>
-
-                    <span class="dashboard-allocation-cell--num dashboard-allocation-percentage">{{ formatPreciseAllocationPercentage(item.percentage) }}</span>
-
-                    <span
-                      v-if="selectedPieType === 'actual'"
-                      class="dashboard-allocation-cell--num dashboard-allocation-profit"
-                      :class="item.profit >= 0 ? 'dashboard-allocation-profit--up' : 'dashboard-allocation-profit--down'"
-                    >
-                      {{ formatAmountWithCode(item.profit) }}
-                    </span>
-                  </div>
-                </div>
+                <DataTable :value="selectedAllocationBreakdown" dataKey="key" size="small" class="min-w-0 text-[0.8rem] font-semibold">
+                  <Column :header="$t('currentAsset')">
+                    <template #body="{ data: item }">
+                      <div class="flex min-w-0 items-center gap-2.5">
+                        <span class="size-2 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
+                        <StockIcon :symbol="item.key" class="!m-0 !size-7 shrink-0" />
+                        <Tag :value="item.name" severity="secondary" class="truncate" />
+                      </div>
+                    </template>
+                  </Column>
+                  <Column :header="selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount')" bodyClass="text-right" :pt="{ columnHeaderContent: 'justify-end' }">
+                    <template #body="{ data: item }">{{ formatAmountWithCode(item.amount) }}</template>
+                  </Column>
+                  <Column :header="$t('distribution')" bodyClass="text-right" :pt="{ columnHeaderContent: 'justify-end' }">
+                    <template #body="{ data: item }">{{ formatPreciseAllocationPercentage(item.percentage) }}</template>
+                  </Column>
+                  <Column v-if="selectedPieType === 'actual'" :header="$t('unrealizedProfit')" bodyClass="text-right" :pt="{ columnHeaderContent: 'justify-end' }">
+                    <template #body="{ data: item }">
+                      <span :class="item.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ formatAmountWithCode(item.profit) }}</span>
+                    </template>
+                  </Column>
+                </DataTable>
               </div>
             </div>
 
@@ -377,11 +367,9 @@
 
           <Column field="currentValue" :header="$t('rate')">
             <template #body="{ data }">
-              <div class="dashboard-weight-cell">
-                <div class="dashboard-weight-track" aria-hidden="true">
-                  <div class="dashboard-weight-fill" :style="getHoldingWeightBarStyle(data)"></div>
-                </div>
-                <span class="dashboard-weight-value">{{ formatAllocationPercentage(getHoldingWeightPercentage(data)) }}</span>
+              <div class="flex min-w-27 items-center gap-3">
+                <ProgressBar :value="getHoldingWeightPercentage(data)" :showValue="false" class="!h-1.5 w-20 shrink-0" />
+                <span class="min-w-11 text-right text-xs font-bold text-muted-color">{{ formatAllocationPercentage(getHoldingWeightPercentage(data)) }}</span>
               </div>
             </template>
           </Column>
@@ -403,6 +391,7 @@
  * =======================*/
 import { ref, watch, computed } from 'vue'
 import Skeleton from 'primevue/skeleton'
+import ProgressBar from 'primevue/progressbar'
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
@@ -627,13 +616,6 @@ function getHoldingWeightPercentage(holding) {
   return (holdingValue / portfolioTotal) * 100
 }
 
-function getHoldingWeightBarStyle(holding) {
-  const percentage = Math.max(0, Math.min(getHoldingWeightPercentage(holding), 100))
-
-  return {
-    width: `${percentage}%`,
-  }
-}
 
 function getAllocationTargetValue(item) {
   return Number(item?.target ?? item?.target_percentage ?? item?.percentage ?? 0)
@@ -1391,95 +1373,6 @@ watch(locale, () => {
   color: var(--p-text-muted-color);
 }
 
-.dashboard-allocation-table {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.dashboard-allocation-table-row {
-  display: grid;
-  grid-template-columns: minmax(9rem, 1.4fr) repeat(2, minmax(0, 1fr));
-  align-items: center;
-  gap: 1rem;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--p-content-border-color) 65%, transparent);
-}
-
-.dashboard-allocation-table--with-profit .dashboard-allocation-table-row {
-  grid-template-columns: minmax(9rem, 1.4fr) repeat(3, minmax(0, 1fr));
-}
-
-.dashboard-allocation-table-row:last-child {
-  border-bottom: none;
-}
-
-.dashboard-allocation-table-head {
-  padding-top: 0;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--p-text-muted-color);
-}
-
-.dashboard-allocation-cell--num {
-  text-align: right;
-}
-
-.dashboard-allocation-item-main {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.dashboard-allocation-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-  flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--p-content-background) 55%, transparent);
-}
-
-.dashboard-allocation-icon {
-  width: 1.75rem !important;
-  height: 1.75rem !important;
-  margin: 0 !important;
-  flex-shrink: 0;
-}
-
-.dashboard-allocation-symbol {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  border-radius: 0.4rem;
-  padding: 0.2rem 0.55rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--p-text-color);
-  background: color-mix(in srgb, var(--p-content-border-color) 35%, transparent);
-}
-
-.dashboard-allocation-value,
-.dashboard-allocation-percentage {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--p-text-color);
-}
-
-.dashboard-allocation-profit {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.dashboard-allocation-profit--up {
-  color: #059669;
-}
-
-.dashboard-allocation-profit--down {
-  color: #e11d48;
-}
-
 .dashboard-summary-item {
   position: relative;
   padding-right: 1rem;
@@ -1504,55 +1397,10 @@ watch(locale, () => {
   font-size: 0.8125rem;
 }
 
-.dashboard-weight-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 6.75rem;
-}
-
-.dashboard-weight-track {
-  position: relative;
-  width: 5rem;
-  flex: none;
-  height: 0.42rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--p-primary-color) 18%, var(--p-surface-200));
-}
-
-.dashboard-weight-fill {
-  height: 100%;
-  min-width: 0.35rem;
-  border-radius: inherit;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--p-primary-color) 88%, white 12%), var(--p-primary-color));
-}
-
-.dashboard-weight-value {
-  min-width: 2.8rem;
-  text-align: right;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--p-text-muted-color);
-}
-
 @media (max-width: 639px) {
   .dashboard-allocation-layout {
     grid-template-columns: 1fr;
     gap: 1rem;
-  }
-
-  .dashboard-allocation-table-row {
-    grid-template-columns: minmax(7rem, 1.2fr) repeat(2, minmax(4.5rem, 1fr));
-    gap: 0.5rem;
-  }
-
-  .dashboard-allocation-table--with-profit .dashboard-allocation-table-row {
-    grid-template-columns: minmax(7rem, 1.2fr) repeat(3, minmax(4.5rem, 1fr));
-  }
-
-  .dashboard-allocation-symbol {
-    padding: 0.15rem 0.4rem;
   }
 
   .dashboard-summary-item {
