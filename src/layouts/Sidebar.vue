@@ -4,7 +4,7 @@
     <template #[wrapperSlot]>
       <aside
         class="sidebar"
-        :class="persistent ? ['hidden lg:flex', { 'sidebar--collapsed': collapsed }] : 'sidebar--drawer'"
+        :class="persistent ? ['sidebar--persistent', { 'sidebar--collapsed': collapsed }] : 'sidebar--drawer'"
       >
         <div class="sidebar-top">
           <div class="sidebar-top-row">
@@ -77,47 +77,13 @@
           </div>
 
           <template v-for="(section, index) in sidebarSections" :key="section.key">
-            <div v-if="index > 0" class="menu-divider"></div>
+            <!-- 收合時標題放不下，改用分隔線區分區段 -->
+            <div v-if="collapsed && index > 0" class="menu-divider"></div>
 
             <div class="menu-group">
+              <div v-if="!collapsed" class="menu-section-label">{{ section.label }}</div>
               <template v-for="item in section.items" :key="item.key">
-                <template v-if="item.type === 'group'">
-                  <button
-                    type="button"
-                    class="menu-item menu-item--group w-full"
-                    :class="{ 'is-expanded': !collapsed && isGroupExpanded(item) }"
-                    :title="collapsed ? item.label : null"
-                    :aria-expanded="isGroupExpanded(item)"
-                    @click="onGroupTriggerClick(item)"
-                  >
-                    <span class="menu-item-left">
-                      <i :class="[item.icon, 'menu-item-icon']" />
-                      <span v-show="!collapsed">{{ item.label }}</span>
-                    </span>
-                    <i v-show="!collapsed" class="pi pi-chevron-right menu-item-group__chevron"></i>
-                  </button>
-                  <div
-                    v-show="!collapsed"
-                    class="menu-subgroup-wrapper"
-                    :class="{ 'is-expanded': isGroupExpanded(item) }"
-                  >
-                    <div class="menu-subgroup">
-                      <RouterLink
-                        v-for="child in item.children"
-                        :key="child.key"
-                        :to="child.to"
-                        class="menu-subitem"
-                        :class="{ active: isNavItemActive(child) }"
-                        @click="closeDrawer"
-                      >
-                        {{ child.label }}
-                      </RouterLink>
-                    </div>
-                  </div>
-                </template>
-
                 <RouterLink
-                  v-else
                   :to="item.to"
                   class="menu-item"
                   :class="{ active: isNavItemActive(item) }"
@@ -259,26 +225,6 @@ const isNavItemActive = (item) => {
   return item.activePaths.some((path) => route.path === path || route.path.startsWith(`${path}/`))
 }
 
-const expandedGroups = ref({})
-
-const isGroupExpanded = (item) => {
-  const override = expandedGroups.value[item.key]
-  if (override !== undefined) return override
-  return true
-}
-
-const toggleGroup = (item) => {
-  expandedGroups.value = { ...expandedGroups.value, [item.key]: !isGroupExpanded(item) }
-}
-
-const onGroupTriggerClick = (item) => {
-  if (collapsed.value) {
-    router.push(item.children[0].to)
-    return
-  }
-  toggleGroup(item)
-}
-
 const closeDrawer = () => {
   if (!props.persistent) emit('update:visible', false)
 }
@@ -317,6 +263,13 @@ const goDashboard = () => {
 .dark .sidebar {
   --sidebar-bg: var(--p-content-background);
   --sidebar-active-bg: #3a3a3a;
+}
+
+/* 不用 Tailwind 的 hidden lg:flex：v4 utilities 在 @layer 裡，會被上面的 display: flex 蓋掉 */
+@media (max-width: 1023px) {
+  .sidebar--persistent {
+    display: none;
+  }
 }
 
 .sidebar--drawer {
@@ -469,11 +422,13 @@ const goDashboard = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 3px 0;
   padding: 8px 12px;
   border-radius: 6px;
   color: var(--sidebar-text);
   text-decoration: none;
   font-size: 14px;
+  font-weight: 500;
   transition: background-color 0.16s ease;
 }
 
@@ -505,93 +460,11 @@ const goDashboard = () => {
   color: var(--sidebar-active-text, var(--sidebar-text));
 }
 
-.menu-item.active {
+.menu-section-label {
+  padding: 4px 12px;
+  font-size: 12px;
   font-weight: 500;
-}
-
-.menu-item--group {
-  width: 100%;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.menu-item-group__chevron {
-  font-size: 11px;
   color: var(--sidebar-text-muted);
-  flex-shrink: 0;
-  transition: transform 0.16s ease;
-}
-
-.menu-item--group.is-expanded .menu-item-group__chevron {
-  transform: rotate(90deg);
-}
-
-.menu-subgroup-wrapper {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.22s ease;
-}
-
-.menu-subgroup-wrapper.is-expanded {
-  grid-template-rows: 1fr;
-}
-
-.menu-subgroup {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  overflow: hidden;
-  min-height: 0;
-}
-
-.menu-subgroup-wrapper.is-expanded .menu-subitem {
-  animation: menu-subitem-fade-in 0.22s ease both;
-}
-
-.menu-subitem {
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 7px 12px 7px 38px;
-  border: none;
-  background: none;
-  border-radius: 6px;
-  color: var(--sidebar-text-muted);
-  text-decoration: none;
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background-color 0.16s ease, color 0.16s ease;
-}
-
-.menu-subitem:hover,
-.menu-subitem.active {
-  background-color: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text, var(--sidebar-text));
-}
-
-.menu-subitem.active {
-  font-weight: 500;
-}
-
-.sidebar--collapsed .menu-subgroup-wrapper {
-  display: none;
-}
-
-@keyframes menu-subitem-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .menu-divider {

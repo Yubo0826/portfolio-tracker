@@ -4,16 +4,29 @@
       <span v-if="info.regularMarketTime">{{ t('lastUpdated', { time: formatUpdatedAt(info.regularMarketTime) }) }}</span>
     </Teleport>
     <div>
+      <Teleport defer to="#page-title-actions">
+        <Button
+          :icon="isWatched ? 'pi pi-star-fill' : 'pi pi-star'"
+          text
+          rounded
+          size="large"
+          :severity="isWatched ? 'warn' : 'secondary'"
+          :aria-label="watchLabel"
+          :aria-pressed="isWatched"
+          v-tooltip.top="{ value: watchLabel, showDelay: 500 }"
+          @click="toggleWatch"
+        />
+      </Teleport>
       <div class="flex items-center">
         <p class="text-muted-color">{{ info.fullName }}</p>
       </div>
       <div class="chart-container">
-        <div class="grid grid-cols-3 gap-8">
-          <div class="col-span-2 flex flex-col gap-4">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
+          <div class="min-w-0 lg:col-span-2 flex flex-col gap-4">
             <Card class="app-panel w-full">
               <template #content>
                 <div>
-                  <div class="flex items-center justify-between">
+                  <div class="flex items-start justify-between gap-2">
                     <div class="flex flex-col mb-2">
                       <p class="asset-kicker">{{ t('currentPrice') }}</p>
 
@@ -86,7 +99,7 @@
                     optionValue="value"
                     :allowEmpty="false"
                     fluid
-                    class="mt-4"
+                    class="range-select mt-4"
                   >
                     <template #option="{ option }">
                       <div class="flex flex-col items-center text-xs font-bold">
@@ -223,7 +236,7 @@
 
           </div>
 
-          <div class="flex flex-col gap-4">
+          <div class="min-w-0 flex flex-col gap-4">
             <Card class="app-panel w-full">
               <template #content>
                 <div>
@@ -411,6 +424,8 @@ import { percentChange, periodRange, filterByPeriod, toIsoDate, yAxisBounds } fr
 import { useRoute, useRouter } from 'vue-router'
 import { useCurrency } from '@/composables/useCurrency'
 import { useTheme } from '@/composables/useTheme.js'
+import * as toast from '@/composables/toast'
+import { useWatchlistStore } from '@/stores/watchlist'
 
 const { t, locale } = useI18n()
 const { isDark } = useTheme()
@@ -419,6 +434,28 @@ const { formatPrice, formatPriceWithCode, displayCurrency } = useCurrency()
 const route = useRoute()
 const router = useRouter()
 const symbol = computed(() => route.params.symbol)
+
+// 關注清單星號；demo 帳號不能改，點了只提示登入
+const watchlistStore = useWatchlistStore()
+const isWatched = computed(() => watchlistStore.symbolSet.has(String(symbol.value).toUpperCase()))
+const watchLabel = computed(() => watchlistStore.isReadOnly
+  ? t('watchlistSignInHint')
+  : t(isWatched.value ? 'removeFromWatchlist' : 'addToWatchlist'))
+const toggleWatch = async () => {
+  if (watchlistStore.isReadOnly) return toast.info(t('watchlistSignInHint'))
+  const s = String(symbol.value).toUpperCase()
+  try {
+    if (isWatched.value) {
+      await watchlistStore.removeSymbol(s)
+      toast.success(t('removedFromWatchlist', { symbol: s }))
+    } else {
+      await watchlistStore.addSymbol(s, info.fullName || null, info.quoteType || null)
+      toast.success(t('addedToWatchlist', { symbol: s }))
+    }
+  } catch (error) {
+    toast.error(t('saveFailed'), error.message)
+  }
+}
 
 const chartType = ref('area')
 const currentRange = ref('3mo')
@@ -1573,6 +1610,16 @@ watch(compareSymbols, () => {
   margin-bottom: 1rem;
 }
 
+/* 8 個區間在窄螢幕擠不下，給最小寬度並改成橫向捲動 */
+.range-select {
+  overflow-x: auto;
+}
+
+.range-select :deep(.p-togglebutton) {
+  flex: 1 0 auto;
+  min-width: 3.5rem;
+}
+
 .asset-kicker {
   font-size: 0.65rem;
   font-weight: 700;
@@ -1615,6 +1662,7 @@ watch(compareSymbols, () => {
   padding: 0.35rem 0.6rem;
   font-size: 0.75rem;
   line-height: 1;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
@@ -1656,6 +1704,11 @@ watch(compareSymbols, () => {
 
 .recommend-list-icon {
   margin-right: 0 !important;
+}
+
+/* 透明背景的 logo 在深色模式看不清楚，墊白底；只套在圖片上，抓不到圖的文字 fallback 維持原樣 */
+img.recommend-list-icon {
+  background-color: #fff;
 }
 
 .recommend-list-action {

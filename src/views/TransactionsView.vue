@@ -8,7 +8,6 @@
             :options="symbolOptions"
             :placeholder="$t('symbol')"
             display="chip"
-            filter
             class="w-60"
           />
           <MultiSelect

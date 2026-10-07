@@ -2,6 +2,7 @@ export function buildSidebarSections(t) {
   return [
     {
       key: 'main',
+      label: t('navOverview'),
       items: [
         {
           key: 'dashboard',
@@ -29,35 +30,44 @@ export function buildSidebarSections(t) {
           activePaths: ['/cash-flow', '/cash-flows'],
         },
         {
-          key: 'analysis',
-          label: t('analysis'),
-          icon: 'pi pi-chart-bar',
-          type: 'group',
-          children: [
-            {
-              key: 'allocation',
-              label: t('setTargets'),
-              to: '/allocation',
-              activePaths: ['/allocation'],
-            },
-            {
-              key: 'rebalancing',
-              label: t('rebalance'),
-              to: '/rebalancing',
-              activePaths: ['/rebalancing'],
-            },
-            {
-              key: 'backtesting',
-              label: t('backtesting'),
-              to: '/backtesting',
-              activePaths: ['/backtesting'],
-            },
-          ],
+          key: 'watchlist',
+          label: t('watchlist'),
+          to: '/watchlist',
+          icon: 'pi pi-star',
+          activePaths: ['/watchlist'],
+        },
+      ],
+    },
+    {
+      key: 'analysis',
+      label: t('analysis'),
+      items: [
+        {
+          key: 'allocation',
+          label: t('setTargets'),
+          to: '/allocation',
+          icon: 'pi pi-chart-pie',
+          activePaths: ['/allocation'],
+        },
+        {
+          key: 'rebalancing',
+          label: t('rebalance'),
+          to: '/rebalancing',
+          icon: 'pi pi-sliders-h',
+          activePaths: ['/rebalancing'],
+        },
+        {
+          key: 'backtesting',
+          label: t('backtesting'),
+          to: '/backtesting',
+          icon: 'pi pi-history',
+          activePaths: ['/backtesting'],
         },
       ],
     },
     {
       key: 'manage',
+      label: t('navManage'),
       items: [
         {
           key: 'portfolios',

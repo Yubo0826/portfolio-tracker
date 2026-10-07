@@ -2,6 +2,18 @@
   <header class="app-shell__topbar">
     <div class="flex min-h-[1rem] items-center gap-3 px-4 sm:px-6 lg:px-8 xl:px-10">
 
+      <!-- 窄屏: 顯示側邊攔按鈕 -->
+      <div class="lg:hidden">
+        <Button
+          icon="pi pi-bars"
+          :aria-label="t('openSidebar')"
+          size="small"
+          variant="outlined"
+          severity="secondary"
+          @click="$emit('open-sidebar')"
+        />
+      </div>
+
       <!-- 搜尋欄位 -->
       <button
         aria-label="Search"
@@ -20,18 +32,6 @@
       >
         <i class="pi pi-search text-sm"></i>
       </button>
-
-        <!-- 窄屏: 顯示側邊攔按鈕 -->
-      <div class="lg:hidden">
-        <Button
-          icon="pi pi-bars"
-          :aria-label="t('openSidebar')"
-          size="small"
-          variant="outlined"
-          severity="secondary"
-          @click="$emit('open-sidebar')"
-        />
-      </div>
 
       <div class="flex-1" />
 

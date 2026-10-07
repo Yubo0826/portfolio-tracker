@@ -17,6 +17,12 @@ portfolioManagement:
 analysis:
   en: Analysis
   zh: 分析
+navOverview:
+  en: Overview
+  zh: 總覽
+navManage:
+  en: Manage
+  zh: 管理
 totalValue:
   en: Total Value
   zh: 總價值
@@ -1012,8 +1018,8 @@ targetAllocationDesc:
   en: Shows your ideal asset allocation ratio.
   zh: 顯示您設定的理想資產配置比例。
 allocationPieDesc1:
-  en: Click "Set Target Allocation" in the top right of the card to quickly go to the "Allocation" page for settings.
-  zh: 點擊卡片右上角的「設定目標配置」可快速前往「資產配置」頁面進行設定。
+  en: Click the "Set Target Allocation" icon in the top right of the card to quickly go to the "Allocation" page for settings.
+  zh: 點擊卡片右上角的「設定目標配置」圖示可快速前往「資產配置」頁面進行設定。
 rebalanceSuggestion:
   en: Rebalancing Suggestions
   zh: 再平衡建議
@@ -1477,6 +1483,45 @@ searchResults:
 popularSymbols:
   en: Popular symbols
   zh: 熱門標的
+watchlist:
+  en: Watchlist
+  zh: 關注清單
+addToWatchlist:
+  en: Add to watchlist
+  zh: 加入關注
+removeFromWatchlist:
+  en: Remove from watchlist
+  zh: 移除關注
+addedToWatchlist:
+  en: "{symbol} added to your watchlist"
+  zh: 已將 {symbol} 加入關注清單
+removedFromWatchlist:
+  en: "{symbol} removed from your watchlist"
+  zh: 已將 {symbol} 從關注清單移除
+watchlistSignInHint:
+  en: Sign in to edit your watchlist
+  zh: 登入後即可編輯關注清單
+watchlistEmpty:
+  en: Your watchlist is empty
+  zh: 關注清單還是空的
+viewWatchlist:
+  en: View watchlist
+  zh: 查看關注清單
+dailyChange:
+  en: Change
+  zh: 漲跌
+dailyChangePercent:
+  en: Change %
+  zh: 漲跌幅
+targetPrice:
+  en: Target price
+  zh: 目標價
+targetPriceHint:
+  en: We'll email you once when the price reaches this target
+  zh: 價格到達目標價時，會寄一次 email 通知你
+saveFailed:
+  en: Save failed
+  zh: 儲存失敗
 landing:
   heroTitle:
     en: Know where your portfolio stands, at a glance

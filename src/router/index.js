@@ -59,6 +59,11 @@ const router = createRouter({
       component: () => import('../views/CashFlowsListView.vue'),
     },
     {
+      path: '/watchlist',
+      name: 'watchlist',
+      component: () => import('../views/WatchlistView.vue'),
+    },
+    {
       path: '/asset/:symbol',
       name: 'asset',
       component: () => import('../views/AssetProfileView.vue'),

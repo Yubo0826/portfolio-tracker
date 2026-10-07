@@ -6,7 +6,6 @@
             v-model="selectedSymbols"
             :options="symbolOptions"
             display="chip"
-            filter
             :placeholder="$t('symbol')"
             class="w-60"
           />

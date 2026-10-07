@@ -37,7 +37,10 @@
       <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto max-w-[1680px]">
         <main class="px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
           <div v-if="route.name !== 'not-found'" class="mb-6 flex items-center justify-between gap-4">
-            <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
+            <div class="flex items-center gap-1">
+              <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
+              <div id="page-title-actions" class="flex items-center"></div>
+            </div>
             <div id="page-title-aside" class="text-xs text-muted-color"></div>
           </div>
           <RouterView />
@@ -195,7 +198,6 @@ const currentPageLabel = computed(() => {
 
   const activeItem = sidebarSections.value
     .flatMap((section) => section.items)
-    .flatMap((item) => (item.type === 'group' ? item.children : item))
     .find(isNavItemActive)
   if (activeItem) return activeItem.label
 

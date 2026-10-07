@@ -212,7 +212,7 @@
             <div class="dashboard-allocation-head">
               <div class="flex items-center justify-between gap-3">
                 <h3 class="dashboard-allocation-title">{{ $t('allocation') }}</h3>
-                <button @click="$router.push('allocation')" v-tooltip.left="$t('setTargets')" :aria-label="$t('setTargets')" class="text-[var(--p-primary-color)] hover:opacity-70"><i class="pi pi-sliders-h"></i></button>
+                <Button @click="$router.push('allocation')" v-tooltip.top="{ value: $t('setTargets'), showDelay: 500 }" :aria-label="$t('setTargets')" icon="pi pi-sliders-h" text rounded severity="secondary" size="small" class="cursor-pointer" />
               </div>
 
               <SelectButton
@@ -235,15 +235,16 @@
 
               <div v-else class="dashboard-allocation-layout">
                 <div class="dashboard-allocation-figure">
-                  <highcharts
-                    :options="selectedAllocationChart"
-                    class="dashboard-allocation-chart"
-                  />
-
+                  <!-- before the chart so the chart's tooltip paints over it -->
                   <div class="dashboard-allocation-total">
                     <span class="dashboard-allocation-total-value">{{ allocationItemCount }}</span>
                     <span class="dashboard-allocation-total-label">{{ $t('totalAssets') }}</span>
                   </div>
+
+                  <highcharts
+                    :options="selectedAllocationChart"
+                    class="dashboard-allocation-chart"
+                  />
                 </div>
 
                 <DataTable :value="selectedAllocationBreakdown" dataKey="key" size="small" class="min-w-0 text-[0.8rem] font-semibold">
@@ -282,19 +283,9 @@
       <!-- Holdings Table -->
       <Card class="app-panel dashboard-table-panel mb-8 p-4">
       <template #content>
-        <div class="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <p class="dashboard-kicker">{{ $t('currentAsset') }}</p>
-            <h2 class="mt-1 text-base font-semibold">{{ $t('holdings') }}</h2>
-          </div>
-
-          <button
-            type="button"
-            class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline"
-            @click="$router.push('/portfolio/holdings')"
-          >
-            {{ $t('holdings') }} ⭢
-          </button>
+        <div class="mb-4">
+          <p class="dashboard-kicker">{{ $t('currentAsset') }}</p>
+          <h2 class="mt-1 text-base font-semibold">{{ $t('holdings') }}</h2>
         </div>
 
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
@@ -381,6 +372,32 @@
         </DataTable>
       </template>
       </Card>
+
+      <!-- 關注清單 -->
+      <Card class="app-panel mb-8 p-4">
+        <template #content>
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <h2 class="text-base font-semibold">{{ $t('watchlist') }}</h2>
+            <Button @click="$router.push('/watchlist')" v-tooltip.top="{ value: $t('viewWatchlist'), showDelay: 500 }" :aria-label="$t('viewWatchlist')" icon="pi pi-arrow-right" text rounded severity="secondary" size="small" />
+          </div>
+          <ul v-if="watchlistStore.items.length" class="divide-y divide-[var(--p-content-border-color)]">
+            <li v-for="item in watchlistStore.items.slice(0, 5)" :key="item.symbol">
+              <RouterLink :to="{ name: 'asset', params: { symbol: item.symbol } }" class="flex items-center gap-3 py-2 hover:text-[var(--p-primary-color)]">
+                <StockIcon :symbol="item.symbol" class="!m-0 !size-7 shrink-0" />
+                <span class="font-medium">{{ item.symbol }}</span>
+                <span class="ml-auto font-medium">{{ item.regularMarketPrice == null ? '--' : item.regularMarketPrice.toFixed(2) }}</span>
+                <span class="w-20 text-right text-sm" :class="(item.regularMarketChangePercent ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                  {{ item.regularMarketChangePercent == null ? '--' : `${item.regularMarketChangePercent > 0 ? '+' : ''}${item.regularMarketChangePercent.toFixed(2)}%` }}
+                </span>
+              </RouterLink>
+            </li>
+          </ul>
+          <p v-else class="text-sm text-muted-color">
+            {{ $t('watchlistEmpty') }} ·
+            <RouterLink to="/watchlist" class="text-[var(--p-primary-color)]">{{ $t('addToWatchlist') }}</RouterLink>
+          </p>
+        </template>
+      </Card>
     </div>
   </div>
 </template>
@@ -403,6 +420,7 @@ import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
+import { useWatchlistStore } from '@/stores/watchlist'
 import NoData from '@/components/NoData.vue'
 
 import { useTheme } from '@/composables/useTheme.js'
@@ -412,6 +430,7 @@ const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
+const watchlistStore = useWatchlistStore()
 // 每日排程更新股價時會寫 last_updated，取最新一筆當作股價更新時間（ISO 字串可直接比大小）
 const pricesUpdatedAt = computed(() => holdingsStore.rawList.reduce((max, h) => (h.last_updated > max ? h.last_updated : max), ''))
 // ponytail: 與 AssetProfileView 同一行格式化，未抽共用 util
@@ -740,7 +759,8 @@ const selectedAllocationChart = computed(() => ({
   legend: { enabled: false },
   tooltip: {
     useHTML: true,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: isDark.value ? '#334155' : '#e2e8f0',
     shadow: false,
     backgroundColor: isDark.value ? '#111b31' : '#ffffff',
     style: { color: isDark.value ? '#f8fafc' : '#0f172a' },
@@ -762,39 +782,27 @@ const selectedAllocationChart = computed(() => ({
   plotOptions: {
     pie: {
       innerSize: '78%',
-      size: '92%',
+      // ponytail: auto size so Highcharts shrinks the pie to fit side labels instead of truncating them; fixed center keeps the HTML total overlay aligned, minSize keeps the hole wide enough for it
+      center: ['50%', '50%'],
+      minSize: 140,
       borderWidth: 4,
       borderColor: isDark.value ? '#1d1e1e' : '#ffffff',
       slicedOffset: 0,
       showInLegend: false,
-      dataLabels: [
-        {
-          enabled: true,
-          distance: '-30%',
-          format: '{point.percentage:.0f}%',
-          filter: { property: 'percentage', operator: '>', value: 3 },
-          style: {
-            color: '#ffffff',
-            fontWeight: '700',
-            fontSize: '13px',
-            textOutline: 'none',
-          },
+      dataLabels: {
+        enabled: true,
+        distance: 14,
+        format: '{point.name}',
+        allowOverlap: false,
+        connectorColor: isDark.value ? '#475569' : '#cbd5e1',
+        filter: { property: 'percentage', operator: '>', value: 3 },
+        style: {
+          color: isDark.value ? '#cbd5e1' : '#475569',
+          fontWeight: '600',
+          fontSize: '12px',
+          textOutline: 'none',
         },
-        {
-          enabled: true,
-          distance: 14,
-          format: '{point.name}',
-          allowOverlap: false,
-          connectorColor: isDark.value ? '#475569' : '#cbd5e1',
-          filter: { property: 'percentage', operator: '>', value: 3 },
-          style: {
-            color: isDark.value ? '#cbd5e1' : '#475569',
-            fontWeight: '600',
-            fontSize: '12px',
-            textOutline: 'none',
-          },
-        },
-      ],
+      },
       states: {
         hover: {
           halo: { size: 0 },
