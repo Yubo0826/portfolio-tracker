@@ -281,7 +281,10 @@
                       :key="card.symbol"
                       class="recommend-list-item"
                       :class="{ 'recommend-list-item--active': isCardCompared(card.symbol) }"
+                      role="link"
+                      tabindex="0"
                       @click="openAssetProfile(card.symbol)"
+                      @keydown.enter.self="openAssetProfile(card.symbol)"
                     >
                       <div class="flex items-center gap-3 min-w-0">
                         <StockIcon :symbol="card.symbol" class="recommend-list-icon" />
@@ -301,6 +304,8 @@
                         class="recommend-list-action"
                         :class="{ 'recommend-list-action--active': isCardCompared(card.symbol) }"
                         :disabled="!isCardCompared(card.symbol) && (isComparisonDisabled || !canAddRecommendationSymbol(card.symbol))"
+                        :aria-label="`${t('addToComparison')} ${card.symbol}`"
+                        :aria-pressed="isCardCompared(card.symbol)"
                         @click.stop="toggleRecommendationCompare(card)"
                       >
                         <i :class="isCardCompared(card.symbol) ? 'pi pi-check' : 'pi pi-plus'"></i>

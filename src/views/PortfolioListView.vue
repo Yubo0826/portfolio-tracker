@@ -57,7 +57,7 @@
           </Column>
           <Column field="" :header="$t('action')">
               <template #body="slotProps">
-                  <Button icon="pi pi-pencil" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
+                  <Button icon="pi pi-pencil" :aria-label="$t('updatePortfolio')" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
               </template>  
           </Column>
 

@@ -25,6 +25,7 @@
       <div class="lg:hidden">
         <Button
           icon="pi pi-bars"
+          :aria-label="t('openSidebar')"
           size="small"
           variant="outlined"
           severity="secondary"

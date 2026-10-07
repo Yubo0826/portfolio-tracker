@@ -297,7 +297,7 @@
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
-              <div @click="() => $router.push({ name: 'asset', params: { symbol: data.symbol } })"
+              <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }"
                   class="flex items-center cursor-pointer p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
                   :style="{ width: '300px', minWidth: '250px' }">
                 <StockIcon :symbol="data.symbol" class="mr-8" />
@@ -305,7 +305,7 @@
                   <span class="font-medium">{{ data.symbol }}</span>
                   <div class="text-xs text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
-              </div>
+              </RouterLink>
             </template>
           </Column>
 

@@ -964,6 +964,15 @@ dateBefore:
 clearAll:
   en: Clear all
   zh: 全部清除
+clearFilters:
+  en: Clear filters
+  zh: 清除篩選
+edit:
+  en: Edit
+  zh: 編輯
+openSidebar:
+  en: Open menu
+  zh: 開啟選單
 apply:
   en: Apply
   zh: 套用

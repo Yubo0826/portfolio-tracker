@@ -23,6 +23,7 @@
           <Button
             v-if="hasActiveFilters"
             icon="pi pi-filter-slash"
+            :aria-label="$t('clearFilters')"
             severity="secondary"
             size="small"
             @click="clearFilters"
@@ -106,6 +107,7 @@
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-text"
                 severity="info"
+                :aria-label="$t('editTransaction')"
                 @click="openEdit(slotProps.data.id)"
               />
             </template>

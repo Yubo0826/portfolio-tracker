@@ -51,6 +51,7 @@
         <template #body="slotProps">
           <div class="flex justify-end">
             <Button
+              :aria-label="$t('buy')"
               v-if="slotProps.data.action === 'BUY' && !slotProps.data.executed"
               icon="pi pi-plus"
               class="p-button-rounded p-button-text"
@@ -59,6 +60,7 @@
               @click="addTransaction(slotProps.data, slotProps.index)"
             />
             <Button
+              :aria-label="$t('sell')"
               v-else-if="slotProps.data.action === 'SELL' && !slotProps.data.executed"
               icon="pi pi-minus"
               class="p-button-rounded p-button-text"

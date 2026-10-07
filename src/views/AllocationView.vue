@@ -121,6 +121,7 @@
                   </div>
                   
                   <Button
+                    :aria-label="$t('delete')"
                     icon="pi pi-times"
                     text
                     severity="danger"
@@ -151,6 +152,7 @@
                     input-class="text-right"
                   />
                   <Button
+                    :aria-label="$t('delete')"
                     icon="pi pi-times"
                     text
                     severity="danger"

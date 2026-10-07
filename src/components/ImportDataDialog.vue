@@ -60,7 +60,11 @@
       class="border-2 border-dashed border-[var(--p-inputtext-border-color)] rounded-lg p-8 text-center flex flex-col items-center justify-center cursor-pointer transition duration-200 hover:border-[var(--p-primary-500)]"
       @dragover.prevent
       @drop.prevent="handleDrop"
+      role="button"
+      tabindex="0"
       @click="triggerFileInput"
+      @keydown.enter.self.prevent="triggerFileInput"
+      @keydown.space.self.prevent="triggerFileInput"
     >
       <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
       <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('uploadTransactions') }}</p>

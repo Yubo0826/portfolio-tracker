@@ -13,6 +13,7 @@
           <Button
             v-if="hasActiveFilters"
             icon="pi pi-filter-slash"
+            :aria-label="$t('clearFilters')"
             severity="secondary"
             size="small"
             @click="clearFilters"

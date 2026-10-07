@@ -63,6 +63,7 @@
             <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
               <h2 class="text-xl font-semibold">{{ $t('cashFlow.accounts') }}</h2>
               <Button 
+                :aria-label="$t('refresh')"
                 icon="pi pi-refresh" 
                 text 
                 rounded 
@@ -92,7 +93,9 @@
                 :class="{ 
                   'border-primary bg-primary-50 shadow-sm': selectedAccount?.id === account.id,
                   'bg-surface-0': selectedAccount?.id !== account.id
+                tabindex="0"
                 }"
+                @keydown.enter.self="handleAccountSelection(account)"
                 @click="handleAccountSelection(account)"
               >
                 <div class="flex justify-between items-start">
@@ -114,6 +117,7 @@
                   </div>
                   <div class="flex gap-2">
                     <Button 
+                      :aria-label="$t('cashFlow.editAccount')"
                       icon="pi pi-pencil" 
                       text 
                       rounded 
@@ -121,6 +125,7 @@
                       @click.stop="editAccount(account)"
                     />
                     <Button 
+                      :aria-label="$t('delete')"
                       icon="pi pi-trash" 
                       text 
                       rounded 

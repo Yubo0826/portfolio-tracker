@@ -132,6 +132,7 @@
             </span>
             <Button 
               icon="pi pi-refresh" 
+              :aria-label="$t('refresh')"
               text 
               rounded 
               @click="refreshData" 
@@ -239,6 +240,7 @@
               <div class="flex gap-2 justify-end">
                 <Button 
                   icon="pi pi-eye" 
+                  :aria-label="$t('cashFlow.viewDetail')"
                   text 
                   rounded 
                   size="small"
@@ -247,6 +249,7 @@
                 />
                 <Button 
                   icon="pi pi-trash" 
+                  :aria-label="$t('delete')"
                   text 
                   rounded 
                   severity="danger"
