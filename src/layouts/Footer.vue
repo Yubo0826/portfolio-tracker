@@ -1,6 +1,6 @@
 <template>
   <footer
-    class="mt-auto flex justify-center items-center p-4 text-gray-600 dark:text-gray-300"
+    class="mt-auto flex justify-center items-center p-4 text-muted-color"
   >
     <div class="text-sm">
       &copy; 2025 StockBar. All rights reserved.

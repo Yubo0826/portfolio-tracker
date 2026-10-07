@@ -18,7 +18,7 @@
       <Column field="symbol" :header="$t('symbol')">
 
         <template #body="slotProps">
-          <!-- :class="slotProps.data.executed ? 'bg-gray-100 p-1 rounded flex items-center' : ''" -->
+          <!-- :class="slotProps.data.executed ? 'bg-emphasis p-1 rounded flex items-center' : ''" -->
           <div>
             <span class="font-medium">{{ slotProps.data.symbol }}</span>
             <div class="text-sm text-[var(--p-card-subtitle-color)] mt-1">{{ slotProps.data.name }}</div>
@@ -36,7 +36,7 @@
             <span v-if="isRebalancing">&nbsp;→&nbsp;</span>
             <span v-if="isRebalancing">{{ (Number(slotProps.data.actualPctAfter) * 100).toFixed(2) }}</span>
             <br />
-            <span class="text-xs text-gray-700">
+            <span class="text-xs text-muted-color">
               ({{ $t('target') }}: {{ slotProps.data.target }})
             </span>
           </div>

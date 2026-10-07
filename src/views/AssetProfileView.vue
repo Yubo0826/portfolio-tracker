@@ -33,10 +33,10 @@
                             {{ formatSignedNumber(growthRateNumber) }}%
                             <span>({{ formatSignedNumber(change) }})</span>
                           </span>
-                          <span class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">{{ selectedRangeLabel }}</span>
+                          <span class="text-xs font-semibold uppercase tracking-wide text-muted-color">{{ selectedRangeLabel }}</span>
                         </div>
 
-                        <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-slate-600 dark:text-slate-500">
+                        <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
                           <span>--</span>
                           <span>(--)</span>
                           <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedRangeLabel }}</span>
@@ -125,10 +125,7 @@
                     {{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsLoadFailed' : 'topHoldingsLoadFailed') }}
                   </p>
 
-                  <div
-                    v-if="fundHoldingsLoading"
-                    class="mt-3 h-72 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"
-                  />
+                  <Skeleton v-if="fundHoldingsLoading" height="18rem" class="mt-3" />
 
                   <highcharts
                     v-else-if="fundHoldingsTab === 'sector' && sectorWeightingsData.length"
@@ -146,7 +143,7 @@
 
                   <p
                     v-else-if="!fundHoldingsError"
-                    class="mt-3 text-xs text-slate-700 dark:text-slate-400"
+                    class="mt-3 text-xs text-muted-color"
                   >
                     {{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsEmpty' : 'topHoldingsEmpty') }}
                   </p>
@@ -159,7 +156,7 @@
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t('compareAssets') }}</span>
-                    <span class="text-xs text-slate-700 dark:text-slate-400">
+                    <span class="text-xs text-muted-color">
                       {{ t('comparisonLimitHint', { max: MAX_COMPARE_SYMBOLS }) }}
                     </span>
                   </div>
@@ -192,7 +189,7 @@
 
                   <p
                     v-if="isComparisonDisabled && compareSymbols.length"
-                    class="mt-2 text-xs text-slate-700 dark:text-slate-400"
+                    class="mt-2 text-xs text-muted-color"
                   >
                     {{ t('comparisonDisabledForCandlestick') }}
                   </p>
@@ -214,7 +211,7 @@
                       <span class="font-semibold">{{ item }}</span>
                       <span
                         v-if="compareNameMap[item] && compareNameMap[item] !== item"
-                        class="ml-1 max-w-28 truncate text-xs text-slate-700 dark:text-slate-300"
+                        class="ml-1 max-w-28 truncate text-xs text-muted-color"
                       >
                         {{ compareNameMap[item] }}
                       </span>
@@ -256,13 +253,13 @@
                     <div
                       v-for="item in recommendSkeletonItems"
                       :key="`recommend-skeleton-${item.id}`"
-                      class="recommend-list-item recommend-list-item--skeleton animate-pulse"
+                      class="recommend-list-item cursor-default"
                     >
                       <div class="flex items-center gap-3 min-w-0">
-                        <div class="recommend-list-icon-skeleton" />
+                        <Skeleton shape="circle" size="2rem" class="shrink-0" />
                         <div class="min-w-0 flex-1">
-                          <div class="recommend-skeleton-line w-2/3" />
-                          <div class="recommend-skeleton-line mt-2 w-1/3" />
+                          <Skeleton width="66%" height="0.75rem" />
+                          <Skeleton width="33%" height="0.75rem" class="mt-2" />
                         </div>
                       </div>
                     </div>
@@ -317,23 +314,23 @@
             <Card class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
-                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                  <div class="flex justify-between border-b border-surface py-4 px-0">
                     <span>{{ t('assetPreviousClose') }}</span>
                     <span class="font-semibold">{{ formatPrice(info.chartPreviousClose) }}</span>
                   </div>
-                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                  <div class="flex justify-between border-b border-surface py-4 px-0">
                     <span>{{ t('assetDayRange') }}</span>
                     <span class="font-semibold">{{ formatPrice(info.regularMarketDayLow) }} - {{ formatPrice(info.regularMarketDayHigh) }}</span>
                   </div>
-                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                  <div class="flex justify-between border-b border-surface py-4 px-0">
                     <span>{{ t('assetYearRange') }}</span>
                     <span class="font-semibold">{{ formatPrice(info.fiftyTwoWeekLow) }} - {{ formatPrice(info.fiftyTwoWeekHigh) }}</span>
                   </div>
-                  <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
+                  <div class="flex justify-between border-b border-surface py-4 px-0">
                     <span>{{ t('assetTodayVolume') }}</span>
                     <span class="font-semibold">{{ info.regularMarketVolume }}</span>
                   </div>
-                  <div class="flex justify-between border-gray-300 py-4 px-0">
+                  <div class="flex justify-between border-surface py-4 px-0">
                     <span>{{ t('assetPrimaryExchange') }}</span>
                     <span class="font-semibold">{{ info.fullExchangeName }}</span>
                   </div>
@@ -352,13 +349,13 @@
                   </p>
 
                   <div class="pt-3">
-                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-400 pb-3">{{ t('companyKeyStats') }}</p>
+                    <p class="text-xs font-semibold text-muted-color pb-3">{{ t('companyKeyStats') }}</p>
 
                     <div
                       v-for="(row, index) in companyKeyStatsRows"
                       :key="row.label"
                       class="flex justify-between py-3 px-0"
-                      :class="index === companyKeyStatsRows.length - 1 ? '' : 'border-b border-gray-300 dark:border-gray-700'"
+                      :class="index === companyKeyStatsRows.length - 1 ? '' : 'border-b border-surface'"
                     >
                       <span>{{ t(row.label) }}</span>
                       <span class="font-semibold text-right">{{ row.value }}</span>
@@ -366,7 +363,7 @@
 
                     <p
                       v-if="!companyKeyStatsRows.length"
-                      class="mt-2 text-xs text-slate-700 dark:text-slate-400"
+                      class="mt-2 text-xs text-muted-color"
                     >
                       {{ t('companyKeyStatsEmpty') }}
                     </p>
@@ -377,13 +374,13 @@
                     v-if="companyInfo.longBusinessSummary"
                     class="pt-3"
                   >
-                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-400">{{ t('companySummary') }}</p>
+                    <p class="text-xs font-semibold text-muted-color">{{ t('companySummary') }}</p>
                     <p class="company-summary mt-2 text-xs">{{ companyInfo.longBusinessSummary }}</p>
                   </div>
 
                   <p
                     v-else-if="!companyInfoLoading && !hasCompanyInfo"
-                    class="text-xs text-slate-700 dark:text-slate-400"
+                    class="text-xs text-muted-color"
                   >
                     {{ t('companyInfoEmpty') }}
                   </p>
@@ -401,6 +398,7 @@
 import { ref, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
+import Skeleton from 'primevue/skeleton'
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
 import StockIcon from '@/components/StockIcon.vue'
 import api from '@/utils/api'
@@ -1811,18 +1809,6 @@ watch(locale, () => {
   opacity: 0.4;
 }
 
-.recommend-list-icon-skeleton {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--p-text-muted-color) 18%, transparent);
-  flex-shrink: 0;
-}
-
-.recommend-list-item--skeleton {
-  cursor: default;
-}
-
 .recommend-muted {
   color: var(--p-text-muted-color, #64748b);
 }
@@ -1845,12 +1831,6 @@ watch(locale, () => {
 
 .recommend-growth-neutral {
   color: var(--p-text-muted-color, #64748b);
-}
-
-.recommend-skeleton-line {
-  height: 0.75rem;
-  border-radius: 0.375rem;
-  background: color-mix(in srgb, var(--p-text-muted-color) 18%, transparent);
 }
 
 .company-link {

@@ -2,7 +2,7 @@
   <form @submit.prevent="handleSubmit" class="space-y-4">
     <!-- 現金帳戶選擇 -->
     <div>
-      <label for="accountId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="accountId" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.selectAccount') }} *
       </label>
       <Dropdown
@@ -20,7 +20,7 @@
           <div class="flex justify-between items-center w-full">
             <div>
               <span>{{ slotProps.option.name }}</span>
-              <small class="text-gray-700 dark:text-gray-400 ml-2">({{ slotProps.option.currency }})</small>
+              <small class="text-muted-color ml-2">({{ slotProps.option.currency }})</small>
             </div>
             <span class="font-semibold">
               ${{ slotProps.option.balance.toLocaleString() }}
@@ -33,7 +33,7 @@
 
     <!-- 現金流類型 -->
     <div>
-      <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="type" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.flowType') }} *
       </label>
       <Dropdown
@@ -52,7 +52,7 @@
 
     <!-- 金額 -->
     <div>
-      <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="amount" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.amount') }} *
       </label>
       <div class="flex gap-2">
@@ -76,14 +76,14 @@
         />
       </div>
       <small v-if="errors.amount" class="p-error">{{ errors.amount }}</small>
-      <small class="text-gray-700 dark:text-gray-400">
+      <small class="text-muted-color">
         {{ amountType === 'income' ? $t('cashFlow.incomeHint') : $t('cashFlow.expenseHint') }}
       </small>
     </div>
 
     <!-- 描述 -->
     <div>
-      <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="description" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.description') }} *
       </label>
       <Textarea
@@ -97,14 +97,14 @@
         required
       />
       <small v-if="errors.description" class="p-error">{{ errors.description }}</small>
-      <small class="text-gray-700 dark:text-gray-400">
+      <small class="text-muted-color">
         {{ form.description?.length || 0 }}/200
       </small>
     </div>
 
     <!-- 關聯股票（可選） -->
     <div v-if="showStockRelation">
-      <label for="relatedSymbol" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="relatedSymbol" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.relatedStock') }}
       </label>
       <InputText
@@ -113,12 +113,12 @@
         :placeholder="$t('cashFlow.relatedStockPlaceholder')"
         class="w-full"
       />
-      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.relatedStockHint') }}</small>
+      <small class="text-muted-color">{{ $t('cashFlow.relatedStockHint') }}</small>
     </div>
 
     <!-- 日期時間 -->
     <div>
-      <label for="createdAt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="createdAt" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.transactionDate') }}
       </label>
       <Calendar
@@ -130,13 +130,13 @@
         showTime
         hourFormat="24"
       />
-      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.dateHint') }}</small>
+      <small class="text-muted-color">{{ $t('cashFlow.dateHint') }}</small>
     </div>
 
     <!-- 預覽 -->
-    <div v-if="form.accountId && form.amount" class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-      <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('cashFlow.preview') }}</h4>
-      <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+    <div v-if="form.accountId && form.amount" class="bg-emphasis rounded-lg p-4 border border-surface">
+      <h4 class="font-medium text-muted-color mb-2">{{ $t('cashFlow.preview') }}</h4>
+      <div class="space-y-1 text-sm text-muted-color">
         <div class="flex justify-between">
           <span>{{ $t('cashFlow.account') }}:</span>
           <span>{{ selectedAccount?.name }}</span>
@@ -151,7 +151,7 @@
             {{ finalAmount > 0 ? '+' : '' }}${{ finalAmount.toLocaleString() }}
           </span>
         </div>
-        <div class="flex justify-between font-semibold border-t border-gray-200 dark:border-gray-600 pt-1">
+        <div class="flex justify-between font-semibold border-t border-surface pt-1">
           <span>{{ $t('cashFlow.newBalance') }}:</span>
           <span :class="newBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
             ${{ newBalance.toLocaleString() }}
@@ -161,7 +161,7 @@
     </div>
 
     <!-- 按鈕 -->
-    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex justify-end gap-3 pt-4 border-t border-surface">
       <Button
         type="button"
         :label="$t('common.cancel')"

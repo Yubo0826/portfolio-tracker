@@ -24,14 +24,14 @@
           :class="
             pendingPreset === preset.value
               ? 'text-[var(--p-primary-color)] font-medium bg-[var(--p-primary-50)] dark:bg-[var(--p-primary-950)]'
-              : 'text-[var(--p-text-color)] hover:bg-gray-100 dark:hover:bg-gray-800'
+              : 'text-[var(--p-text-color)] hover:bg-emphasis'
           "
           @click="selectPreset(preset.value)"
         >
           <span>{{ preset.label }}</span>
           <i v-if="preset.value === 'custom'" class="pi pi-angle-right text-xs opacity-60" />
         </div>
-        <div class="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2 flex items-center justify-between">
+        <div class="border-t border-surface mt-2 pt-2 flex items-center justify-between">
           <Button :label="$t('clearAll')" text size="small" @click="clearAll" />
           <div class="flex">
             <Button :label="$t('cancel')" text size="small" @click="cancel" />
@@ -43,7 +43,7 @@
       <!-- Custom date inputs (shown when custom preset is selected) -->
       <div
         v-if="pendingPreset === 'custom'"
-        class="border-l border-gray-200 dark:border-gray-700 ml-3 pl-4 flex flex-col gap-4 w-52 py-1"
+        class="border-l border-surface ml-3 pl-4 flex flex-col gap-4 w-52 py-1"
       >
         <div class="flex flex-col gap-1.5">
           <span class="text-xs text-[var(--p-text-muted-color)] font-medium">{{ $t('dateAfter') }}</span>

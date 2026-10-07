@@ -32,7 +32,7 @@
     </template>
 
     <div v-if="isPortfolioMode" class="mb-4">
-      <label for="import-portfolio-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="import-portfolio-name" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('newPortfolioName') }}
         </label>
       <InputText
@@ -64,7 +64,7 @@
     >
       <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
       <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('uploadTransactions') }}</p>
-      <p class="text-gray-700">{{ $t('dropOrClickToUpload') }}</p>
+      <p class="text-muted-color">{{ $t('dropOrClickToUpload') }}</p>
       <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
     </div>
     

@@ -7,14 +7,14 @@
     :style="{ width: '30rem' }"
   >
     <div class="mb-4">
-      <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="name" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('name') }} <span class="text-red-500">*</span>
       </label>
       <InputText id="name" class="w-full" autocomplete="off" v-model="newPortfolio.name" />
     </div>
 
     <div class="mb-4">
-      <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="description" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('description') }}
       </label>
       <Textarea
@@ -28,9 +28,9 @@
     </div>
 
     <div class="mb-4">
-      <label for="driftThreshold" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="driftThreshold" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('driftThreshold') }}
-        <i class="pi pi-info-circle ml-1 text-gray-600" v-tooltip.bottom="$t('emailAlertHint')" />
+        <i class="pi pi-info-circle ml-1 text-muted-color" v-tooltip.bottom="$t('emailAlertHint')" />
       </label>
       <InputNumber 
         id="driftThreshold" 
@@ -43,21 +43,21 @@
       />
     </div>
 
-    <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <label for="enableEmailAlert" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+    <div class="flex items-center justify-between mb-4 p-3 bg-emphasis rounded-lg border border-surface">
+      <label for="enableEmailAlert" class="text-sm font-medium text-muted-color">
         {{ $t('emailAlert') }}
       </label>
       <ToggleSwitch id="enableEmailAlert" v-model="newPortfolio.enable_email_alert" />
     </div>
 
-    <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <label for="applyNewPortfolio" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+    <div class="flex items-center justify-between mb-4 p-3 bg-emphasis rounded-lg border border-surface">
+      <label for="applyNewPortfolio" class="text-sm font-medium text-muted-color">
         {{ $t('applyNewPortfolioImmediately') }}
       </label>
       <ToggleSwitch id="applyNewPortfolio" v-model="isApplyNewPortfolio" />
     </div>
 
-    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex justify-end gap-3 pt-4 border-t border-surface">
       <Button type="button" :label="$t('cancel')" severity="secondary" @click="emit('update:visible', false)" />
       <Button type="button" :label="$t('save')" @click="clickSave" :disabled="saveDisabled" />
     </div>

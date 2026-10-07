@@ -62,7 +62,7 @@
           </Column>
 
           <template #empty>
-              <div class="p-4 text-center text-gray-700">
+              <div class="p-4 text-center text-muted-color">
               <i class="pi pi-info-circle mr-2" />
                 {{ $t('noData') }}
               </div>

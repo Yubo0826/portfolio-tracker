@@ -35,7 +35,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
       <!-- Symbol - full width -->
       <div class="mb-4 sm:col-span-2">
-        <label for="symbol" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="symbol" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('symbol') }} <span class="text-red-500">*</span>
         </label>
         <SymbolAutoComplete
@@ -48,7 +48,7 @@
 
       <!-- Date -->
       <div class="mb-4">
-        <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="date" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('transactionDate') }} <span class="text-red-500">*</span>
         </label>
         <DatePicker
@@ -66,7 +66,7 @@
 
       <!-- Shares -->
       <div class="mb-4">
-        <label for="shares" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="shares" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('share') }} <span class="text-red-500">*</span>
         </label>
         <InputNumber 
@@ -80,7 +80,7 @@
 
       <!-- Price -->
       <div class="mb-4">
-        <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="price" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('pleaseInputPrice') }} <span class="text-red-500">*</span>
         </label>
         <div class="flex items-stretch rounded-lg">
@@ -105,7 +105,7 @@
 
       <!-- Fee -->
       <div class="mb-4">
-        <label for="fee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="fee" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('fee') }}
         </label>
         <InputNumber 
@@ -123,7 +123,7 @@
 
       <!-- Operation -->
       <div class="mb-4">
-        <label for="operation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label for="operation" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('type') }}
         </label>
         <SelectButton 
@@ -137,12 +137,12 @@
       </div>
 
       <!-- Total - full width -->
-      <div class="sm:col-span-2 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
+      <div class="sm:col-span-2 rounded-lg p-4 mb-4 border border-surface">
         <div class="flex justify-between items-center">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('total') }}</label>
+          <label class="text-sm font-medium text-muted-color">{{ $t('total') }}</label>
           <div>
-            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalPrice.toLocaleString() }}</span>
-            <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.currency || 'USD' }}</span>
+            <span class="text-lg font-bold text-color">{{ totalPrice.toLocaleString() }}</span>
+            <span class="ml-2 text-sm font-medium text-muted-color">{{ form.currency || 'USD' }}</span>
           </div>
         </div>
       </div>

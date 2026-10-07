@@ -2,7 +2,7 @@
   <form @submit.prevent="handleSubmit" class="space-y-4">
     <!-- 帳戶名稱 -->
     <div>
-      <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="name" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.accountName') }} *
       </label>
       <InputText
@@ -18,20 +18,20 @@
 
     <!-- 貨幣類型 (固定為 USD) -->
     <div>
-      <label for="currency" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="currency" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.currency') }}
       </label>
-      <div class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md">
-        <i class="pi pi-lock text-gray-600"></i>
-        <span class="font-medium text-gray-700 dark:text-gray-200">USD (美元)</span>
+      <div class="flex items-center gap-2 p-3 bg-emphasis border border-surface rounded-md">
+        <i class="pi pi-lock text-muted-color"></i>
+        <span class="font-medium text-muted-color">USD (美元)</span>
         <Tag value="Fixed" severity="info" class="text-xs" />
       </div>
-      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.currencyFixedHint') }}</small>
+      <small class="text-muted-color">{{ $t('cashFlow.currencyFixedHint') }}</small>
     </div>
 
     <!-- 初始餘額 -->
     <div>
-      <label for="balance" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="balance" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.initialBalance') }}
       </label>
       <InputNumber
@@ -45,12 +45,12 @@
         :min="0"
       />
       <small v-if="errors.balance" class="p-error">{{ errors.balance }}</small>
-      <small class="text-gray-700 dark:text-gray-400">{{ $t('cashFlow.initialBalanceHint') }}</small>
+      <small class="text-muted-color">{{ $t('cashFlow.initialBalanceHint') }}</small>
     </div>
 
     <!-- 帳戶描述 -->
     <div>
-      <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="description" class="block text-sm font-medium text-muted-color mb-2">
         {{ $t('cashFlow.accountDescription') }}
       </label>
       <!-- :placeholder="$t('cashFlow.accountDescriptionPlaceholder')" -->
@@ -61,7 +61,7 @@
         rows="3"
         :maxlength="200"
       />
-      <small class="text-gray-700 dark:text-gray-400">
+      <small class="text-muted-color">
         {{ form.description?.length || 0 }}/200
       </small>
     </div>
@@ -73,11 +73,11 @@
         v-model="form.isActive"
         :binary="true"
       />
-      <label for="isActive" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label for="isActive" class="ml-2 text-sm font-medium text-muted-color">
         {{ $t('cashFlow.activeAccount') }}
       </label>
     </div>
-    <small class="text-gray-700 dark:text-gray-400 block">{{ $t('cashFlow.activeAccountHint') }}</small> -->
+    <small class="text-muted-color block">{{ $t('cashFlow.activeAccountHint') }}</small> -->
 
     <!-- 按鈕 -->
     <div class="flex justify-end gap-3 pt-4 border-t">

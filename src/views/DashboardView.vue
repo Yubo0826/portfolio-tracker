@@ -95,7 +95,7 @@
                       <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
                         <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
                         <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
                       </div>
                       <div v-else class="text-4xl font-bold">--</div>
 
@@ -111,10 +111,10 @@
                           {{ formatSignedNumber(growthRateNumber) }}%
                           <span>({{ formatSignedNumber(change) }})</span>
                         </span>
-                        <span class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-400">{{ selectedPeriodLabel }}</span>
+                        <span class="text-xs font-semibold uppercase tracking-wide text-muted-color">{{ selectedPeriodLabel }}</span>
                       </div>
 
-                      <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-slate-600 dark:text-slate-500">
+                      <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
                         <span>--</span>
                         <span>(--)</span>
                         <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedPeriodLabel }}</span>
@@ -159,8 +159,8 @@
               <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
               <div v-if="totalProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
                 <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                <span class="text-sm text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+                <span class="text-sm text-muted-color">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                <span class="ml-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
               </div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
 
@@ -182,8 +182,8 @@
               </p>
               <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
                 <span>{{ splitAmountForEmphasis(realizedProfit).main }}</span>
-                <span class="text-sm text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
-                <span class="ml-1 text-[10px] font-semibold text-slate-600 dark:text-slate-500">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
+                <span class="text-sm text-muted-color">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
+                <span class="ml-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
               </div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
             </template>
@@ -196,7 +196,7 @@
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
               </p>
               <div v-if="irr" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
-              <div v-else class="mt-2 text-xl font-bold tracking-tight text-slate-600">--</div>
+              <div v-else class="mt-2 text-xl font-bold tracking-tight text-muted-color">--</div>
             </template>
           </Card>
         </div>
@@ -272,7 +272,7 @@
             <div v-else class="flex flex-col items-center text-center gap-3 py-8">
               <img class="w-60 h-60 sm:w-80 sm:h-80" src="/src/assets/undraw_report_k55w.svg" alt="">
               <h2 class="text-base sm:text-lg font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
-              <p class="text-xs sm:text-sm text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
+              <p class="text-xs sm:text-sm text-muted-color">{{ $t('portfolioNoHoldingsDesc') }}</p>
             </div>
           </template>
         </Card>

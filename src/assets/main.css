@@ -1,5 +1,6 @@
 @import './base.css';
 @import "tailwindcss";
+@import "tailwindcss-primeui";
 
 /*
   Tailwind CSS v4 預設的 dark: variant 是基於 OS 系統層級的 prefers-color-scheme: dark media query，而不是你手動加的 .dark class。所以即使你的應用程式切換到 light mode（移除 .dark class），只要使用者的系統設定是 dark mode，dark: classes 就會繼續觸發。

@@ -108,7 +108,7 @@
     <Card class="my-6" v-if="lineData.length">
       <template #title>{{ $t('chartTitle') }}</template>
       <template #content>
-        <p class="text-sm text-gray-700 mb-2">{{ $t('chartSubtitle') }}</p>
+        <p class="text-sm text-muted-color mb-2">{{ $t('chartSubtitle') }}</p>
         <highcharts
           :options="highLineOptions"
           style="width: 100%; height: 400px;"
@@ -120,7 +120,7 @@
     <Card class="my-6" v-if="annualReturnsData.length">
       <template #title>{{ $t('annualReturnChart') }}</template>
       <template #content>
-        <p class="text-sm text-gray-700 mb-2">{{ $t('annualReturnHint') }}</p>
+        <p class="text-sm text-muted-color mb-2">{{ $t('annualReturnHint') }}</p>
         <highcharts
           :options="highBarOptions"
           style="width: 100%; height: 400px;"

@@ -2,7 +2,7 @@
   <div class="max-w-md mx-auto mt-10">
     <Card class="p-6 shadow-lg rounded-2xl">
       <template #title>
-        <h2 class="text-xl font-semibold text-gray-700">
+        <h2 class="text-xl font-semibold text-muted-color">
           使用者設定
         </h2>
       </template>
@@ -11,7 +11,7 @@
         <div class="flex flex-col gap-6">
           <!-- 偏移值設定 -->
           <div>
-            <label class="block text-gray-600 mb-2 font-medium">投資組合偏移容忍值 (%)</label>
+            <label class="block text-muted-color mb-2 font-medium">投資組合偏移容忍值 (%)</label>
             <InputNumber
               v-model="threshold"
               mode="decimal"
@@ -21,7 +21,7 @@
               suffix="%"
               class="w-full"
             />
-            <small class="text-gray-700">
+            <small class="text-muted-color">
               當實際配置偏離超過此百分比時，系統會發出警示。
             </small>
           </div>

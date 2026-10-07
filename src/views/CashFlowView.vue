@@ -142,7 +142,7 @@
             <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
               <div class="flex items-center">
                 <h2 class="text-xl font-semibold text-surface-900">{{ $t('cashFlow.recentFlows') }}</h2>
-                <i class="pi pi-info-circle ml-2 text-gray-600" v-tooltip.bottom="$t('cashFlow.recentFlowsHint')" />
+                <i class="pi pi-info-circle ml-2 text-muted-color" v-tooltip.bottom="$t('cashFlow.recentFlowsHint')" />
               </div>
               <Button 
                 :label="$t('cashFlow.viewAll')"
