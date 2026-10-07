@@ -426,7 +426,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Drawer from 'primevue/drawer'
 import TieredMenu from 'primevue/tieredmenu'
-import SvgIcon from '@/components/SvgIcon.vue'
 
 import { buildSidebarSections } from './navigation.js'
 import { useSidebarCollapse } from '@/composables/useSidebarCollapse.js'

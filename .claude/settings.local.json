@@ -4,6 +4,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(curl -sf http://localhost:5175/ -o /dev/null -w \"%{http_code}\\\\n\")",
       "Read(//private/tmp/**)",
+      "Bash(git rm *)",
+      "Bash(npm uninstall *)",
       "Bash(git push *)",
       "Bash(npx prisma *)",
       "Bash(npm ls *)",
