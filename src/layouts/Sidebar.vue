@@ -615,29 +615,8 @@ const goDashboard = () => {
 </script>
 
 <style>
-/* Reference light-mode palette (Cursor Settings) */
-html:not(.dark) .sidebar {
-  --bg-sidebar: #f0f4f8;
-  --bg-main: #f8fafc;
-  --bg-card: #f1f5f9;
-  --text-main: #334155;
-  --text-muted: #626a73;
-  --accent-color: #3b82f6;
-  --border-color: #e2e8f0;
-
-  --sidebar-bg: var(--bg-sidebar);
-  --sidebar-border: var(--border-color);
-  --sidebar-text: var(--text-main);
-  --sidebar-text-muted: var(--text-muted);
-  --sidebar-active-bg: #e2e8f0;
-  --sidebar-active-text: #334155;
-  --sidebar-input-bg: #ffffff;
-  --sidebar-avatar-bg: #cbd5e1;
-  --sidebar-hover-bg: #e2e8f0;
-}
-
 .sidebar {
-  --sidebar-bg: color-mix(in srgb, var(--p-surface-background) 88%, var(--p-content-border-color));
+  --sidebar-bg: var(--p-surface-background);
   --sidebar-border: var(--p-content-border-color);
   --sidebar-text: var(--p-text-color);
   --sidebar-text-muted: var(--p-text-muted-color);
@@ -733,10 +712,6 @@ html:not(.dark) .sidebar {
   color: var(--sidebar-text);
 }
 
-html:not(.dark) .back-btn:hover {
-  color: #64748b;
-}
-
 .sidebar-brand {
   font-size: 30px;
   font-weight: 800;
@@ -749,16 +724,8 @@ html:not(.dark) .back-btn:hover {
   color: color-mix(in srgb, var(--sidebar-text) 80%, transparent);
 }
 
-html:not(.dark) .sidebar-brand__stock {
-  color: #334155;
-}
-
 .sidebar-brand__bar {
   color: var(--p-primary-color);
-}
-
-html:not(.dark) .sidebar-brand__bar {
-  color: #3b82f6;
 }
 
 .sidebar-portfolio {
@@ -989,16 +956,6 @@ html:not(.dark) .sidebar-brand__bar {
   transition: background-color 0.16s ease;
 }
 
-.user-profile:hover,
-.user-profile.is-open {
-  background-color: var(--sidebar-hover-bg);
-}
-
-html:not(.dark) .user-profile:hover,
-html:not(.dark) .user-profile.is-open {
-  background-color: transparent;
-}
-
 .user-info {
   display: flex;
   align-items: center;
@@ -1074,11 +1031,6 @@ html:not(.dark) .user-profile.is-open {
   background: var(--sidebar-hover-bg);
 }
 
-html:not(.dark) .portfolio-menu-trigger:hover,
-html:not(.dark) .portfolio-menu-trigger.is-open {
-  background: #e2e8f0;
-}
-
 .portfolio-menu-trigger__icon {
   font-size: 10px;
   color: var(--sidebar-text-muted);
@@ -1101,13 +1053,6 @@ html:not(.dark) .portfolio-menu-trigger.is-open {
 
 .portfolio-tiered-menu.p-tieredmenu {
   position: fixed;
-}
-
-html:not(.dark) .portfolio-tiered-menu.p-tieredmenu,
-html:not(.dark) .portfolio-tiered-menu .p-tieredmenu-submenu {
-  border-color: #e2e8f0;
-  background: #ffffff;
-  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.08);
 }
 
 .portfolio-tiered-menu .p-tieredmenu-root-list,
@@ -1153,10 +1098,6 @@ html:not(.dark) .portfolio-tiered-menu .p-tieredmenu-submenu {
   color: var(--p-text-color);
 }
 
-html:not(.dark) .portfolio-menu-current {
-  color: #334155;
-}
-
 .portfolio-menu-current__label {
   font-size: 1rem;
   font-weight: 700;
@@ -1171,10 +1112,6 @@ html:not(.dark) .portfolio-menu-current {
   color: var(--p-text-muted-color);
 }
 
-html:not(.dark) .portfolio-menu-section {
-  color: #64748b;
-}
-
 .portfolio-menu-item {
   display: flex;
   align-items: center;
@@ -1186,16 +1123,8 @@ html:not(.dark) .portfolio-menu-section {
   transition: background-color 0.14s ease, color 0.14s ease;
 }
 
-html:not(.dark) .portfolio-menu-item {
-  color: #334155;
-}
-
 .portfolio-menu-item:hover {
   background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
-}
-
-html:not(.dark) .portfolio-menu-item:hover {
-  background: #f1f5f9;
 }
 
 .portfolio-menu-item.is-active {
@@ -1203,13 +1132,8 @@ html:not(.dark) .portfolio-menu-item:hover {
   color: var(--p-primary-color);
 }
 
-html:not(.dark) .portfolio-menu-item.is-active {
-  background: #e2e8f0;
-  color: #334155;
-}
-
 .portfolio-menu-item.is-danger {
-  color: #ef4444;
+  color: var(--p-red-500);
 }
 
 .portfolio-menu-item__label {
@@ -1225,96 +1149,4 @@ html:not(.dark) .portfolio-menu-item.is-active {
   color: var(--p-text-muted-color);
 }
 
-html:not(.dark) .portfolio-menu-item__suffix {
-  color: #64748b;
-}
-
-html:not(.dark) .portfolio-tiered-menu .p-tieredmenu-separator {
-  border-top-color: #e2e8f0;
-}
-
-/* Reference dark-mode palette (Cursor Settings) */
-.dark .sidebar {
-  --bg-sidebar: #0b121f;
-  --bg-main: #070a12;
-  --bg-card: #0f172a;
-  --bg-input: #1e293b;
-  --border-color: #1e293b;
-  --text-main: #94a3b8;
-  --text-muted: #64748b;
-  --text-title: #f8fafc;
-  --accent-blue: #38bdf8;
-  --accent-bg: #1e293b;
-  --control-btn-hover: #334155;
-
-  --sidebar-bg: var(--bg-sidebar);
-  --sidebar-border: var(--border-color);
-  --sidebar-text: var(--text-main);
-  --sidebar-text-muted: var(--text-muted);
-  --sidebar-active-bg: var(--accent-bg);
-  --sidebar-active-text: var(--text-title);
-  --sidebar-input-bg: var(--bg-input);
-  --sidebar-avatar-bg: #cbd5e1;
-  --sidebar-avatar-text: #334155;
-  --sidebar-user-name: var(--text-title);
-  --sidebar-hover-bg: var(--control-btn-hover);
-}
-
-.dark .back-btn:hover {
-  color: #64748b;
-}
-
-.dark .sidebar-brand__stock {
-  color: #f8fafc;
-}
-
-.dark .sidebar-brand__bar {
-  color: #38bdf8;
-}
-
-.dark .user-profile:hover,
-.dark .user-profile.is-open {
-  background-color: transparent;
-}
-
-.dark .portfolio-tiered-menu.p-tieredmenu,
-.dark .portfolio-tiered-menu .p-tieredmenu-submenu {
-  border-color: #1e293b;
-  background: #0f172a;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
-}
-
-.dark .portfolio-tiered-menu .p-tieredmenu-separator {
-  border-top-color: #1e293b;
-}
-
-.dark .portfolio-menu-trigger:hover,
-.dark .portfolio-menu-trigger.is-open {
-  background: #334155;
-}
-
-.dark .portfolio-menu-current {
-  color: #f8fafc;
-}
-
-.dark .portfolio-menu-section {
-  color: #64748b;
-}
-
-.dark .portfolio-menu-item {
-  color: #94a3b8;
-}
-
-.dark .portfolio-menu-item:hover {
-  background: #334155;
-}
-
-.dark .portfolio-menu-item.is-active {
-  background: #1e293b;
-  color: #f8fafc;
-}
-
-.dark .portfolio-menu-item__suffix {
-  color: #64748b;
-}
 </style>

@@ -11,7 +11,7 @@
 
   <div
     v-else
-    class="w-8 h-8 mr-2 rounded-full bg-[#d8dde7] text-slate-700 flex items-center justify-center text-sm font-semibold leading-none"
+    class="w-8 h-8 mr-2 rounded-full bg-emphasis text-muted-color flex items-center justify-center text-sm font-semibold leading-none"
     :title="symbolText"
   >
     {{ fallbackText }}

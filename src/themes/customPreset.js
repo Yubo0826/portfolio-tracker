@@ -47,7 +47,7 @@ export default definePreset(Aura, {
               // background: '#ffffff',
               // background: '#f4f6fe',
               // background: '#f1f5f9',
-              background: '#dae4ec', // 原本的淺灰色
+              background: '#f0f4f8', // app shell / sidebar 底色
               card: '#ffffff',
               0: '#ffffff',
               50: '{zinc.50}',
@@ -98,7 +98,7 @@ export default definePreset(Aura, {
             // background: '#1a1a1e',
             // background: '#000c23', // 原本的藍色
             // background: '#151b23', // Github 的背景色
-            background: '#1e293b', // cursor 的背景色
+            background: '#0b121f', // app shell / sidebar 底色
             // background: '#101216',
             // background: '#000000',
             card: '#1a1a1e',

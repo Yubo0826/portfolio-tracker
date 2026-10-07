@@ -2,7 +2,7 @@ import toasteventbus from 'primevue/toasteventbus'
 
 // 全域預設，可被 configure 覆蓋
 const BASE = {
-  severity: 'custom',
+  severity: 'info',
   group: 'standard',
   life: 3000
 }
@@ -16,7 +16,7 @@ function emit(payload = {}) {
   // 確保沒帶時用預設值（life / group / severity）
   const msg = {
     ...payload,
-    severity: payload.severity ?? BASE.severity,
+    severity: payload.severity ?? payload.type ?? BASE.severity,
     group: payload.group ?? BASE.group,
     life: payload.life ?? BASE.life
   }

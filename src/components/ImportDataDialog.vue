@@ -46,9 +46,9 @@
 
     <!-- 格式說明 -->
       <div class="px-1 pt-4 pb-2 flex justify-between items-center">
-        <p class="dark:text-[#a1a1a1]">
+        <p class="text-muted-color">
           {{ $t('importFileHint1') }}
-          <button @click="downloadSampleCSV" class="py-1 text-[#5b9cf6] text-md cursor-pointer hover:underline transition">
+          <button @click="downloadSampleCSV" class="py-1 text-primary text-md cursor-pointer hover:underline transition">
             {{ $t('downloadSampleCSV') }}
           </button>
         </p>

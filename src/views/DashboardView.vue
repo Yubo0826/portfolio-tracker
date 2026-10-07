@@ -346,7 +346,7 @@
                 <span>{{ splitAmountWithCode(data.currentValue).fraction }}</span>
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
               </div>
-              <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-[#f27362]': data.profitPercentage < 0 }">
+              <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-rose-600': data.profitPercentage < 0 }">
                 <div class="flex items-center gap-1 font-bold text-xs">
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
                   <i v-else class="pi pi-sort-down-fill"></i> -->

@@ -1,6 +1,8 @@
 <template>
-  <CustomToast :dark="isDark" />
-  <GlobalLoading />
+  <Toast position="bottom-center" group="standard" />
+  <div v-if="globalLoadingVisible" class="fixed inset-0 z-[2102] flex items-center justify-center bg-black/40">
+    <ProgressSpinner />
+  </div>
   <ConfirmDialog />
 
   <div class="app-shell h-screen overflow-hidden">
@@ -106,13 +108,12 @@ import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
 import AppHeader from './layouts/AppHeader.vue'
 import Sidebar from './layouts/Sidebar.vue'
 import Footer from './layouts/Footer.vue'
-import CustomToast from './components/CustomToast.vue'
+import ProgressSpinner from 'primevue/progressspinner'
 import ImportDataDialog from './components/ImportDataDialog.vue'
-import GlobalLoading from "@/components/GlobalLoading.vue"
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
-import { showLoading, hideLoading } from "@/composables/loading.js"
+import { showLoading, hideLoading, globalLoadingVisible } from "@/composables/loading.js"
 import * as toast from '@/composables/toast'
 import { buildSidebarSections } from './layouts/navigation.js'
 
@@ -602,28 +603,18 @@ const menuItems = computed(() => {
 </style>
 
 <style>
-html:not(.dark) .app-shell {
-  background-color: #f0f4f8;
-  color: #334155;
-}
-
-html:not(.dark) .app-shell__topbar {
-  background-color: #f0f4f8;
-  backdrop-filter: none;
+.app-shell,
+.app-shell__main,
+.app-shell__topbar {
+  background-color: var(--p-surface-background);
+  color: var(--p-text-color);
 }
 
 .app-shell__topbar {
   position: sticky;
   top: 0;
   z-index: 30;
-  backdrop-filter: blur(18px);
   padding: 10px 16px 10px 0;
-}
-
-html:not(.dark) .app-shell__search {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
 }
 
 .app-shell__search {
@@ -631,15 +622,12 @@ html:not(.dark) .app-shell__search {
   gap: 0.75rem;
   width: min(24rem, 100%);
   padding: 0.5rem 1rem;
+  border: 1px solid var(--p-content-border-color);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--p-content-background) 94%, transparent);
+  background: var(--p-content-background);
   color: var(--p-text-muted-color);
   text-align: left;
   transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
-}
-
-html:not(.dark) .app-shell__search:hover {
-  color: #334155;
 }
 
 .app-shell__search:hover {
@@ -647,46 +635,9 @@ html:not(.dark) .app-shell__search:hover {
   cursor: text;
 }
 
-html:not(.dark) .app-shell__content {
-  background-color: #ffffff;
-  color: #334155;
+.app-shell__content {
+  background-color: var(--p-content-background);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-
-html:not(.dark) .app-shell__main {
-  background-color: #f0f4f8;
-  color: #334155;
-}
-
-.dark .app-shell {
-  background-color: #0b121f;
-  color: #94a3b8;
-}
-
-.dark .app-shell__topbar {
-  background-color: #0b121f;
-  backdrop-filter: none;
-}
-
-.dark .app-shell__search {
-  background-color: #1e293b;
-  border: 1px solid #1e293b;
-  color: #64748b;
-}
-
-.dark .app-shell__search:hover {
-  color: #94a3b8;
-}
-
-.dark .app-shell__content {
-  background-color: #0f172a;
-  color: #94a3b8;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.dark .app-shell__main {
-  background-color: #0b121f;
-  color: #94a3b8;
 }
 
 @media (min-width: 1024px) {
@@ -709,7 +660,7 @@ html:not(.dark) .app-shell__main {
 }
 
 .custom-select-root:hover {
-  border: 1px solid rgb(121, 121, 121) !important;
+  border: 1px solid var(--p-form-field-hover-border-color) !important;
 }
 
 .trade-actions-split {

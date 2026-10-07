@@ -45,8 +45,8 @@
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-md bg-gray-200 dark:bg-[#515964] text-gray-700 dark:text-gray-300 text-sm font-semibold tracking-wide">{{ data.symbol }}</span>
-                <span class="text-sm dark:text-[#a1a1a1]">{{ data.name }}</span>
+                <Tag :value="data.symbol" severity="secondary" />
+                <span class="text-sm text-muted-color">{{ data.name }}</span>
               </div>
             </template>
           </Column>
@@ -86,7 +86,7 @@
                   class="mr-4 cursor-help whitespace-nowrap"
                   :class="{
                   'text-emerald-600': data.totalProfit >= 0,
-                  'text-[#f27362]': data.totalProfit < 0,
+                  'text-rose-600': data.totalProfit < 0,
                 }"
                 >
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-90"></i>
