@@ -482,6 +482,12 @@ recommendationPartialHint:
 addToComparison:
   en: Add to Compare
   zh: 加入對比
+removeFromComparison:
+  en: Remove from Compare
+  zh: 移除對比
+lastUpdated:
+  en: "Last updated: {time}"
+  zh: "最後更新：{time}"
 companyBasicInfo:
   en: Company Info
   zh: 公司基本資訊

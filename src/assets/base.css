@@ -92,3 +92,11 @@ select,
 .p-component {
   font-family: var(--font-family-base);
 }
+
+/* 卡片外框（Dashboard、Asset 頁共用） */
+.app-panel {
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 82%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--p-content-background) 94%, transparent), color-mix(in srgb, var(--p-content-background) 86%, transparent));
+  box-shadow: 0 18px 36px rgba(10, 14, 24, 0.08);
+}

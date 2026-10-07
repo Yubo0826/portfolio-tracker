@@ -2,6 +2,9 @@
   <!-- px-4 sm:px-6 lg:px-8 -->
   <!--  max-w-screen-2xl -->
   <div class="w-full">
+    <Teleport defer to="#page-title-aside">
+      <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
+    </Teleport>
 
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
@@ -84,7 +87,7 @@
       <div class="grid grid-cols-12 gap-6 items-stretch">
         <!-- 總資產走勢圖 -->
         <div class="col-span-12 xl:col-span-8">
-          <Card class="dashboard-panel dashboard-panel--hero h-full">
+          <Card class="app-panel dashboard-panel--hero h-full">
             <template #content>
               <div>
                 <div class="flex items-center justify-between">
@@ -154,7 +157,7 @@
 
         <!-- 損益資訊小卡 -->
         <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
-          <Card class="dashboard-panel dashboard-metric-card flex-1">
+          <Card class="app-panel dashboard-metric-card flex-1">
             <template #content>
               <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
               <div v-if="totalProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
@@ -174,7 +177,7 @@
             </template>
           </Card>
 
-          <Card class="dashboard-panel dashboard-metric-card flex-1">
+          <Card class="app-panel dashboard-metric-card flex-1">
             <template #content>
               <p class="dashboard-kicker flex items-center gap-1.5">
                 {{ $t('realizedProfit') }}
@@ -189,7 +192,7 @@
             </template>
           </Card>
 
-          <Card class="dashboard-panel dashboard-metric-card flex-1">
+          <Card class="app-panel dashboard-metric-card flex-1">
             <template #content>
               <p class="dashboard-kicker flex items-center gap-1.5">
                 {{ $t('irr') }}
@@ -204,7 +207,7 @@
 
       <!-- 資產配置 -->
       <div>
-        <Card class="dashboard-panel dashboard-allocation-card">
+        <Card class="app-panel dashboard-allocation-card">
           <template #title>
             <div class="dashboard-allocation-head">
               <div class="flex items-center justify-between gap-3">
@@ -277,7 +280,7 @@
       </div>
 
       <!-- Holdings Table -->
-      <Card class="dashboard-panel dashboard-table-panel mb-8 p-4">
+      <Card class="app-panel dashboard-table-panel mb-8 p-4">
       <template #content>
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
@@ -409,6 +412,10 @@ const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
+// 每日排程更新股價時會寫 last_updated，取最新一筆當作股價更新時間（ISO 字串可直接比大小）
+const pricesUpdatedAt = computed(() => holdingsStore.rawList.reduce((max, h) => (h.last_updated > max ? h.last_updated : max), ''))
+// ponytail: 與 AssetProfileView 同一行格式化，未抽共用 util
+const formatUpdatedAt = iso => new Date(iso).toLocaleString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
@@ -949,13 +956,6 @@ watch(displayCurrency, () => {
 </script>
 
 <style scoped>
-.dashboard-panel {
-  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 82%, transparent);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--p-content-background) 94%, transparent), color-mix(in srgb, var(--p-content-background) 86%, transparent));
-  box-shadow: 0 18px 36px rgba(10, 14, 24, 0.08);
-}
-
 .dashboard-panel--hero {
   overflow: hidden;
 }
@@ -1143,3 +1143,8 @@ watch(displayCurrency, () => {
     top: auto;
     right: auto;
     bottom: 0;
+    width: 100%;
+    height: 1px;
+  }
+}
+</style>

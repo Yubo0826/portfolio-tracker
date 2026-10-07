@@ -1,5 +1,8 @@
 <template>
   <div>
+    <Teleport defer to="#page-title-aside">
+      <span v-if="info.regularMarketTime">{{ t('lastUpdated', { time: formatUpdatedAt(info.regularMarketTime) }) }}</span>
+    </Teleport>
     <div>
       <div class="flex items-center">
         <p class="text-muted-color">{{ info.fullName }}</p>
@@ -7,7 +10,7 @@
       <div class="chart-container">
         <div class="grid grid-cols-3 gap-8">
           <div class="col-span-2 flex flex-col gap-4">
-            <Card class="w-full">
+            <Card class="app-panel w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between">
@@ -62,10 +65,6 @@
                     </div>
                   </div>
 
-                  <div class="flex justify-between text-[#5f6368] text-xs">
-                    <span>已收盤：{{ formatUTC8(info.regularMarketTime) }}</span>
-                  </div>
-
                   <div class="mt-2">
                     <highcharts
                       v-if="chartType === 'area'"
@@ -102,7 +101,7 @@
               </template>
             </Card>
 
-            <Card v-if="isFundQuote" class="w-full">
+            <Card v-if="isFundQuote" class="app-panel w-full">
               <template #content>
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
@@ -151,7 +150,7 @@
               </template>
             </Card>
 
-            <Card class="w-full">
+            <Card class="app-panel w-full">
               <template #content>
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
@@ -225,7 +224,7 @@
           </div>
 
           <div class="flex flex-col gap-4">
-            <Card class="w-full">
+            <Card class="app-panel w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between gap-2">
@@ -304,7 +303,8 @@
                         class="recommend-list-action"
                         :class="{ 'recommend-list-action--active': isCardCompared(card.symbol) }"
                         :disabled="!isCardCompared(card.symbol) && (isComparisonDisabled || !canAddRecommendationSymbol(card.symbol))"
-                        :aria-label="`${t('addToComparison')} ${card.symbol}`"
+                        v-tooltip.top="{ value: t(isCardCompared(card.symbol) ? 'removeFromComparison' : 'addToComparison'), showDelay: 500 }"
+                        :aria-label="`${t(isCardCompared(card.symbol) ? 'removeFromComparison' : 'addToComparison')} ${card.symbol}`"
                         :aria-pressed="isCardCompared(card.symbol)"
                         @click.stop="toggleRecommendationCompare(card)"
                       >
@@ -316,7 +316,7 @@
               </template>
             </Card>
 
-            <Card class="w-full">
+            <Card class="app-panel w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <div class="flex justify-between border-b border-surface py-4 px-0">
@@ -343,7 +343,7 @@
               </template>
             </Card>
 
-            <Card class="w-full">
+            <Card class="app-panel w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <p
@@ -1533,27 +1533,8 @@ function clearComparisonSymbols() {
   setComparisonNotice()
 }
 
-function formatUTC8(isoString) {
-  if (!isoString) return '--'
-  const date = new Date(isoString)
-  if (Number.isNaN(date.getTime())) return '--'
-
-  const utc8Time = date.getTime() + 8 * 60 * 60 * 1000
-  const utc8Date = new Date(utc8Time)
-  const pad = n => String(n).padStart(2, '0')
-
-  const month = utc8Date.getUTCMonth() + 1
-  const day = utc8Date.getUTCDate()
-  let hour = utc8Date.getUTCHours()
-  const minute = pad(utc8Date.getUTCMinutes())
-  const second = pad(utc8Date.getUTCSeconds())
-  const period = hour >= 12 ? '下午' : '上午'
-
-  if (hour > 12) hour -= 12
-  if (hour === 0) hour = 12
-
-  return `${month}月${day}日, ${period}${hour}:${minute}:${second} [UTC+8]`
-}
+// ponytail: 與 DashboardView 同一行格式化，未抽共用 util
+const formatUpdatedAt = iso => new Date(iso).toLocaleString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 watch(symbol, nextSymbol => {
   const normalized = String(nextSymbol || '').toUpperCase()
