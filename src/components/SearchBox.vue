@@ -8,8 +8,8 @@
       optionGroupLabel="label"
       optionGroupChildren="items"
       completeOnFocus
-      autofocus
       fluid
+      :pt="{ pcInputText: { root: { autofocus: true } } }"
       scrollHeight="20rem"
       :placeholder="$t('searchPlaceholder')"
       :emptySearchMessage="t('noResults')"
