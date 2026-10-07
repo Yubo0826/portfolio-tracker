@@ -421,7 +421,10 @@ const menuItems = computed(() => {
   ]
   if (auth.user.uid !== 'demo-user') {
     list.push({ separator: true })
-    list.push({ label: t('logout'), icon: 'pi pi-sign-out', kind: 'danger', command: () => auth.logout() })
+    list.push({ label: t('logout'), icon: 'pi pi-sign-out', kind: 'danger', command: async () => {
+      await auth.logout()
+      if (route.meta.requiresAuth) router.replace({ name: 'home' })
+    } })
   } else {
     list.push({ separator: true })
     list.push({ label: t('login'), icon: 'pi pi-sign-in', command: () => auth.login() })

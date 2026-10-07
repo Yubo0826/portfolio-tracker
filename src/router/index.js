@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -88,6 +89,7 @@ const router = createRouter({
       path: '/user-settings',
       name: 'user-settings',
       component: () => import('../views/UserSettingView.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/user-guide',
@@ -100,6 +102,13 @@ const router = createRouter({
       component: () => import('../views/NotFoundView.vue'),
     }
   ],
+})
+
+// 未登入以 demo-user 瀏覽（首頁「試用 Demo」），只擋需要真實帳號的頁面
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
+  await auth.whenReady()
+  if (to.meta.requiresAuth && auth.user.uid === 'demo-user') return { name: 'home' }
 })
 
 export default router

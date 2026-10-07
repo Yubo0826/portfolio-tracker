@@ -25,6 +25,12 @@ export const useAuthStore = defineStore('auth', () => {
     email: 'demo@example.com',
     displayName: 'Demo User'
   })
+  // Firebase 還原登入狀態前為 false，避免已登入者先看到 landing page
+  const authReady = ref(false)
+  let resolveReady: () => void
+  const ready = new Promise<void>((r) => (resolveReady = r))
+  // 路由守衛用：等 Firebase 還原完登入狀態
+  const whenReady = (): Promise<void> => ready
 
   const login = async (): Promise<void> => {
     await setPersistence(auth, browserLocalPersistence)
@@ -86,7 +92,9 @@ export const useAuthStore = defineStore('auth', () => {
         displayName: 'Demo User'
       }
     }
+    authReady.value = true
+    resolveReady()
   })
 
-  return { user, login, logout }
+  return { user, authReady, whenReady, login, logout }
 })
