@@ -1,6 +1,6 @@
 <template>
-  <div class="mt-4">
-      <div class="flex mb-2 mt-6 gap-2 items-center justify-start relative">
+  <div>
+      <div class="flex mb-2 gap-2 items-center justify-start relative">
         <SelectButton
           v-model="tab"
           :options="options"
@@ -9,16 +9,6 @@
           :allowEmpty="false"
           size="small"
         />
-        <div class="ml-auto">
-          <Button
-            :label="$t('refresh')"
-            icon="pi pi-refresh"
-            severity="secondary"
-            size="small"
-            :loading="isRefreshing"
-            @click="refreshAll"
-          />
-        </div>
       </div>
   
       <div class="mt-4">
@@ -39,24 +29,6 @@ import DividendsView from './DividendsView.vue'
 
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-
-import { useHoldingsStore } from '@/stores/holdings'
-import { useDividendsStore } from '@/stores/dividends'
-import { useTransactionsStore } from '@/stores/transactions'
-
-const holdingsStore = useHoldingsStore()
-const dividendsStore = useDividendsStore()
-const transactionsStore = useTransactionsStore()
-
-const isRefreshing = computed(
-  () => holdingsStore.isLoading || dividendsStore.isLoading || transactionsStore.isLoading
-)
-
-const refreshAll = () => {
-  holdingsStore.refreshPrices()
-  dividendsStore.refreshDividends()
-  transactionsStore.fetchTransactions()
-}
 
 const VALID_TABS = ['holdings', 'transactions', 'dividends']
 const normalize = (t) => (VALID_TABS.includes(t) ? t : 'holdings')
@@ -93,3 +65,33 @@ watch(tab, (t) => {
 </script>
 
 
+
+<style scoped>
+/* 表格當卡片用，圓角對齊 Card（Aura card 用 border.radius.xl） */
+:deep(.p-datatable) {
+  border-radius: var(--p-border-radius-xl);
+  overflow: hidden;
+}
+
+/* 表頭與內容同底色，分隔線用頁面底色做出凹槽感 */
+:deep(.p-datatable-header-cell),
+:deep(.p-datatable-tbody > tr > td) {
+  border-color: var(--p-surface-background);
+  border-bottom-width: 2px;
+}
+
+:deep(.p-datatable-header-cell) {
+  padding: 1.25rem 1rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+}
+
+:deep(.p-datatable-tbody > tr > td) {
+  padding: 1rem;
+  font-weight: 500;
+}
+
+:deep(.p-datatable-paginator-bottom) {
+  border: 0;
+}
+</style>

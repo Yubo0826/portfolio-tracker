@@ -58,25 +58,10 @@ export const useDividendsStore = defineStore('dividends', () => {
     }
   }
 
-  const refreshDividends = async (): Promise<void> => {
-    if (!uid.value || !portfolioId.value) return
-    isLoading.value = true
-    try {
-      const payload = { uid: uid.value, portfolio_id: portfolioId.value }
-      const data = await api.post('/api/dividends/sync', payload)
-      setDividends(data.dividends)
-    } catch (error) {
-      console.error('Error refreshing dividends:', error)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   return {
     list,
     isLoading,
     fetchDividends,
-    refreshDividends,
     setDividends,
   }
 })

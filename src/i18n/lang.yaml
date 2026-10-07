@@ -26,9 +26,6 @@ totalValue:
 delete:
   en: Delete
   zh: 刪除
-refreshPrices:
-  en: Refresh Prices
-  zh: 重新整理價格
 symbol:
   en: Symbol
   zh: 代號
@@ -897,18 +894,6 @@ loading:
 noResults:
   en: No results
   zh: 無結果
-dividendsRefreshed:
-  en: Dividends refreshed successfully.
-  zh: 股利資料已成功更新。
-dividendsRefreshFailed:
-  en: Failed to refresh dividends.
-  zh: 更新股利資料失敗。
-pricesRefreshed:
-  en: Prices refreshed successfully.
-  zh: 價格已成功更新。
-pricesRefreshFailed:
-  en: Failed to refresh prices.
-  zh: 更新價格失敗。
 importFileRequired:
   en: Please upload a transaction file first.
   zh: 請先上傳交易檔案。
@@ -924,12 +909,6 @@ loadSettingsError:
 portfolioRequired:
   en: Portfolio name is required.
   zh: 投資組合名稱為必填項目。
-refreshingPrices:
-  en: Refreshing prices...
-  zh: 正在更新價格...
-refreshingDividends:
-  en: Refreshing dividends...
-  zh: 正在更新股利...
 
 # 不分類
 deleteConfirm:
