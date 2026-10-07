@@ -19,7 +19,7 @@
           :aria-label="isCollapsed ? t('expandSidebar') : t('collapseSidebar')"
           @click="toggleCollapsed"
         >
-          <i :class="isCollapsed ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'"></i>
+          <i :class="isCollapsed ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></i>
         </button>
       </div>
 
@@ -35,13 +35,13 @@
           @click="togglePortfolioMenu"
         >
           <span class="menu-item-left">
-            <i class="fa-solid fa-briefcase"></i>
+            <i class="pi pi-briefcase"></i>
             <span v-show="!isCollapsed" class="sidebar-portfolio__text">
               <span class="sidebar-portfolio__label">{{ t('portfolio') }}</span>
               <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
             </span>
           </span>
-          <i v-show="!isCollapsed" class="fa-solid fa-chevron-down portfolio-menu-trigger__icon"></i>
+          <i v-show="!isCollapsed" class="pi pi-chevron-down portfolio-menu-trigger__icon"></i>
         </button>
 
         <TieredMenu
@@ -110,10 +110,10 @@
                 @click="onGroupTriggerClick(item)"
               >
                 <span class="menu-item-left">
-                  <SvgIcon :name="item.icon" class="menu-item-icon" />
+                  <i :class="[item.icon, 'menu-item-icon']" />
                   <span v-show="!isCollapsed">{{ item.label }}</span>
                 </span>
-                <i v-show="!isCollapsed" class="fa-solid fa-chevron-right menu-item-group__chevron"></i>
+                <i v-show="!isCollapsed" class="pi pi-chevron-right menu-item-group__chevron"></i>
               </button>
               <div
                 v-show="!isCollapsed"
@@ -142,7 +142,7 @@
               :title="isCollapsed ? item.label : null"
             >
               <span class="menu-item-left">
-                <SvgIcon :name="item.icon" class="menu-item-icon" />
+                <i :class="[item.icon, 'menu-item-icon']" />
                 <span v-show="!isCollapsed">{{ item.label }}</span>
               </span>
             </RouterLink>
@@ -171,7 +171,7 @@
             <div class="user-plan">{{ userEmail }}</div>
           </div>
         </div>
-        <i v-show="!isCollapsed" class="fa-solid fa-chevron-up user-profile__chevron"></i>
+        <i v-show="!isCollapsed" class="pi pi-chevron-up user-profile__chevron"></i>
       </button>
 
       <TieredMenu
@@ -228,7 +228,7 @@
             class="back-btn"
             @click="go('/dashboard', closeCallback)"
           >
-            <i class="fa-solid fa-arrow-left"></i>
+            <i class="pi pi-arrow-left"></i>
             <span class="sidebar-brand">
               <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
             </span>
@@ -244,13 +244,13 @@
               @click="togglePortfolioMenu"
             >
               <span class="menu-item-left">
-                <i class="fa-solid fa-briefcase"></i>
+                <i class="pi pi-briefcase"></i>
                 <span class="sidebar-portfolio__text">
                   <span class="sidebar-portfolio__label">{{ t('portfolio') }}</span>
                   <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
                 </span>
               </span>
-              <i class="fa-solid fa-chevron-down portfolio-menu-trigger__icon"></i>
+              <i class="pi pi-chevron-down portfolio-menu-trigger__icon"></i>
             </button>
 
             <TieredMenu
@@ -318,10 +318,10 @@
                     @click="toggleGroup(item)"
                   >
                     <span class="menu-item-left">
-                      <SvgIcon :name="item.icon" class="menu-item-icon" />
+                      <i :class="[item.icon, 'menu-item-icon']" />
                       {{ item.label }}
                     </span>
-                    <i class="fa-solid fa-chevron-right menu-item-group__chevron"></i>
+                    <i class="pi pi-chevron-right menu-item-group__chevron"></i>
                   </button>
                   <div class="menu-subgroup-wrapper" :class="{ 'is-expanded': isGroupExpanded(item) }">
                     <div class="menu-subgroup">
@@ -347,7 +347,7 @@
                   @click="go(item.to, closeCallback)"
                 >
                   <span class="menu-item-left">
-                    <SvgIcon :name="item.icon" class="menu-item-icon" />
+                    <i :class="[item.icon, 'menu-item-icon']" />
                     {{ item.label }}
                   </span>
                 </button>
@@ -375,7 +375,7 @@
                 <div class="user-plan">{{ userEmail }}</div>
               </div>
             </div>
-            <i class="fa-solid fa-chevron-up user-profile__chevron"></i>
+            <i class="pi pi-chevron-up user-profile__chevron"></i>
           </button>
 
           <TieredMenu

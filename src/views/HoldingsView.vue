@@ -89,8 +89,8 @@
                   'text-[#f27362]': data.totalProfit < 0,
                 }"
                 >
-                  <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-                  <i v-else class="fas fa-arrow-right rotate-90"></i> -->
+                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-90"></i>
+                  <i v-else class="pi pi-arrow-right rotate-90"></i> -->
                   <span v-if="data.profitPercentage >= 0">+</span>
                   <span v-else>-</span>
                   <span>

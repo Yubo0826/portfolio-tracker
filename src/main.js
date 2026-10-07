@@ -18,7 +18,6 @@ const i18n = createI18n({
   messages
 })
 
-import SvgIcon from './components/SvgIcon.vue'
 import AppCard from './components/AppCard.vue'
 
 // PrimeVue Setup
@@ -82,7 +81,6 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(ConfirmationService)
-app.component('SvgIcon', SvgIcon)
 app.component('AppCard', AppCard)
 
 // Directives

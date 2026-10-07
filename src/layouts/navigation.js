@@ -1,68 +1,3 @@
-export function buildPrimaryNavigation(t, currentPortfolioName) {
-  return [
-    {
-      key: 'dashboard',
-      label: t('dashboard'),
-      to: '/dashboard',
-      icon: 'dashboard',
-      activePaths: ['/dashboard'],
-      hasMenu: false,
-    },
-    {
-      key: 'portfolio',
-      label: t('portfolio'),
-      to: '/portfolio/holdings',
-      icon: 'pi pi-briefcase',
-      activePaths: ['/portfolio', '/portfolio/holdings', '/portfolio/transactions', '/portfolio/dividends', '/portfolios'],
-      hasMenu: true,
-      menuGroups: [
-        {
-          label: t('portfolio'),
-          items: [
-            { label: t('assetDetails'), to: '/portfolio/holdings', icon: 'detail' },
-          ],
-        },
-        {
-          label: t('portfolios'),
-          noDivider: true,
-          items: [
-            {
-              label: t('portfolioManagement'),
-              to: '/portfolios',
-              icon: 'pi pi-folder',
-              sub: currentPortfolioName || undefined,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      key: 'tools',
-      label: t('functions'),
-      to: '/allocation',
-      icon: 'pi pi-chart-pie',
-      activePaths: ['/allocation', '/rebalancing', '/backtesting'],
-      hasMenu: true,
-      menuGroups: [
-        {
-          label: t('functions'),
-          items: [
-            { label: t('rebalance'), to: '/rebalancing', icon: 'pi pi-sync' },
-            { label: t('backtesting'), to: '/backtesting', icon: 'pi pi-chart-line' },
-          ],
-        },
-        {
-          label: t('setTargets'),
-          noDivider: true,
-          items: [
-            { label: t('setTargets'), to: '/allocation', icon: 'pi pi-cog' },
-          ],
-        },
-      ],
-    },
-  ]
-}
-
 export function buildSidebarSections(t) {
   return [
     {
@@ -72,14 +7,14 @@ export function buildSidebarSections(t) {
           key: 'dashboard',
           label: t('dashboard'),
           to: '/dashboard',
-          icon: 'dashboard',
+          icon: 'pi pi-th-large',
           activePaths: ['/dashboard'],
         },
         {
           key: 'asset-details',
           label: t('assetDetails'),
           to: '/portfolio/holdings',
-          icon: 'detail',
+          icon: 'pi pi-list',
           activePaths: [
             '/portfolio/holdings',
             '/portfolio/transactions',
@@ -92,7 +27,7 @@ export function buildSidebarSections(t) {
         {
           key: 'analysis',
           label: t('analysis'),
-          icon: 'analysis',
+          icon: 'pi pi-chart-bar',
           type: 'group',
           children: [
             {
@@ -124,7 +59,7 @@ export function buildSidebarSections(t) {
           key: 'portfolios',
           label: t('portfolioManagement'),
           to: '/portfolios',
-          icon: 'folder',
+          icon: 'pi pi-folder',
           activePaths: ['/portfolios'],
         },
       ],

@@ -361,15 +361,15 @@
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
                   <i v-else class="pi pi-sort-down-fill"></i> -->
                   
-                  <!-- <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-90"></i>
-                  <i v-else class="fas fa-arrow-right rotate-90"></i> -->
+                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-90"></i>
+                  <i v-else class="pi pi-arrow-right rotate-90"></i> -->
 
                   <!-- <span v-if="data.profitPercentage >= 0">+</span>
                   <span v-else>-</span> -->
                   <span>{{ Math.abs(data.profitPercentage) }}%</span>
 
-                  <i v-if="data.profitPercentage >= 0" class="fas fa-arrow-right -rotate-45"></i>
-                  <i v-else class="fas fa-arrow-right rotate-45"></i>
+                  <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-45"></i>
+                  <i v-else class="pi pi-arrow-right rotate-45"></i>
                 </div>
               </div>
             </template>
