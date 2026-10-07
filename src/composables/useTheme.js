@@ -1,23 +1,19 @@
-import { ref, onMounted } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 
-const isDark = ref(false) // 放在 function 外層，整個 app 共用
+// 放在 function 外層，整個 app 共用
+const media = window.matchMedia('(prefers-color-scheme: dark)')
+const systemDark = ref(media.matches)
+media.addEventListener('change', (e) => { systemDark.value = e.matches })
+
+const theme = ref(localStorage.getItem('theme') || 'system') // 'light' | 'dark' | 'system'
+const isDark = computed(() => theme.value === 'dark' || (theme.value === 'system' && systemDark.value))
+watchEffect(() => document.documentElement.classList.toggle('dark', isDark.value))
 
 export function useTheme() {
-
-  // const isDark = ref(false) // 每次 useTheme() 都會建立一個新的 ref，彼此獨立（互不相通）。
-
-  const updateThemeState = () => {
-    isDark.value = document.documentElement.classList.contains('dark')
-    console.log('Theme updated:', isDark.value ? 'dark' : 'light')
+  const setTheme = (value) => {
+    theme.value = value
+    localStorage.setItem('theme', value)
   }
 
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark')
-    updateThemeState()
-    localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-  }
-
-  onMounted(updateThemeState)
-
-  return { isDark, toggleTheme }
+  return { theme, isDark, setTheme }
 }

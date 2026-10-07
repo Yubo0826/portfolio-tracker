@@ -93,6 +93,9 @@ darkMode:
 lightMode:
   en: Light Mode
   zh: 淺色模式
+systemMode:
+  en: System
+  zh: 跟隨系統
 
 # 股利頁欄位（更精準）
 dividendPerShare:
@@ -1501,3 +1504,40 @@ searchResults:
 popularSymbols:
   en: Popular symbols
   zh: 熱門標的
+landing:
+  heroTitle:
+    en: Know where your portfolio stands, at a glance
+    zh: 一眼掌握你的投資組合
+  heroSubtitle:
+    en: Track holdings, set target allocations, rebalance and backtest, all in one place.
+    zh: 追蹤持股、設定目標配置、再平衡與回測，一站完成。
+  signIn:
+    en: Sign in with Google
+    zh: 使用 Google 登入
+  tryDemo:
+    en: Try the demo
+    zh: 試用展示版
+  holdingsTitle:
+    en: Holdings & dividends
+    zh: 持股與股息
+  holdingsDesc:
+    en: Record trades and see returns, dividends and cash flows across portfolios.
+    zh: 記錄交易，跨投資組合查看報酬、股息與現金流。
+  allocationTitle:
+    en: Allocation & rebalancing
+    zh: 資產配置與再平衡
+  allocationDesc:
+    en: Set target weights and get the trades needed to get back on target.
+    zh: 設定目標權重，算出回到目標所需的買賣。
+  backtestTitle:
+    en: Backtesting
+    zh: 回測
+  backtestDesc:
+    en: See how an allocation would have performed historically.
+    zh: 看看一個配置在過去的表現如何。
+  alertTitle:
+    en: Drift email alerts
+    zh: 偏離 Email 提醒
+  alertDesc:
+    en: Get an email when your portfolio drifts past your threshold.
+    zh: 投資組合偏離超過門檻時寄信通知你。

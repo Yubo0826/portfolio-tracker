@@ -5,7 +5,9 @@
   </div>
   <ConfirmDialog />
 
-  <div class="app-shell h-screen overflow-hidden">
+  <!-- ponytail: 寫死 home 路由不套 app shell；之後若有第二個獨立頁面再改用 route.meta.bare -->
+  <RouterView v-if="route.name === 'home'" />
+  <div v-else class="app-shell h-screen overflow-hidden">
     <Sidebar
       persistent
       :currentPortfolioName="currentPortfolioName"
@@ -20,7 +22,6 @@
     <div class="flex h-screen flex-col app-shell__main">
       <AppHeader
         :currentPageLabel="currentPageLabel"
-        :isDark="isDark"
         :showAddTradeButtonBar="showAddTradeButtonBar"
         :isDemoUser="auth.user?.uid === 'demo-user'"
         :hasPortfolios="portfolioStore.portfolios.length > 0"
@@ -30,7 +31,6 @@
         @create-portfolio="dialogVisible = true"
         @open-transaction="transctionDialogVisible = true"
         @login="auth.login"
-        @toggle-theme="toggleTheme"
       />
 
       <div class="app-shell__scroll flex-1 overflow-y-auto">
@@ -121,8 +121,6 @@ const holdingsStore = useHoldingsStore()
 const transactionsStore = useTransactionsStore()
 const sidebarSections = computed(() => buildSidebarSections(t))
 
-import { useTheme } from '@/composables/useTheme.js'
-const { isDark, toggleTheme } = useTheme()
 
 // Currency settings
 import { useSettingsStore } from '@/stores/settings'
@@ -378,11 +376,6 @@ const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'reb
 const sidebarVisible = ref(false)
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'dark') {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
   const savedLocale = localStorage.getItem('locale')
   if (savedLocale && savedLocale !== locale.value) {
     locale.value = savedLocale
