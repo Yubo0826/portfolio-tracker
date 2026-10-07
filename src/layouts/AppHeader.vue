@@ -4,7 +4,6 @@
 
       <!-- 搜尋欄位 -->
       <button
-        ref="desktopSearchTriggerRef"
         aria-label="Search"
         class="app-shell__search hidden md:flex"
         @click="$emit('open-search')"
@@ -15,7 +14,6 @@
       </button>
 
       <button
-        ref="mobileSearchTriggerRef"
         aria-label="Search"
         class="flex h-10 w-10 items-center justify-center rounded-full text-[var(--p-text-muted-color)] transition-colors hover:bg-[var(--p-content-background)] md:hidden"
         @click="$emit('open-search')"
@@ -105,7 +103,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -133,13 +131,6 @@ const toggleCurrency = () => {
 
 defineEmits(['open-sidebar', 'open-search', 'create-portfolio', 'open-transaction', 'login', 'toggle-theme'])
 
-const desktopSearchTriggerRef = ref(null)
-const mobileSearchTriggerRef = ref(null)
-
-defineExpose({
-  desktopSearchTriggerRef,
-  mobileSearchTriggerRef,
-})
 
 defineProps({
   currentPageLabel: {

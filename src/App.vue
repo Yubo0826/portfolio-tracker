@@ -19,7 +19,6 @@
 
     <div class="flex h-screen flex-col app-shell__main">
       <AppHeader
-        ref="appHeaderRef"
         :currentPageLabel="currentPageLabel"
         :isDark="isDark"
         :showAddTradeButtonBar="showAddTradeButtonBar"
@@ -47,27 +46,19 @@
   </div>
 
   <!-- Search Overlay -->
-  <Teleport to="body">
-    <Transition name="search-overlay-fade">
-      <div
-        v-if="searchBoxVisible"
-        class="search-overlay"
-        aria-hidden="true"
-        @click="closeSearchBox"
-      ></div>
-    </Transition>
-
-    <div
-      v-if="searchBoxVisible"
-      class="search-overlay-panel"
-      :class="{ 'search-overlay-panel--expanded': searchPanelExpanded }"
-      :style="searchPanelStyle"
-      role="dialog"
-      aria-modal="true"
-    >
-      <SearchBox ref="searchBoxRef" @close="closeSearchBox" />
-    </div>
-  </Teleport>
+  <Dialog
+    v-model:visible="searchBoxVisible"
+    modal
+    dismissableMask
+    blockScroll
+    position="top"
+    :showHeader="false"
+    :draggable="false"
+    class="w-[min(38rem,calc(100vw-2rem))]"
+    :pt="{ content: { class: '!p-2' } }"
+  >
+    <SearchBox @close="searchBoxVisible = false" />
+  </Dialog>
 
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
@@ -95,7 +86,7 @@
 
 <script setup>
 // 同原始邏輯，無變動
-import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 import { useConfirm } from 'primevue/useconfirm'
 import { usePortfolioStore } from '@/stores/portfolio'
@@ -359,44 +350,8 @@ async function getPortfolios() {
 }
 
 const searchBoxVisible = ref(false)
-const searchBoxRef = ref(null)
-const appHeaderRef = ref(null)
-const searchPanelStyle = ref({})
-const searchPanelExpanded = ref(false)
-
-const getVisibleSearchTrigger = () => {
-  const desktop = appHeaderRef.value?.desktopSearchTriggerRef
-  const mobile = appHeaderRef.value?.mobileSearchTriggerRef
-  if (desktop?.offsetParent !== null) return desktop
-  if (mobile?.offsetParent !== null) return mobile
-  return desktop || mobile || null
-}
-
-const captureSearchTriggerRect = () => {
-  const trigger = getVisibleSearchTrigger()
-  if (!trigger) {
-    return { top: '1rem', left: '1rem', width: 'min(24rem, calc(100vw - 2rem))' }
-  }
-  const rect = trigger.getBoundingClientRect()
-  return {
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
-  }
-}
-
-const closeSearchBox = () => {
-  searchPanelExpanded.value = false
-  searchBoxVisible.value = false
-}
-
-const openSearchBox = async () => {
-  searchPanelStyle.value = captureSearchTriggerRect()
-  searchPanelExpanded.value = true
+const openSearchBox = () => {
   searchBoxVisible.value = true
-
-  await nextTick()
-  searchBoxRef.value?.focusInput?.()
 }
 
 const isEditableTarget = (target) => {
@@ -406,11 +361,6 @@ const isEditableTarget = (target) => {
 
 const onGlobalSearchShortcut = (event) => {
   if (event.isComposing || event.repeat) return
-  if (event.key === 'Escape' && searchBoxVisible.value) {
-    event.preventDefault()
-    closeSearchBox()
-    return
-  }
 
   const isCommandShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'
   const isSlashShortcut = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && event.key === '/'
@@ -443,7 +393,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onGlobalSearchShortcut)
-  document.body.style.removeProperty('overflow')
 })
 
 watch(
@@ -463,17 +412,6 @@ watch(
 
 watch(dialogVisible, (visible) => {
   if (!visible) resetEditPortfolio()
-})
-
-watch(searchBoxVisible, async (visible) => {
-  if (!visible) {
-    document.body.style.removeProperty('overflow')
-    return
-  }
-
-  document.body.style.overflow = 'hidden'
-  await nextTick()
-  searchBoxRef.value?.focusInput?.()
 })
 
 const tradeActionItems = computed(() => [
@@ -545,40 +483,6 @@ const menuItems = computed(() => {
 .page-main-leave-active {
   transition: opacity 0.32s ease, transform 0.32s ease;
   will-change: opacity, transform;
-}
-
-.search-overlay-fade-enter-active,
-.search-overlay-fade-leave-active {
-  transition: opacity 0.18s ease;
-}
-
-.search-overlay-fade-enter-from,
-.search-overlay-fade-leave-to {
-  opacity: 0;
-}
-
-.search-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  background: rgba(9, 14, 24, 0.48);
-  backdrop-filter: blur(2px);
-}
-
-.search-overlay-panel {
-  position: fixed;
-  z-index: 1201;
-  max-width: calc(100vw - 2rem);
-  border-radius: 999px;
-  box-shadow: none;
-  overflow: hidden;
-}
-
-.search-overlay-panel--expanded {
-  width: min(38rem, calc(100vw - 2rem)) !important;
-  border-radius: 1.25rem;
-  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.4);
-  overflow: visible;
 }
 
 .page-main-enter-from,
