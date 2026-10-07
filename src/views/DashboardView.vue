@@ -5,7 +5,7 @@
 
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
-      <AppCard class="rounded-xl shadow-md">
+      <Card class="rounded-xl shadow-md">
         <template #content>
           <div class="space-y-4 py-1">
             <div class="flex justify-between items-center gap-4">
@@ -19,12 +19,12 @@
             <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
           </div>
         </template>
-      </AppCard>
+      </Card>
 
       <div class="grid grid-cols-12 gap-6 items-stretch">
         <div class="col-span-12 xl:col-span-8 space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AppCard v-for="idx in skeletonStatCards.slice(0, 2)" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md h-full">
+            <Card v-for="idx in skeletonStatCards.slice(0, 2)" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md h-full">
               <template #content>
                 <div class="space-y-3 py-2">
                   <Skeleton width="6rem" height="1rem" />
@@ -32,10 +32,10 @@
                   <Skeleton width="8rem" height="0.85rem" />
                 </div>
               </template>
-            </AppCard>
+            </Card>
           </div>
 
-          <AppCard class="rounded-xl shadow-md">
+          <Card class="rounded-xl shadow-md">
           <template #content>
             <div class="space-y-3 py-2">
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -43,10 +43,10 @@
               </div>
             </div>
           </template>
-          </AppCard>
+          </Card>
         </div>
 
-        <AppCard class="col-span-12 xl:col-span-4 rounded-xl shadow-md h-full">
+        <Card class="col-span-12 xl:col-span-4 rounded-xl shadow-md h-full">
           <template #content>
             <div class="space-y-4 py-1">
               <div class="flex justify-between items-center gap-4">
@@ -57,10 +57,10 @@
               <Skeleton width="100%" height="9rem" borderRadius="0.75rem" />
             </div>
           </template>
-        </AppCard>
+        </Card>
       </div>
 
-      <AppCard class="mb-8 p-4">
+      <Card class="mb-8 p-4">
         <template #content>
           <div class="space-y-3">
             <Skeleton width="12rem" height="1rem" />
@@ -75,7 +75,7 @@
             </div>
           </div>
         </template>
-      </AppCard>
+      </Card>
     </div>
 
     <!-- Main Content -->
@@ -84,7 +84,7 @@
       <div class="grid grid-cols-12 gap-6 items-stretch">
         <!-- 總資產走勢圖 -->
         <div class="col-span-12 xl:col-span-8">
-          <AppCard class="dashboard-panel dashboard-panel--hero h-full">
+          <Card class="dashboard-panel dashboard-panel--hero h-full">
             <template #content>
               <div>
                 <div class="flex items-center justify-between">
@@ -149,12 +149,12 @@
                 </SelectButton>
               </div>
             </template>
-          </AppCard>
+          </Card>
         </div>
 
         <!-- 損益資訊小卡 -->
         <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
-          <AppCard class="dashboard-panel dashboard-metric-card flex-1">
+          <Card class="dashboard-panel dashboard-metric-card flex-1">
             <template #content>
               <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
               <div v-if="totalProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
@@ -172,9 +172,9 @@
                 <span v-else>--</span>
               </div>
             </template>
-          </AppCard>
+          </Card>
 
-          <AppCard class="dashboard-panel dashboard-metric-card flex-1">
+          <Card class="dashboard-panel dashboard-metric-card flex-1">
             <template #content>
               <p class="dashboard-kicker flex items-center gap-1.5">
                 {{ $t('realizedProfit') }}
@@ -187,9 +187,9 @@
               </div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
             </template>
-          </AppCard>
+          </Card>
 
-          <AppCard class="dashboard-panel dashboard-metric-card flex-1">
+          <Card class="dashboard-panel dashboard-metric-card flex-1">
             <template #content>
               <p class="dashboard-kicker flex items-center gap-1.5">
                 {{ $t('irr') }}
@@ -198,13 +198,13 @@
               <div v-if="irr" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight text-slate-600">--</div>
             </template>
-          </AppCard>
+          </Card>
         </div>
       </div>
 
       <!-- 資產配置 -->
       <div>
-        <AppCard class="dashboard-panel dashboard-allocation-card">
+        <Card class="dashboard-panel dashboard-allocation-card">
           <template #title>
             <div class="dashboard-allocation-head">
               <div class="flex items-center justify-between gap-3">
@@ -285,11 +285,11 @@
               <p class="text-xs sm:text-sm text-gray-600">{{ $t('portfolioNoHoldingsDesc') }}</p>
             </div>
           </template>
-        </AppCard>
+        </Card>
       </div>
 
       <!-- Holdings Table -->
-      <AppCard class="dashboard-panel dashboard-table-panel mb-8 p-4">
+      <Card class="dashboard-panel dashboard-table-panel mb-8 p-4">
       <template #content>
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
@@ -391,7 +391,7 @@
           </template>
         </DataTable>
       </template>
-      </AppCard>
+      </Card>
     </div>
   </div>
 </template>
@@ -1290,16 +1290,16 @@ watch(locale, () => {
 }
 
 .dashboard-allocation-card,
-.dashboard-allocation-card :deep(.app-card-body) {
+.dashboard-allocation-card :deep(.p-card-body) {
   height: 100%;
 }
 
-.dashboard-allocation-card :deep(.app-card-body) {
+.dashboard-allocation-card :deep(.p-card-body) {
   display: flex;
   flex-direction: column;
 }
 
-.dashboard-allocation-card :deep(.app-card-content) {
+.dashboard-allocation-card :deep(.p-card-content) {
   flex: 1;
   display: flex;
   flex-direction: column;

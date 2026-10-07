@@ -7,7 +7,7 @@
       <div class="chart-container">
         <div class="grid grid-cols-3 gap-8">
           <div class="col-span-2 flex flex-col gap-4">
-            <AppCard class="w-full">
+            <Card class="w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between">
@@ -100,9 +100,9 @@
                   </SelectButton>
                 </div>
               </template>
-            </AppCard>
+            </Card>
 
-            <AppCard v-if="isFundQuote" class="w-full">
+            <Card v-if="isFundQuote" class="w-full">
               <template #content>
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
@@ -152,9 +152,9 @@
                   </p>
                 </div>
               </template>
-            </AppCard>
+            </Card>
 
-            <AppCard class="w-full">
+            <Card class="w-full">
               <template #content>
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
@@ -223,12 +223,12 @@
                   </div>
                 </div>
               </template>
-            </AppCard>
+            </Card>
 
           </div>
 
           <div class="flex flex-col gap-4">
-            <AppCard class="w-full">
+            <Card class="w-full">
               <template #content>
                 <div>
                   <div class="flex items-center justify-between gap-2">
@@ -312,9 +312,9 @@
                   </div>
                 </div>
               </template>
-            </AppCard>
+            </Card>
 
-            <AppCard class="w-full">
+            <Card class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <div class="flex justify-between border-b border-gray-300 dark:border-gray-700 py-4 px-0">
@@ -339,9 +339,9 @@
                   </div>
                 </div>
               </template>
-            </AppCard>
+            </Card>
 
-            <AppCard class="w-full">
+            <Card class="w-full">
               <template #content>
                 <div class="flex flex-col gap-3 text-sm">
                   <p
@@ -389,7 +389,7 @@
                   </p>
                 </div>
               </template>
-            </AppCard>
+            </Card>
           </div>
         </div>
       </div>
@@ -1724,10 +1724,6 @@ watch(locale, () => {
 .asset-growth-pill--down {
   color: #be123c;
   background: rgba(244, 63, 94, 0.14);
-}
-
-.p-breadcrumb {
-  background: var(--p-surface-background);
 }
 
 .compare-chip {

@@ -34,7 +34,6 @@
 
       <div class="app-shell__scroll flex-1 overflow-y-auto">
         <main class="app-shell__content mx-auto max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
-          <PageBreadcrumb :items="breadcrumbItems" />
           <RouterView />
         </main>
 
@@ -110,7 +109,6 @@ import Footer from './layouts/Footer.vue'
 import CustomToast from './components/CustomToast.vue'
 import ImportDataDialog from './components/ImportDataDialog.vue'
 import GlobalLoading from "@/components/GlobalLoading.vue"
-import PageBreadcrumb from '@/components/PageBreadcrumb.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
@@ -201,52 +199,6 @@ const currentPageLabel = computed(() => {
   if (activeItem) return activeItem.label
 
   return currentPortfolioName.value
-})
-
-const PORTFOLIO_TAB_LABELS = {
-  holdings: () => t('holding'),
-  transactions: () => t('transactions'),
-  dividends: () => t('dividends'),
-}
-
-const breadcrumbItems = computed(() => {
-  const portfolioRoot = { label: t('portfolio'), to: '/portfolios' }
-
-  switch (route.name) {
-    case 'portfolios':
-      return [{ label: t('portfolio') }]
-    case 'dashboard':
-      return [portfolioRoot, { label: t('dashboard') }]
-    case 'portfolio':
-    case 'holdings':
-    case 'transactions':
-    case 'dividends': {
-      const tabKey = route.name === 'portfolio' ? (route.params.tab || 'holdings') : route.name
-      const tabLabel = (PORTFOLIO_TAB_LABELS[tabKey] || PORTFOLIO_TAB_LABELS.holdings)()
-      return [
-        portfolioRoot,
-        { label: currentPortfolioName.value, to: '/portfolio/holdings' },
-        { label: tabLabel },
-      ]
-    }
-    case 'allocation':
-      return [portfolioRoot, { label: t('setTargets') }]
-    case 'rebalancing':
-      return [portfolioRoot, { label: t('rebalance') }]
-    case 'backtesting':
-      return [portfolioRoot, { label: t('backtesting') }]
-    case 'cash-flow':
-    case 'cash-flows':
-      return [portfolioRoot, { label: t('cashFlowNav') }]
-    case 'asset':
-      return [portfolioRoot, { label: String(route.params.symbol || t('currentAsset')) }]
-    case 'user-settings':
-      return [portfolioRoot, { label: t('userSettings') }]
-    case 'user-guide':
-      return [portfolioRoot, { label: t('userGuide') }]
-    default:
-      return []
-  }
 })
 
 const recentPortfolios = computed(() =>

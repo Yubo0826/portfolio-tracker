@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md mx-auto mt-10">
-    <AppCard class="p-6 shadow-lg rounded-2xl">
+    <Card class="p-6 shadow-lg rounded-2xl">
       <template #title>
         <h2 class="text-xl font-semibold text-gray-700">
           使用者設定
@@ -34,7 +34,7 @@
           />
         </div>
       </template>
-    </AppCard>
+    </Card>
 
     <Button @click="sendEmail">發送測試郵件</Button>
     <Button @click="checkPortfolioDrift">投資組合偏移檢查測試</Button>

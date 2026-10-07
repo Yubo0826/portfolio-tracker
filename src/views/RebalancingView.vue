@@ -1,5 +1,5 @@
 <template>
-  <AppCard class="mt-4 p-6 min-h-90">
+  <Card class="mt-4 p-6 min-h-90">
     <template #content>
     <h2 class="text-xl font-semibold mb-8">{{ $t('rebalanceTitle') }}</h2>
 
@@ -84,7 +84,7 @@
       />
     </div> -->
   </template>
-</AppCard>
+</Card>
 
   <TransactionDialog v-model="transactionDialog" :formData="newTransaction" />
 </template>

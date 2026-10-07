@@ -22,7 +22,7 @@
     <!-- 現金總覽卡片（只顯示總資金和帳戶數量） -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <!-- 總現金餘額 -->
-      <AppCard>
+      <Card>
         <template #content>
           <div class="flex items-center">
             <div class="rounded-full p-3 mr-4">
@@ -36,9 +36,9 @@
             </div>
           </div>
         </template>
-      </AppCard>
+      </Card>
       <!-- 帳戶數量 -->
-      <AppCard>
+      <Card>
         <template #content>
           <div class="flex items-center">
             <div class="rounded-full p-3 mr-4">
@@ -50,7 +50,7 @@
             </div>
           </div>
         </template>
-      </AppCard>
+      </Card>
     </div>
 
     <!-- 新版現金帳戶管理區塊：左側卡片+帳戶列表，右側現金流列表 -->
@@ -58,7 +58,7 @@
       <!-- 左半邊：卡片+帳戶列表 -->
       <div class="space-y-6">
         <!-- 卡片（總資金和帳戶數量）已在上方顯示 -->
-        <AppCard>
+        <Card>
           <template #header>
             <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
               <h2 class="text-xl font-semibold">{{ $t('cashFlow.accounts') }}</h2>
@@ -133,11 +133,11 @@
               </div>
             </div>
           </template>
-        </AppCard>
+        </Card>
       </div>
       <!-- 右半邊：現金流列表 -->
       <div>
-        <AppCard>
+        <Card>
           <template #header>
             <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
               <div class="flex items-center">
@@ -191,7 +191,7 @@
               </div>
             </div>
           </template>
-        </AppCard>
+        </Card>
       </div>
     </div>
 

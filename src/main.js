@@ -18,7 +18,7 @@ const i18n = createI18n({
   messages
 })
 
-import AppCard from './components/AppCard.vue'
+import Card from 'primevue/card'
 
 // PrimeVue Setup
 import PrimeVue from 'primevue/config'
@@ -81,7 +81,6 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(ConfirmationService)
-app.component('AppCard', AppCard)
 
 // Directives
 app.directive('tooltip', Tooltip)
@@ -101,7 +100,8 @@ const components = {
   Toast,
   SelectButton,
   Tag,
-  MultiSelect
+  MultiSelect,
+  Card
 }
 
 Object.entries(components).forEach(([name, component]) => {

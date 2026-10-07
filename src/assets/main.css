@@ -50,10 +50,6 @@
 }
 
 /* primevue css 覆寫 */
-.p-card {
-  border: none !important;
-}
-
 .dark .p-togglebutton,
 .dark .p-selectbutton .p-togglebutton {
   background-color: var(--p-togglebutton-background);

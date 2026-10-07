@@ -15,7 +15,7 @@
     </div>
 
     <!-- 帳戶選擇和過濾器 -->
-    <AppCard class="mb-6">
+    <Card class="mb-6">
       <template #content>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- 帳戶選擇 -->
@@ -60,12 +60,12 @@
           </div>
         </div>
       </template>
-    </AppCard>
+    </Card>
 
     <!-- 現金流統計卡片 -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <!-- 總收入 -->
-      <AppCard>
+      <Card>
         <template #content>
           <div class="flex items-center">
             <div class="rounded-full p-3 bg-green-50 mr-4">
@@ -79,10 +79,10 @@
             </div>
           </div>
         </template>
-      </AppCard>
+      </Card>
 
       <!-- 總支出 -->
-      <AppCard>
+      <Card>
         <template #content>
           <div class="flex items-center">
             <div class="rounded-full p-3 bg-red-50 mr-4">
@@ -96,10 +96,10 @@
             </div>
           </div>
         </template>
-      </AppCard>
+      </Card>
 
       <!-- 淨現金流 -->
-      <AppCard>
+      <Card>
         <template #content>
           <div class="flex items-center">
             <div class="rounded-full p-3 bg-blue-50 mr-4">
@@ -116,11 +116,11 @@
             </div>
           </div>
         </template>
-      </AppCard>
+      </Card>
     </div>
 
     <!-- 現金流列表 -->
-    <AppCard>
+    <Card>
       <template #header>
         <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
           <h2 class="text-xl font-semibold">
@@ -259,7 +259,7 @@
           </Column>
         </DataTable>
       </template>
-    </AppCard>
+    </Card>
 
     <!-- 確認對話框 -->
     <ConfirmDialog />

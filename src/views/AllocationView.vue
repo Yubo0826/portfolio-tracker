@@ -1,5 +1,5 @@
 <template>
-  <AppCard class="mt-4 pb-8">
+  <Card class="mt-4 pb-8">
     <template #content>
       <div class="flex justify-between mt-4">
         <h1 class="text-xl font-semibold pb-2">{{ $t('setTargets') }}</h1>
@@ -171,7 +171,7 @@
         </div>
       </div>
     </template>
-  </AppCard>
+  </Card>
 </template>
 
 
