@@ -11,9 +11,6 @@ notFound:
 portfolio:
   en: Portfolio
   zh: 投資組合
-portfolios:
-  en: Portfolio List
-  zh: 投資組合列表
 portfolioManagement:
   en: Portfolio Management
   zh: 投資組合管理
@@ -239,6 +236,9 @@ uploadTransactions:
 recentlyUsed:
   en: Recently used
   zh: 最近使用
+managePortfolio:
+  en: Manage
+  zh: 管理
 openPortfolio:
   en: Open portfolio...
   zh: 開啟投資組合...
@@ -712,9 +712,6 @@ in_allocation:
   en: Already in allocation
   zh: 已在配置中
 
-rebalanceTitle:
-  en: Portfolio Rebalancing
-  zh: 投資組合再平衡
 amountLabel:
   en: Amount
   zh: 金額
@@ -747,9 +744,6 @@ backtest:
 backtesting:
   en: Backtesting
   zh: 回測
-backtestTitle:
-  en: Portfolio Backtest Settings
-  zh: 投資組合回測設定
 startDate:
   en: Start Date
   zh: 開始日期
@@ -952,18 +946,6 @@ thisYear:
 lastYear:
   en: Last year
   zh: 去年
-customDateRange:
-  en: Custom date range
-  zh: 自訂日期範圍
-dateAfter:
-  en: After date
-  zh: 以下日期後
-dateBefore:
-  en: Before date
-  zh: 以下日期前
-clearAll:
-  en: Clear all
-  zh: 全部清除
 clearFilters:
   en: Clear filters
   zh: 清除篩選
@@ -990,9 +972,6 @@ GetStarted:
 userGuide:
   en: User Guide
   zh: 使用者指南
-userGuideTitle:
-  en: User Operation Guide
-  zh: 使用者操作指南
 tableOfContents:
   en: Table of Contents
   zh: 目錄
@@ -1027,8 +1006,8 @@ targetAllocationDesc:
   en: Shows your ideal asset allocation ratio.
   zh: 顯示您設定的理想資產配置比例。
 allocationPieDesc1:
-  en: Click the gear icon in the top right to quickly go to the "Allocation" page for settings.
-  zh: 點擊右上角的齒輪圖示可快速前往「資產配置」頁面進行設定。
+  en: Click "Set Target Allocation" in the top right of the card to quickly go to the "Allocation" page for settings.
+  zh: 點擊卡片右上角的「設定目標配置」可快速前往「資產配置」頁面進行設定。
 rebalanceSuggestion:
   en: Rebalancing Suggestions
   zh: 再平衡建議

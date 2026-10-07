@@ -1,8 +1,7 @@
 <template>
-  <Card class="mt-4 pb-8">
+  <Card class="pb-8">
     <template #content>
-      <div class="flex justify-between mt-4">
-        <h1 class="text-xl font-semibold pb-2">{{ $t('setTargets') }}</h1>
+      <div class="flex justify-end mt-4">
         <!-- Save button -->
         <div>
             <Button
@@ -121,8 +120,8 @@
                   </div>
                   
                   <Button
-                    :aria-label="$t('delete')"
                     icon="pi pi-times"
+                    :aria-label="$t('delete')"
                     text
                     severity="danger"
                     size="small"
@@ -152,8 +151,8 @@
                     input-class="text-right"
                   />
                   <Button
-                    :aria-label="$t('delete')"
                     icon="pi pi-times"
+                    :aria-label="$t('delete')"
                     text
                     severity="danger"
                     size="small"

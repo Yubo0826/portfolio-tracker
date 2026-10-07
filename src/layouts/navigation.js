@@ -19,10 +19,14 @@ export function buildSidebarSections(t) {
             '/portfolio/holdings',
             '/portfolio/transactions',
             '/portfolio/dividends',
-            '/holdings',
-            '/transactions',
-            '/dividends',
           ],
+        },
+        {
+          key: 'cash-flow',
+          label: t('cashFlowNav'),
+          to: '/cash-flow',
+          icon: 'pi pi-wallet',
+          activePaths: ['/cash-flow', '/cash-flows'],
         },
         {
           key: 'analysis',

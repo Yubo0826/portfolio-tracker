@@ -1,8 +1,7 @@
 <template>
-  <div class="container mx-auto px-4 py-6">
+  <div>
     <!-- 頁面標題 -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">{{ $t('cashFlow.title') }}</h1>
+    <div class="flex justify-end items-center mb-6">
       <div class="flex gap-3">
         <Button 
           icon="pi pi-plus" 
@@ -63,8 +62,8 @@
             <div class="flex justify-between items-center p-4 border-b border-[var(--p-overlay-modal-border-color)]">
               <h2 class="text-xl font-semibold">{{ $t('cashFlow.accounts') }}</h2>
               <Button 
-                :aria-label="$t('refresh')"
                 icon="pi pi-refresh" 
+                :aria-label="$t('refresh')"
                 text 
                 rounded 
                 @click="fetchCashAccounts" 
@@ -93,10 +92,10 @@
                 :class="{ 
                   'border-primary bg-primary-50 shadow-sm': selectedAccount?.id === account.id,
                   'bg-surface-0': selectedAccount?.id !== account.id
-                tabindex="0"
                 }"
-                @keydown.enter.self="handleAccountSelection(account)"
+                tabindex="0"
                 @click="handleAccountSelection(account)"
+                @keydown.enter.self="handleAccountSelection(account)"
               >
                 <div class="flex justify-between items-start">
                   <div class="flex-1">
@@ -117,16 +116,16 @@
                   </div>
                   <div class="flex gap-2">
                     <Button 
-                      :aria-label="$t('cashFlow.editAccount')"
                       icon="pi pi-pencil" 
+                      :aria-label="$t('cashFlow.editAccount')"
                       text 
                       rounded 
                       size="small"
                       @click.stop="editAccount(account)"
                     />
                     <Button 
-                      :aria-label="$t('delete')"
                       icon="pi pi-trash" 
+                      :aria-label="$t('delete')"
                       text 
                       rounded 
                       severity="danger"

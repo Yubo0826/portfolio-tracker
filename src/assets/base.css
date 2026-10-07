@@ -81,7 +81,7 @@ html:not(.dark) body {
 }
 
 .dark body {
-  background-color: #070a12;
+  background-color: var(--p-surface-background);
   color: #94a3b8;
 }
 

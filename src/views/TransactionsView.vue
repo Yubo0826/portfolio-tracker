@@ -107,9 +107,9 @@
             <template #body="slotProps">
               <Button
                 icon="pi pi-pencil"
+                :aria-label="$t('editTransaction')"
                 class="p-button-rounded p-button-text"
                 severity="info"
-                :aria-label="$t('editTransaction')"
                 @click="openEdit(slotProps.data.id)"
               />
             </template>

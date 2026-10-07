@@ -68,111 +68,17 @@
           class="hidden sm:inline-flex"
           @click="$emit('login')"
         />
-
-        <Button
-          icon="pi pi-language"
-          :aria-label="t('language')"
-          aria-haspopup="true"
-          aria-controls="language-menu"
-          size="small"
-          text
-          rounded
-          severity="secondary"
-          @click="languageMenu.toggle($event)"
-        />
-        <Menu id="language-menu" ref="languageMenu" :model="languageItems" popup />
-
-        <Button
-          icon="pi pi-dollar"
-          :aria-label="t('currency.label')"
-          aria-haspopup="true"
-          aria-controls="currency-menu"
-          size="small"
-          text
-          rounded
-          severity="secondary"
-          @click="currencyMenu.toggle($event)"
-        />
-        <Menu id="currency-menu" ref="currencyMenu" :model="currencyItems" popup />
-
-        <Button
-          :icon="isDark ? 'pi pi-moon' : 'pi pi-sun'"
-          :aria-label="t('appearance')"
-          aria-haspopup="true"
-          aria-controls="theme-menu"
-          size="small"
-          text
-          rounded
-          severity="secondary"
-          @click="themeMenu.toggle($event)"
-        />
-        <Menu id="theme-menu" ref="themeMenu" :model="themeItems" popup>
-          <template #item="{ item, props }">
-            <a v-bind="props.action" class="flex items-center gap-2">
-              <i :class="item.icon" />
-              <span>{{ item.label }}</span>
-              <i v-if="item.selected" class="pi pi-check ml-auto pl-3 text-xs" />
-            </a>
-          </template>
-        </Menu>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import Menu from 'primevue/menu'
 import SplitButton from 'primevue/splitbutton'
-import { useSettingsStore } from '@/stores/settings'
-import { useTheme } from '@/composables/useTheme'
 
-const { locale, t } = useI18n()
-const settingsStore = useSettingsStore()
-const { displayCurrency } = storeToRefs(settingsStore)
-
-const languageMenu = ref()
-const languages = [
-  { code: 'zh-TW', label: '繁體中文' },
-  { code: 'en', label: 'English' },
-]
-
-const setLanguage = (code) => {
-  locale.value = code
-  localStorage.setItem('locale', code)
-}
-
-const languageItems = computed(() => languages.map(({ code, label }) => ({
-  label,
-  icon: locale.value === code ? 'pi pi-check' : 'pi pi-fw',
-  command: () => setLanguage(code),
-})))
-
-const currencyMenu = ref()
-const currencyItems = computed(() => [
-  { code: 'USD', label: 'USD ($)' },
-  { code: 'TWD', label: 'TWD (NT$)' },
-].map(({ code, label }) => ({
-  label,
-  icon: displayCurrency.value === code ? 'pi pi-check' : 'pi pi-fw',
-  command: () => settingsStore.setDisplayCurrency(code),
-})))
-
-const { theme, isDark, setTheme } = useTheme()
-const themeMenu = ref()
-const themeItems = computed(() => [
-  { code: 'light', label: t('lightMode'), icon: 'pi pi-sun' },
-  { code: 'dark', label: t('darkMode'), icon: 'pi pi-moon' },
-  { code: 'system', label: t('systemMode'), icon: 'pi pi-desktop' },
-].map(({ code, label, icon }) => ({
-  label,
-  icon,
-  selected: theme.value === code,
-  command: () => setTheme(code),
-})))
+const { t } = useI18n()
 
 defineEmits(['open-sidebar', 'open-search', 'create-portfolio', 'open-transaction', 'login'])
 

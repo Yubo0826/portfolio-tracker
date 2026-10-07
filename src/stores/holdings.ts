@@ -58,7 +58,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
 
   const recalculateHoldings = (): void => {
     list.value = rawList.value.map(item => {
-      const shares = parseInt(String(item.total_shares)) || 0
+      const shares = parseFloat(String(item.total_shares)) || 0
       const avgCostRaw = parseFloat(String(item.avg_cost)) || 0
       const currentPriceRaw = parseFloat(String(item.current_price)) || 0
       const currency = String(item.currency || 'USD').toUpperCase()

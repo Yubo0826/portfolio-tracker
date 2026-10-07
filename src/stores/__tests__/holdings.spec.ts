@@ -92,6 +92,13 @@ describe('Holdings Store', () => {
       expect(store.list[0].profitPercentage).toBe('25.00')
     })
 
+    it('小數股不會被截成整數', () => {
+      const store = useHoldingsStore()
+      store.setHoldings([{ id: '1', symbol: 'VOO', name: 'VOO', asset_type: 'etf', total_shares: '0.50', avg_cost: '400', current_price: '500', target_percentage: '0' }])
+      expect(store.list[0].shares).toBe(0.5)
+      expect(store.list[0].currentValue).toBe(250)
+    })
+
     it('應該計算總市值和實際配置比例', () => {
       const store = useHoldingsStore()
       

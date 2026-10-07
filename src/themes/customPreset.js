@@ -84,7 +84,7 @@ export default definePreset(Aura, {
             // background: '#212830', // Github 的卡片、側邊欄配色
             // background: '#22211f', //更深的黑色
             // background: '#242c32', //更深的黑色2
-            background: '#0f172a', // cursor settings 的背景色
+            background: '#1d1e1e', // 卡片、側邊欄（Knowt 配色）
             focusBackground: 'rgba(250, 250, 250, .24)',
             color: 'rgba(255,255,255,.87)',
             focusColor: 'rgba(255,255,255,.87)',
@@ -98,10 +98,10 @@ export default definePreset(Aura, {
             // background: '#1a1a1e',
             // background: '#000c23', // 原本的藍色
             // background: '#151b23', // Github 的背景色
-            background: '#0b121f', // app shell / sidebar 底色
+            background: '#0d0d0d', // app shell 底色（Knowt 配色）
             // background: '#101216',
             // background: '#000000',
-            card: '#1a1a1e',
+            card: '#1d1e1e',
             0: '#ffffff',
              50: '{zinc.50}',
             100: '{zinc.100}',

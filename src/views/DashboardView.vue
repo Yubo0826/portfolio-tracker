@@ -1,7 +1,7 @@
 ﻿<template>
   <!-- px-4 sm:px-6 lg:px-8 -->
   <!--  max-w-screen-2xl -->
-  <div class="w-full mt-4">
+  <div class="w-full">
 
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
@@ -166,8 +166,8 @@
 
               <div class="dashboard-footnote mt-3">
                 {{ $t('roi') }}
-                <span v-if="annualReturn" :class="annualReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'">
-                  {{ annualReturn.toFixed(2) }}%
+                <span v-if="totalReturn" :class="totalReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+                  {{ totalReturn.toFixed(2) }}%
                 </span>
                 <span v-else>--</span>
               </div>
@@ -195,7 +195,7 @@
                 {{ $t('irr') }}
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
               </p>
-              <div v-if="irr" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr }}%</div>
+              <div v-if="irr !== null" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr.toFixed(2) }}%</div>
               <div v-else class="mt-2 text-xl font-bold tracking-tight text-muted-color">--</div>
             </template>
           </Card>
@@ -209,7 +209,7 @@
             <div class="dashboard-allocation-head">
               <div class="flex items-center justify-between gap-3">
                 <h3 class="dashboard-allocation-title">{{ $t('allocation') }}</h3>
-                <button @click="$router.push('allocation')" class="text-xs font-semibold text-[var(--p-primary-color)] hover:underline">{{ $t('setTargets') }} ⭢</button>
+                <button @click="$router.push('allocation')" v-tooltip.left="$t('setTargets')" :aria-label="$t('setTargets')" class="text-[var(--p-primary-color)] hover:opacity-70"><i class="pi pi-sliders-h"></i></button>
               </div>
 
               <SelectButton
@@ -253,13 +253,13 @@
                       </div>
                     </template>
                   </Column>
-                  <Column :header="selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount')" bodyClass="text-right" :pt="{ columnHeaderContent: 'justify-end' }">
+                  <Column :header="selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount')">
                     <template #body="{ data: item }">{{ formatAmountWithCode(item.amount) }}</template>
                   </Column>
-                  <Column :header="$t('distribution')" bodyClass="text-right" :pt="{ columnHeaderContent: 'justify-end' }">
+                  <Column :header="$t('distribution')">
                     <template #body="{ data: item }">{{ formatPreciseAllocationPercentage(item.percentage) }}</template>
                   </Column>
-                  <Column v-if="selectedPieType === 'actual'" :header="$t('unrealizedProfit')" bodyClass="text-right" :pt="{ columnHeaderContent: 'justify-end' }">
+                  <Column v-if="selectedPieType === 'actual'" :header="$t('unrealizedProfit')">
                     <template #body="{ data: item }">
                       <span :class="item.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ formatAmountWithCode(item.profit) }}</span>
                     </template>
@@ -393,7 +393,7 @@ import ProgressBar from 'primevue/progressbar'
 import StockIcon from '@/components/StockIcon.vue'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
-import xirr from 'xirr'
+import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, percentChange, filterByPeriod, yAxisBounds } from '@/utils/portfolioMetrics'
 import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 import { useAuthStore } from '@/stores/auth'
@@ -412,7 +412,7 @@ const holdingsStore = useHoldingsStore()
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatAmountWithCode, formatChange, formatPrice, formatPriceWithCode, currencySymbol, convertAmountFromCurrency } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatPriceWithCode, convertAmountFromCurrency } = useCurrency()
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
@@ -454,58 +454,20 @@ const timeRangeOptions = [
 ]
 
 const selectedPeriod = ref('5d')
+const selectedPeriodLabel = computed(() => timeRangeOptions.find(option => option.value === selectedPeriod.value)?.label)
 
-const chartSeries = ref([{ name: t('totalPrice'), data: [] }])
-const growthRate = ref(null)
-const change = ref(0)
-const periodLabelMap = {
-  '1d': '1D',
-  '5d': '5D',
-  '7d': '7D',
-  '1mo': '1M',
-  '3mo': '3M',
-  '6mo': '6M',
-  ytd: 'YTD',
-  '1y': '1Y',
-  '5y': '5Y',
-}
-
-const selectedPeriodLabel = computed(() => {
-  return timeRangeOptions.find(option => option.value === selectedPeriod.value)?.label
-    || periodLabelMap[selectedPeriod.value]
-    || String(selectedPeriod.value || '').toUpperCase()
-})
-
-const recentTradingDayPointCount = 2
-const growthRateNumber = computed(() => {
-  const n = Number(growthRate.value)
-  return Number.isFinite(n) ? n : null
-})
-const chartWindowLabel = computed(() => {
-  if (startDate.value && endDate.value) return `${startDate.value} - ${endDate.value}`
-  return selectedPeriodLabel.value
+// 後端回傳「最早交易日 ~ 今天」的完整資料，切換時間區間只在前端切片，避免重打 API
+const rawChartPoints = ref([])
+const chartPoints = computed(() => filterByPeriod(rawChartPoints.value, selectedPeriod.value, p => p.x))
+const growthRateNumber = computed(() => percentChange(chartPoints.value))
+const change = computed(() => {
+  const list = chartPoints.value
+  return list.length < 2 ? 0 : list[list.length - 1].y - list[0].y
 })
 
 /* =========================
  *  Utils / Formatters
  * =======================*/
-// formatUSD now uses useCurrency composable (formatAmount)
-function formatDate(date) {
-  return date.toISOString().split('T')[0]
-}
-function formatStrDate(dateStr, locale = 'en-US') {
-  const date = new Date(dateStr)
-  if (locale.startsWith('en')) {
-    return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: '2-digit' }).format(date)
-  }
-  if (locale.startsWith('zh')) {
-    const formatted = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'numeric', day: 'numeric' }).format(date)
-    const [year, month, day] = formatted.match(/\d+/g)
-    return `${month}月${day}日, ${year}年`
-  }
-  return dateStr
-}
-
 function splitAmountForEmphasis(value) {
   const fractionDigits = displayCurrency.value === 'TWD' ? 0 : 2
   const formatted = formatAmount(value, {
@@ -656,82 +618,10 @@ function buildAllocationBreakdown(items, mapItem) {
   return primaryItems
 }
 
-function setChartWindowFromPoints(points) {
-  if (!points.length) {
-    startDate.value = ''
-    endDate.value = ''
-    return
-  }
-
-  const localeCode = locale.value || 'en'
-  const firstPoint = points[0].x instanceof Date ? points[0].x : new Date(points[0].x)
-  const lastPoint = points[points.length - 1].x instanceof Date ? points[points.length - 1].x : new Date(points[points.length - 1].x)
-
-  startDate.value = formatStrDate(formatDate(firstPoint), localeCode)
-  endDate.value = formatStrDate(formatDate(lastPoint), localeCode)
-}
-
-function normalizeChartDataForPeriod(points, range) {
-  if (range !== '1d') return points
-  return points.slice(-recentTradingDayPointCount)
-}
-
-const startDate = ref('')
-const endDate = ref('')
-
-function calcPeriodRange(range) {
-  const today = new Date()
-  const e = formatDate(today)
-
-  const daysMap = { '1d': 7, '5d': 7, '7d': 7, '1mo': 30, '3mo': 90, '6mo': 180, '1y': 365, '2y': 730, '5y': 1825 }
-  if (range === 'ytd') {
-    const start = new Date(today.getFullYear(), 0, 1)
-    return { period1: formatDate(start), period2: e }
-  }
-  const days = daysMap[range] || 30
-  const start = new Date()
-  start.setDate(start.getDate() - days)
-  return { period1: formatDate(start), period2: e }
-}
-
-function getPeriodRange(range) {
-  const { period1, period2 } = calcPeriodRange(range)
-  const localeCode = locale.value || 'en'
-  startDate.value = formatStrDate(period1, localeCode)
-  endDate.value = formatStrDate(period2, localeCode)
-  return { period1, period2 }
-}
-
-function computeRangeGrowth(range) {
-  if (!rawChartPoints.value.length) return null
-
-  const { period1, period2 } = calcPeriodRange(range)
-  const rangeFiltered = filterPointsByRange(rawChartPoints.value, period1, period2)
-  const normalized = normalizeChartDataForPeriod(rangeFiltered, range)
-  if (normalized.length < 2 || !normalized[0].y) return null
-
-  return Number((((normalized[normalized.length - 1].y - normalized[0].y) / normalized[0].y) * 100).toFixed(2))
-}
-
 const timeRangeOptionsWithGrowth = computed(() => timeRangeOptions.map(option => ({
   ...option,
-  growth: computeRangeGrowth(option.value),
+  growth: percentChange(filterByPeriod(rawChartPoints.value, option.value, p => p.x)),
 })))
-
-/* =========================
- *  Setters (transform API -> view model)
- * =======================*/
-function setDividends(data) {
-  dividends.value = data.map(item => ({
-    id: item.id,
-    symbol: item.symbol,
-    name: item.name,
-    shares: item.shares,
-    amount: item.amount,
-    totalAmount: (item.shares * item.amount).toFixed(2),
-    date: item.date.slice(0, 10)
-  }))
-}
 
 /* =========================
  *  API Calls
@@ -749,7 +639,7 @@ async function getAllocation() {
 async function getDividends() {
   try {
     const data = await api.get(`/api/dividends?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
-    setDividends(data)
+    dividends.value = data.map(item => ({ symbol: item.symbol, amount: item.shares * item.amount, date: item.date.slice(0, 10) }))
   } catch (e) {
     console.error('Error fetching dividends:', e)
   }
@@ -763,7 +653,7 @@ async function loadData() {
   try {
     await holdingsStore.fetchHoldings()
     if (holdingsStore.list.length === 0) {
-      chartSeries.value = [{ name: t('totalPrice'), data: [] }]
+      rawChartPoints.value = []
       return
     }
     // await transactionsStore.fetchTransactions()
@@ -867,7 +757,7 @@ const selectedAllocationChart = computed(() => ({
       innerSize: '78%',
       size: '92%',
       borderWidth: 4,
-      borderColor: isDark.value ? '#0f172a' : '#ffffff',
+      borderColor: isDark.value ? '#1d1e1e' : '#ffffff',
       slicedOffset: 0,
       showInLegend: false,
       dataLabels: [
@@ -920,105 +810,11 @@ const selectedAllocationChart = computed(() => ({
   }],
 }))
 
-const annualReturn = computed(() => {
-  if (!holdingsStore.list.length) return 0
-  const totalCost = holdingsStore.list.reduce((s, h) => s + h.avgCost * h.shares, 0)
-  const curr = holdingsStore.list.reduce((s, h) => s + h.currentValue, 0)
-  if (totalCost === 0) return 0
-  return ((curr - totalCost) / totalCost) * 100
-})
-
-const realizedProfit = computed(() => {
-  if (!transactionsStore.list.length) return 0
-
-  const costBasisBySymbol = new Map()
-  let realizedGain = 0
-
-  const sortedTransactions = [...transactionsStore.list].sort((a, b) => new Date(a.date) - new Date(b.date))
-
-  sortedTransactions.forEach(tx => {
-    const shares = Number(tx.shares) || 0
-    const state = costBasisBySymbol.get(tx.symbol) || { shares: 0, costBasis: 0 }
-
-    if (tx.transactionType === 'buy') {
-      state.shares += shares
-      state.costBasis += convertAmountFromCurrency(tx.price * shares + tx.fee, tx.currency)
-    } else if (tx.transactionType === 'sell' && state.shares > 0) {
-      const soldShares = Math.min(shares, state.shares)
-      const avgCost = state.costBasis / state.shares
-      const costOfSoldShares = avgCost * soldShares
-      const proceeds = convertAmountFromCurrency(tx.price * soldShares - tx.fee, tx.currency)
-
-      realizedGain += proceeds - costOfSoldShares
-      state.shares -= soldShares
-      state.costBasis -= costOfSoldShares
-    }
-
-    costBasisBySymbol.set(tx.symbol, state)
-  })
-
-  return realizedGain
-})
-
-const irr = computed(() => {
-  if (transactionsStore.list.length === 0 || holdingsStore.list.length === 0) return null
-  const cashflows = []
-
-  transactionsStore.list.forEach(tx => {
-    let amount
-    if (tx.transactionType === 'buy') {
-      amount = -(tx.price * tx.shares + tx.fee)
-    } else {
-      amount = tx.price * tx.shares - tx.fee
-    }
-    cashflows.push({ amount: convertAmountFromCurrency(amount, tx.currency), when: new Date(tx.date) })
-  })
-  
-  // Dividend cash inflow
-  dividends.value.forEach(d => {
-    cashflows.push({ amount: parseFloat(d.totalAmount), when: new Date(d.date) })
-  })
-  
-  // Current holdings treated as terminal cash inflow today
-  cashflows.push({ amount: holdingsStore.list.reduce((s, h) => s + h.currentValue, 0), when: new Date() })
-
-  try {
-    const rate = xirr(cashflows)
-    return (rate * 100).toFixed(2)
-  } catch (e) {
-    console.error('Error calculating XIRR:', e)
-    return 'N/A'
-  }
-})
-
-const rebalanceRows = computed(() => {
-  const tv = totalValue.value
-  if (!tv || (!holdingsStore.list.length && !allocation.value.length)) return []
-
-  const targetMap = new Map()
-  allocation.value.forEach(a => {
-    const pct = Number(a.target ?? a.target_percentage ?? a.percentage ?? 0)
-    targetMap.set(a.symbol, pct)
-  })
-  holdingsStore.list.forEach(h => {
-    if (!targetMap.has(h.symbol) && h.target) targetMap.set(h.symbol, Number(h.target))
-  })
-
-  const symbols = new Set([...holdingsStore.list.map(h => h.symbol), ...targetMap.keys()])
-  const out = []
-  symbols.forEach(sym => {
-    const h = holdingsStore.list.find(x => x.symbol === sym)
-    const currentVal = h?.currentValue ?? 0
-    const currentPct = tv ? (currentVal / tv) * 100 : 0
-    const targetPct = targetMap.get(sym) ?? 0
-    const deltaPct = targetPct - currentPct
-    if (Math.abs(deltaPct) < 0.05) return
-    const amount = Math.round(tv * (deltaPct / 100))
-    out.push({ symbol: sym, currentPct: Number(currentPct.toFixed(1)), targetPct: Number(targetPct.toFixed(1)), change: Number(deltaPct.toFixed(1)), amount })
-  })
-  out.sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-  return out.slice(0, 5)
-})
+const totalReturn = computed(() => totalReturnPct(holdingsStore.list))
+const realizedProfit = computed(() => calcRealizedProfit(transactionsStore.list, convertAmountFromCurrency))
+const irr = computed(() => holdingsStore.list.length
+  ? portfolioXirr(transactionsStore.list, dividends.value, totalValue.value, convertAmountFromCurrency)
+  : null)
 
 /* =========================
  *  Charts (options & helpers)
@@ -1030,15 +826,6 @@ const areaChartOptions = computed(() => {
   const gridColor = isDark.value ? '#374151' : '#eee'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
-  const yValues = chartSeries.value[0].data
-    .map(d => Number(d.y))
-    .filter(v => Number.isFinite(v))
-  const yMin = yValues.length ? Math.min(...yValues) : null
-  const yMax = yValues.length ? Math.max(...yValues) : null
-  const yRange = yMin !== null && yMax !== null ? yMax - yMin : 0
-  const yPadding = yMin !== null && yMax !== null
-    ? (yRange > 0 ? yRange * 0.08 : Math.max(Math.abs(yMax), 1) * 0.02)
-    : 0
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
     chartLocale,
@@ -1065,8 +852,7 @@ const areaChartOptions = computed(() => {
     },
     yAxis: {
       title: { text: null },
-      min: yMin !== null ? yMin - yPadding : undefined,
-      max: yMax !== null ? yMax + yPadding : undefined,
+      ...yAxisBounds(chartPoints.value.map(d => Number(d.y))),
       startOnTick: false,
       endOnTick: false,
       labels: {
@@ -1100,73 +886,23 @@ const areaChartOptions = computed(() => {
     series: [{
       type: 'area',
       name: t('totalPrice'),
-      data: chartSeries.value[0].data.map(d => [
-        d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime(),
-        d.y
-      ]),
+      data: chartPoints.value.map(d => [d.x.getTime(), d.y]),
       color: lineColor,
     }],
   }
 })
 
-function calculateGrowthRate() {
-  if (!chartSeries.value[0].data || chartSeries.value[0].data.length < 2) {
-    growthRate.value = null
-    change.value = 0
-    return null
-  }
-  const firstPrice = chartSeries.value[0].data[0].y
-  const lastPrice = chartSeries.value[0].data[chartSeries.value[0].data.length - 1].y
-  change.value = lastPrice - firstPrice
-  growthRate.value = Number((((lastPrice - firstPrice) / firstPrice) * 100).toFixed(2))
-}
-
-const rawChartPoints = ref([])
-
-function filterPointsByRange(points, period1Str, period2Str) {
-  const start = new Date(period1Str)
-  const end = new Date(period2Str)
-  end.setHours(23, 59, 59, 999)
-  return points.filter(p => p.x >= start && p.x <= end)
-}
-
-function applySelectedPeriod() {
-  if (!rawChartPoints.value.length) {
-    chartSeries.value = [{ name: t('totalPrice'), data: [] }]
-    growthRate.value = null
-    change.value = 0
-    startDate.value = ''
-    endDate.value = ''
-    return
-  }
-
-  const { period1, period2 } = getPeriodRange(selectedPeriod.value)
-  const rangeFiltered = filterPointsByRange(rawChartPoints.value, period1, period2)
-  const normalizedLineData = normalizeChartDataForPeriod(rangeFiltered, selectedPeriod.value)
-
-  chartSeries.value = [{ name: t('closePrice'), data: normalizedLineData }]
-  setChartWindowFromPoints(normalizedLineData)
-  calculateGrowthRate()
-}
-
 async function fetchChartData() {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id || holdingsStore.list.length === 0) {
     rawChartPoints.value = []
-    chartSeries.value = [{ name: t('totalPrice'), data: [] }]
-    growthRate.value = null
-    change.value = 0
-    startDate.value = ''
-    endDate.value = ''
     return
   }
 
   try {
-    // 不帶 period1/period2，後端會回傳「最早交易日 ~ 今天」的完整資料；切換時間區間時改為在前端切片，避免重打 API
     const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`)
     rawChartPoints.value = data
       .map(item => ({ x: new Date(item.date), y: item.close }))
       .sort((a, b) => a.x - b.x)
-    applySelectedPeriod()
   } catch (e) {
     console.error('Error fetching total value chart data:', e)
   }
@@ -1204,14 +940,6 @@ watch(() => transactionsStore.list, async () => {
   }
 
   await fetchChartData()
-})
-
-watch(selectedPeriod, (newVal, oldVal) => {
-  if (newVal !== oldVal) applySelectedPeriod()
-})
-
-watch(locale, () => {
-  applySelectedPeriod()
 })
 </script>
 
@@ -1410,8 +1138,3 @@ watch(locale, () => {
     top: auto;
     right: auto;
     bottom: 0;
-    width: 100%;
-    height: 1px;
-  }
-}
-</style>

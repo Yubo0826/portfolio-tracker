@@ -3,10 +3,6 @@
   <div>
       <ConfirmDialog></ConfirmDialog>
 
-      <div class="text-xl font-semibold mt-16">
-        {{ t('portfolios') }}
-      </div>
-
       <div class="flex justify-end mb-8 mt-4">
           <Button
             :label="$t('addPortfolio')"

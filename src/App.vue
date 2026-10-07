@@ -12,6 +12,7 @@
       persistent
       :currentPortfolioName="currentPortfolioName"
       :portfolioMenuItems="portfolioMenuItems"
+      :portfolioListItems="portfolioListItems"
       :menuItems="menuItems"
       :isDemoUser="auth.user?.uid === 'demo-user'"
       :userDisplayName="displayUserName"
@@ -33,8 +34,12 @@
         @login="auth.login"
       />
 
-      <div class="app-shell__scroll flex-1 overflow-y-auto">
-        <main class="app-shell__content mx-auto max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+      <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto max-w-[1680px]">
+        <main class="px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+          <div v-if="route.name !== 'not-found'" class="mb-6 flex items-center justify-between gap-4">
+            <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
+            <div id="page-title-aside" class="text-xs text-muted-color"></div>
+          </div>
           <RouterView />
         </main>
 
@@ -76,6 +81,7 @@
     v-model:visible="sidebarVisible"
     :currentPortfolioName="currentPortfolioName"
     :portfolioMenuItems="portfolioMenuItems"
+    :portfolioListItems="portfolioListItems"
     :menuItems="menuItems"
     :isDemoUser="auth.user?.uid === 'demo-user'"
     :userDisplayName="displayUserName"
@@ -104,6 +110,7 @@ import ImportDataDialog from './components/ImportDataDialog.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
+import { useWatchlistStore } from '@/stores/watchlist'
 import { showLoading, hideLoading, globalLoadingVisible } from "@/composables/loading.js"
 import * as toast from '@/composables/toast'
 import { buildSidebarSections } from './layouts/navigation.js'
@@ -119,11 +126,13 @@ const auth = useAuthStore()
 const transctionDialogVisible = ref(false)
 const holdingsStore = useHoldingsStore()
 const transactionsStore = useTransactionsStore()
+const watchlistStore = useWatchlistStore()
 const sidebarSections = computed(() => buildSidebarSections(t))
 
 
 // Currency settings
 import { useSettingsStore } from '@/stores/settings'
+import { useTheme } from '@/composables/useTheme'
 const settingsStore = useSettingsStore()
 
 // Fetch exchange rate on mount
@@ -137,6 +146,7 @@ watch(() => auth.user, async (newUser) => {
     await getPortfolios()
     await holdingsStore.fetchHoldings()
     await transactionsStore.fetchTransactions()
+    watchlistStore.fetchWatchlist() // 不阻塞載入畫面
     hideLoading()
   }
 })
@@ -181,6 +191,7 @@ const isNavItemActive = (item) => {
 const currentPageLabel = computed(() => {
   if (route.name === 'asset') return String(route.params.symbol || t('currentAsset'))
   if (route.name === 'user-settings') return t('userSettings')
+  if (route.name === 'user-guide') return t('userGuide')
 
   const activeItem = sidebarSections.value
     .flatMap((section) => section.items)
@@ -191,11 +202,14 @@ const currentPageLabel = computed(() => {
   return currentPortfolioName.value
 })
 
-const recentPortfolios = computed(() =>
-  recentPortfolioIds.value
+// 全部投資組合，最近使用的排前面
+const recentPortfolios = computed(() => {
+  const recent = recentPortfolioIds.value
     .map((id) => portfolioStore.portfolios.find((portfolio) => portfolio.id === id))
     .filter(Boolean)
-)
+  const others = portfolioStore.portfolios.filter((portfolio) => !recentPortfolioIds.value.includes(portfolio.id))
+  return [...recent, ...others]
+})
 
 const switchPortfolio = (portfolio) => {
   if (!portfolio || portfolio.id === portfolioStore.currentPortfolio?.id) return
@@ -294,9 +308,9 @@ const confirmDeletePortfolio = (portfolio = portfolioStore.currentPortfolio) => 
 }
 
 const buildPortfolioMenuItem = (portfolio) => ({
+  key: portfolio.id,
   label: portfolio.name,
-  kind: 'portfolio',
-  active: portfolio.id === portfolioStore.currentPortfolio?.id,
+  icon: portfolio.id === portfolioStore.currentPortfolio?.id ? 'pi pi-fw pi-check' : 'pi pi-fw',
   command: () => switchPortfolio(portfolio),
 })
 
@@ -306,37 +320,25 @@ const portfolioMenuItems = computed(() => {
     : [
         { label: t('duplicatePortfolio'), icon: 'pi pi-copy', command: () => duplicatePortfolio() },
         { label: t('updatePortfolio'), icon: 'pi pi-pencil', command: () => openEditPortfolioDialog() },
-        { label: t('delete'), icon: 'pi pi-trash', kind: 'danger', command: () => confirmDeletePortfolio() },
+        { label: t('delete'), icon: 'pi pi-trash', class: 'menu-item-danger', command: () => confirmDeletePortfolio() },
         { separator: true },
-        {
-          label: t('createNewPortfolio'),
-          icon: 'pi pi-plus',
-          items: [
-            { label: t('addPortfolio'), icon: 'pi pi-file-plus', command: openCreatePortfolioDialog },
-            { label: t('importPortfolioDialogTitle'), icon: 'pi pi-upload', command: () => openImportPortfolioDialog() },
-          ],
-        },
+        { label: t('createNewPortfolio'), icon: 'pi pi-plus', command: openCreatePortfolioDialog },
+        { separator: true },
       ]
 
-  const recentItems = recentPortfolios.value.length
-    ? [
-        { separator: true },
-        { label: t('recentlyUsed'), kind: 'section', disabled: true },
-        ...recentPortfolios.value.map(buildPortfolioMenuItem),
-      ]
-    : []
-
-  const openItems = [
-    { separator: true },
+  return [
     {
-      label: t('importPortfolio'),
-      icon: 'pi pi-upload',
-      command: openImportPortfolioDialog
+      label: t('managePortfolio'),
+      icon: 'pi pi-cog',
+      items: [
+        ...currentActions,
+        { label: t('importPortfolio'), icon: 'pi pi-upload', command: openImportPortfolioDialog },
+      ],
     },
   ]
-
-  return [...currentActions, ...recentItems, ...openItems]
 })
+
+const portfolioListItems = computed(() => recentPortfolios.value.map(buildPortfolioMenuItem))
 
 async function getPortfolios() {
   try {
@@ -376,7 +378,8 @@ const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'reb
 const sidebarVisible = ref(false)
 
 onMounted(() => {
-  const savedLocale = localStorage.getItem('locale')
+  // 舊版 header 曾存 'zh-TW'，但 i18n messages 只有 'zh'
+  const savedLocale = localStorage.getItem('locale')?.replace('zh-TW', 'zh')
   if (savedLocale && savedLocale !== locale.value) {
     locale.value = savedLocale
   }
@@ -415,13 +418,36 @@ const tradeActionItems = computed(() => [
   },
 ])
 
+const { theme, setTheme } = useTheme()
+const setLanguage = (code) => {
+  locale.value = code
+  localStorage.setItem('locale', code)
+}
+// 子選單項目：目前選中的打勾，其餘用 pi-fw 佔位讓文字對齊
+const choice = (label, selected, command) => ({ label, icon: selected ? 'pi pi-check' : 'pi pi-fw', command })
+
 const menuItems = computed(() => {
   const list = [
     { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
+    { separator: true },
+    { label: t('language'), icon: 'pi pi-language', items: [
+      choice('繁體中文', locale.value === 'zh', () => setLanguage('zh')),
+      choice('English', locale.value === 'en', () => setLanguage('en')),
+    ] },
+    { label: t('currency.label'), icon: 'pi pi-dollar', items: ['USD ($)', 'TWD (NT$)'].map((label) => {
+      const code = label.slice(0, 3)
+      return choice(label, settingsStore.displayCurrency === code, () => settingsStore.setDisplayCurrency(code))
+    }) },
+    { label: t('appearance'), icon: 'pi pi-palette', items: [
+      choice(t('lightMode'), theme.value === 'light', () => setTheme('light')),
+      choice(t('darkMode'), theme.value === 'dark', () => setTheme('dark')),
+      choice(t('systemMode'), theme.value === 'system', () => setTheme('system')),
+    ] },
   ]
   if (auth.user.uid !== 'demo-user') {
+    list.unshift({ label: t('userSettings'), icon: 'pi pi-cog', command: () => router.push('/user-settings') })
     list.push({ separator: true })
-    list.push({ label: t('logout'), icon: 'pi pi-sign-out', kind: 'danger', command: async () => {
+    list.push({ label: t('logout'), icon: 'pi pi-sign-out', class: 'menu-item-danger', command: async () => {
       await auth.logout()
       if (route.meta.requiresAuth) router.replace({ name: 'home' })
     } })
@@ -540,6 +566,12 @@ const menuItems = computed(() => {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
+/* 深色：主內容區與底色一致，卡片 (#1d1e1e) 浮在 #0d0d0d 上 */
+.dark .app-shell__content {
+  background-color: var(--p-surface-background);
+  box-shadow: none;
+}
+
 @media (min-width: 1024px) {
   .app-shell__main {
     padding-left: var(--sidebar-width, 260px);
@@ -548,7 +580,7 @@ const menuItems = computed(() => {
 }
 
 .app-shell__content {
-  min-height: calc(100vh - 5rem);
+  min-height: 0;
   margin: 16px 16px 16px 0;
   border-radius: 16px;
 }

@@ -40,7 +40,6 @@
               <span class="menu-item-left">
                 <i class="pi pi-briefcase"></i>
                 <span v-show="!collapsed" class="sidebar-portfolio__text">
-                  <span class="sidebar-portfolio__label">{{ t('portfolio') }}</span>
                   <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
                 </span>
               </span>
@@ -51,41 +50,23 @@
               ref="portfolioMenu"
               :model="portfolioMenuItems"
               :popup="true"
-              class="portfolio-tiered-menu"
-              @show="onPortfolioMenuShow"
-              @hide="onPortfolioMenuHide"
+              @show="portfolioMenuVisible = true"
+              @hide="portfolioMenuVisible = false"
             >
+              <!-- 清單獨立捲動：放進 model 的話，根列表的 overflow 會把子選單裁掉 -->
               <template #start>
-                <div class="portfolio-menu-current">
-                  <span class="portfolio-menu-current__label">{{ currentPortfolioName }}</span>
-                  <i class="pi pi-chevron-up text-xs"></i>
-                </div>
-              </template>
-
-              <template #item="{ item, props: itemProps }">
-                <div v-if="item.kind === 'section'" class="portfolio-menu-section">
-                  {{ item.label }}
-                </div>
-
-                <a
-                  v-else
-                  v-ripple
-                  class="portfolio-menu-item"
-                  :class="{
-                    'is-active': item.kind === 'portfolio' && item.active,
-                    'is-danger': item.kind === 'danger'
-                  }"
-                  v-bind="itemProps.action"
-                >
-                  <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
-                  <span class="portfolio-menu-item__label">{{ item.label }}</span>
-                  <span v-if="item.items" class="portfolio-menu-item__suffix">
-                    <span v-if="item.suffix">{{ item.suffix }}</span>
-                    <i class="pi pi-chevron-right text-xs"></i>
-                  </span>
-                  <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
-                  <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
-                </a>
+                <div class="p-menu-submenu-label">{{ t('selectPortfolio') }}</div>
+                <ul class="portfolio-menu-list" role="menu">
+                  <li v-for="item in portfolioListItems" :key="item.key" class="p-tieredmenu-item" role="none">
+                    <div class="p-tieredmenu-item-content" @click="selectPortfolioItem(item)">
+                      <a href="#" class="p-tieredmenu-item-link" role="menuitem" @click.prevent>
+                        <span :class="['p-tieredmenu-item-icon', item.icon]"></span>
+                        <span class="p-tieredmenu-item-label">{{ item.label }}</span>
+                      </a>
+                    </div>
+                  </li>
+                </ul>
+                <div class="p-tieredmenu-separator" role="separator"></div>
               </template>
             </TieredMenu>
 
@@ -180,38 +161,9 @@
             ref="userMenu"
             :model="menuItems"
             :popup="true"
-            class="portfolio-tiered-menu"
-            @show="onUserMenuShow"
-            @hide="onUserMenuHide"
-          >
-            <template #start>
-              <div class="portfolio-menu-current">
-                <span class="portfolio-menu-current__label">{{ userDisplayName }}</span>
-                <i class="pi pi-chevron-up text-xs"></i>
-              </div>
-            </template>
-
-            <template #item="{ item, props: itemProps }">
-              <a
-                v-ripple
-                class="portfolio-menu-item"
-                :class="{
-                  'is-active': item.active,
-                  'is-danger': item.kind === 'danger'
-                }"
-                v-bind="itemProps.action"
-              >
-                <i v-if="item.icon" :class="[item.icon, 'text-sm']"></i>
-                <span class="portfolio-menu-item__label">{{ item.label }}</span>
-                <span v-if="item.items" class="portfolio-menu-item__suffix">
-                  <span v-if="item.suffix">{{ item.suffix }}</span>
-                  <i class="pi pi-chevron-right text-xs"></i>
-                </span>
-                <span v-else-if="item.suffix" class="portfolio-menu-item__suffix">{{ item.suffix }}</span>
-                <i v-if="item.active && !item.items" class="pi pi-check ml-auto text-xs"></i>
-              </a>
-            </template>
-          </TieredMenu>
+            @show="userMenuVisible = true"
+            @hide="userMenuVisible = false"
+          />
         </div>
       </aside>
     </template>
@@ -219,7 +171,7 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, onBeforeUnmount } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Drawer from 'primevue/drawer'
@@ -248,6 +200,10 @@ const props = defineProps({
   portfolioMenuItems: {
     type: Array,
     required: true,
+  },
+  portfolioListItems: {
+    type: Array,
+    default: () => [],
   },
   menuItems: {
     type: Array,
@@ -285,6 +241,11 @@ const wrapperProps = computed(() => props.persistent
 
 const portfolioMenu = ref()
 const portfolioMenuVisible = ref(false)
+
+const selectPortfolioItem = (item) => {
+  item.command()
+  portfolioMenu.value?.hide()
+}
 const userMenu = ref()
 const userMenuVisible = ref(false)
 const sidebarSections = computed(() => buildSidebarSections(t))
@@ -317,83 +278,6 @@ const onGroupTriggerClick = (item) => {
   }
   toggleGroup(item)
 }
-
-let menuPositionCleanup = null
-
-const clearMenuPositionLock = () => {
-  menuPositionCleanup?.()
-  menuPositionCleanup = null
-}
-
-const lockPopupMenuPosition = (menuRef) => {
-  clearMenuPositionLock()
-
-  nextTick(() => {
-    const menu = menuRef.value
-    if (!menu?.container || !menu?.target) return
-
-    const reposition = () => {
-      if (!menu.visible || !menu.container || !menu.target) return
-
-      const target = menu.target.getBoundingClientRect()
-      const container = menu.container
-      const gap = 4
-      const containerHeight = container.offsetHeight
-      const containerWidth = container.offsetWidth
-      const viewportHeight = window.innerHeight
-      const viewportWidth = window.innerWidth
-
-      let top = target.bottom + gap
-      if (top + containerHeight > viewportHeight && target.top - containerHeight - gap > 0) {
-        top = target.top - containerHeight - gap
-      }
-
-      let left = target.left
-      if (left + containerWidth > viewportWidth) {
-        left = Math.max(gap, viewportWidth - containerWidth - gap)
-      }
-
-      container.style.position = 'fixed'
-      container.style.top = `${top}px`
-      container.style.left = `${left}px`
-    }
-
-    reposition()
-
-    const sidebarScroll = menu.target.closest('.sidebar-top')
-    const onScroll = () => reposition()
-
-    window.addEventListener('scroll', onScroll, true)
-    sidebarScroll?.addEventListener('scroll', onScroll, { passive: true })
-
-    menuPositionCleanup = () => {
-      window.removeEventListener('scroll', onScroll, true)
-      sidebarScroll?.removeEventListener('scroll', onScroll)
-    }
-  })
-}
-
-const onPortfolioMenuShow = () => {
-  portfolioMenuVisible.value = true
-  lockPopupMenuPosition(portfolioMenu)
-}
-
-const onPortfolioMenuHide = () => {
-  portfolioMenuVisible.value = false
-  clearMenuPositionLock()
-}
-
-const onUserMenuShow = () => {
-  userMenuVisible.value = true
-  lockPopupMenuPosition(userMenu)
-}
-
-const onUserMenuHide = () => {
-  userMenuVisible.value = false
-  clearMenuPositionLock()
-}
-
-onBeforeUnmount(clearMenuPositionLock)
 
 const closeDrawer = () => {
   if (!props.persistent) emit('update:visible', false)
@@ -428,6 +312,11 @@ const goDashboard = () => {
   justify-content: space-between;
   overflow: hidden;
   transition: width 0.18s ease;
+}
+
+.dark .sidebar {
+  --sidebar-bg: var(--p-content-background);
+  --sidebar-active-bg: #3a3a3a;
 }
 
 .sidebar--drawer {
@@ -527,10 +416,26 @@ const goDashboard = () => {
 
 .sidebar-portfolio__trigger {
   width: 100%;
-  border: none;
-  background: none;
+  border: 1px solid var(--p-content-border-color);
+  background: var(--p-content-background);
   cursor: pointer;
   text-align: left;
+}
+
+/* 與 Header 搜尋欄同款 pill 外框；需壓過後面 .menu-item 的 6px 圓角 */
+.menu-item.sidebar-portfolio__trigger {
+  border-radius: 999px;
+}
+
+.portfolio-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-tieredmenu-list-gap);
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--p-tieredmenu-list-padding);
+  list-style: none;
 }
 
 .sidebar-portfolio__text {
@@ -538,14 +443,6 @@ const goDashboard = () => {
   flex-direction: column;
   align-items: flex-start;
   min-width: 0;
-}
-
-.sidebar-portfolio__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--sidebar-text-muted);
 }
 
 .sidebar-demo-notice {
@@ -578,17 +475,6 @@ const goDashboard = () => {
   text-decoration: none;
   font-size: 14px;
   transition: background-color 0.16s ease;
-}
-
-.menu-item.active::before {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  border-radius: 3px;
-  background-color: var(--p-primary-color);
 }
 
 .menu-item-left {
@@ -681,17 +567,6 @@ const goDashboard = () => {
   cursor: pointer;
   font-family: inherit;
   transition: background-color 0.16s ease, color 0.16s ease;
-}
-
-.menu-subitem.active::before {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  border-radius: 3px;
-  background-color: var(--p-primary-color);
 }
 
 .menu-subitem:hover,
@@ -833,112 +708,16 @@ const goDashboard = () => {
   transform: rotate(180deg);
 }
 
-.portfolio-tiered-menu.p-tieredmenu,
-.portfolio-tiered-menu .p-tieredmenu-submenu {
-  min-width: 17rem;
-  padding: 0.375rem;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 1rem;
-  background: var(--p-surface-card);
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.12);
-}
-
-.portfolio-tiered-menu.p-tieredmenu {
-  position: fixed;
-}
-
-.portfolio-tiered-menu .p-tieredmenu-root-list,
-.portfolio-tiered-menu .p-tieredmenu-submenu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.portfolio-tiered-menu .p-tieredmenu-item-content {
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  color: inherit;
-}
-
-.portfolio-tiered-menu .p-tieredmenu-item-link {
-  background: transparent;
-  border-radius: 0;
-  color: inherit;
-}
-
-.portfolio-tiered-menu .p-tieredmenu-item-content:hover,
-.portfolio-tiered-menu .p-tieredmenu-item-content.p-focus,
-.portfolio-tiered-menu .p-tieredmenu-item.p-focus > .p-tieredmenu-item-content,
-.portfolio-tiered-menu .p-tieredmenu-item-link:hover,
-.portfolio-tiered-menu .p-tieredmenu-item-link.p-focus {
-  background: transparent;
-  color: inherit;
-}
-
-.portfolio-tiered-menu .p-tieredmenu-separator {
-  margin: 0.375rem 0.5rem;
-  border-top: 1px solid var(--p-content-border-color);
-}
-
-.portfolio-menu-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.875rem 0.875rem 0.625rem;
-  color: var(--p-text-color);
-}
-
 .portfolio-menu-current__label {
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.portfolio-menu-section {
-  padding: 0.5rem 0.875rem 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--p-text-muted-color);
-}
-
-.portfolio-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem 0.875rem;
-  border-radius: 0.7rem;
-  color: var(--p-text-color);
-  transition: background-color 0.14s ease, color 0.14s ease;
-}
-
-.portfolio-menu-item:hover {
-  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
-}
-
-.portfolio-menu-item.is-active {
-  background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
-  color: var(--p-primary-color);
-}
-
-.portfolio-menu-item.is-danger {
+.p-menu-item.menu-item-danger .p-menu-item-label,
+.p-menu-item.menu-item-danger .p-menu-item-icon,
+.p-tieredmenu-item.menu-item-danger .p-tieredmenu-item-label,
+.p-tieredmenu-item.menu-item-danger .p-tieredmenu-item-icon {
   color: var(--p-red-500);
 }
-
-.portfolio-menu-item__label {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.portfolio-menu-item__suffix {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-left: auto;
-  color: var(--p-text-muted-color);
-}
-
 </style>

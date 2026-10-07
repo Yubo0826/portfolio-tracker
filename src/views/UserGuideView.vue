@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col lg:flex-row gap-8 py-6">
+  <div class="flex flex-col lg:flex-row gap-8">
     <!-- Sidebar Navigation (Desktop) -->
     <aside class="hidden lg:block w-64 shrink-0">
       <div class="sticky top-24 p-4 bg-[var(--p-surface-card)] rounded-xl border border-[var(--p-content-border-color)] shadow-sm">
@@ -38,7 +38,6 @@
     <!-- Main Content -->
     <main class="flex-1 min-w-0">
       <div class="prose max-w-none dark:prose-invert">
-        <h1 class="text-3xl font-bold mb-8">{{ $t('userGuideTitle') }}</h1>
         
         <section id="dashboard" class="scroll-mt-24 mb-12">
           <h2 class="text-2xl font-bold mb-4 border-b pb-2">1. {{ $t('dashboard') }}</h2>

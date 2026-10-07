@@ -94,7 +94,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       price: parseFloat(String(item.price)) || 0,
       currency: item.currency || 'USD',
       fee: parseFloat(String(item.fee)) || 0,
-      shares: parseInt(String(item.shares)) || 0,
+      shares: parseFloat(String(item.shares)) || 0,
       transactionType: item.transaction_type,
       date: item.transaction_date?.split('T')[0] || item.date || '',
       accountId: item.cash_account_id || null,

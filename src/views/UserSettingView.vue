@@ -1,12 +1,6 @@
 <template>
-  <div class="max-w-md mx-auto mt-10">
+  <div class="max-w-md mx-auto">
     <Card class="p-6 shadow-lg rounded-2xl">
-      <template #title>
-        <h2 class="text-xl font-semibold text-muted-color">
-          使用者設定
-        </h2>
-      </template>
-
       <template #content>
         <div class="flex flex-col gap-6">
           <!-- 偏移值設定 -->

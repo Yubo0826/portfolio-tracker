@@ -14,35 +14,18 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
-    },
-    {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue'),
-    },
-    {
-      path: '/transactions',
-      name: 'transactions',
-      component: () => import('../views/TransactionsView.vue'),
-    },
-    {
-      path: '/holdings',
-      name: 'holdings',
-      component: () => import('../views/HoldingsView.vue'),
     },
     {
       path: '/portfolios',
       name: 'portfolios',
       component: () => import('../views/PortfolioListView.vue'),
     },
-    // 預設導到 holdings（可選，但建議）
-    { path: '/portfolio', redirect: '/portfolio/holdings', component: () => import('../views/PortfolioView.vue') },
+    { path: '/portfolio', redirect: '/portfolio/holdings' },
+    // 舊網址導到 PortfolioView 的對應分頁，保留書籤可用
+    { path: '/:tab(holdings|transactions|dividends)', redirect: (to) => `/portfolio/${to.params.tab}` },
 
     // 用路由參數承載分頁值，只允許三種
     {
@@ -64,11 +47,6 @@ const router = createRouter({
       path: '/backtesting',
       name: 'backtesting',
       component: () => import('../views/BacktestingView.vue'),
-    },
-    {
-      path: '/dividends',
-      name: 'dividends',
-      component: () => import('../views/DividendsView.vue'),
     },
     {
       path: '/cash-flow',

@@ -1,9 +1,9 @@
 <template>
-  <div class="container mx-auto px-4 py-6">
+  <div>
     <!-- 頁面標題 -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold">{{ $t('cashFlow.allCashFlows') }}</h1>
+        <h2 class="text-lg font-semibold">{{ $t('cashFlow.allCashFlows') }}</h2>
         <p class="text-sm text-surface-600 mt-1">{{ $t('cashFlow.allCashFlowsDesc') }}</p>
       </div>
       <Button 

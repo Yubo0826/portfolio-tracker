@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="pl-4 pr-4 mt-4">
+    <div>
       <div class="flex items-center">
-        <h1 class="text-2xl">{{ info.fullName }}</h1>
+        <p class="text-muted-color">{{ info.fullName }}</p>
       </div>
       <div class="chart-container">
         <div class="grid grid-cols-3 gap-8">
@@ -407,6 +407,7 @@ import Skeleton from 'primevue/skeleton'
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
 import StockIcon from '@/components/StockIcon.vue'
 import api from '@/utils/api'
+import { percentChange, periodRange, filterByPeriod, toIsoDate, yAxisBounds } from '@/utils/portfolioMetrics'
 import { useRoute, useRouter } from 'vue-router'
 import { useCurrency } from '@/composables/useCurrency'
 import { useTheme } from '@/composables/useTheme.js'
@@ -517,9 +518,6 @@ const companyInfo = reactive({
   longBusinessSummary: '',
 })
 
-const startDate = ref('')
-const endDate = ref('')
-
 const chartTypeOptions = computed(() => [
   { label: t('areaChart'), value: 'area', icon: 'pi pi-chart-line' },
   { label: t('klineChart'), value: 'candlestick', icon: 'pi pi-chart-bar' },
@@ -549,45 +547,21 @@ const rangeOptions = computed(() => ([
   { label: t('period5y'), value: '5y' },
 ]))
 
-function filterQuotesByRange(quotes, range) {
-  const { period1, period2 } = getPeriodRange(range)
-  const start = new Date(period1)
-  const end = new Date(period2)
-  end.setHours(23, 59, 59, 999)
-
-  return quotes.filter(item => {
-    const pointDate = new Date(item?.date)
-    return !Number.isNaN(pointDate.getTime()) && pointDate >= start && pointDate <= end
-  })
+function quotesForRange(range) {
+  return range === '1d' ? rawIntradayQuotes.value : filterByPeriod(rawQuotes.value, range, item => item?.date)
 }
 
-const currentRangeQuotes = computed(() => {
-  if (currentRange.value === '1d') return rawIntradayQuotes.value
-  return filterQuotesByRange(rawQuotes.value, currentRange.value)
-})
+const currentRangeQuotes = computed(() => quotesForRange(currentRange.value))
 
 const chartSeries = computed(() => [{ name: t('closePrice'), data: toLineSeriesFromQuotes(currentRangeQuotes.value) }])
 const candleSeries = computed(() => [{ name: t('klineChart'), data: toCandleSeriesFromQuotes(currentRangeQuotes.value) }])
 
-function computeRangeGrowth(range) {
-  const source = range === '1d' ? rawIntradayQuotes.value : filterQuotesByRange(rawQuotes.value, range)
-  const list = toLineSeriesFromQuotes(source)
-  if (list.length < 2 || !list[0].y) return null
-
-  return Number((((list[list.length - 1].y - list[0].y) / list[0].y) * 100).toFixed(2))
-}
-
 const rangeOptionsWithGrowth = computed(() => rangeOptions.value.map(option => ({
   ...option,
-  growth: computeRangeGrowth(option.value),
+  growth: percentChange(toLineSeriesFromQuotes(quotesForRange(option.value))),
 })))
 
-const growthRateNumber = computed(() => {
-  const list = chartSeries.value[0].data
-  if (!list || list.length < 2 || !list[0].y) return null
-
-  return Number((((list[list.length - 1].y - list[0].y) / list[0].y) * 100).toFixed(2))
-})
+const growthRateNumber = computed(() => percentChange(chartSeries.value[0].data))
 
 const change = computed(() => {
   const list = chartSeries.value[0].data
@@ -817,65 +791,6 @@ function formatSignedNumber(value, digits = 2) {
   return `${sign}${Math.abs(n).toFixed(digits)}`
 }
 
-function formatDate(date) {
-  return date.toISOString().split('T')[0]
-}
-
-function formatStrDate(dateStr, lang = 'en-US') {
-  const date = new Date(dateStr)
-
-  if (lang.startsWith('en')) {
-    return new Intl.DateTimeFormat(lang, {
-      month: 'short',
-      day: 'numeric',
-      year: '2-digit',
-    }).format(date)
-  }
-
-  if (lang.startsWith('zh')) {
-    const formatted = new Intl.DateTimeFormat(lang, {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-    }).format(date)
-    const [year, month, day] = formatted.match(/\d+/g)
-    return `${month}月${day}日, ${year}年`
-  }
-
-  return dateStr
-}
-
-function getPeriodRange(range) {
-  const today = new Date()
-  const end = formatDate(today)
-  const daysMap = {
-    '7d': 7,
-    '1mo': 30,
-    '3mo': 90,
-    '6mo': 180,
-    '1y': 365,
-    '2y': 730,
-    '5y': 1825,
-  }
-
-  if (range === 'ytd') {
-    const start = new Date(today.getFullYear(), 0, 1)
-    return {
-      period1: formatDate(start),
-      period2: end,
-    }
-  }
-
-  const days = daysMap[range] || 30
-  const start = new Date()
-  start.setDate(start.getDate() - days)
-
-  return {
-    period1: formatDate(start),
-    period2: end,
-  }
-}
-
 function getIntradayPeriodRange() {
   // 往前抓 5 天緩衝，避免今天遇到假日/週末時 Yahoo 回傳空資料；實際顯示範圍由 extractLatestSessionQuotes 收斂到最近一個交易日
   const today = new Date()
@@ -885,8 +800,8 @@ function getIntradayPeriodRange() {
   start.setDate(start.getDate() - 5)
 
   return {
-    period1: formatDate(start),
-    period2: formatDate(tomorrow),
+    period1: toIsoDate(start),
+    period2: toIsoDate(tomorrow),
   }
 }
 
@@ -1173,17 +1088,6 @@ const highAreaOptions = computed(() => {
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
 
-  const yValues = areaSeries.value
-    .flatMap(series => series.data.map(point => Number(point[1])))
-    .filter(v => Number.isFinite(v))
-
-  const yMin = yValues.length ? Math.min(...yValues) : null
-  const yMax = yValues.length ? Math.max(...yValues) : null
-  const yRange = yMin !== null && yMax !== null ? yMax - yMin : 0
-  const yPadding = yMin !== null && yMax !== null
-    ? (yRange > 0 ? yRange * 0.08 : Math.max(Math.abs(yMax), 1) * 0.02)
-    : 0
-
   const isIntradayView = currentRange.value === '1d'
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
@@ -1216,8 +1120,7 @@ const highAreaOptions = computed(() => {
     },
     yAxis: {
       title: { text: t('closePrice'), style: { color: axisColor } },
-      min: yMin !== null ? yMin - yPadding : undefined,
-      max: yMax !== null ? yMax + yPadding : undefined,
+      ...yAxisBounds(areaSeries.value.flatMap(series => series.data.map(point => Number(point[1])))),
       startOnTick: false,
       endOnTick: false,
       labels: {
@@ -1332,7 +1235,7 @@ const sectorTreemapOptions = computed(() => {
   const labelColor = '#ffffff'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
-  const borderColor = isDark.value ? '#0f172a' : '#ffffff'
+  const borderColor = isDark.value ? '#1d1e1e' : '#ffffff'
 
   return {
     chart: { type: 'treemap', backgroundColor: 'transparent', animation: { duration: 400 } },
@@ -1406,7 +1309,7 @@ const topHoldingsTreemapOptions = computed(() => {
   const labelColor = '#ffffff'
   const tooltipBg = isDark.value ? '#1f2937' : '#fff'
   const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
-  const borderColor = isDark.value ? '#0f172a' : '#ffffff'
+  const borderColor = isDark.value ? '#1d1e1e' : '#ffffff'
 
   return {
     chart: { type: 'treemap', backgroundColor: 'transparent', animation: { duration: 400 } },
@@ -1519,14 +1422,14 @@ function syncComparisonData() {
     return
   }
 
-  const { period1, period2 } = getPeriodRange(currentRange.value)
+  const { period1, period2 } = periodRange(currentRange.value)
   fetchComparisonData(period1, period2)
 }
 
 async function fetchChartData(targetSymbol) {
   const requestId = ++mainRequestId
   // 一次抓取最大區間（5年）的原始資料，各時間範圍按鈕改為在前端切片計算，避免每次切換都重打 API
-  const { period1, period2 } = getPeriodRange('5y')
+  const { period1, period2 } = periodRange('5y')
   const activeSymbol = String(targetSymbol || symbol.value || '').toUpperCase()
 
   try {
@@ -1677,13 +1580,6 @@ watch([currentRange, chartType], () => {
 watch(compareSymbols, () => {
   syncComparisonData()
 }, { deep: true })
-
-watch(locale, () => {
-  const { period1, period2 } = getPeriodRange(currentRange.value)
-  const localeCode = locale.value || 'en-US'
-  startDate.value = formatStrDate(period1, localeCode)
-  endDate.value = formatStrDate(period2, localeCode)
-})
 </script>
 
 <style scoped>

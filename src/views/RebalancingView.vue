@@ -1,8 +1,6 @@
 <template>
-  <Card class="mt-4 p-6 min-h-90">
+  <Card class="p-6 min-h-90">
     <template #content>
-    <h2 class="text-xl font-semibold mb-8">{{ $t('rebalanceTitle') }}</h2>
-
     <!-- 存入 / 提取 + 金額輸入 -->
     <div class="flex justify-center items-center mb-8 gap-4">
       <SelectButton v-model="cashAction" :options="cashActionOptions" optionLabel="name" optionValue="code" />
@@ -51,18 +49,18 @@
         <template #body="slotProps">
           <div class="flex justify-end">
             <Button
-              :aria-label="$t('buy')"
               v-if="slotProps.data.action === 'BUY' && !slotProps.data.executed"
               icon="pi pi-plus"
+              :aria-label="$t('buy')"
               class="p-button-rounded p-button-text"
               severity="success"
               v-tooltip.bottom="$t('buy')"
               @click="addTransaction(slotProps.data, slotProps.index)"
             />
             <Button
-              :aria-label="$t('sell')"
               v-else-if="slotProps.data.action === 'SELL' && !slotProps.data.executed"
               icon="pi pi-minus"
+              :aria-label="$t('sell')"
               class="p-button-rounded p-button-text"
               severity="danger"
               v-tooltip.bottom="$t('sell')"
@@ -163,7 +161,7 @@ const getHoldings = async () => {
       assetType: item.asset_type,
       currentPrice: parseFloat(item.current_price) || 0,
       avgCost: parseFloat(item.avg_cost) || 0,
-      shares: parseInt(item.total_shares) || 0,
+      shares: parseFloat(item.total_shares) || 0,
       lastUpdated: item.last_updated.split('T')[0]
     }));
   } catch (error) {
