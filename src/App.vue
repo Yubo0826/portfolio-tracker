@@ -34,8 +34,8 @@
         @login="auth.login"
       />
 
-      <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto max-w-[1680px]">
-        <main class="px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+      <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto">
+        <main class="max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
           <div v-if="route.name !== 'not-found'" class="mb-6 flex items-center justify-between gap-4">
             <div class="flex items-center gap-1">
               <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
@@ -46,7 +46,7 @@
           <RouterView />
         </main>
 
-        <div class="px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
+        <div class="max-w-[1680px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
           <Footer />
         </div>
       </div>
