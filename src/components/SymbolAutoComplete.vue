@@ -1,7 +1,7 @@
 <template>
     <AutoComplete
         :modelValue="modelValue"
-        @update:modelValue="(val) => emit('update:modelValue', val)"
+        @update:modelValue="(val) => emit('update:modelValue', val?.symbol ?? val)"
         optionLabel="symbol"
         :suggestions="filteredSymbols"
         @complete="debouncedSearch"
@@ -59,6 +59,7 @@ const search = async (event) => {
 const debouncedSearch = debounce(search, 50);
 
 // forceSelection 在 blur 時若文字剛好等於選項 label 會再觸發一次 item-select（modelValue 是字串、選項是物件，PrimeVue 判斷不出已選），這裡擋掉重複
+// 重複那次 PrimeVue 會先送出整個選項物件給 update:modelValue，上方 template 已轉回 symbol 字串，否則 v-model 會變成物件
 let lastSelected = null;
 const onItemSelect = (event) => {
     if (event.value.symbol === lastSelected && props.modelValue === lastSelected) return;

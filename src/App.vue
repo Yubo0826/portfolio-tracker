@@ -272,6 +272,7 @@ const duplicatePortfolio = async (portfolio = portfolioStore.currentPortfolio) =
       description: portfolio.description || '',
       drift_threshold: portfolio.drift_threshold ?? 5,
       enable_email_alert: portfolio.enable_email_alert ?? true,
+      source_id: portfolio.id,
     })
 
     const duplicatedPortfolio = portfolioStore.portfolios[portfolioStore.portfolios.length - 1]

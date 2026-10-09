@@ -16,6 +16,7 @@ interface NewPortfolio {
   description?: string
   drift_threshold?: number
   enable_email_alert?: boolean
+  source_id?: string // 製作副本：後端一併複製來源組合的交易、持股、目標配置與股息
 }
 
 interface UpdatePortfolio {
@@ -79,7 +80,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   
   // 之後後端or前端可能要卡重複名稱
   async function addPortfolio(newPortfolio: NewPortfolio): Promise<Portfolio | null> {
-    const { name, description, drift_threshold, enable_email_alert } = newPortfolio
+    const { name, description, drift_threshold, enable_email_alert, source_id } = newPortfolio
     if (!name) {
       throw new Error('Name are required to add a portfolio')
     }
@@ -89,7 +90,8 @@ export const usePortfolioStore = defineStore('portfolio', () => {
         name,
         description,
         drift_threshold,
-        enable_email_alert
+        enable_email_alert,
+        source_id
       })
       portfolios.value.push(data.portfolio)
       return data.portfolio

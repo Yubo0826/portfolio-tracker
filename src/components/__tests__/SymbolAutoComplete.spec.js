@@ -30,4 +30,10 @@ describe('SymbolAutoComplete', () => {
     ac.vm.$emit('item-select', { value })
     expect(w.emitted('update')).toHaveLength(1)
   })
+
+  it('PrimeVue 送出選項物件時，v-model 仍只收到 symbol 字串', () => {
+    const w = mountIt()
+    w.findComponent(AutoComplete).vm.$emit('update:modelValue', { symbol: 'AAPL', name: 'Apple' })
+    expect(w.emitted('update:modelValue').at(-1)).toEqual(['AAPL'])
+  })
 })
