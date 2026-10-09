@@ -4,7 +4,6 @@ import { useTransactionsStore } from '../transactions'
 import { useAuthStore } from '../auth'
 import { usePortfolioStore } from '../portfolio'
 import { useHoldingsStore } from '../holdings'
-import { useCashFlowStore } from '../cashflow'
 import api from '@/utils/api'
 import { mockUser, mockPortfolio } from '@/utils/test-helpers'
 
@@ -335,7 +334,6 @@ describe('Transactions Store', () => {
       expect(api.post).toHaveBeenCalledWith('/api/transactions', {
         uid: 'demo-user',
         portfolio_id: 1,
-        cash_account_id: null,
         symbol: 'AAPL',
         name: 'Apple Inc.',
         asset_type: 'stock',
@@ -440,31 +438,6 @@ describe('Transactions Store', () => {
       }))
     })
 
-    it('應該在有 accountId 時更新現金帳戶', async () => {
-      const store = useTransactionsStore()
-      const cashFlowStore = useCashFlowStore()
-      
-      vi.spyOn(cashFlowStore, 'fetchCashAccounts').mockResolvedValue()
-      vi.mocked(api.post).mockResolvedValue({ transactions: [] })
-
-      const form = {
-        symbol: 'AAPL',
-        name: 'Apple Inc.',
-        assetType: 'stock',
-        shares: 100,
-        fee: 10,
-        price: 150,
-        currency: 'USD',
-        operation: 'buy',
-        date: '2025-01-15',
-        accountId: 'acc-1'
-      }
-
-      await store.saveTransaction({ form })
-
-      expect(cashFlowStore.fetchCashAccounts).toHaveBeenCalled()
-    })
-
     it('沒有 uid 時應該拋出錯誤', async () => {
       const authStore = useAuthStore()
       authStore.user = null
@@ -565,33 +538,6 @@ describe('Transactions Store', () => {
       expect(store.list).toHaveLength(2)
       expect(holdingsStore.refreshPrices).toHaveBeenCalled()
       expect(holdingsStore.fetchHoldings).toHaveBeenCalled()
-    })
-
-    it('當有 accountId 時應該更新現金帳戶', async () => {
-      const store = useTransactionsStore()
-      const cashFlowStore = useCashFlowStore()
-      
-      vi.spyOn(cashFlowStore, 'fetchCashAccounts').mockResolvedValue()
-      vi.mocked(api.post).mockResolvedValue({ transactions: [] })
-
-      const transactions = [
-        {
-          symbol: 'AAPL',
-          name: 'Apple',
-          assetType: 'stock',
-          shares: 100,
-          fee: 10,
-          price: 150,
-          currency: 'USD',
-          transactionType: 'buy',
-          date: '2025-01-15',
-          accountId: 'acc-1'
-        }
-      ]
-
-      await store.saveTransactionBulk(transactions)
-
-      expect(cashFlowStore.fetchCashAccounts).toHaveBeenCalled()
     })
 
     it('空數組時應該拋出錯誤', async () => {

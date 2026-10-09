@@ -55,38 +55,6 @@ export const mockTransaction = (overrides = {}) => ({
   shares: '10',
   transaction_type: 'buy',
   transaction_date: '2025-01-01',
-  cash_account_id: null,
-  ...overrides
-})
-
-/**
- * Mock Cash Account
- */
-export const mockCashAccount = (overrides = {}) => ({
-  id: '1',
-  name: 'Main Account',
-  currency: 'TWD',
-  balance: '10000.00',
-  portfolio_id: 'portfolio-123',
-  description: 'Test account',
-  created_at: '2025-01-01T00:00:00Z',
-  updated_at: '2025-01-01T00:00:00Z',
-  ...overrides
-})
-
-/**
- * Mock Cash Flow
- */
-export const mockCashFlow = (overrides = {}) => ({
-  id: '1',
-  account_id: '1',
-  portfolio_id: 'portfolio-123',
-  flow_type: 'salary',
-  amount: '5000.00',
-  description: 'Monthly salary',
-  balance_after: '15000.00',
-  created_at: '2025-01-01T00:00:00Z',
-  updated_at: '2025-01-01T00:00:00Z',
   ...overrides
 })
 

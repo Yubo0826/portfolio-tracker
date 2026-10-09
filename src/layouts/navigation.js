@@ -23,13 +23,6 @@ export function buildSidebarSections(t) {
           ],
         },
         {
-          key: 'cash-flow',
-          label: t('cashFlowNav'),
-          to: '/cash-flow',
-          icon: 'pi pi-wallet',
-          activePaths: ['/cash-flow', '/cash-flows'],
-        },
-        {
           key: 'watchlist',
           label: t('watchlist'),
           to: '/watchlist',

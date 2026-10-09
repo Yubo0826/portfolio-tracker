@@ -222,7 +222,6 @@ const emptyForm = () => ({
   currency: 'USD',
   fee: 0,
   operation: 'buy',
-  accountId: null,
 });
 
 const form = ref(emptyForm());
@@ -287,7 +286,6 @@ const loadEditing = () => {
     currency: item.currency || 'USD',
     fee: item.fee,
     operation: item.transactionType,
-    accountId: item.accountId || null,
   };
 };
 
@@ -315,7 +313,6 @@ watch(
       currency: newForm.currency || 'USD',
       fee: newForm.fee,
       operation: newForm.transactionType,
-      accountId: newForm.accountId || null,
     }
   }
 );

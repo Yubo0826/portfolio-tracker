@@ -10,10 +10,10 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | Method | Path | 說明 | 參數 |
 |---|---|---|---|
 | GET | `/api/transactions` | 取得指定使用者/投資組合的交易紀錄與持股 | query: `uid`, `portfolio_id` |
-| POST | `/api/transactions` | 新增一筆交易，並更新持股（可自動建立對應現金流） | body: `uid, portfolio_id, symbol, name, asset_type, shares, price, currency, fee, transaction_type, transaction_date, cash_account_id` |
+| POST | `/api/transactions` | 新增一筆交易，並更新持股 | body: `uid, portfolio_id, symbol, name, asset_type, shares, price, currency, fee, transaction_type, transaction_date` |
 | POST | `/api/transactions/bulk` | 批次新增交易並更新持股 | body: `uid, portfolio_id, transactions[]` |
 | PUT | `/api/transactions/:id` | 更新單筆交易並重算持股（含買賣方向切換） | params: `id`；body: `uid, portfolio_id, symbol, name, asset_type, shares, fee, price, currency, transaction_type, transaction_date` |
-| DELETE | `/api/transactions` | 刪除交易、回沖相關現金流、重算受影響持股 | body: `ids[], uid, portfolio_id` |
+| DELETE | `/api/transactions` | 刪除交易、重算受影響持股 | body: `ids[], uid, portfolio_id` |
 
 ## `/api/user`（`routes/users.js`）
 
@@ -61,26 +61,7 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | Method | Path | 說明 | 參數 |
 |---|---|---|---|
 | GET | `/api/dividends` | 取得股利紀錄 | query: `uid, portfolio_id` |
-| POST | `/api/dividends/sync` | 依持股同步 Yahoo 股利歷史，並自動建立對應現金流 | body: `uid, portfolio_id, cash_account_id` |
-
-## `/api/cash-accounts`（`routes/cashAccounts.js`）
-
-| Method | Path | 說明 | 參數 |
-|---|---|---|---|
-| GET | `/api/cash-accounts` | 取得現金帳戶清單與總餘額 | query: `uid` |
-| POST | `/api/cash-accounts` | 建立現金帳戶 | body: `uid, name, balance, currency, description` |
-| PUT | `/api/cash-accounts/:id` | 更新現金帳戶 | params: `id`；body: `uid, name, balance, currency, description` |
-| DELETE | `/api/cash-accounts/:id` | 刪除現金帳戶（若有相關現金流則擋下） | params: `id`；query: `uid` |
-| GET | `/api/cash-accounts/:id` | 取得帳戶詳情與最近 10 筆現金流 | params: `id`；query: `uid` |
-
-## `/api/cash-flows`（`routes/cashFlows.js`）
-
-| Method | Path | 說明 | 參數 |
-|---|---|---|---|
-| GET | `/api/cash-flows` | 分頁/篩選現金流列表 | query: `uid, portfolio_id, account_id, flow_type, start_date, end_date, page, limit` |
-| POST | `/api/cash-flows` | 手動建立現金流並更新帳戶餘額 | body: `uid, account_id, portfolio_id, amount, flow_type, description, date` |
-| DELETE | `/api/cash-flows/:id` | 刪除手動現金流（自動產生者不可刪） | params: `id`；query: `uid` |
-| GET | `/api/cash-flows/stats` | 依 `flow_type` 分組回傳收入/支出/淨額統計 | query: `uid, portfolio_id, account_id, start_date, end_date` |
+| POST | `/api/dividends/sync` | 依持股同步 Yahoo 股利歷史 | body: `uid, portfolio_id` |
 
 ## `/api/yahoo`（`routes/yahooFinance.js`）
 

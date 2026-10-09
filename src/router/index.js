@@ -49,16 +49,6 @@ const router = createRouter({
       component: () => import('../views/BacktestingView.vue'),
     },
     {
-      path: '/cash-flow',
-      name: 'cash-flow',
-      component: () => import('../views/CashFlowView.vue'),
-    },
-    {
-      path: '/cash-flows',
-      name: 'cash-flows',
-      component: () => import('../views/CashFlowsListView.vue'),
-    },
-    {
       path: '/watchlist',
       name: 'watchlist',
       component: () => import('../views/WatchlistView.vue'),
