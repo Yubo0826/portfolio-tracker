@@ -112,7 +112,7 @@
           >
             <div class="user-info">
               <div v-if="userPhotoUrl" class="avatar avatar--image">
-                <img :src="userPhotoUrl" :alt="userDisplayName" />
+                <img :src="userPhotoUrl" :alt="userDisplayName" referrerpolicy="no-referrer" />
               </div>
               <div v-else class="avatar">{{ userInitial }}</div>
               <div v-show="!collapsed">
