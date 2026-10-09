@@ -33,7 +33,9 @@
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <Tag :value="data.symbol" severity="secondary" />
+                <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }">
+                  <Tag :value="data.symbol" severity="info" class="cursor-pointer hover:opacity-80" />
+                </RouterLink>
                 <span class="text-sm text-muted-color">{{ data.name }}</span>
               </div>
             </template>

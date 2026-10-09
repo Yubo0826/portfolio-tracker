@@ -11,7 +11,7 @@
         />
       </div>
   
-      <div class="mt-4">
+      <div class="mt-4 [&_.p-datatable-tbody>tr>td]:text-base">
         <div v-if="tab === 'holdings'"><HoldingsView /></div>
         <div v-else-if="tab === 'transactions'"><TransactionsView /></div>
         <div v-else><DividendsView /></div>
