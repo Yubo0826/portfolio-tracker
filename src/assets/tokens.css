@@ -1,0 +1,256 @@
+/* =============================================================================
+   帳與板 — Ledger & Board
+   投資組合追蹤器的設計 token 層
+
+   兩件器物：
+     淺色模式 =「帳」綠條會計紙（green-bar ledger paper）
+     深色模式 =「板」號子的行情看板
+
+   一條規則（整套系統的脊椎）：
+     品牌色永遠不碰漲跌色。
+     brass（黃銅）= 品牌／互動；red / green = 損益語意，只給數字用。
+     這讓使用者不必分辨「這個顏色是語意還是裝飾」。
+
+   兩個軸（都是產品真實存在的設定，不是裝飾）：
+     .dark            → 帳 / 板
+     [data-polarity]  → 紅漲綠跌（台亞，預設）/ green-up（美歐）
+   ========================================================================== */
+
+/* -----------------------------------------------------------------------------
+   1. 原色（raw palette）
+   只在這裡出現色票值。其他地方一律引用語意 token。
+   命名刻意用「色相」而非「漲跌」，因為漲跌會隨市場慣例翻轉。
+   -------------------------------------------------------------------------- */
+:root {
+  /* 帳 — 紙、條、線、墨 */
+  --lb-paper:        #fbfaf7; /* 紙：偏白帶微暖，刻意不是奶油色 */
+  --lb-paper-sunk:   #f4f3ed; /* 紙的凹陷處：輸入框、軌道 */
+  --lb-band:         #ecf0e6; /* 綠條：隔行帶、表頭 */
+  --lb-band-strong:  #dfe6d5; /* 綠條加深：hover、選取 */
+  --lb-rule:         #dce0d2; /* 髮絲線 */
+  --lb-ink:          #1c2620; /* 墨：帶綠黑調，不是純黑也不是 zinc */
+  --lb-ink-muted:    #5b6b60;
+  --lb-ink-faint:    #7f8c84; /* 11px 標籤在紙上仍達 3:1 */
+
+  /* 板 — 看板底、掃描條、磷光 */
+  --lb-board:        #121815; /* 看板底：綠黑，刻意不是 GitHub Dimmed 的藍灰 */
+  --lb-board-raised: #1a221e; /* 浮起的卡片 */
+  --lb-board-sunk:   #0d1210; /* 凹陷：輸入框、軌道 */
+  --lb-scanline:     #1e2823; /* 掃描條 = 深色模式下的綠條 */
+  --lb-scanline-strong: #26322b;
+  --lb-rule-dark:    #2c3830;
+  --lb-ink-dark:     #d8e2da;
+  --lb-ink-muted-dark: #8a9a90;
+  --lb-ink-faint-dark: #63736a;
+
+  /* 黃銅 — 品牌與互動。橫跨兩種模式的同一個故事：
+     帳裡是印章與算珠的銅，板裡是看板上的燈。 */
+  /* 值是解出來的：要同時在紙、綠條、黃銅 tint 上都達 4.5:1 */
+  --lb-brass:        #8a621c;
+  --lb-brass-hover:  #6e4e16;
+  --lb-brass-tint:   #f3e9d2;
+  --lb-brass-dark:   #d6a94e;
+  --lb-brass-dark-hover: #e6bc68;
+  --lb-brass-tint-dark: #2a2317;
+
+  /* 損益原色。注意 --lb-green 刻意比綠條 --lb-band 深且濃，
+     兩者不會在同一個表格裡被誤認。 */
+  --lb-red:          #bf392b;
+  --lb-green:        #0e7a52;
+  --lb-red-dark:     #ff6152; /* 板上的磷光較亮 */
+  --lb-green-dark:   #35c98d;
+  --lb-red-tint:     #f8e6e2;
+  --lb-green-tint:   #dff0e7;
+  --lb-red-tint-dark:   #2e1a18;
+  --lb-green-tint-dark: #12291f;
+}
+
+/* -----------------------------------------------------------------------------
+   2. 語意層 — 帳（淺色，預設）
+   -------------------------------------------------------------------------- */
+:root {
+  --surface-canvas:  var(--lb-paper-sunk);
+  --surface-sheet:   var(--lb-paper);
+  --surface-band:    var(--lb-band);
+  --surface-band-hover: var(--lb-band-strong);
+  --surface-sunk:    var(--lb-paper-sunk);
+
+  --text-primary:    var(--lb-ink);
+  --text-muted:      var(--lb-ink-muted);
+  --text-faint:      var(--lb-ink-faint);
+  --text-on-accent:  var(--lb-paper);
+
+  --rule:            var(--lb-rule);
+  --rule-strong:     #c6cdb9;
+
+  --accent:          var(--lb-brass);
+  --accent-hover:    var(--lb-brass-hover);
+  --accent-tint:     var(--lb-brass-tint);
+
+  --c-up-hue:        var(--lb-red);
+  --c-down-hue:      var(--lb-green);
+  --c-up-tint:       var(--lb-red-tint);
+  --c-down-tint:     var(--lb-green-tint);
+}
+
+/* 語意層 — 板（深色） */
+.dark {
+  --surface-canvas:  var(--lb-board);
+  --surface-sheet:   var(--lb-board-raised);
+  --surface-band:    var(--lb-scanline);
+  --surface-band-hover: var(--lb-scanline-strong);
+  --surface-sunk:    var(--lb-board-sunk);
+
+  --text-primary:    var(--lb-ink-dark);
+  --text-muted:      var(--lb-ink-muted-dark);
+  --text-faint:      var(--lb-ink-faint-dark);
+  --text-on-accent:  var(--lb-board);
+
+  --rule:            var(--lb-rule-dark);
+  --rule-strong:     #3d4c43;
+
+  --accent:          var(--lb-brass-dark);
+  --accent-hover:    var(--lb-brass-dark-hover);
+  --accent-tint:     var(--lb-brass-tint-dark);
+
+  --c-up-hue:        var(--lb-red-dark);
+  --c-down-hue:      var(--lb-green-dark);
+  --c-up-tint:       var(--lb-red-tint-dark);
+  --c-down-tint:     var(--lb-green-tint-dark);
+}
+
+/* -----------------------------------------------------------------------------
+   3. 極性（polarity）— 漲跌配色隨市場慣例翻轉
+   預設 = 紅漲綠跌（台灣／亞洲）。西方慣例把兩者對調。
+   元件只認 --gain / --loss，永遠不直接用紅綠。
+   -------------------------------------------------------------------------- */
+:root,
+[data-polarity='asia'] {
+  --gain:      var(--c-up-hue);
+  --loss:      var(--c-down-hue);
+  --gain-tint: var(--c-up-tint);
+  --loss-tint: var(--c-down-tint);
+}
+
+[data-polarity='west'] {
+  --gain:      var(--c-down-hue);
+  --loss:      var(--c-up-hue);
+  --gain-tint: var(--c-down-tint);
+  --loss-tint: var(--c-up-tint);
+}
+
+/* -----------------------------------------------------------------------------
+   4. 字體
+   Latin 介面 = Instrument Sans（幾何感 grotesque，不是 Inter / Geist）
+   數字      = IBM Plex Mono，等寬對齊，大級數時當標題字用 ←── 這是簽名
+   中文      = Noto Sans TC
+   -------------------------------------------------------------------------- */
+:root {
+  --font-ui: 'Instrument Sans', 'Noto Sans TC', 'PingFang TC',
+             'Microsoft JhengHei', sans-serif;
+  --font-num: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  /* 級數。數字用的級數（--fs-figure-*）刻意比文字級數跳得更遠，
+     因為在這個產品裡數字是主角，文字是註解。 */
+  --fs-micro:  11px;  /* 標籤、單位 */
+  --fs-small:  13px;  /* 表格內文、說明 */
+  --fs-body:   14px;
+  --fs-lead:   16px;
+  --fs-title:  20px;
+  --fs-figure-sm: 22px;
+  --fs-figure:    34px;
+  --fs-figure-lg: 60px;  /* hero 數字 */
+
+  --lh-tight: 1.1;
+  --lh-snug:  1.35;
+  --lh-body:  1.6;
+
+  /* 數字在大級數時收緊字距，小級數時放開一點以利判讀 */
+  --tracking-figure: -0.03em;
+  --tracking-label:  0.14em;
+}
+
+/* 數字的統一寫法。凡是會被縱向比較的數字都該套這個。 */
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+  letter-spacing: var(--tracking-figure);
+}
+
+/* 標籤／眉標：小、寬字距、全大寫（僅拉丁字母；中文靠字距微放） */
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* -----------------------------------------------------------------------------
+   5. 間距、圓角、陰影、動態
+   圓角刻意小但不為零 —— 為零會變成 broadsheet 版面，這裡要的是儀器面板。
+   -------------------------------------------------------------------------- */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 72px;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  --row-h: 40px;   /* 條帶的節拍。所有密集列表都對齊這個高度。 */
+
+  --ease: cubic-bezier(0.2, 0, 0.13, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-tick: 640ms; /* 報價跳動的閃光 */
+
+  --shadow-sheet: 0 1px 2px rgb(28 38 32 / 0.06),
+                  0 8px 24px -12px rgb(28 38 32 / 0.12);
+}
+
+.dark {
+  --shadow-sheet: 0 1px 2px rgb(0 0 0 / 0.4),
+                  0 8px 24px -12px rgb(0 0 0 / 0.6);
+}
+
+/* -----------------------------------------------------------------------------
+   6. 條帶系統（the band）— 簽名元素
+   表格內不畫任何橫線。分隔完全交給隔行的綠條完成。
+   深色模式下同一條帶變成看板的掃描條。
+   -------------------------------------------------------------------------- */
+.band-row:nth-child(even) {
+  background-color: var(--surface-band);
+}
+
+.band-row:hover {
+  background-color: var(--surface-band-hover);
+}
+
+/* -----------------------------------------------------------------------------
+   7. 品質底線
+   -------------------------------------------------------------------------- */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

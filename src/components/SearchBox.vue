@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AutoComplete from 'primevue/autocomplete'
@@ -67,6 +67,7 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import api from '@/utils/api'
 import StockIcon from '@/components/StockIcon.vue'
+import { preloadStockLogos } from '@/utils/stockLogo'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -74,6 +75,8 @@ const emit = defineEmits(['close'])
 
 const query = ref('')
 const groups = ref([])
+// 選項一出現就開始解析 logo，讓整個清單一起淡入，而不是一個一個跳出來
+watch(groups, (value) => preloadStockLogos(value.flatMap(g => g.items.map(item => item.symbol))))
 let trending = null
 
 const SEARCH_HISTORY_KEY = 'portfolio-tracker-search-history'

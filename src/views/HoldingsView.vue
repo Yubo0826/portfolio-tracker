@@ -1,5 +1,4 @@
 <template>
-  <ConfirmDialog></ConfirmDialog>
   <div>
         <div class="flex flex-wrap items-center gap-2 mb-8">
           <MultiSelect
@@ -103,7 +102,16 @@
                 </span>
             </template>
           </Column>
-    
+          <Column field="profitWithDividends" sortable :header="$t('returnWithDividends')">
+            <template #body="{ data }">
+              <span
+                v-tooltip.top="formatSignedAmountWithCode(data.profitWithDividends)"
+                class="cursor-help whitespace-nowrap"
+                :class="data.profitWithDividends >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+              >{{ data.profitWithDividends >= 0 ? '+' : '-' }}{{ Math.abs(data.returnWithDividends).toFixed(2) }}%</span>
+            </template>
+          </Column>
+
           <template #empty>
             <NoData />
           </template>
@@ -128,7 +136,28 @@ import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore();
 
 import { useCurrency } from '@/composables/useCurrency';
-const { formatAmountWithCode, formatPriceWithCode } = useCurrency();
+const { formatAmountWithCode, formatPriceWithCode, convertAmountToUsd } = useCurrency();
+
+import { useDividendsStore } from '@/stores/dividends';
+const dividendsStore = useDividendsStore();
+
+const loadData = () => {
+  store.fetchHoldings();
+  dividendsStore.fetchDividends();
+};
+
+// 股息表沒有幣別欄位，以持股幣別換算成美金（與 holdings 金額同單位）
+// ponytail: 加總該代號全部股息，含已清倉又重新買進前領的，分母只用目前持股的成本
+const holdingsWithDividends = computed(() => {
+  const dividendBySymbol = new Map();
+  for (const d of dividendsStore.list) {
+    dividendBySymbol.set(d.symbol, (dividendBySymbol.get(d.symbol) ?? 0) + d.shares * d.amount);
+  }
+  return store.list.map((h) => {
+    const profitWithDividends = h.totalProfit + convertAmountToUsd(dividendBySymbol.get(h.symbol) ?? 0, h.currency);
+    return { ...h, profitWithDividends, returnWithDividends: h.totalCost ? (profitWithDividends / h.totalCost) * 100 : 0 };
+  });
+});
 
 const splitDisplayAmount = (value, mode = 'amount') => {
   const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
@@ -200,26 +229,26 @@ const clearFilters = () => {
 };
 
 const filteredHoldings = computed(() => {
-  if (!selectedSymbols.value.length) return store.list;
-  return store.list.filter((h) => selectedSymbols.value.includes(h.symbol));
+  if (!selectedSymbols.value.length) return holdingsWithDividends.value;
+  return holdingsWithDividends.value.filter((h) => selectedSymbols.value.includes(h.symbol));
 });
 
 // 初始化＆監聽登入/投組變化後自動載入
 if (auth.user && portfolioStore.currentPortfolio?.id) {
-  store.fetchHoldings();
+  loadData();
 }
 
 watch(
   () => auth.user,
   (u) => {
-    if (u && portfolioStore.currentPortfolio?.id) store.fetchHoldings();
+    if (u && portfolioStore.currentPortfolio?.id) loadData();
   }
 );
 
 watch(
   () => portfolioStore.currentPortfolio,
   (p) => {
-    if (p?.id && auth.user) store.fetchHoldings();
+    if (p?.id && auth.user) loadData();
   }
 );
 

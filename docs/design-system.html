@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="zh-Hant" data-polarity="asia">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>帳與板 — 投資組合追蹤器設計系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../src/assets/tokens.css">
+<style>
+/* =========================================================================
+   示範頁自身的版面。所有顏色與級數一律引用 tokens.css，不另立色票。
+   ====================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--surface-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--dur-base) var(--ease),
+              color var(--dur-base) var(--ease);
+}
+
+.ds-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-5) var(--space-8);
+}
+
+/* ---- 頁首列：兩個軸的開關 ---------------------------------------------- */
+.ds-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--space-7);
+}
+
+.ds-wordmark {
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  letter-spacing: -0.01em;
+  margin-right: auto;
+}
+.ds-wordmark span { color: var(--accent); }
+
+/* ---- 段落骨架 ---------------------------------------------------------- */
+.ds-section { margin-bottom: var(--space-8); }
+
+.ds-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--rule);
+}
+
+.ds-section-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.ds-section-note {
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  margin: 0;
+}
+
+.ds-prose {
+  max-width: 62ch;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  margin: 0 0 var(--space-5);
+}
+.ds-prose strong { color: var(--text-primary); font-weight: 600; }
+
+/* =========================================================================
+   HERO — 這一頁的論點：數字就是標題字，條帶就是版面。
+   ====================================================================== */
+.ds-hero {
+  background-color: var(--surface-sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sheet);
+  overflow: hidden;
+  margin-bottom: var(--space-7);
+}
+
+.ds-hero-main {
+  padding: var(--space-6) var(--space-5) var(--space-5);
+}
+
+.ds-hero-figure {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: var(--tracking-figure);
+  font-size: var(--fs-figure-lg);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  margin: var(--space-2) 0 var(--space-3);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.ds-hero-unit {
+  font-size: var(--fs-figure-sm);
+  color: var(--text-faint);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.ds-hero-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-figure);
+  font-size: var(--fs-figure-sm);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--gain-tint);
+  color: var(--gain);
+}
+
+/* 條帶做的迷你分配圖 —— 不是圓餅圖，因為條帶已經是這套系統的語言 */
+.ds-hero-bar {
+  display: flex;
+  height: 10px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: var(--space-5);
+  border: 1px solid var(--rule);
+}
+.ds-hero-bar i { display: block; height: 100%; }
+
+.ds-hero-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  font-size: var(--fs-micro);
+  color: var(--text-muted);
+}
+.ds-hero-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.ds-hero-legend i {
+  width: 8px; height: 8px; border-radius: 1px; display: inline-block;
+}
+
+/* =========================================================================
+   規則卡 —— 系統的脊椎，直接寫出來
+   ====================================================================== */
+.ds-rule-card {
+  border: 1px solid var(--accent);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  background-color: var(--accent-tint);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-7);
+}
+.ds-rule-card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.ds-rule-card p {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-primary);
+  max-width: 68ch;
+}
+
+/* =========================================================================
+   色票
+   ====================================================================== */
+.ds-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.ds-swatch {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--surface-sheet);
+}
+
+.ds-swatch-chip { height: 56px; }
+
+.ds-swatch-meta {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: 1px solid var(--rule);
+}
+
+.ds-swatch-name {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  display: block;
+}
+
+.ds-swatch-val {
+  font-family: var(--font-num);
+  font-size: var(--fs-micro);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* =========================================================================
+   字體
+   ====================================================================== */
+.ds-type-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.ds-type-row:last-child { border-bottom: 0; }
+
+.ds-type-meta {
+  flex: 0 0 132px;
+  font-size: var(--fs-micro);
+  color: var(--text-muted);
+  font-family: var(--font-num);
+  letter-spacing: 0;
+}
+
+.ds-type-sample { min-width: 0; }
+
+.ds-t-hero {
+  font-family: var(--font-num); font-variant-numeric: tabular-nums;
+  font-size: var(--fs-figure-lg); font-weight: 500;
+  letter-spacing: var(--tracking-figure); line-height: var(--lh-tight);
+}
+.ds-t-fig {
+  font-family: var(--font-num); font-variant-numeric: tabular-nums;
+  font-size: var(--fs-figure); font-weight: 500;
+  letter-spacing: var(--tracking-figure);
+}
+.ds-t-title { font-size: var(--fs-title); font-weight: 700; letter-spacing: -0.01em; }
+.ds-t-lead  { font-size: var(--fs-lead); }
+.ds-t-body  { font-size: var(--fs-body); }
+.ds-t-small { font-size: var(--fs-small); color: var(--text-muted); }
+
+/* =========================================================================
+   條帶 / 表格 —— 簽名元素。表格內沒有任何一條橫線。
+   ====================================================================== */
+.ds-sheet {
+  background-color: var(--surface-sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sheet);
+}
+
+.ds-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.ds-sheet-title { font-weight: 600; font-size: var(--fs-body); margin: 0; }
+
+.ds-table { width: 100%; overflow-x: auto; }
+
+.ds-tr {
+  display: grid;
+  grid-template-columns: 76px minmax(120px, 1.6fr) 80px 92px 128px 148px 84px;
+  align-items: center;
+  min-height: var(--row-h);
+  padding-inline: var(--space-4);
+  min-width: 760px;
+}
+
+.ds-th {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  background-color: var(--surface-band);
+  min-height: 34px;
+}
+
+.ds-td { font-size: var(--fs-small); transition: background-color var(--dur-fast) var(--ease); }
+
+/* 條帶從第二列開始。body 列包在 .ds-tbody 裡，
+   否則表頭會被算進 nth-of-type，第一列就跟表頭同色黏在一起。 */
+.ds-tbody .ds-tr--body:nth-of-type(even) { background-color: var(--surface-band); }
+.ds-tbody .ds-tr--body:hover { background-color: var(--surface-band-hover); }
+
+.ds-c-num {
+  text-align: right;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: 0;
+}
+
+.ds-sym {
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: var(--fs-small);
+  letter-spacing: 0;
+}
+
+.ds-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: var(--space-3); }
+
+/* 只有損益的百分比帶顏色底，其餘數字維持墨色 —— 節制的來源 */
+.ds-pill {
+  display: inline-block;
+  min-width: 72px;
+  text-align: right;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.ds-pill--gain { background-color: var(--gain-tint); color: var(--gain); }
+.ds-pill--loss { background-color: var(--loss-tint); color: var(--loss); }
+
+.ds-gain { color: var(--gain); }
+.ds-loss { color: var(--loss); }
+
+/* 比重：條帶語言的再一次使用 */
+.ds-weight {
+  position: relative;
+  height: 16px;
+  background-color: var(--surface-sunk);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.ds-weight i {
+  position: absolute; inset: 0 auto 0 0;
+  background-color: var(--accent);
+  opacity: 0.55;
+}
+.ds-weight b {
+  position: relative;
+  display: block;
+  text-align: right;
+  padding-right: 5px;
+  font-family: var(--font-num);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0;
+}
+
+/* 唯一的動態時刻：報價更新時該格閃一次（行情板跳動） */
+@keyframes ds-tick-up {
+  0%   { background-color: var(--gain-tint); }
+  100% { background-color: transparent; }
+}
+@keyframes ds-tick-down {
+  0%   { background-color: var(--loss-tint); }
+  100% { background-color: transparent; }
+}
+.ds-td--tick-up   { animation: ds-tick-up   var(--dur-tick) var(--ease); }
+.ds-td--tick-down { animation: ds-tick-down var(--dur-tick) var(--ease); }
+
+/* =========================================================================
+   元件
+   ====================================================================== */
+.ds-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-5);
+}
+
+.ds-panel {
+  background-color: var(--surface-sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.ds-panel-label {
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.ds-cluster { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+
+/* 按鈕 —— 品牌黃銅，永遠不會被誤讀成漲跌 */
+.ds-btn {
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  padding: 7px var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+
+.ds-btn--primary {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+}
+.ds-btn--primary:hover { background-color: var(--accent-hover); }
+
+.ds-btn--quiet {
+  background-color: transparent;
+  border-color: var(--rule-strong);
+  color: var(--text-primary);
+}
+.ds-btn--quiet:hover { background-color: var(--surface-band); }
+
+.ds-btn--bare {
+  background-color: transparent;
+  color: var(--text-muted);
+  padding-inline: var(--space-2);
+}
+.ds-btn--bare:hover { color: var(--accent); }
+
+/* 分段切換 —— 頁首的兩個軸也用它 */
+.ds-seg {
+  display: inline-flex;
+  background-color: var(--surface-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.ds-seg button {
+  font-family: inherit;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.ds-seg button:hover { color: var(--text-primary); }
+.ds-seg button[aria-pressed='true'] {
+  background-color: var(--surface-sheet);
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+/* 輸入 */
+.ds-field { display: block; margin-bottom: var(--space-3); }
+.ds-field-label {
+  display: block;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.ds-input {
+  width: 100%;
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+  padding: 7px var(--space-3);
+  color: var(--text-primary);
+  background-color: var(--surface-sunk);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-md);
+}
+.ds-input::placeholder { color: var(--text-faint); }
+.ds-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-tint); }
+
+/* 狀態 */
+.ds-state {
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  text-align: center;
+}
+.ds-state p { margin: 0 0 var(--space-3); color: var(--text-muted); font-size: var(--fs-small); }
+.ds-state strong { display: block; color: var(--text-primary); font-size: var(--fs-body); margin-bottom: 4px; }
+
+.ds-error {
+  border: 1px solid var(--lb-red);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-small);
+}
+.dark .ds-error { border-color: var(--lb-red-dark); }
+.ds-error strong { display: block; margin-bottom: 2px; }
+
+.ds-foot {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule);
+  font-size: var(--fs-micro);
+  color: var(--text-faint);
+}
+
+@media (max-width: 640px) {
+  .ds-shell { padding-inline: var(--space-4); }
+  .ds-type-row { flex-direction: column; gap: var(--space-1); }
+  .ds-type-meta { flex-basis: auto; }
+  :root { --fs-figure-lg: 42px; }
+}
+</style>
+</head>
+<body>
+<div class="ds-shell">
+
+  <header class="ds-topbar">
+    <div class="ds-wordmark">帳與板 <span>/</span> Ledger &amp; Board</div>
+
+    <div class="ds-seg" role="group" aria-label="外觀">
+      <button type="button" data-mode="light" aria-pressed="true">帳</button>
+      <button type="button" data-mode="dark" aria-pressed="false">板</button>
+    </div>
+
+    <div class="ds-seg" role="group" aria-label="漲跌配色">
+      <button type="button" data-polarity="asia" aria-pressed="true">紅漲綠跌</button>
+      <button type="button" data-polarity="west" aria-pressed="false">Green&nbsp;up</button>
+    </div>
+  </header>
+
+  <!-- ================= HERO ================= -->
+  <section class="ds-hero">
+    <div class="ds-hero-main">
+      <span class="label">總價值 · 我的投資組合</span>
+      <div class="ds-hero-figure">
+        <span class="ds-hero-unit">NT$</span>4,182,650
+        <span class="ds-hero-delta" id="heroDelta">+613,204 <span style="font-size:var(--fs-body)">+17.2%</span></span>
+      </div>
+      <p class="ds-prose" style="margin-bottom:0">
+        數字用 IBM&nbsp;Plex&nbsp;Mono 的等寬字，級數跳到 60px。在這個產品裡
+        <strong>數字就是標題字</strong>，文字才是註解——所以字體階層是反過來排的。
+      </p>
+
+      <div class="ds-hero-bar" aria-hidden="true">
+        <i style="width:38%;background-color:var(--accent)"></i>
+        <i style="width:24%;background-color:var(--accent);opacity:.72"></i>
+        <i style="width:18%;background-color:var(--accent);opacity:.5"></i>
+        <i style="width:12%;background-color:var(--accent);opacity:.32"></i>
+        <i style="width:8%;background-color:var(--rule-strong)"></i>
+      </div>
+      <div class="ds-hero-legend">
+        <span><i style="background-color:var(--accent)"></i>台股 38%</span>
+        <span><i style="background-color:var(--accent);opacity:.72"></i>美股 24%</span>
+        <span><i style="background-color:var(--accent);opacity:.5"></i>ETF 18%</span>
+        <span><i style="background-color:var(--accent);opacity:.32"></i>債券 12%</span>
+        <span><i style="background-color:var(--rule-strong)"></i>現金 8%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 規則 ================= -->
+  <div class="ds-rule-card">
+    <h3>品牌色永遠不碰漲跌色</h3>
+    <p>
+      黃銅（brass）是品牌與所有可互動的東西：按鈕、連結、焦點框、比重條。
+      紅與綠只有一個用途——損益。使用者因此不必在每個畫面上重新判斷
+      「這個顏色是語意還是裝飾」。上面那張分配圖沒用彩虹色，就是這條規則的結果。
+    </p>
+  </div>
+
+  <!-- ================= 色 ================= -->
+  <section class="ds-section">
+    <div class="ds-section-head">
+      <h2 class="ds-section-title">色</h2>
+      <p class="ds-section-note">切換上方的「帳／板」，整組色票會換一套語意值</p>
+    </div>
+    <p class="ds-prose">
+      淺色來自<strong>綠條會計紙</strong>：偏白帶微暖的紙，配一階淡鼠尾草綠的條。
+      深色來自<strong>號子的行情看板</strong>：綠黑色的板底，不是常見的藍灰近黑。
+      注意「跌綠」比「條帶綠」濃且深得多，在同一張表格裡不會互相干擾。
+    </p>
+    <div class="ds-swatches">
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--surface-canvas)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">畫布</span><span class="ds-swatch-val">--surface-canvas</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--surface-sheet)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">紙 / 板</span><span class="ds-swatch-val">--surface-sheet</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--surface-band)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">條帶</span><span class="ds-swatch-val">--surface-band</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--text-primary)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">墨</span><span class="ds-swatch-val">--text-primary</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--accent)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">黃銅 · 品牌</span><span class="ds-swatch-val">--accent</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--gain)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">漲</span><span class="ds-swatch-val">--gain</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--loss)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">跌</span><span class="ds-swatch-val">--loss</span></div></div>
+      <div class="ds-swatch"><div class="ds-swatch-chip" style="background-color:var(--rule)"></div><div class="ds-swatch-meta"><span class="ds-swatch-name">線</span><span class="ds-swatch-val">--rule</span></div></div>
+    </div>
+  </section>
+
+  <!-- ================= 字 ================= -->
+  <section class="ds-section">
+    <div class="ds-section-head">
+      <h2 class="ds-section-title">字</h2>
+      <p class="ds-section-note">Instrument Sans · IBM Plex Mono · Noto Sans TC</p>
+    </div>
+    <p class="ds-prose">
+      三個角色，一個原則：<strong>會被縱向比較的數字，一律等寬</strong>。
+      中文用 Noto Sans TC，是唯一能撐住繁體介面的高品質網頁字型——
+      這個 app 有 zh / en 雙語，字體選擇不能只顧拉丁字母。
+    </p>
+    <div class="ds-panel">
+      <div class="ds-type-row"><span class="ds-type-meta">Mono 60 / -3%</span><span class="ds-type-sample ds-t-hero">4,182,650</span></div>
+      <div class="ds-type-row"><span class="ds-type-meta">Mono 34 / -3%</span><span class="ds-type-sample ds-t-fig">+17.24%</span></div>
+      <div class="ds-type-row"><span class="ds-type-meta">Sans 20 / 700</span><span class="ds-type-sample ds-t-title">再平衡建議</span></div>
+      <div class="ds-type-row"><span class="ds-type-meta">Sans 16 / 400</span><span class="ds-type-sample ds-t-lead">目標配置與實際持有的差距</span></div>
+      <div class="ds-type-row"><span class="ds-type-meta">Sans 14 / 400</span><span class="ds-type-sample ds-t-body">台積電目前佔投資組合 38.2%，高於你設定的 30% 目標。</span></div>
+      <div class="ds-type-row"><span class="ds-type-meta">Sans 13 / muted</span><span class="ds-type-sample ds-t-small">上次更新 2026/08/08 13:30 · 收盤價</span></div>
+      <div class="ds-type-row"><span class="ds-type-meta">Sans 11 / label</span><span class="ds-type-sample label">累計損益 · TOTAL P/L</span></div>
+    </div>
+  </section>
+
+  <!-- ================= 帶 ================= -->
+  <section class="ds-section">
+    <div class="ds-section-head">
+      <h2 class="ds-section-title">帶</h2>
+      <p class="ds-section-note">簽名元素 — 表格內沒有任何一條橫線</p>
+    </div>
+    <p class="ds-prose">
+      分隔完全交給隔行的條帶，不畫橫線。這是綠條會計紙本來就在做的事，
+      而且在密集財務表格裡比框線安靜得多。深色模式下同一條帶變成看板的掃描條。
+      <strong>只有損益的百分比帶顏色底</strong>，其餘數字維持墨色——節制就是從這裡來的。
+    </p>
+    <div class="ds-sheet">
+      <div class="ds-sheet-head">
+        <h3 class="ds-sheet-title">我的持股</h3>
+        <div class="ds-cluster">
+          <button class="ds-btn ds-btn--bare" type="button">匯出</button>
+          <button class="ds-btn ds-btn--quiet" type="button">重新整理價格</button>
+          <button class="ds-btn ds-btn--primary" type="button">新增交易</button>
+        </div>
+      </div>
+      <div class="ds-table" role="table" aria-label="我的持股">
+        <div class="ds-tr ds-th" role="row">
+          <span role="columnheader">代號</span>
+          <span role="columnheader">名稱</span>
+          <span role="columnheader" class="ds-c-num">股數</span>
+          <span role="columnheader" class="ds-c-num">現價</span>
+          <span role="columnheader" class="ds-c-num">現值</span>
+          <span role="columnheader" class="ds-c-num">累計損益</span>
+          <span role="columnheader" class="ds-c-num">比重</span>
+        </div>
+        <div class="ds-tbody" role="rowgroup">
+        <div class="ds-tr ds-tr--body" role="row">
+          <span class="ds-td ds-sym" role="cell">2330</span>
+          <span class="ds-td ds-name" role="cell">台積電</span>
+          <span class="ds-td ds-c-num" role="cell">1,400</span>
+          <span class="ds-td ds-c-num js-price" role="cell">1,142</span>
+          <span class="ds-td ds-c-num" role="cell">1,598,800</span>
+          <span class="ds-td ds-c-num" role="cell"><span class="ds-pill ds-pill--gain">+34.8%</span></span>
+          <span class="ds-td" role="cell"><span class="ds-weight"><i style="width:38.2%"></i><b>38.2</b></span></span>
+        </div>
+        <div class="ds-tr ds-tr--body" role="row">
+          <span class="ds-td ds-sym" role="cell">2454</span>
+          <span class="ds-td ds-name" role="cell">聯發科</span>
+          <span class="ds-td ds-c-num" role="cell">600</span>
+          <span class="ds-td ds-c-num js-price" role="cell">1,285</span>
+          <span class="ds-td ds-c-num" role="cell">771,000</span>
+          <span class="ds-td ds-c-num" role="cell"><span class="ds-pill ds-pill--gain">+12.1%</span></span>
+          <span class="ds-td" role="cell"><span class="ds-weight"><i style="width:18.4%"></i><b>18.4</b></span></span>
+        </div>
+        <div class="ds-tr ds-tr--body" role="row">
+          <span class="ds-td ds-sym" role="cell">0050</span>
+          <span class="ds-td ds-name" role="cell">元大台灣50</span>
+          <span class="ds-td ds-c-num" role="cell">3,000</span>
+          <span class="ds-td ds-c-num js-price" role="cell">218.4</span>
+          <span class="ds-td ds-c-num" role="cell">655,200</span>
+          <span class="ds-td ds-c-num" role="cell"><span class="ds-pill ds-pill--gain">+9.6%</span></span>
+          <span class="ds-td" role="cell"><span class="ds-weight"><i style="width:15.7%"></i><b>15.7</b></span></span>
+        </div>
+        <div class="ds-tr ds-tr--body" role="row">
+          <span class="ds-td ds-sym" role="cell">AAPL</span>
+          <span class="ds-td ds-name" role="cell">Apple Inc.</span>
+          <span class="ds-td ds-c-num" role="cell">180</span>
+          <span class="ds-td ds-c-num js-price" role="cell">241.06</span>
+          <span class="ds-td ds-c-num" role="cell">438,730</span>
+          <span class="ds-td ds-c-num" role="cell"><span class="ds-pill ds-pill--loss">−3.4%</span></span>
+          <span class="ds-td" role="cell"><span class="ds-weight"><i style="width:10.5%"></i><b>10.5</b></span></span>
+        </div>
+        <div class="ds-tr ds-tr--body" role="row">
+          <span class="ds-td ds-sym" role="cell">2412</span>
+          <span class="ds-td ds-name" role="cell">中華電</span>
+          <span class="ds-td ds-c-num" role="cell">2,000</span>
+          <span class="ds-td ds-c-num js-price" role="cell">128.5</span>
+          <span class="ds-td ds-c-num" role="cell">257,000</span>
+          <span class="ds-td ds-c-num" role="cell"><span class="ds-pill ds-pill--loss">−1.2%</span></span>
+          <span class="ds-td" role="cell"><span class="ds-weight"><i style="width:6.1%"></i><b>6.1</b></span></span>
+        </div>
+        <div class="ds-tr ds-tr--body" role="row">
+          <span class="ds-td ds-sym" role="cell">VOO</span>
+          <span class="ds-td ds-name" role="cell">Vanguard S&amp;P 500 ETF</span>
+          <span class="ds-td ds-c-num" role="cell">42</span>
+          <span class="ds-td ds-c-num js-price" role="cell">598.20</span>
+          <span class="ds-td ds-c-num" role="cell">253,924</span>
+          <span class="ds-td ds-c-num" role="cell"><span class="ds-pill ds-pill--gain">+21.7%</span></span>
+          <span class="ds-td" role="cell"><span class="ds-weight"><i style="width:6.1%"></i><b>6.1</b></span></span>
+        </div>
+        </div>
+      </div>
+    </div>
+    <p class="ds-prose" style="margin-top:var(--space-3)">
+      現價欄會偶爾閃一次——這是整套系統<strong>唯一</strong>的動態時刻，
+      對應行情板上的跳動。`prefers-reduced-motion` 會關掉它。
+    </p>
+  </section>
+
+  <!-- ================= 件 ================= -->
+  <section class="ds-section">
+    <div class="ds-section-head">
+      <h2 class="ds-section-title">件</h2>
+      <p class="ds-section-note">按鈕、輸入、狀態</p>
+    </div>
+    <div class="ds-grid-2">
+      <div class="ds-panel">
+        <span class="ds-panel-label">動作</span>
+        <div class="ds-cluster" style="margin-bottom:var(--space-4)">
+          <button class="ds-btn ds-btn--primary" type="button">儲存變更</button>
+          <button class="ds-btn ds-btn--quiet" type="button">重新整理價格</button>
+          <button class="ds-btn ds-btn--bare" type="button">取消</button>
+        </div>
+        <p class="ds-prose" style="margin:0">
+          按鈕說出按下去會發生什麼事：「儲存變更」，不是「送出」。
+          同一個動作從按鈕到提示訊息用同一個詞——按「發布」，看到的是「已發布」。
+        </p>
+      </div>
+
+      <div class="ds-panel">
+        <span class="ds-panel-label">輸入</span>
+        <label class="ds-field">
+          <span class="ds-field-label">目標比重</span>
+          <input class="ds-input" type="text" value="30.0" inputmode="decimal">
+        </label>
+        <label class="ds-field" style="margin-bottom:0">
+          <span class="ds-field-label">股數</span>
+          <input class="ds-input" type="text" placeholder="0" inputmode="numeric">
+        </label>
+      </div>
+
+      <div class="ds-panel">
+        <span class="ds-panel-label">空狀態</span>
+        <div class="ds-state">
+          <p><strong>這個投資組合還沒有交易紀錄</strong>
+          新增第一筆買進，或從券商 CSV 匯入既有紀錄。</p>
+          <div class="ds-cluster" style="justify-content:center">
+            <button class="ds-btn ds-btn--primary" type="button">新增交易</button>
+            <button class="ds-btn ds-btn--quiet" type="button">匯入 CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-panel">
+        <span class="ds-panel-label">錯誤</span>
+        <div class="ds-error">
+          <strong>報價來源沒有回應</strong>
+          顯示的是 08/07 收盤價。稍後再試，或改用手動輸入的價格。
+        </div>
+        <p class="ds-prose" style="margin:var(--space-3) 0 0">
+          錯誤訊息不道歉，也不含糊：說清楚發生什麼事、現在看到的是什麼、怎麼往下走。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ds-foot">
+    帳與板 · 投資組合追蹤器設計系統 · token 定義於 <code>src/assets/tokens.css</code>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  function bindSeg(attr, apply) {
+    document.querySelectorAll('[data-' + attr + ']').forEach(function (btn) {
+      if (btn.tagName !== 'BUTTON') return;
+      btn.addEventListener('click', function () {
+        var group = btn.parentElement;
+        group.querySelectorAll('button').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b === btn));
+        });
+        apply(btn.dataset[attr]);
+      });
+    });
+  }
+
+  bindSeg('mode', function (v) { root.classList.toggle('dark', v === 'dark'); });
+  bindSeg('polarity', function (v) { root.setAttribute('data-polarity', v); });
+
+  // 唯一的動態時刻：報價跳動
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var cells = Array.prototype.slice.call(document.querySelectorAll('.js-price'));
+  if (cells.length && !reduce.matches) {
+    setInterval(function () {
+      if (reduce.matches) return;
+      var cell = cells[Math.floor(Math.random() * cells.length)];
+      var cls = Math.random() > 0.5 ? 'ds-td--tick-up' : 'ds-td--tick-down';
+      cell.classList.remove('ds-td--tick-up', 'ds-td--tick-down');
+      void cell.offsetWidth;
+      cell.classList.add(cls);
+    }, 2600);
+  }
+})();
+</script>
+</body>
+</html>

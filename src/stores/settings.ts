@@ -3,6 +3,12 @@ import { ref, watch, type Ref } from 'vue'
 
 export type DisplayCurrency = 'USD' | 'TWD'
 
+// 可選幣別（供 header 設定彈窗與偏好設定頁共用）
+export const CURRENCY_OPTIONS: { value: DisplayCurrency; code: string; symbol: string; labelKey: string }[] = [
+  { value: 'USD', code: 'USD', symbol: '$', labelKey: 'currency.usd' },
+  { value: 'TWD', code: 'TWD', symbol: 'NT$', labelKey: 'currency.twd' },
+]
+
 interface ExchangeRateData {
   rate: number
   lastUpdated: string

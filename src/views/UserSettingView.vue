@@ -1,112 +1,172 @@
 <template>
-  <div class="max-w-md mx-auto">
-    <Card class="p-6 shadow-lg rounded-2xl">
-      <template #content>
-        <div class="flex flex-col gap-6">
-          <!-- 偏移值設定 -->
-          <div>
-            <label class="block text-muted-color mb-2 font-medium">投資組合偏移容忍值 (%)</label>
-            <InputNumber
-              v-model="threshold"
-              mode="decimal"
-              :min="0"
-              :max="50"
-              :step="0.1"
-              suffix="%"
-              class="w-full"
-            />
-            <small class="text-muted-color">
-              當實際配置偏離超過此百分比時，系統會發出警示。
-            </small>
-          </div>
+  <div class="preferences">
+    <p class="preferences__intro">{{ t('notifications.intro') }}</p>
 
-          <!-- 儲存按鈕 -->
-          <Button
-            label="儲存設定"
-            class="w-full mt-4"
-            @click="saveSettings"
+    <!-- 1. 通知信箱 -->
+    <section class="pref-section">
+      <div class="pref-section__head">
+        <h2 class="pref-section__title">{{ t('notifications.email.label') }}</h2>
+        <p class="pref-section__desc">{{ t('notifications.email.desc') }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="font-medium">{{ auth.user?.email }}</span>
+        <Button
+          :label="t('notifications.email.test')"
+          icon="pi pi-send"
+          severity="secondary"
+          size="small"
+          :loading="sending"
+          @click="sendEmail"
+        />
+      </div>
+    </section>
+
+    <div class="pref-divider"></div>
+
+    <!-- 2. 各投資組合的偏移警示（drift_threshold / enable_email_alert 存在 portfolios 表） -->
+    <section class="pref-section">
+      <div class="pref-section__head">
+        <h2 class="pref-section__title">{{ t('notifications.drift.label') }}</h2>
+        <p class="pref-section__desc">{{ t('emailAlertHint') }}</p>
+      </div>
+
+      <p v-if="!rows.length" class="pref-section__desc">{{ t('notifications.drift.empty') }}</p>
+
+      <div v-else class="drift-list">
+        <div v-for="row in rows" :key="row.id" class="drift-row">
+          <span class="drift-row__name">{{ row.name }}</span>
+          <InputNumber
+            v-model="row.drift_threshold"
+            :min="0"
+            :max="100"
+            :step="0.5"
+            :minFractionDigits="0"
+            :maxFractionDigits="2"
+            suffix="%"
+            showButtons
+            :inputId="`drift-${row.id}`"
+            :aria-label="`${row.name} ${t('driftThreshold')}`"
+            inputClass="w-24"
+            :disabled="!row.enable_email_alert"
           />
+          <ToggleSwitch v-model="row.enable_email_alert" :aria-label="`${row.name} ${t('emailAlert')}`" />
         </div>
-      </template>
-    </Card>
+      </div>
 
-    <Button @click="sendEmail">發送測試郵件</Button>
-    <Button @click="checkPortfolioDrift">投資組合偏移檢查測試</Button>
+      <div v-if="rows.length">
+        <Button :label="t('save')" :disabled="!dirty.length" :loading="saving" @click="save" />
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import api from '@/utils/api.js';
-import * as toast from '@/composables/toast';
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ToggleSwitch from 'primevue/toggleswitch'
+import api from '@/utils/api.js'
+import * as toast from '@/composables/toast'
+import { useAuthStore } from '@/stores/auth'
+import { usePortfolioStore } from '@/stores/portfolio'
+
 const { t } = useI18n()
+const auth = useAuthStore()
+const portfolioStore = usePortfolioStore()
 
-import { useAuthStore } from "@/stores/auth";
-const auth = useAuthStore();
+// 編輯用的本地副本；store 更新（例如儲存後）時重新同步
+const pick = (p) => ({ id: p.id, name: p.name, description: p.description, drift_threshold: p.drift_threshold ?? 5, enable_email_alert: p.enable_email_alert ?? true })
+const rows = ref([])
+watch(() => portfolioStore.portfolios, (list) => { rows.value = (list || []).map(pick) }, { immediate: true, deep: true })
 
-const threshold = ref(0);
+const dirty = computed(() => rows.value.filter((row) => {
+  const orig = pick(portfolioStore.portfolios.find((p) => p.id === row.id) || {})
+  return row.drift_threshold !== orig.drift_threshold || row.enable_email_alert !== orig.enable_email_alert
+}))
 
-// 讀取現有設定
-const loadSettings = async () => {
-  try {
-    const data = await api.get(`/api/user/settings?uid=${auth.user?.uid}`);
-    console.log('Loaded settings:', data);
-    threshold.value = parseFloat(data.settings.drift_threshold * 100) || 0;
-  } catch (e) {
-    toast.error(t('loadSettingsError'));
-  }
-};
-
-// 儲存設定
-const saveSettings = async () => {
-  try {
-    await api.put(`/api/user/settings`, {
-      uid: auth.user?.uid,
-      settings: {
-        drift_threshold: threshold.value / 100,
-      }
-    });
-    toast.success(t('settingsSaved'));
-  } catch (e) {
-    toast.error(t('saveSettingsError'));
-  }
-};
-
-// 測試投資組合偏移檢查
-const checkPortfolioDrift = async () => {
-    try {
-        await api.post('/api/user/send-drift-alert-test');
-        toast.success('Portfolio drift check email sent.');
-    } catch (e) {
-        toast.error('Error sending portfolio drift check email.');
-    }
-};  
-
-const sendEmail = async () => {
-    try {
-        await api.post('/api/user/send-test-email', {
-          to: auth.user?.email
-        });
-        toast.success(t('testEmailSent'));
-    } catch (e) {
-        toast.error(t('testEmailError'));
-    }
-};
-
-// 如果有用戶登入
-if (auth.user) {
-    loadSettings(); // 取得使用者設定
-} else {
-    console.log('No user is logged in');
+const saving = ref(false)
+const save = async () => {
+  saving.value = true
+  // ponytail: editPortfolio 內部吞掉錯誤只 console.error，這裡無法得知個別失敗；要精確回報需讓它 rethrow
+  await Promise.all(dirty.value.map(({ id, ...data }) => portfolioStore.editPortfolio(id, data)))
+  saving.value = false
+  toast.success(t('settingsSaved'))
 }
 
-// 監聽 auth.user 的變化，如果有用戶變化則取得使用者設定
-watch(() => auth.user, (newUser) => {
-    if (newUser) {
-       loadSettings();
-    }
-})
-
-
+const sending = ref(false)
+const sendEmail = async () => {
+  sending.value = true
+  try {
+    await api.post('/api/user/send-test-email', { to: auth.user?.email })
+    toast.success(t('notifications.email.sent'))
+  } catch (e) {
+    toast.error(t('notifications.email.error'))
+  } finally {
+    sending.value = false
+  }
+}
 </script>
+
+<style scoped>
+.preferences {
+  max-width: 62rem;
+}
+
+.preferences__intro {
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: var(--p-text-muted-color);
+}
+
+.pref-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.pref-section__title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.pref-section__desc {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+}
+
+.pref-divider {
+  height: 1px;
+  background: var(--p-content-border-color);
+  margin: 1.5rem 0;
+}
+
+.drift-list {
+  max-width: 36rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.drift-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--p-surface-card);
+}
+
+.drift-row + .drift-row {
+  border-top: 1px solid var(--p-content-border-color);
+}
+
+.drift-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+</style>

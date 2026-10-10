@@ -52,6 +52,27 @@ export const useCurrency = () => {
   }
 
   /**
+   * 依來源幣別轉成 USD。
+   *
+   * 資料層（store / computed）一律以美金保存金額，顯示時才由 formatAmount* 系列
+   * 轉成使用者的顯示幣別。若在資料層就轉成顯示幣別，之後再餵給 formatAmount*
+   * 會被轉第二次（formatAmount 內部會呼叫 convertAmount）。
+   */
+  const convertAmountToUsd = (
+    amount: number | null | undefined,
+    sourceCurrency: string | null | undefined = 'USD'
+  ): number => {
+    if (amount == null || isNaN(amount)) return 0
+
+    const fromCurrency = normalizeCurrency(sourceCurrency)
+
+    if (fromCurrency === 'USD') return amount
+    if (fromCurrency === 'TWD') return exchangeRate.value > 0 ? amount / exchangeRate.value : amount
+
+    return amount
+  }
+
+  /**
    * 轉換金額（USD -> 當前幣別）
    * @param usdAmount 美金金額
    * @returns 轉換後的金額數字
@@ -199,6 +220,33 @@ export const useCurrency = () => {
   }
 
   /**
+   * 把「數字 + 幣別代碼」拆成三段，讓表格能把小數與幣別代碼用較小字級排版。
+   * 例如 1,234.56 USD -> { main: '1,234', fraction: '.56', code: 'USD' }
+   * @param value 美金金額
+   * @param mode 'amount' 走 formatAmountWithCode，'price' 走 formatPriceWithCode（小數位較多）
+   */
+  const splitDisplayAmount = (
+    value: number | null | undefined,
+    mode: 'amount' | 'price' = 'amount'
+  ): { main: string; fraction: string; code: string } => {
+    const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
+    if (formatted === '--') {
+      return { main: '--', fraction: '', code: '' }
+    }
+
+    const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+    if (!match) {
+      return { main: formatted, fraction: '', code: '' }
+    }
+
+    return {
+      main: match[1] || formatted,
+      fraction: match[2] || '',
+      code: match[3] || ''
+    }
+  }
+
+  /**
    * 取得匯率顯示文字
    * @returns 匯率資訊字串
    */
@@ -224,11 +272,13 @@ export const useCurrency = () => {
     // Methods
     convertAmount,
     convertAmountFromCurrency,
+    convertAmountToUsd,
     formatAmount,
     formatAmountWithCode,
     formatChange,
     formatPrice,
     formatPriceWithCode,
+    splitDisplayAmount,
     toggleCurrency,
     fetchExchangeRate,
     setExchangeRate,

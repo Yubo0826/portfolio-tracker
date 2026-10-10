@@ -1,6 +1,7 @@
 @import './base.css';
 @import "tailwindcss";
 @import "tailwindcss-primeui";
+@import './dark-variants.css';
 
 /*
   Tailwind CSS v4 預設的 dark: variant 是基於 OS 系統層級的 prefers-color-scheme: dark media query，而不是你手動加的 .dark class。所以即使你的應用程式切換到 light mode（移除 .dark class），只要使用者的系統設定是 dark mode，dark: classes 就會繼續觸發。
@@ -10,7 +11,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --p-togglebutton-background: var(--p-surface-900);
+  /* SelectButton／ToggleButton：未選取的底色（軌道）比卡片暗一階，選取的那一顆再亮回來 */
+  --p-togglebutton-background: var(--p-surface-950);
+  --p-togglebutton-checked-background: var(--p-surface-950);
+  --p-togglebutton-hover-background: var(--p-surface-950);
+  --p-togglebutton-border-color: var(--p-surface-700);
+  --p-togglebutton-checked-border-color: var(--p-surface-700);
+  --p-togglebutton-content-checked-background: var(--p-surface-700);
 }
 
 #app {

@@ -119,6 +119,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import * as toast from '@/composables/toast'
+import { buildSymbolCandidates, normalizeSymbol } from '@/utils/symbol'
 import InputText from 'primevue/inputtext'
 import Papa from 'papaparse'
 import api from '@/utils/api'
@@ -236,7 +237,7 @@ function normalizeData(rows) {
 
     return {
       date: normalizedDate,
-      symbol,
+      symbol: normalizeSymbol(symbol),
       name,
       assetType: assettype,
       shares: numShares,
@@ -414,30 +415,53 @@ async function confirmImport() {
   }
 
   const symbolList = [...new Set(previewData.value.map(trade => trade.symbol))]
-  let nonexistentSymbols = []
+  const nonexistentSymbols = []
   const symbolDetails = {}
 
-  // 查詢每個 symbol 的詳細資訊 & 蒐集不存在的 symbol
-  for (const symbol of symbolList) {
-    try {
-      const query = await api.get('/api/yahoo/symbol?query=' + symbol)
-      if (!query || query.length === 0) {
-        nonexistentSymbols.push(symbol)
-        continue
-      }
-      const matched =
-        query.find(q => q.exchange === 'NMS' && q.quoteType === 'EQUITY') ||
-        query.find(q => q.quoteType === 'EQUITY') ||
-        query[0]
+  // 同一檔標的以第一筆出現的幣別為準，用來判斷是否為缺後綴的台股代號
+  const currencyBySymbol = {}
+  for (const trade of previewData.value) {
+    if (!currencyBySymbol[trade.symbol]) currencyBySymbol[trade.symbol] = trade.currency
+  }
 
-      symbolDetails[symbol] = {
-        name: matched.longname || matched.shortname || '',
-        assetType: matched.quoteType || '',
-      }
-    } catch (err) {
-      console.error('查詢 symbol 錯誤:', symbol, err)
-      nonexistentSymbols.push(symbol)
+  const lookupSymbol = async candidate => {
+    const query = await api.get('/api/yahoo/symbol?query=' + encodeURIComponent(candidate))
+    if (!Array.isArray(query) || query.length === 0) return null
+
+    // 完全相符的代號優先。查「0050」時 Yahoo 會一併回傳 0050.KL、005070.KS 等
+    // 同名標的，只靠 quoteType 挑選會抓到錯誤的公司。
+    const matched =
+      query.find(q => normalizeSymbol(q.symbol) === candidate) ||
+      query.find(q => q.exchange === 'NMS' && q.quoteType === 'EQUITY') ||
+      query.find(q => q.quoteType === 'EQUITY') ||
+      query[0]
+
+    if (!matched?.symbol) return null
+
+    return {
+      symbol: normalizeSymbol(matched.symbol),
+      name: matched.longname || matched.shortname || '',
+      assetType: matched.quoteType || '',
     }
+  }
+
+  // 查詢每個 symbol 的詳細資訊 & 蒐集不存在的 symbol
+  // 台股裸代號（0050、00830…）Yahoo 查不到，依序試 .TW / .TWO 並把補完的代號寫回
+  for (const symbol of symbolList) {
+    const candidates = buildSymbolCandidates(symbol, currencyBySymbol[symbol])
+    let resolved = null
+
+    for (const candidate of candidates) {
+      try {
+        resolved = await lookupSymbol(candidate)
+      } catch (err) {
+        console.error('查詢 symbol 錯誤:', candidate, err)
+      }
+      if (resolved) break
+    }
+
+    if (resolved) symbolDetails[symbol] = resolved
+    else nonexistentSymbols.push(symbol)
   }
 
   // 如果有不存在的 symbol，顯示錯誤並中止匯入
@@ -450,7 +474,7 @@ async function confirmImport() {
   previewData.value = previewData.value.map(trade => {
     const details = symbolDetails[trade.symbol]
     return details
-      ? { ...trade, name: details.name, assetType: details.assetType }
+      ? { ...trade, symbol: details.symbol, name: details.name, assetType: details.assetType }
       : trade
   })
 

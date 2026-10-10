@@ -116,20 +116,34 @@ export default definePreset(Aura, {
             950: '{zinc.950}'
           },
         }
-      },
-    // 可以進一步針對特定元件覆寫樣式，但失效目前找不到原因
-    components: {
-      button: {
-        background: '{primary.color}',
-        color:      '{primary.contrastColor}',
-        hoverBackground: '{primary.hoverColor}',
-        outlined: {
-          border: {
-            color: '{primary.color}'
-          },
-          hoverBorderColor: '{primary.hoverColor}'
+      }
+  },
+  // 元件覆寫必須放在 semantic 外層才會生效
+  // 實心主色按鈕改用 contrast 配色（淺色黑底、深色白底），與 Header「新增交易」一致；值取自 Aura button 的 contrast token
+  components: {
+    button: {
+      colorScheme: {
+        light: {
+          root: {
+            primary: {
+              background: '{surface.950}', hoverBackground: '{surface.900}', activeBackground: '{surface.800}',
+              borderColor: '{surface.950}', hoverBorderColor: '{surface.900}', activeBorderColor: '{surface.800}',
+              color: '{surface.0}', hoverColor: '{surface.0}', activeColor: '{surface.0}',
+              focusRing: { color: '{surface.950}', shadow: 'none' }
+            }
+          }
+        },
+        dark: {
+          root: {
+            primary: {
+              background: '{surface.0}', hoverBackground: '{surface.100}', activeBackground: '{surface.200}',
+              borderColor: '{surface.0}', hoverBorderColor: '{surface.100}', activeBorderColor: '{surface.200}',
+              color: '{surface.950}', hoverColor: '{surface.950}', activeColor: '{surface.950}',
+              focusRing: { color: '{surface.0}', shadow: 'none' }
+            }
+          }
         }
-      },
+      }
     }
   }
 })

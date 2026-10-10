@@ -45,17 +45,15 @@
                             class="asset-growth-pill"
                             :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
                           >
-                            <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"></i>
-                            {{ formatSignedNumber(growthRateNumber) }}%
+                            <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
+                            {{ Math.abs(growthRateNumber).toFixed(2) }}%
                             <span>({{ formatSignedNumber(change) }})</span>
                           </span>
-                          <span class="text-xs font-semibold uppercase tracking-wide text-muted-color">{{ selectedRangeLabel }}</span>
                         </div>
 
                         <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
                           <span>--</span>
                           <span>(--)</span>
-                          <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedRangeLabel }}</span>
                         </div>
                       </div>
                     </div>
@@ -428,8 +426,12 @@ import * as toast from '@/composables/toast'
 import { useWatchlistStore } from '@/stores/watchlist'
 
 const { t, locale } = useI18n()
-const { isDark } = useTheme()
-const { formatPrice, formatPriceWithCode, displayCurrency } = useCurrency()
+const { isDark, chartPalette } = useTheme()
+const { formatPrice: formatUsdPrice, formatPriceWithCode: formatUsdPriceWithCode, convertAmountToUsd, displayCurrency } = useCurrency()
+// Yahoo 回傳的是標的原幣價格（0050.TW 是 TWD），formatPrice* 預設輸入為 USD，先轉回 USD 避免台股被再乘一次匯率
+const toUsd = (value) => (value == null ? value : convertAmountToUsd(value, info.currency))
+const formatPrice = (value) => formatUsdPrice(toUsd(value))
+const formatPriceWithCode = (value) => formatUsdPriceWithCode(toUsd(value))
 
 const route = useRoute()
 const router = useRouter()
@@ -525,6 +527,7 @@ const info = reactive({
   fiftyTwoWeekLow: 0,
   fullExchangeName: '',
   regularMarketVolume: 0,
+  currency: '',
 })
 
 const companyInfo = reactive({
@@ -560,18 +563,6 @@ const chartTypeOptions = computed(() => [
   { label: t('klineChart'), value: 'candlestick', icon: 'pi pi-chart-bar' },
 ])
 
-const periodLabelMap = {
-  '1d': '1D',
-  '7d': '7D',
-  '1mo': '1M',
-  '3mo': '3M',
-  '6mo': '6M',
-  ytd: 'YTD',
-  '1y': '1Y',
-  '5y': '5Y',
-}
-
-const selectedRangeLabel = computed(() => periodLabelMap[currentRange.value] || String(currentRange.value || '').toUpperCase())
 
 const rangeOptions = computed(() => ([
   { label: t('period1d'), value: '1d' },
@@ -1120,10 +1111,7 @@ const areaSeries = computed(() => {
 })
 
 const highAreaOptions = computed(() => {
-  const axisColor = isDark.value ? '#9ca3af' : '#999'
-  const gridColor = isDark.value ? '#374151' : '#eee'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg } = chartPalette.value
 
   const isIntradayView = currentRange.value === '1d'
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
@@ -1191,10 +1179,7 @@ const highAreaOptions = computed(() => {
 })
 
 const highCandleOptions = computed(() => {
-  const axisColor = isDark.value ? '#9ca3af' : '#999'
-  const gridColor = isDark.value ? '#374151' : '#eee'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg } = chartPalette.value
   const isIntradayView = currentRange.value === '1d'
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
@@ -1270,9 +1255,7 @@ const sectorWeightingsData = computed(() => sectorWeightings.value
 
 const sectorTreemapOptions = computed(() => {
   const labelColor = '#ffffff'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
-  const borderColor = isDark.value ? '#1d1e1e' : '#ffffff'
+  const { tooltipBg, tooltipFg, border: borderColor } = chartPalette.value
 
   return {
     chart: { type: 'treemap', backgroundColor: 'transparent', animation: { duration: 400 } },
@@ -1344,9 +1327,7 @@ const topHoldingsData = computed(() => {
 
 const topHoldingsTreemapOptions = computed(() => {
   const labelColor = '#ffffff'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
-  const borderColor = isDark.value ? '#1d1e1e' : '#ffffff'
+  const { tooltipBg, tooltipFg, border: borderColor } = chartPalette.value
 
   return {
     chart: { type: 'treemap', backgroundColor: 'transparent', animation: { duration: 400 } },
@@ -1482,11 +1463,13 @@ async function fetchChartData(targetSymbol) {
       regularMarketDayHigh: meta.regularMarketDayHigh || 0,
       regularMarketDayLow: meta.regularMarketDayLow || 0,
       regularMarketTime: meta.regularMarketTime || '',
-      chartPreviousClose: meta.chartPreviousClose || 0,
+      // meta.chartPreviousClose 是整段 5 年區間起點前的收盤價，不是昨收；改取倒數第二根日 K 的收盤
+      chartPreviousClose: quotes.map(q => q?.close).filter(Number.isFinite).at(-2) || 0,
       fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh || 0,
       fiftyTwoWeekLow: meta.fiftyTwoWeekLow || 0,
       fullExchangeName: meta.fullExchangeName || '',
       regularMarketVolume: meta.regularMarketVolume || 0,
+      currency: meta.currency || '',
     })
 
     rawQuotes.value = quotes
@@ -1632,25 +1615,26 @@ watch(compareSymbols, () => {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.85rem;
-  font-weight: 700;
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1;
 }
 
 .asset-growth-pill i {
-  font-size: 0.7rem;
+  font-size: 0.85em;
 }
 
+/* 實色底＋深色字，淺色／深色主題共用同一組色 */
 .asset-growth-pill--up {
-  color: #047857;
-  background: rgba(16, 185, 129, 0.14);
+  color: #14381f;
+  background: #80c990;
 }
 
 .asset-growth-pill--down {
-  color: #be123c;
-  background: rgba(244, 63, 94, 0.14);
+  color: #4c1019;
+  background: #f2a3ab;
 }
 
 .compare-chip {

@@ -139,7 +139,7 @@ import { useAuthStore } from "@/stores/auth";
 import { usePortfolioStore } from "@/stores/portfolio";
 
 import { useTheme } from '@/composables/useTheme.js'
-const { isDark } = useTheme()
+const { chartPalette } = useTheme()
 
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
@@ -162,15 +162,13 @@ const result = ref(null);
 const isLoading = ref(false);
 const lineData = ref([]);
 const highLineOptions = computed(() => {
-  const axisColor = isDark.value ? '#9ca3af' : '#999'
-  const gridColor = isDark.value ? '#374151' : '#eee'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg, legend: legendColor } =
+    chartPalette.value
   return {
     chart: { type: 'line', backgroundColor: 'transparent', animation: { duration: 300 } },
     title: { text: null },
     credits: { enabled: false },
-    legend: { itemStyle: { color: isDark.value ? '#d1d5db' : '#374151' } },
+    legend: { itemStyle: { color: legendColor } },
     xAxis: {
       type: 'datetime',
       labels: { datetimeUTC: false, style: { color: axisColor } },
@@ -336,10 +334,8 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
 // 年度報酬率圖表設定
 const annualReturnsData = ref([]);
 const highBarOptions = computed(() => {
-  const axisColor = isDark.value ? '#9ca3af' : '#999'
-  const gridColor = isDark.value ? '#374151' : '#eee'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg, legend: legendColor } =
+    chartPalette.value
   return {
     chart: { type: 'column', backgroundColor: 'transparent' },
     title: { text: null },
@@ -348,7 +344,7 @@ const highBarOptions = computed(() => {
     xAxis: {
       categories: annualReturnsData.value.map(r => r.year.toString()),
       title: { text: t('year'), style: { color: axisColor } },
-      labels: { style: { fontWeight: '600', color: isDark.value ? '#d1d5db' : '#374151' } },
+      labels: { style: { fontWeight: '600', color: legendColor } },
     },
     yAxis: {
       labels: {

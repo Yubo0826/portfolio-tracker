@@ -139,7 +139,9 @@ describe('Holdings Store', () => {
       expect(store.list[1].actualRatio).toBe('25.00')
     })
 
-    it('應該根據 holding 幣別轉成目前顯示幣別', () => {
+    // 資料層一律存美金，顯示幣別的轉換由 formatAmount* 在畫面上做。
+    // 若這裡改回存顯示幣別，畫面會被轉第二次（formatAmount 內部也會轉一次）。
+    it('應該將各幣別持股一律換算成美金保存，且不受顯示幣別影響', () => {
       const store = useHoldingsStore()
       const settingsStore = useSettingsStore()
 
@@ -175,23 +177,25 @@ describe('Holdings Store', () => {
 
       store.setHoldings(mockData)
 
+      // 美金持股維持原值
       expect(store.list[0]).toMatchObject({
         currency: 'USD',
         nativeCurrentPrice: 180,
-        avgCost: 4800,
-        currentPrice: 5760,
-        totalCost: 9600,
-        currentValue: 11520,
+        avgCost: 150,
+        currentPrice: 180,
+        totalCost: 300,
+        currentValue: 360,
       })
+      // 台幣持股除以匯率換成美金，nativeCurrentPrice 保留原始幣別價格
       expect(store.list[1]).toMatchObject({
         currency: 'TWD',
         nativeCurrentPrice: 120,
-        avgCost: 100,
-        currentPrice: 120,
-        totalCost: 100,
-        currentValue: 120,
+        avgCost: 3.13,
+        currentPrice: 3.75,
+        totalCost: 3.13,
+        currentValue: 3.75,
       })
-      expect(store.list.totalValue).toBe(11640)
+      expect(store.list.totalValue).toBe(363.75)
     })
   })
 

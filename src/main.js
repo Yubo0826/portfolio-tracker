@@ -10,8 +10,9 @@ import router from './router'
 // i18n Setup
 import { createI18n } from 'vue-i18n'
 import messages from './i18n/index.js'
+import { readStoredLocale } from './composables/useLocale.js'
 
-const lang = sessionStorage.getItem('lang') || 'zh'
+const lang = readStoredLocale()
 const i18n = createI18n({
   legacy: false,
   locale: lang,

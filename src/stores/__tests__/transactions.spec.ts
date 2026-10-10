@@ -253,6 +253,18 @@ describe('Transactions Store', () => {
       expect(store.canSell('GOOGL', 10)).toBe(false)
     })
 
+    it('編輯已全數賣出的賣出交易時，應把原本賣出的股數加回', () => {
+      const store = useTransactionsStore()
+      const holdingsStore = useHoldingsStore()
+
+      holdingsStore.list = []
+      store.list = [{ id: 's1', symbol: '00922.TW', shares: 8000, transactionType: 'sell' } as any]
+
+      expect(store.canSell('00922.TW', 8000, 's1')).toBe(true)
+      expect(store.canSell('00922.TW', 8001, 's1')).toBe(false)
+      expect(store.canSell('00922.TW', 8000)).toBe(false)
+    })
+
     it('應該忽略大小寫', () => {
       const store = useTransactionsStore()
       const holdingsStore = useHoldingsStore()

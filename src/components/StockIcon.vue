@@ -1,9 +1,8 @@
 <template>
   <img
-    v-if="!showFallback"
+    v-if="imageSrc"
     :src="imageSrc"
     :alt="`${symbolText} logo`"
-    loading="lazy"
     decoding="async"
     @error="handleImageError"
     class="w-8 h-8 mr-2 rounded-full object-cover"
@@ -14,12 +13,18 @@
     class="w-8 h-8 mr-2 rounded-full bg-emphasis text-muted-color flex items-center justify-center text-sm font-semibold leading-none"
     :title="symbolText"
   >
-    {{ fallbackText }}
+    <span v-if="resolved">{{ fallbackText }}</span>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import {
+  LOGO_SOURCES,
+  NOT_FOUND,
+  getCachedSourceIndex,
+  resolveStockLogo,
+} from '@/utils/stockLogo'
 
 const props = defineProps({
   symbol: {
@@ -28,14 +33,10 @@ const props = defineProps({
   },
 })
 
-// Tried in order; on load error we advance to the next source before giving up.
-const LOGO_SOURCES = [
-  (symbol) => `https://storage.googleapis.com/iex/api/logos/${symbol}.png`,
-  (symbol) => `https://financialmodelingprep.com/image-stock/${symbol}.png`,
-]
-
-const showFallback = ref(false)
-const sourceIndex = ref(0)
+const sourceIndex = ref(NOT_FOUND)
+// False only while we are probing a symbol we have never seen; keeps the
+// placeholder blank instead of flashing initials before the logo lands.
+const resolved = ref(true)
 
 const symbolText = computed(() => (props.symbol || '').toUpperCase())
 
@@ -45,20 +46,39 @@ const fallbackText = computed(() => {
   return cleaned.slice(0, 2)
 })
 
-const imageSrc = computed(() => LOGO_SOURCES[sourceIndex.value]?.(props.symbol) ?? '')
+const imageSrc = computed(() => {
+  if (sourceIndex.value === NOT_FOUND || !symbolText.value) return ''
+  return LOGO_SOURCES[sourceIndex.value](symbolText.value)
+})
 
-const resetSource = () => {
-  sourceIndex.value = 0
-  showFallback.value = false
-}
-
+// The <img> can still fail even for a cached hit (expired CDN entry): fall
+// through to the remaining sources and let the cache be rewritten.
 const handleImageError = () => {
   if (sourceIndex.value < LOGO_SOURCES.length - 1) {
     sourceIndex.value += 1
   } else {
-    showFallback.value = true
+    sourceIndex.value = NOT_FOUND
   }
 }
 
-watch(() => props.symbol, resetSource, { immediate: true })
+watch(
+  () => props.symbol,
+  async (symbol) => {
+    const cached = getCachedSourceIndex(symbol)
+    if (cached !== undefined) {
+      sourceIndex.value = cached
+      resolved.value = true
+      return
+    }
+
+    sourceIndex.value = NOT_FOUND
+    resolved.value = false
+    const index = await resolveStockLogo(symbol)
+    // A newer symbol may have been assigned while we were probing.
+    if (symbol !== props.symbol) return
+    sourceIndex.value = index
+    resolved.value = true
+  },
+  { immediate: true }
+)
 </script>

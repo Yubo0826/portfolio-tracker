@@ -12,8 +12,8 @@ portfolio:
   en: Portfolio
   zh: 投資組合
 portfolioManagement:
-  en: Portfolio Management
-  zh: 投資組合管理
+  en: Portfolios
+  zh: 投資組合
 analysis:
   en: Analysis
   zh: 分析
@@ -50,9 +50,18 @@ currentPrice:
 currentValue:
   en: Current Value
   zh: 現值
+holdingsCount:
+  en: Holdings
+  zh: 持有檔數
+mixedCurrencyHint:
+  en: This portfolio holds assets in a currency that is not yet supported for conversion (only USD and TWD are supported), so its market value cannot be calculated.
+  zh: 此投資組合含有尚未支援換算的幣別持股（目前僅支援美元與台幣），因此無法計算市值。
 totalProfit:
   en: Total P/L
   zh: 累計損益
+returnWithDividends:
+  en: Return incl. Dividends
+  zh: 含息報酬
 noData:
   en: No data Found
   zh: 目前沒有資料
@@ -71,7 +80,7 @@ refresh:
   zh: 重新整理
 holding:
   en: Holdings
-  zh: 當前持有
+  zh: 持有資產
 Notification:
   en: Notification
   zh: 通知
@@ -110,9 +119,18 @@ date:
 add:
   en: Add
   zh: 新增
+create:
+  en: Create
+  zh: 建立
 price:
   en: Price
   zh: 價格
+unitPrice:
+  en: Unit Price
+  zh: 單價
+tradeValue:
+  en: Trade Value
+  zh: 價金
 fee:
   en: Fee
   zh: 手續費
@@ -204,8 +222,8 @@ deletePortfolioConfirm:
   en: Are you sure you want to delete portfolio "{name}"? This action cannot be undone.
   zh: 確定要刪除投資組合「{name}」嗎？此操作無法復原。
 allPortfolios:
-  en: Portfolio List
-  zh: 投資組合列表
+  en: Portfolios
+  zh: 投資組合
 currentPortfolio:
   en: "Current Portfolio :"
   zh: "目前投資組合 :"
@@ -221,6 +239,9 @@ collapseSidebar:
 expandSidebar:
   en: Expand sidebar
   zh: 展開側邊欄
+navSectionMain:
+  en: Menu
+  zh: 選單
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
@@ -245,6 +266,12 @@ recentlyUsed:
 managePortfolio:
   en: Manage
   zh: 管理
+recentSearches:
+  en: Recent searches
+  zh: 最近搜尋紀錄
+noRecentSearches:
+  en: No recent searches
+  zh: 尚無搜尋紀錄
 openPortfolio:
   en: Open portfolio...
   zh: 開啟投資組合...
@@ -262,7 +289,7 @@ dashboard:
   zh: 儀表板
 holdings:
   en: Holdings
-  zh: 當前持有
+  zh: 持有資產
 transactions:
   en: Transactions
   zh: 交易
@@ -331,6 +358,36 @@ irr:
 xirrHint:
   en: Internal Rate of Return (IRR) - Annualized return considering all cash flows (buys, sells, dividends) with their exact dates and current holdings value.
   zh: 內部報酬率 (IRR) - 考慮所有現金流（買入、賣出、股息）及其確切日期和當前持倉市值的年化報酬率。
+costBasis:
+  en: Cost Basis
+  zh: 持倉成本
+marketValue:
+  en: Market Value
+  zh: 目前市值
+winLoss:
+  en: Gainers / Losers
+  zh: 獲利／虧損檔數
+winLossValue:
+  en: '{up} / {down}'
+  zh: '{up} / {down}'
+realizedPlusDividends:
+  en: Realized + Dividends
+  zh: 已實現＋股息
+sellTrades:
+  en: Sell Trades
+  zh: 賣出筆數
+investingSince:
+  en: Investing Since
+  zh: 投資起始
+yearsShort:
+  en: '{n} yrs'
+  zh: '{n} 年'
+totalInvested:
+  en: Total Invested
+  zh: 累計投入
+xirrHintAccount:
+  en: 'Internal Rate of Return (IRR) - Annualized return based on your recorded deposits and withdrawals, against holdings value plus uninvested cash. Buys, sells and dividends are internal transfers and are not counted as new money.'
+  zh: '內部報酬率 (IRR) - 依你記錄的存入／提出資金，對比持股市值加上未投入現金計算的年化報酬率。買入、賣出、股利屬帳戶內部搬移，不計為新資金。'
 applyNewPortfolioImmediately:
   en: Apply new portfolio immediately
   zh: 新增後立即套用
@@ -566,6 +623,12 @@ companyWebsite:
 companySummary:
   en: Summary
   zh: 公司簡介
+assetSymbolNotFound:
+  en: "Symbol \"{symbol}\" not found."
+  zh: "找不到代號「{symbol}」的資料。"
+assetSymbolLoadFailed:
+  en: Failed to load data for this symbol.
+  zh: 無法載入此代號的資料。
 companyInfoLoadFailed:
   en: Failed to load company profile.
   zh: 公司基本資訊載入失敗。
@@ -642,12 +705,45 @@ actualPercentage:
 targetPercentage:
   en: Target %
   zh: 目標比例
+setTargetsSubtitle:
+  en: Set the ideal allocation for each asset
+  zh: 設定每檔資產的理想配置比例
+distributeEven:
+  en: Distribute Evenly
+  zh: 平均分配
+remainingUnder:
+  en: remaining
+  zh: 尚待配置
+remainingOver:
+  en: over
+  zh: 超出配置
+customAssetTag:
+  en: Custom
+  zh: 自訂標的
+quickPick:
+  en: Quick pick from your holdings
+  zh: 從現有持股快速選擇
+allNamedInAllocation:
+  en: All holdings are already in the allocation
+  zh: 所有持股皆已加入配置
+allocEmpty:
+  en: No assets yet — add one below to get started
+  zh: 尚未加入任何標的，從下方新增開始
+targetPreview:
+  en: Target
+  zh: 目標
 portfolioNoHoldingsTitle:
   en: This portfolio has no holdings yet
   zh: 這個投資組合還沒有投資項目
 portfolioNoHoldingsDesc:
   en: Add holdings to see performance and manage assets.
   zh: 新增投資項目，即可查看成效及管理資產
+dashboardChartEmptyTitle:
+  en: No trades yet
+  zh: 還沒有交易紀錄
+dashboardChartEmptyDesc:
+  en: Add your first trade or import past records, and your portfolio's value trend will appear here.
+  zh: 新增第一筆交易或匯入歷史紀錄後，這裡會顯示投資組合的總價值走勢
 diffFromTargetTitle:
   en: Difference from target (needs adjustment)
   zh: 與目標的差值（需調整）
@@ -662,6 +758,9 @@ diffLegend:
 currentAsset:
   en: Asset
   zh: 資產
+backToHoldings:
+  en: Back to Holdings
+  zh: 返回持股
 allocationRatio:
   en: Proportion
   zh: 配置比例
@@ -1180,6 +1279,8 @@ common:
     en: Update
     zh: 更新
 
+# Header 設定彈窗（語言 / 貨幣 / 版面）
+
 # 幣別切換
 currency:
   label:
@@ -1203,6 +1304,115 @@ currency:
   lastUpdated:
     en: "Last updated: {time}"
     zh: "最後更新：{time}"
+
+# 偏好設定頁
+preferences:
+  title:
+    en: Preferences
+    zh: 偏好設定
+  intro:
+    en: Customize how StockBar looks and behaves.
+    zh: 自訂 StockBar 的外觀與行為。
+  colorMode:
+    label:
+      en: Color mode
+      zh: 顯示模式
+    desc:
+      en: Choose a color mode.
+      zh: 選擇淺色、深色或跟隨系統。
+    light:
+      en: Light
+      zh: 淺色
+    dark:
+      en: Dark
+      zh: 深色
+    system:
+      en: System
+      zh: 跟隨系統
+  darkStyle:
+    label:
+      en: Dark style
+      zh: 深色風格
+    desc:
+      en: Choose the dark mode palette. Applies whenever dark mode is active.
+      zh: 選擇深色模式的配色，套用於任何進入深色的情況。
+    default:
+      en: Default
+      zh: 預設
+    defaultHint:
+      en: Neutral black with soft gray cards
+      zh: 中性黑底配灰色卡片
+    dim:
+      en: Soft
+      zh: 柔和
+    dimHint:
+      en: Muted blue-gray, easier on the eyes
+      zh: 藍灰色調，長時間閱讀較不刺眼
+    standard:
+      en: Standard
+      zh: 標準
+    standardHint:
+      en: Deep blue-black, stronger contrast
+      zh: 藍黑底色，對比更強
+  theme:
+    label:
+      en: Theme
+      zh: 主題色
+    desc:
+      en: Select the accent color for the application interface.
+      zh: 選擇應用程式介面的強調色。
+  accent:
+    stone:
+      en: Stone
+      zh: 暖灰色
+    indigo:
+      en: Indigo
+      zh: 靛藍
+    blue:
+      en: Blue
+      zh: 藍色
+    emerald:
+      en: Green
+      zh: 綠色
+    rose:
+      en: Red
+      zh: 紅色
+    slate:
+      en: Gray
+      zh: 灰色
+  language:
+    label:
+      en: Language
+      zh: 語言
+    desc:
+      en: Choose the display language for the interface.
+      zh: 選擇介面顯示的語言。
+  currency:
+    label:
+      en: Currency
+      zh: 顯示幣別
+    desc:
+      en: Choose the currency used to display amounts.
+      zh: 選擇金額顯示所使用的幣別。
+  navLayout:
+    label:
+      en: Navigation layout
+      zh: 導覽版面
+    desc:
+      en: Choose where the main navigation lives. You can also switch it anytime from the toolbar.
+      zh: 選擇主導覽的擺放位置，也可以隨時從右上角工具列一鍵切換。
+    sidebar:
+      en: Sidebar
+      zh: 側邊欄
+    sidebarDesc:
+      en: Fixed left column, collapsible.
+      zh: 固定於左側、可收合。
+    header:
+      en: Top bar
+      zh: 上方列
+    headerDesc:
+      en: Horizontal menu, wider content area.
+      zh: 水平選單、內容區更寬。
 
 # 圖表標籤
 totalPrice:
@@ -1315,3 +1525,30 @@ landing:
   alertDesc:
     en: Get an email when your portfolio drifts past your threshold.
     zh: 投資組合偏離超過門檻時寄信通知你。
+notifications:
+  intro:
+    en: Choose where alerts go and when each portfolio should notify you.
+    zh: 設定通知寄送的信箱，以及各投資組合何時要發出偏移警示。
+  email:
+    label:
+      en: Notification email
+      zh: 通知信箱
+    desc:
+      en: Drift alerts are sent to your sign-in email.
+      zh: 偏移警示會寄到您登入用的 Email。
+    test:
+      en: Send test email
+      zh: 寄送測試信
+    sent:
+      en: Test email sent.
+      zh: 測試信已寄出。
+    error:
+      en: Failed to send test email.
+      zh: 寄送測試信失敗。
+  drift:
+    label:
+      en: Drift alerts
+      zh: 配置偏移警示
+    empty:
+      en: No portfolios yet.
+      zh: 尚未建立投資組合。

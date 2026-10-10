@@ -9,6 +9,7 @@
   <RouterView v-if="route.name === 'home'" />
   <div v-else class="app-shell h-screen overflow-hidden">
     <Sidebar
+      v-if="!isHeaderNav"
       persistent
       :currentPortfolioName="currentPortfolioName"
       :portfolioMenuItems="portfolioMenuItems"
@@ -27,6 +28,9 @@
         :isDemoUser="auth.user?.uid === 'demo-user'"
         :hasPortfolios="portfolioStore.portfolios.length > 0"
         :tradeActionItems="tradeActionItems"
+        :menuItems="menuItems"
+        :userDisplayName="displayUserName"
+        :userPhotoUrl="auth.user?.photoURL || ''"
         @open-sidebar="sidebarVisible = true"
         @open-search="openSearchBox"
         @create-portfolio="dialogVisible = true"
@@ -35,7 +39,46 @@
       />
 
       <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto">
-        <main class="max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+        <main class="mx-auto max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+          <!-- header 導覽模式沒有側邊欄，投資組合切換放在頁面標題上方 -->
+          <template v-if="isHeaderNav && route.name !== 'not-found'">
+            <button
+              type="button"
+              class="page-portfolio -mt-3 mb-6"
+              :class="{ 'is-open': portfolioMenuVisible }"
+              :aria-label="t('openPortfolioMenu')"
+              :aria-expanded="portfolioMenuVisible"
+              @click="portfolioMenu?.toggle($event)"
+            >
+              <i class="pi pi-briefcase page-portfolio__icon"></i>
+              <span class="page-portfolio__name">{{ currentPortfolioName }}</span>
+              <i class="pi pi-chevron-down page-portfolio__chevron"></i>
+            </button>
+
+            <!-- 結構同 Sidebar 的投資組合選單：清單放在 #start 才能獨立捲動 -->
+            <TieredMenu
+              ref="portfolioMenu"
+              :model="portfolioMenuItems"
+              :popup="true"
+              @show="portfolioMenuVisible = true"
+              @hide="portfolioMenuVisible = false"
+            >
+              <template #start>
+                <div class="p-menu-submenu-label">{{ t('selectPortfolio') }}</div>
+                <ul class="portfolio-menu-list" role="menu">
+                  <li v-for="item in portfolioListItems" :key="item.key" class="p-tieredmenu-item" role="none">
+                    <div class="p-tieredmenu-item-content" @click="selectPortfolioItem(item)">
+                      <a href="#" class="p-tieredmenu-item-link" role="menuitem" @click.prevent>
+                        <span :class="['p-tieredmenu-item-icon', item.icon]"></span>
+                        <span class="p-tieredmenu-item-label">{{ item.label }}</span>
+                      </a>
+                    </div>
+                  </li>
+                </ul>
+                <div class="p-tieredmenu-separator" role="separator"></div>
+              </template>
+            </TieredMenu>
+          </template>
           <div v-if="route.name !== 'not-found'" class="mb-6 flex items-center justify-between gap-4">
             <div class="flex items-center gap-1">
               <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
@@ -46,7 +89,7 @@
           <RouterView />
         </main>
 
-        <div class="max-w-[1680px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
+        <div class="mx-auto max-w-[1680px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
           <Footer />
         </div>
       </div>
@@ -109,6 +152,7 @@ import AppHeader from './layouts/AppHeader.vue'
 import Sidebar from './layouts/Sidebar.vue'
 import Footer from './layouts/Footer.vue'
 import ProgressSpinner from 'primevue/progressspinner'
+import TieredMenu from 'primevue/tieredmenu'
 import ImportDataDialog from './components/ImportDataDialog.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
@@ -117,6 +161,8 @@ import { useWatchlistStore } from '@/stores/watchlist'
 import { showLoading, hideLoading, globalLoadingVisible } from "@/composables/loading.js"
 import * as toast from '@/composables/toast'
 import { buildSidebarSections } from './layouts/navigation.js'
+import { useNavLayout } from '@/composables/useNavLayout.js'
+import { useLocale } from '@/composables/useLocale.js'
 
 const { locale, t } = useI18n()
 const confirm = useConfirm()
@@ -131,6 +177,8 @@ const holdingsStore = useHoldingsStore()
 const transactionsStore = useTransactionsStore()
 const watchlistStore = useWatchlistStore()
 const sidebarSections = computed(() => buildSidebarSections(t))
+const { isHeaderNav } = useNavLayout()
+const { setLocale } = useLocale()
 
 
 // Currency settings
@@ -195,6 +243,7 @@ const currentPageLabel = computed(() => {
   if (route.name === 'asset') return String(route.params.symbol || t('currentAsset'))
   if (route.name === 'user-settings') return t('userSettings')
   if (route.name === 'user-guide') return t('userGuide')
+  if (route.name === 'preferences') return t('preferences.title')
 
   const activeItem = sidebarSections.value
     .flatMap((section) => section.items)
@@ -343,6 +392,13 @@ const portfolioMenuItems = computed(() => {
 
 const portfolioListItems = computed(() => recentPortfolios.value.map(buildPortfolioMenuItem))
 
+const portfolioMenu = ref()
+const portfolioMenuVisible = ref(false)
+const selectPortfolioItem = (item) => {
+  item.command()
+  portfolioMenu.value?.hide()
+}
+
 async function getPortfolios() {
   try {
     await portfolioStore.fetchPortfolios()
@@ -381,12 +437,7 @@ const showAddTradeButtonBar = computed(() => !['portfolios', 'backtesting', 'reb
 const sidebarVisible = ref(false)
 
 onMounted(() => {
-  // 舊版 header 曾存 'zh-TW'，但 i18n messages 只有 'zh'
-  const savedLocale = localStorage.getItem('locale')?.replace('zh-TW', 'zh')
-  if (savedLocale && savedLocale !== locale.value) {
-    locale.value = savedLocale
-  }
-
+  // 語言的還原由 main.js 建立 i18n 時處理（見 composables/useLocale.js）
   window.addEventListener('keydown', onGlobalSearchShortcut)
 })
 
@@ -422,10 +473,6 @@ const tradeActionItems = computed(() => [
 ])
 
 const { theme, setTheme } = useTheme()
-const setLanguage = (code) => {
-  locale.value = code
-  localStorage.setItem('locale', code)
-}
 // 子選單項目：目前選中的打勾，其餘用 pi-fw 佔位讓文字對齊
 const choice = (label, selected, command) => ({ label, icon: selected ? 'pi pi-check' : 'pi pi-fw', command })
 
@@ -433,9 +480,10 @@ const menuItems = computed(() => {
   const list = [
     { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
     { separator: true },
+    { label: t('preferences.title'), icon: 'pi pi-sliders-h', command: () => router.push('/preferences') },
     { label: t('language'), icon: 'pi pi-language', items: [
-      choice('繁體中文', locale.value === 'zh', () => setLanguage('zh')),
-      choice('English', locale.value === 'en', () => setLanguage('en')),
+      choice('繁體中文', locale.value === 'zh', () => setLocale('zh')),
+      choice('English', locale.value === 'en', () => setLocale('en')),
     ] },
     { label: t('currency.label'), icon: 'pi pi-dollar', items: ['USD ($)', 'TWD (NT$)'].map((label) => {
       const code = label.slice(0, 3)
@@ -499,6 +547,55 @@ const menuItems = computed(() => {
   transition: all .3s ease-in-out;
 }
 
+
+/* 用區塊層級的 flex：inline-flex 會被行框基線對齊抵銷負 margin */
+.page-portfolio {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  height: 2.5rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 0.8rem;
+  background: var(--p-content-background);
+  font-family: inherit;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  cursor: pointer;
+  transition: border-color 0.16s ease;
+}
+
+.page-portfolio:hover,
+.page-portfolio.is-open {
+  border-color: var(--p-primary-color);
+}
+
+.page-portfolio__icon {
+  font-size: 0.9rem;
+  color: var(--p-text-muted-color);
+  flex-shrink: 0;
+}
+
+.page-portfolio__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-portfolio__chevron {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  flex-shrink: 0;
+  transition: transform 0.16s ease;
+}
+
+.page-portfolio.is-open .page-portfolio__chevron {
+  transform: rotate(180deg);
+}
 
 .page-main-transition {
   width: 100%;
@@ -591,6 +688,17 @@ const menuItems = computed(() => {
 @media (max-width: 1023px) {
   .app-shell__content {
     margin: 12px;
+  }
+}
+
+/* 導覽列改放頂部時，主內容不需要為側邊欄留位 */
+html[data-nav-layout='header'] .app-shell__main {
+  padding-left: 0;
+}
+
+@media (min-width: 1024px) {
+  html[data-nav-layout='header'] .app-shell__content {
+    margin-left: 16px;
   }
 }
 

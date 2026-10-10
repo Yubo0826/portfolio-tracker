@@ -83,23 +83,24 @@
         <label for="price" class="block text-sm font-medium text-muted-color mb-2">
           {{ $t('pleaseInputPrice') }} <span class="text-red-500">*</span>
         </label>
-        <div class="flex items-stretch rounded-lg">
+        <div class="flex items-stretch gap-2 rounded-lg">
           <InputNumber
             id="price"
             v-model="form.price"
             class="w-full"
             autocomplete="off"
             showButtons
-            mode="currency"
-            :currency="form.currency || 'USD'"
-            :currencyDisplay="'code'"
             :minFractionDigits="0"
             :maxFractionDigits="3"
             :placeholder="form.currency || 'USD'"
           />
-          <!-- <span class="inline-flex min-w-16 items-center justify-center rounded-r-lg border border-l-0 border-surface-300 bg-surface-100 px-3 text-sm font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300">
-            {{ form.currency || 'USD' }}
-          </span> -->
+          <!-- 幣別：查價時自動帶入，也可手動切換（台股輸入台幣） -->
+          <Select
+            v-model="form.currency"
+            :options="['TWD', 'USD']"
+            :aria-label="$t('currency.label')"
+            class="shrink-0"
+          />
         </div>
       </div>
 
@@ -114,9 +115,7 @@
           class="w-full" 
           showButtons 
           autocomplete="off" 
-          mode="currency"
-          :currency="form.currency || 'USD'"
-          :currencyDisplay="'code'"
+          :maxFractionDigits="2"
           :placeholder="form.currency || 'USD'" 
         />
       </div>
@@ -220,7 +219,7 @@ const emptyForm = () => ({
   shares: null,
   price: null,
   currency: 'USD',
-  fee: 0,
+  fee: null,
   operation: 'buy',
 });
 
@@ -245,15 +244,14 @@ const totalPrice = computed(() => {
   return Number((s * p).toFixed(2)) || 0;
 });
 
+// 查不到報價時依代號後綴推斷：.TW / .TWO 為台股
+const guessCurrency = (symbol) => (/\.TWO?$/i.test(symbol || '') ? 'TWD' : 'USD');
+
 const applyQuoteData = async (symbol, date) => {
   const quoteData = await store.searchPrice(symbol, date);
-  if (!quoteData) {
-    form.value.currency = 'USD';
-    return;
-  }
-
-  form.value.price = quoteData.price ?? null;
-  form.value.currency = quoteData.currency || 'USD';
+  form.value.price = quoteData?.price ?? form.value.price;
+  // searchPrice 查價失敗時也會回傳 'USD'，所以只在有價格時信任它的幣別
+  form.value.currency = quoteData?.price != null ? quoteData.currency : guessCurrency(symbol);
 };
 
 const onSymbolSelected = ({ symbol, name, assetType }) => {
@@ -288,6 +286,12 @@ const loadEditing = () => {
     operation: item.transactionType,
   };
 };
+
+// 關閉時 onHide 會清空表單，再次編輯同一筆時 editingId 沒變，所以開啟時也要重新載入
+watch(
+  () => props.modelValue,
+  (v) => v && props.editingId && loadEditing()
+);
 
 watch(
   () => props.editingId,
@@ -325,7 +329,7 @@ const onSave = async (saveAnother = false) => {
   }
 
   if (form.value.operation === 'sell') {
-    const ok = store.canSell(form.value.symbol, form.value.shares);
+    const ok = store.canSell(form.value.symbol, form.value.shares, props.editingId);
     if (!ok) {
       // 無法賣出超過持有的股數。
       toast.error(t('notEnoughSharesToSell'), '');
@@ -357,8 +361,10 @@ const onSave = async (saveAnother = false) => {
     emit('saved', result);
     console.log('觸發 saved 事件');
     if (saveAnother) {
-      form.value = emptyForm();
-      console.log('重設後的 form 資料:', form.value);
+      // 保留上一筆的代號（連同名稱、類型、幣別），方便連續輸入同一檔的多筆交易
+      const { symbol, name, assetType, currency } = form.value;
+      form.value = { ...emptyForm(), symbol, name, assetType, currency };
+      applyQuoteData(symbol, form.value.date.toISOString().split('T')[0]);
     }
     else close();
   } catch (err) {

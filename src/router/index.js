@@ -65,6 +65,11 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/preferences',
+      name: 'preferences',
+      component: () => import('../views/PreferencesView.vue'),
+    },
+    {
       path: '/user-guide',
       name: 'user-guide',
       component: () => import('../views/UserGuideView.vue'),

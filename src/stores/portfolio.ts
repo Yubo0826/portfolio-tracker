@@ -3,12 +3,20 @@ import { defineStore } from 'pinia'
 import api from '@/utils/api.js'
 import { useAuthStore } from '@/stores/auth'
 
+// 列表頁計算持有檔數與市值所需的最小持股欄位（由 GET /api/portfolio 一併帶回）
+interface PortfolioHoldingSummary {
+  currency?: string
+  current_price?: string | number | null
+  total_shares?: string | number | null
+}
+
 interface Portfolio {
   id: string
   name: string
   description?: string
   drift_threshold?: number
   enable_email_alert?: boolean
+  holdings?: PortfolioHoldingSummary[]
 }
 
 interface NewPortfolio {
@@ -74,8 +82,10 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   // 設定目前使用的投資組合
   function setCurrentPortfolio(portfolio: Portfolio | null): void {
     currentPortfolio.value = portfolio
-    localStorage.setItem('currentPortfolio', JSON.stringify(portfolio))
-    console.log('Current portfolio set to localstorage:', portfolio)
+    // holdings 只給列表頁算彙總用，不寫進 localStorage —— 否則每次切換組合都會把整份持股塞進去
+    const persisted = portfolio ? { ...portfolio, holdings: undefined } : null
+    localStorage.setItem('currentPortfolio', JSON.stringify(persisted))
+    console.log('Current portfolio set to localstorage:', persisted)
   }
   
   // 之後後端or前端可能要卡重複名稱
@@ -118,7 +128,12 @@ export const usePortfolioStore = defineStore('portfolio', () => {
       })
       const index = portfolios.value.findIndex(p => p.id === portfolioId)
       if (index !== -1) {
-        portfolios.value[index] = data.portfolio
+        // PUT 回應不含 holdings，直接覆蓋會讓列表頁的檔數／市值欄位變空白
+        portfolios.value[index] = { ...data.portfolio, holdings: portfolios.value[index].holdings }
+      }
+      // 編輯的若是目前選取的投資組合，同步更新（含 localStorage），否則標題仍顯示舊名稱
+      if (currentPortfolio.value?.id === portfolioId) {
+        setCurrentPortfolio(data.portfolio)
       }
     } catch (error) {
       console.error('Error editing portfolio:', error)

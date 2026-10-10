@@ -380,6 +380,14 @@ const goDashboard = () => {
   border-radius: 999px;
 }
 
+/* p-menu-submenu-label 的樣式屬於 PrimeVue Menu，沒有載入 Menu 時要自己補（Sidebar 與 AppHeader 的投資組合選單共用） */
+.p-tieredmenu .p-menu-submenu-label {
+  padding: var(--p-tieredmenu-item-padding);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
+}
+
 .portfolio-menu-list {
   display: flex;
   flex-direction: column;

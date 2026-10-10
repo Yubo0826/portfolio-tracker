@@ -126,10 +126,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
-  // 檢查是否能賣出這麼多股
-  const canSell = (symbol: string, shares: number): boolean => {
-    const h = holdingsStore.list.find((x: any) => x.symbol === String(symbol).toUpperCase())
-    return (h?.shares || 0) >= (Number(shares) || 0)
+  // 檢查是否能賣出這麼多股；編輯舊的賣出交易時，目前持股已扣過它，要先加回來
+  // ponytail: 只看目前持股，不依日期重算；改日期造成的中途賣超由後端 computeHolding 把關
+  const canSell = (symbol: string, shares: number, editingId: string | null = null): boolean => {
+    const sym = String(symbol).toUpperCase()
+    const h = holdingsStore.list.find((x: any) => x.symbol === sym)
+    const old = editingId ? getTransactionById(editingId) : null
+    const back = old?.transactionType === 'sell' && old.symbol === sym ? Number(old.shares) : 0
+    return (h?.shares || 0) + back >= (Number(shares) || 0)
   }
 
   const getTransactionById = (id: string): Transaction | null => {

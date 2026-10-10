@@ -110,29 +110,43 @@
                           class="asset-growth-pill"
                           :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
                         >
-                          <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"></i>
-                          {{ formatSignedNumber(growthRateNumber) }}%
+                          <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
+                          {{ Math.abs(growthRateNumber).toFixed(2) }}%
                           <span>({{ formatSignedNumber(change) }})</span>
                         </span>
-                        <span class="text-xs font-semibold uppercase tracking-wide text-muted-color">{{ selectedPeriodLabel }}</span>
                       </div>
 
                       <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
                         <span>--</span>
                         <span>(--)</span>
-                        <span class="text-xs font-semibold uppercase tracking-wide">{{ selectedPeriodLabel }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- 面積圖 -->
-                <div class="mt-2">
+                <div v-if="holdingsStore.list.length" class="mt-2">
                   <StockChart :options="areaChartOptions" :height="320" />
                 </div>
 
+                <!-- 沒有交易時：引導新增 -->
+                <div v-else class="dashboard-chart-empty mt-2">
+                  <div class="dashboard-chart-empty__body">
+                    <span class="dashboard-chart-empty__icon"><i class="pi pi-chart-line" /></span>
+                    <h3 class="text-base font-semibold">{{ $t('dashboardChartEmptyTitle') }}</h3>
+                    <p class="text-xs sm:text-sm text-muted-color max-w-sm">{{ $t('dashboardChartEmptyDesc') }}</p>
+                    <div class="mt-2 flex flex-wrap justify-center gap-2">
+                      <Button :label="$t('addInvestment')" icon="pi pi-plus" size="small" @click="transactionDialogVisible = true" />
+                      <Button :label="$t('importTransactions')" icon="pi pi-upload" size="small" severity="secondary" outlined @click="importDialogVisible = true" />
+                    </div>
+                  </div>
+                </div>
+                <TransactionDialog v-model="transactionDialogVisible" />
+                <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
+
                 <!-- 時間範圍選擇 -->
                 <SelectButton
+                  v-if="holdingsStore.list.length"
                   v-model="selectedPeriod"
                   :options="timeRangeOptionsWithGrowth"
                   optionLabel="label"
@@ -159,21 +173,31 @@
         <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
           <Card class="app-panel dashboard-metric-card flex-1">
             <template #content>
-              <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
-              <div v-if="totalProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
-                <span>{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                <span class="text-sm text-muted-color">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                <span class="ml-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+              <div class="flex items-start justify-between gap-2">
+                <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
+                <span
+                  v-if="holdingsStore.list.length"
+                  class="asset-growth-pill asset-growth-pill--sm"
+                  :class="totalReturn >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
+                  v-tooltip.top="$t('cumulativeReturn')"
+                >{{ formatSignedNumber(totalReturn) }}%</span>
               </div>
-              <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
+              <div v-if="totalProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
+                <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
+                <span class="text-sm opacity-70">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+              </div>
+              <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
 
-              <div class="dashboard-footnote mt-3">
-                {{ $t('roi') }}
-                <span v-if="totalReturn" :class="totalReturn >= 0 ? 'text-emerald-500' : 'text-rose-500'">
-                  {{ totalReturn.toFixed(2) }}%
-                </span>
-                <span v-else>--</span>
+              <!-- 獲利／虧損檔數比例條 -->
+              <div v-if="holdingsStore.list.length" class="dashboard-winloss mt-3" :aria-label="$t('winLossValue', winLoss)">
+                <span v-if="winLoss.up" class="dashboard-winloss__up" :style="{ flexGrow: winLoss.up }" />
+                <span v-if="winLoss.down" class="dashboard-winloss__down" :style="{ flexGrow: winLoss.down }" />
               </div>
+
+              <dl class="dashboard-metric-rows">
+                <div v-for="row in unrealizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
             </template>
           </Card>
 
@@ -183,12 +207,16 @@
                 {{ $t('realizedProfit') }}
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
               </p>
-              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-xl font-bold tracking-tight">
-                <span>{{ splitAmountForEmphasis(realizedProfit).main }}</span>
-                <span class="text-sm text-muted-color">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
-                <span class="ml-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
+              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
+                <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
+                <span class="text-sm opacity-70">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
+                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
               </div>
-              <div v-else class="mt-2 text-xl font-bold tracking-tight">--</div>
+              <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
+
+              <dl class="dashboard-metric-rows">
+                <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
             </template>
           </Card>
 
@@ -198,8 +226,15 @@
                 {{ $t('irr') }}
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
               </p>
-              <div v-if="irr !== null" class="mt-2 text-xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr.toFixed(2) }}%</div>
-              <div v-else class="mt-2 text-xl font-bold tracking-tight text-muted-color">--</div>
+              <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
+                <span class="text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr.toFixed(2) }}%</span>
+                <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
+              </div>
+              <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
+
+              <dl class="dashboard-metric-rows">
+                <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
             </template>
           </Card>
         </div>
@@ -283,10 +318,7 @@
       <!-- Holdings Table -->
       <Card class="app-panel dashboard-table-panel mb-8 p-4">
       <template #content>
-        <div class="mb-4">
-          <p class="dashboard-kicker">{{ $t('currentAsset') }}</p>
-          <h2 class="mt-1 text-base font-semibold">{{ $t('holdings') }}</h2>
-        </div>
+        <h2 class="mb-4 text-base font-semibold">{{ $t('holdings') }}</h2>
 
         <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
@@ -296,7 +328,7 @@
                   :style="{ width: '300px', minWidth: '250px' }">
                 <StockIcon :symbol="data.symbol" class="mr-8" />
                 <div class="truncate">
-                  <span class="font-medium">{{ data.symbol }}</span>
+                  <Tag :value="data.symbol" severity="secondary" class="truncate" />
                   <div class="text-xs text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
               </RouterLink>
@@ -339,20 +371,7 @@
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
               </div>
               <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-rose-600': data.profitPercentage < 0 }">
-                <div class="flex items-center gap-1 font-bold text-xs">
-                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-sort-up-fill"></i>
-                  <i v-else class="pi pi-sort-down-fill"></i> -->
-                  
-                  <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-90"></i>
-                  <i v-else class="pi pi-arrow-right rotate-90"></i> -->
-
-                  <!-- <span v-if="data.profitPercentage >= 0">+</span>
-                  <span v-else>-</span> -->
-                  <span>{{ Math.abs(data.profitPercentage) }}%</span>
-
-                  <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-45"></i>
-                  <i v-else class="pi pi-arrow-right rotate-45"></i>
-                </div>
+                <div class="font-bold text-xs">{{ formatSignedNumber(data.profitPercentage) }}%</div>
               </div>
             </template>
           </Column>
@@ -422,9 +441,11 @@ import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import { useWatchlistStore } from '@/stores/watchlist'
 import NoData from '@/components/NoData.vue'
+import TransactionDialog from '@/components/TransactionDialog.vue'
+import ImportDataDialog from '@/components/ImportDataDialog.vue'
 
 import { useTheme } from '@/composables/useTheme.js'
-const { isDark } = useTheme()
+const { isDark, chartPalette } = useTheme()
 
 const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
@@ -438,7 +459,7 @@ const formatUpdatedAt = iso => new Date(iso).toLocaleString(locale.value.startsW
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatAmountWithCode, formatPriceWithCode, convertAmountFromCurrency, currencySymbol } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatPriceWithCode, convertAmountToUsd, currencySymbol } = useCurrency()
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
@@ -449,6 +470,8 @@ const { displayCurrency } = storeToRefs(settingsStore)
  *  State
  * =======================*/
 const isLoading = ref(true)
+const transactionDialogVisible = ref(false)
+const importDialogVisible = ref(false)
 const skeletonStatCards = [1, 2, 3]
 const skeletonTableRows = [1, 2, 3, 4, 5, 6]
 
@@ -480,7 +503,6 @@ const timeRangeOptions = [
 ]
 
 const selectedPeriod = ref('5d')
-const selectedPeriodLabel = computed(() => timeRangeOptions.find(option => option.value === selectedPeriod.value)?.label)
 
 // 後端回傳「最早交易日 ~ 今天」的完整資料，切換時間區間只在前端切片，避免重打 API
 const rawChartPoints = ref([])
@@ -750,7 +772,7 @@ const selectedAllocationChart = computed(() => ({
     type: 'pie',
     backgroundColor: 'transparent',
     spacing: [8, 8, 8, 8],
-    height: 260,
+    height: 300,
     animation: { duration: 350 },
   },
   title: { text: null },
@@ -762,8 +784,8 @@ const selectedAllocationChart = computed(() => ({
     borderWidth: 1,
     borderColor: isDark.value ? '#334155' : '#e2e8f0',
     shadow: false,
-    backgroundColor: isDark.value ? '#111b31' : '#ffffff',
-    style: { color: isDark.value ? '#f8fafc' : '#0f172a' },
+    backgroundColor: chartPalette.value.tooltipBg,
+    style: { color: chartPalette.value.tooltipFgStrong },
     formatter: function () {
       const custom = this.point?.options?.custom || {}
       const amount = Number(custom.amount)
@@ -786,7 +808,7 @@ const selectedAllocationChart = computed(() => ({
       center: ['50%', '50%'],
       minSize: 140,
       borderWidth: 4,
-      borderColor: isDark.value ? '#1d1e1e' : '#ffffff',
+      borderColor: chartPalette.value.border,
       slicedOffset: 0,
       showInLegend: false,
       dataLabels: {
@@ -826,10 +848,46 @@ const selectedAllocationChart = computed(() => ({
 }))
 
 const totalReturn = computed(() => totalReturnPct(holdingsStore.list))
-const realizedProfit = computed(() => calcRealizedProfit(transactionsStore.list, convertAmountFromCurrency))
+const realizedProfit = computed(() => calcRealizedProfit(transactionsStore.list, convertAmountToUsd))
 const irr = computed(() => holdingsStore.list.length
-  ? portfolioXirr(transactionsStore.list, dividends.value, totalValue.value, convertAmountFromCurrency)
+  ? portfolioXirr(transactionsStore.list, dividends.value, totalValue.value, convertAmountToUsd)
   : null)
+
+/* 損益小卡的明細列 */
+const profitColor = v => (v >= 0 ? 'text-emerald-500' : 'text-rose-500')
+const winLoss = computed(() => {
+  const up = holdingsStore.list.filter(h => h.currentValue >= h.avgCost * h.shares).length
+  return { up, down: holdingsStore.list.length - up }
+})
+// 股息表沒有幣別欄位，與 portfolioXirr 相同以該 symbol 交易的幣別換算；資料層一律用 USD，顯示時 formatAmount* 才轉幣別
+const totalDividends = computed(() => {
+  const currencyBySymbol = new Map(transactionsStore.list.map(tx => [tx.symbol, tx.currency]))
+  return dividends.value.reduce((s, d) => s + convertAmountToUsd(d.amount, currencyBySymbol.get(d.symbol) ?? 'USD'), 0)
+})
+const firstTradeDate = computed(() => transactionsStore.list.reduce(
+  (min, tx) => (!min || new Date(tx.date) < min ? new Date(tx.date) : min), null))
+
+const unrealizedRows = computed(() => [
+  { label: t('costBasis'), value: formatAmountWithCode(totalValue.value - totalProfit.value) },
+  { label: t('marketValue'), value: formatAmountWithCode(totalValue.value) },
+  { label: t('winLoss'), value: t('winLossValue', winLoss.value) },
+])
+const realizedRows = computed(() => [
+  { label: t('dividendTotal'), value: formatAmountWithCode(totalDividends.value) },
+  { label: t('realizedPlusDividends'), value: formatAmountWithCode(realizedProfit.value + totalDividends.value) },
+  { label: t('sellTrades'), value: transactionsStore.list.filter(tx => tx.transactionType === 'sell').length },
+])
+const irrRows = computed(() => {
+  const first = firstTradeDate.value
+  const years = first ? (Date.now() - first.getTime()) / (365.25 * 864e5) : null
+  return [
+    { label: t('investingSince'), value: first ? `${first.toLocaleDateString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US')} · ${t('yearsShort', { n: years.toFixed(1) })}` : '--' },
+    { label: t('totalInvested'), value: formatAmountWithCode(transactionsStore.list
+      .filter(tx => tx.transactionType === 'buy')
+      .reduce((s, tx) => s + convertAmountToUsd(tx.price * tx.shares + tx.fee, tx.currency), 0)) },
+    { label: t('cumulativeReturn'), value: holdingsStore.list.length ? `${formatSignedNumber(totalReturn.value)}%` : '--' },
+  ]
+})
 
 /* =========================
  *  Charts (options & helpers)
@@ -837,10 +895,7 @@ const irr = computed(() => holdingsStore.list.length
 const areaChartOptions = computed(() => {
   const lineColor = 'var(--p-primary-color)'
   const fillFrom = 'color-mix(in srgb, var(--p-primary-color) 35%, transparent)'
-  const axisColor = isDark.value ? '#9ca3af' : '#999'
-  const gridColor = isDark.value ? '#374151' : '#eee'
-  const tooltipBg = isDark.value ? '#1f2937' : '#fff'
-  const tooltipFg = isDark.value ? '#f3f4f6' : '#374151'
+  const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg } = chartPalette.value
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
     chartLocale,
@@ -957,6 +1012,11 @@ watch(() => transactionsStore.list, async () => {
   await fetchChartData()
 })
 
+// 第一筆交易後 holdings 才非同步出現，此時 transactions watcher 抓圖已被 holdings 為空擋掉，補抓一次
+watch(() => holdingsStore.list.length, (n, o) => {
+  if (n && !o && !isLoadingData) fetchChartData()
+})
+
 // 走勢圖由後端用歷史匯率換算，切換顯示幣別要重抓
 watch(displayCurrency, () => {
   if (!isLoadingData) fetchChartData()
@@ -985,25 +1045,74 @@ watch(displayCurrency, () => {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.85rem;
-  font-weight: 700;
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1;
 }
 
 .asset-growth-pill i {
-  font-size: 0.7rem;
+  font-size: 0.85em;
 }
 
+.asset-growth-pill--sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+/* 小卡內容撐滿高度，明細列貼底，避免卡片下半部空白 */
+.dashboard-metric-card :deep(.p-card-body),
+.dashboard-metric-card :deep(.p-card-content) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-metric-rows {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  font-size: 0.78rem;
+}
+
+.dashboard-metric-rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-top: 1px dashed var(--p-content-border-color);
+}
+
+.dashboard-metric-rows dt {
+  color: var(--p-text-muted-color);
+}
+
+.dashboard-metric-rows dd {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dashboard-winloss {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dashboard-winloss__up { background: #10b981; }
+.dashboard-winloss__down { background: #f43f5e; }
+
+/* 實色底＋深色字，淺色／深色主題共用同一組色 */
 .asset-growth-pill--up {
-  color: #047857;
-  background: rgba(16, 185, 129, 0.14);
+  color: #14381f;
+  background: #80c990;
 }
 
 .asset-growth-pill--down {
-  color: #be123c;
-  background: rgba(244, 63, 94, 0.14);
+  color: #4c1019;
+  background: #f2a3ab;
 }
 
 .dashboard-summary-strip {
@@ -1065,7 +1174,7 @@ watch(displayCurrency, () => {
 
 .dashboard-allocation-layout {
   display: grid;
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 400px) minmax(0, 1fr);
   align-items: center;
   align-content: center;
   gap: 2.5rem;
@@ -1074,16 +1183,43 @@ watch(displayCurrency, () => {
   flex: 1;
 }
 
+.dashboard-chart-empty {
+  height: 320px;
+  display: grid;
+  place-items: center;
+}
+
+.dashboard-chart-empty__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.dashboard-chart-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.25rem;
+  border-radius: 999px;
+  color: var(--p-text-muted-color);
+  background: color-mix(in srgb, var(--p-text-muted-color) 12%, transparent);
+  font-size: 1.25rem;
+}
+
 .dashboard-allocation-figure {
   position: relative;
-  width: min(100%, 260px);
+  width: min(100%, 380px);
   margin-inline: auto;
 }
 
 .dashboard-allocation-chart {
   display: block;
   width: 100%;
-  height: 260px;
+  height: 300px;
 }
 
 .dashboard-allocation-total {

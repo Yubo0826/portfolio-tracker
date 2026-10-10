@@ -1,0 +1,61 @@
+/* =============================================================================
+   深色風格（dark variants）
+
+   深色模式有三種配色，由 useTheme.js 掛在 <html> 上的 data-dark-variant 決定：
+
+     default   Knowt 配色，畫布 #0d0d0d、卡片 #1d1e1e —— customPreset.js 的原生深色，預設值
+     dim       GitHub Dimmed，畫布 #22272e —— 對比較柔和的藍灰
+     standard  GitHub Dark，  畫布 #0d1117 —— 對比較強的藍黑
+
+   .dark class 本身不動：Tailwind 的 dark: variant（main.css 的 @custom-variant）
+   與 PrimeVue 的 darkModeSelector 都認它，動了會牽連全站。這裡只用
+   .dark[data-dark-variant='…'] 這個較高特異度的選擇器覆寫 PrimeVue 的 CSS 變數，
+   不需要重新產生 PrimeVue theme，也就沒有切換時的閃色。
+
+   PrimeVue 4 會把 preset 裡的 {surface.900} 這類 token reference 編譯成
+   var(--p-surface-900)，例如：
+     --p-overlay-modal-background:     var(--p-surface-900)   Dialog
+     --p-overlay-popover-background:   var(--p-surface-800)   下拉面板
+     --p-list-option-focus-background: var(--p-surface-800)   選單 hover
+     --p-form-field-border-color:      var(--p-surface-600)   輸入框邊框
+   所以換掉 surface ramp，這些全部自動跟著走，不用逐一覆寫。
+   下面另外列出的 --p-surface-background / card 與 --p-content-* 則是 preset 裡
+   寫死字面 hex 的，必須明寫。
+
+   surface 0~400 三種風格共用（不覆寫）：深色下 --p-text-color 是 var(--p-surface-0)、
+   --p-text-muted-color 是 var(--p-surface-400)，因此 PrimeVue 元件的文字色維持一致。
+   ========================================================================== */
+
+.dark[data-dark-variant='dim'] {
+  --p-surface-500: #545d68;
+  --p-surface-600: #444c56;
+  --p-surface-700: #373e47;
+  --p-surface-800: #2d333b;
+  --p-surface-900: #22272e;
+  --p-surface-950: #1c2128;
+
+  --p-surface-background: #22272e; /* app shell 底色 */
+  --p-surface-card: #2d333b;
+
+  --p-content-background: #2d333b; /* 卡片、側邊欄（同 remote：content 比底色亮一階） */
+  --p-content-border-color: #373e47;
+  --p-content-color: #adbac7;
+  --p-content-focus-color: #cdd9e5;
+}
+
+.dark[data-dark-variant='standard'] {
+  --p-surface-500: #656c76;
+  --p-surface-600: #3d444d;
+  --p-surface-700: #30363d;
+  --p-surface-800: #161b22;
+  --p-surface-900: #0d1117;
+  --p-surface-950: #010409;
+
+  --p-surface-background: #0d1117;
+  --p-surface-card: #161b22;
+
+  --p-content-background: #161b22;
+  --p-content-border-color: #30363d;
+  --p-content-color: #e6edf3;
+  --p-content-focus-color: #f0f6fc;
+}
