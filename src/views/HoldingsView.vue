@@ -18,6 +18,7 @@
           />
           <div class="flex items-center gap-2 ml-auto">
           <Button
+            v-if="!auth.isDemo"
             :label="$t('delete')"
             @click="deleteConfirm"
             :disabled="selectedHoldings.length === 0"
@@ -42,7 +43,7 @@
           rowHover
           paginator :rows="15"
         >
-          <Column selectionMode="multiple" headerStyle="width: 3rem" />
+          <Column v-if="!auth.isDemo" selectionMode="multiple" headerStyle="width: 3rem" />
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
               <div class="flex items-center gap-2">

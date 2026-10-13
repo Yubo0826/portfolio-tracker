@@ -1,20 +1,70 @@
 <template>
   <div>
-    <div class="flex flex-wrap items-center gap-2 mb-8">
-      <div class="w-72">
-        <SymbolAutoComplete v-model="newSymbol" :disabled="store.isReadOnly" @update="picked = $event" />
-      </div>
-      <Button
-        :label="$t('addToWatchlist')"
-        icon="pi pi-plus"
-        size="small"
-        :disabled="store.isReadOnly || !picked"
-        :loading="adding"
-        @click="onAdd"
-      />
+    <div class="flex flex-wrap items-center justify-end gap-2 mb-8">
       <span v-if="store.isReadOnly" class="text-sm text-muted-color">{{ $t('watchlistSignInHint') }}</span>
+      <Button :label="$t('addSymbol')" icon="pi pi-plus" size="small" :disabled="store.isReadOnly" @click="openPicker" />
     </div>
 
+    <Dialog
+      v-model:visible="pickerVisible"
+      modal
+      dismissableMask
+      blockScroll
+      position="top"
+      :showHeader="false"
+      :draggable="false"
+      class="w-[min(44rem,calc(100vw-2rem))]"
+      :pt="{ content: { class: '!p-0' } }"
+    >
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
+        <i class="pi pi-search text-primary"></i>
+        <input
+          v-model="query"
+          autofocus
+          class="flex-1 bg-transparent outline-none"
+          :placeholder="$t('searchPlaceholder')"
+          :aria-label="$t('searchPlaceholder')"
+          @input="onSearch"
+        />
+        <Button icon="pi pi-times" text rounded severity="secondary" size="small" :aria-label="$t('close')"
+          v-tooltip.bottom="{ value: $t('close'), showDelay: 500 }" @click="pickerVisible = false" />
+      </div>
+      <div class="px-4 pt-3 pb-1 text-sm text-muted-color">{{ query.trim() ? $t('searchResults') : $t('popularSymbols') }}</div>
+      <div class="max-h-[60vh] overflow-y-auto pb-2">
+        <div v-if="searching" class="px-4 py-6 text-center"><i class="pi pi-spin pi-spinner"></i></div>
+        <div v-else-if="!options.length" class="px-4 py-6 text-center text-muted-color">{{ $t('noResults') }}</div>
+        <button
+          v-for="item in options"
+          v-else
+          :key="item.symbol"
+          type="button"
+          class="flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer hover:bg-emphasis disabled:cursor-wait disabled:opacity-60"
+          :disabled="pending.has(item.symbol)"
+          :aria-pressed="store.symbolSet.has(item.symbol)"
+          @click="toggle(item)"
+        >
+          <i
+            :class="pending.has(item.symbol) ? 'pi pi-spin pi-spinner' : store.symbolSet.has(item.symbol) ? 'pi pi-check text-primary' : 'pi pi-plus text-primary'"
+            class="w-4"
+          ></i>
+          <div class="min-w-0 flex-1">
+            <div class="truncate">
+              <span class="font-semibold">{{ item.symbol }}</span>
+              <span v-if="item.exchDisp" class="text-muted-color"> : {{ item.exchDisp }}</span>
+            </div>
+            <div class="truncate text-sm text-muted-color">{{ item.longname || item.shortname }}</div>
+          </div>
+          <div v-if="item.regularMarketPrice != null" class="shrink-0 text-right">
+            <div class="font-semibold">{{ formatNumber(item.regularMarketPrice) }}</div>
+            <div v-if="item.regularMarketChangePercent != null" :class="changeClass(item.regularMarketChangePercent)" class="text-sm">
+              {{ formatSigned(item.regularMarketChangePercent) }}%
+            </div>
+          </div>
+        </button>
+      </div>
+    </Dialog>
+
+    <div class="card-table">
     <DataTable :value="store.items" :loading="store.isLoading" dataKey="symbol" tableStyle="min-width: 50rem" rowHover>
       <Column field="symbol" sortable :header="$t('symbol')">
         <template #body="{ data }">
@@ -90,6 +140,7 @@
         <NoData />
       </template>
     </DataTable>
+    </div>
   </div>
 </template>
 
@@ -97,8 +148,9 @@
 import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
+import debounce from 'lodash/debounce'
 import NoData from '@/components/NoData.vue'
-import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
+import api from '@/utils/api'
 import * as toast from '@/composables/toast'
 import { useWatchlistStore } from '@/stores/watchlist'
 
@@ -107,9 +159,50 @@ const confirm = useConfirm()
 const store = useWatchlistStore()
 store.fetchWatchlist() // 進頁面時刷新報價
 
-const newSymbol = ref('')
-const picked = ref(null)
-const adding = ref(false)
+// 新增代號對話框：空白時列熱門標的，輸入時列搜尋結果；點一下加入、再點一下移除
+const pickerVisible = ref(false)
+const query = ref('')
+const options = ref([])
+const searching = ref(false)
+const pending = reactive(new Set())
+let trending = null
+
+const loadOptions = async () => {
+  const q = query.value.trim()
+  searching.value = true
+  try {
+    const data = q
+      ? await api.get('/api/yahoo/symbol?query=' + encodeURIComponent(q))
+      : await (trending ??= api.get('/api/yahoo/trending').catch(() => { trending = null; return [] }))
+    if (q === query.value.trim()) options.value = Array.isArray(data) ? data : [] // 丟掉過期回應
+  } catch {
+    options.value = []
+  } finally {
+    searching.value = false
+  }
+}
+const onSearch = debounce(loadOptions, 300)
+
+const openPicker = () => {
+  query.value = ''
+  pickerVisible.value = true
+  loadOptions()
+}
+
+const toggle = async (item) => {
+  const { symbol } = item
+  const added = store.symbolSet.has(symbol)
+  pending.add(symbol)
+  try {
+    if (added) await store.removeSymbol(symbol)
+    else await store.addSymbol(symbol, item.longname || item.shortname || null, item.typeDisp || item.assetType || item.quoteType || null)
+    toast.success(t(added ? 'removedFromWatchlist' : 'addedToWatchlist', { symbol }))
+  } catch (error) {
+    toast.error(t('saveFailed'), error.message)
+  } finally {
+    pending.delete(symbol)
+  }
+}
 
 // 目標價輸入框的草稿值，blur 時跟 store 比對有變才存
 const drafts = reactive({})
@@ -120,20 +213,6 @@ watch(() => store.items, (items) => {
 const formatNumber = (v) => v == null ? '--' : Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const formatSigned = (v) => v == null ? '--' : `${v > 0 ? '+' : ''}${formatNumber(v)}`
 const changeClass = (v) => v == null ? '' : v >= 0 ? 'text-up' : 'text-down'
-
-const onAdd = async () => {
-  adding.value = true
-  try {
-    await store.addSymbol(picked.value.symbol, picked.value.name, picked.value.assetType)
-    toast.success(t('addedToWatchlist', { symbol: picked.value.symbol }))
-    newSymbol.value = ''
-    picked.value = null
-  } catch (error) {
-    toast.error(t('saveFailed'), error.message)
-  } finally {
-    adding.value = false
-  }
-}
 
 const onTargetBlur = async (item) => {
   const value = drafts[item.symbol] ?? null

@@ -4,6 +4,7 @@
 
       <div class="flex justify-end mb-8 mt-4">
           <Button
+            v-if="!auth.isDemo"
             :label="$t('addPortfolio')"
             @click="dialogVisible = true"
             class="mr-2"
@@ -11,17 +12,6 @@
             severity="secondary"
             size="small"
           />
-          <Button
-            :label="$t('delete')"
-            @click="showDeleteConfirm"
-            :disabled="selectedPortfolios.length === 0"
-            class="mr-2"
-            icon="pi pi-trash"
-            severity="secondary"
-            size="small"
-          />
-          <!-- <Button icon="pi pi-plus" class="p-button-rounded p-button-text mr-2" @click="dialogVisible = true" size="small" />
-          <Button @click="confirm2" :disabled="selectedPortfolios.length === 0" icon="pi pi-trash" class="p-button-rounded p-button-text mr-2" size="small" severity="danger" /> -->
       </div>
 
       <PortfolioFormDialog 
@@ -32,8 +22,8 @@
           @clear:editPortfolio="editPortfolio = { id: null, name: '', description: '' }"
           />
 
-      <DataTable v-model:selection="selectedPortfolios" selectionMode="multiple" :metaKeySelection="false" :value="rows" :loading="isLoading" dataKey="id" tableStyle="min-width: 60rem">
-          <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+      <div class="card-table">
+      <DataTable :value="rows" :loading="isLoading" dataKey="id" tableStyle="min-width: 60rem" rowHover>
           <Column field="name" :header="$t('name')"></Column>
           <Column field="description" :header="$t('description')"></Column>
           <Column field="holdingsCount" sortable :header="$t('holdingsCount')"></Column>
@@ -44,7 +34,7 @@
                 class="text-muted-color cursor-help"
                 v-tooltip.bottom="$t('mixedCurrencyHint')"
               >--</span>
-              <span v-else class="font-mono text-[13px]">{{ formatAmountWithCode(data.marketValue) }}</span>
+              <span v-else>{{ formatAmountWithCode(data.marketValue) }}</span>
             </template>
           </Column>
           <Column field="drift_threshold" :header="$t('driftThreshold') + ' (%)'">
@@ -61,10 +51,11 @@
               {{ slotProps.data.enable_email_alert ? $t('enabled') : $t('disabled') }}
             </template>
           </Column>
-          <Column field="" :header="$t('action')">
+          <Column v-if="!auth.isDemo" field="" :header="$t('action')">
               <template #body="slotProps">
-                  <Button icon="pi pi-pencil" :aria-label="$t('updatePortfolio')" v-tooltip.bottom="$t('updatePortfolio')" class="p-button-rounded p-button-text" severity="info" @click="updateSelectedPortfolios(slotProps.data.id)" />
-                  <Button icon="pi pi-copy" :aria-label="$t('duplicatePortfolio')" v-tooltip.bottom="$t('duplicatePortfolio')" class="p-button-rounded p-button-text" severity="secondary" @click="duplicatePortfolio(slotProps.data.id)" />
+                  <Button icon="pi pi-pencil" :aria-label="$t('updatePortfolio')" v-tooltip.bottom="{ value: $t('updatePortfolio'), showDelay: 500 }" class="p-button-rounded p-button-text" severity="secondary" @click="updateSelectedPortfolios(slotProps.data.id)" />
+                  <Button icon="pi pi-copy" :aria-label="$t('duplicatePortfolio')" v-tooltip.bottom="{ value: $t('duplicatePortfolio'), showDelay: 500 }" class="p-button-rounded p-button-text" severity="secondary" @click="duplicatePortfolio(slotProps.data.id)" />
+                  <Button icon="pi pi-trash" :aria-label="$t('delete')" v-tooltip.bottom="{ value: $t('delete'), showDelay: 500 }" class="p-button-rounded p-button-text" severity="secondary" @click="showDeleteConfirm(slotProps.data.id)" />
               </template>  
           </Column>
 
@@ -76,6 +67,7 @@
           </template>
 
       </DataTable>
+      </div>
   </div>
 </template>
 
@@ -96,7 +88,6 @@ const confirm = useConfirm();
 const portfolioStore = usePortfolioStore()
 const auth = useAuthStore()
 
-const selectedPortfolios = ref([])
 const { convertAmountToUsd, formatAmountWithCode } = useCurrency()
 
 // convertAmountToUsd 目前只認得 USD / TWD，其餘幣別會原封不動回傳（useCurrency.ts）。
@@ -200,7 +191,7 @@ const countdown = ref(5);
 const disabled = ref(true);
 let interval;
 
-const showDeleteConfirm = () => {
+const showDeleteConfirm = (id) => {
     countdown.value = 5;
     disabled.value = true;
 
@@ -262,8 +253,8 @@ const showDeleteConfirm = () => {
                     severity: 'danger',
                     disabled: false
                 },
-                accept: () => {
-                    portfolioStore.removePortfolio(selectedPortfolios.value.map(p => p.id));
+                accept: async () => {
+                    await portfolioStore.removePortfolio([id]);
                     toast.success(t('portfolioDeleted'));
                     clearInterval(interval);
                 },
@@ -280,11 +271,3 @@ onUnmounted(() => {
 });
 
 </script>
-
-<style scoped>
-/* 圓角對齊 PortfolioView 內的表格（Aura card 用 border.radius.xl） */
-:deep(.p-datatable) {
-  border-radius: var(--p-border-radius-xl);
-  overflow: hidden;
-}
-</style>

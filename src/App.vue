@@ -40,9 +40,9 @@
       />
 
       <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto">
-        <main class="mx-auto max-w-[1680px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+        <main class="mx-auto max-w-[1440px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
           <!-- header 導覽模式沒有側邊欄，投資組合切換放在頁面標題上方 -->
-          <template v-if="isHeaderNav && route.name !== 'not-found'">
+          <template v-if="isHeaderNav && PORTFOLIO_SCOPED_ROUTES.has(route.name)">
             <button
               type="button"
               class="page-portfolio -mt-3 mb-6"
@@ -80,7 +80,7 @@
               </template>
             </TieredMenu>
           </template>
-          <div v-if="route.name !== 'not-found'" class="mb-6 flex items-center justify-between gap-4">
+          <div v-if="route.name !== 'not-found' && route.name !== 'user-guide'" class="mb-6 flex items-center justify-between gap-4">
             <div class="flex items-center gap-1">
               <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
               <div id="page-title-actions" class="flex items-center"></div>
@@ -90,7 +90,7 @@
           <RouterView />
         </main>
 
-        <div class="mx-auto max-w-[1680px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
+        <div class="mx-auto max-w-[1440px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
           <Footer />
         </div>
       </div>
@@ -106,8 +106,8 @@
     position="top"
     :showHeader="false"
     :draggable="false"
-    class="w-[min(38rem,calc(100vw-2rem))]"
-    :pt="{ content: { class: '!p-2' } }"
+    class="w-[min(44rem,calc(100vw-2rem))]"
+    :pt="{ content: { class: '!p-0' } }"
   >
     <SearchBox @close="searchBoxVisible = false" />
   </Dialog>
@@ -233,6 +233,8 @@ const resetEditPortfolio = () => {
   editPortfolio.value = createEmptyPortfolio()
 }
 
+// 只有依當前投資組合取資料的頁面才顯示切換鈕（關注清單、資產頁、設定類頁面與組合無關）
+const PORTFOLIO_SCOPED_ROUTES = new Set(['dashboard', 'portfolio', 'allocation', 'rebalancing', 'backtesting'])
 const currentPortfolioName = computed(() => portfolioStore.currentPortfolio?.name || t('portfolio'))
 const displayUserName = computed(() => auth.user.displayName || auth.user.email || 'StockBar')
 
@@ -368,7 +370,7 @@ const buildPortfolioMenuItem = (portfolio) => ({
 })
 
 const portfolioMenuItems = computed(() => {
-  const currentActions = auth.user.uid === 'demo-user'
+  const manageItems = auth.isDemo
     ? []
     : [
         { label: t('duplicatePortfolio'), icon: 'pi pi-copy', command: () => duplicatePortfolio() },
@@ -377,16 +379,14 @@ const portfolioMenuItems = computed(() => {
         { separator: true },
         { label: t('createNewPortfolio'), icon: 'pi pi-plus', command: openCreatePortfolioDialog },
         { separator: true },
+        { label: t('importPortfolio'), icon: 'pi pi-upload', command: openImportPortfolioDialog },
       ]
 
   return [
     {
       label: t('managePortfolio'),
       icon: 'pi pi-cog',
-      items: [
-        ...currentActions,
-        { label: t('importPortfolio'), icon: 'pi pi-upload', command: openImportPortfolioDialog },
-      ],
+      items: manageItems,
     },
   ]
 })

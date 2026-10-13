@@ -1,212 +1,319 @@
 <template>
-  <div class="flex flex-col lg:flex-row gap-8">
-    <!-- Sidebar Navigation (Desktop) -->
-    <aside class="hidden lg:block w-64 shrink-0">
-      <div class="sticky top-24 p-4 bg-[var(--p-surface-card)] rounded-xl border border-[var(--p-content-border-color)] shadow-sm">
-        <div class="font-bold mb-4 text-lg">{{ $t('userGuide') }}</div>
-        <nav class="flex flex-col gap-2">
-          <a
-            v-for="item in menuItems"
-            :key="item.id"
-            :href="`#${item.id}`"
-            class="text-sm text-[var(--p-text-muted-color)] hover:text-[var(--p-primary-color)] transition-colors py-1 px-2 rounded hover:bg-[var(--p-surface-hover)]"
-            :class="{ 'text-[var(--p-primary-color)] font-medium bg-[var(--p-surface-hover)]': activeSection === item.id }"
-            @click.prevent="scrollToSection(item.id)"
-          >
-            {{ item.label }}
-          </a>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- Mobile Navigation (Dropdown or simple list) -->
-    <div class="lg:hidden mb-4">
-      <div class="p-4 bg-[var(--p-surface-card)] rounded-xl border border-[var(--p-content-border-color)]">
-        <div class="font-bold mb-2">{{ $t('tableOfContents') }}</div>
-        <Select 
-          v-model="selectedSection" 
-          @change="scrollToSection(selectedSection)" 
-          :options="menuItems" 
-          optionLabel="label" 
-          optionValue="id"
-          placeholder="Select a section"
-          class="w-full"
-        />
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="flex-1 min-w-0">
-      <div class="prose max-w-none dark:prose-invert">
-        
-        <section id="dashboard" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">1. {{ $t('dashboard') }}</h2>
-          <p class="mb-4">{{ $t('dashboardIntro') }}</p>
-          
-          <h3 class="text-xl font-semibold mb-2">{{ $t('coreMetrics') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('totalValue') }}</strong>: {{ $t('totalValueDesc') }}</li>
-            <li><strong>{{ $t('totalProfit') }}</strong>: {{ $t('totalProfitDesc') }}</li>
-            <li><strong>{{ $t('irr') }} (XIRR)</strong>: {{ $t('irrDesc') }}</li>
-          </ul>
-
-          <h3 class="text-xl font-semibold mb-2">{{ $t('assetTrend') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li>{{ $t('assetTrendDesc1') }}</li>
-            <li>{{ $t('assetTrendDesc2') }}</li>
-          </ul>
-
-          <h3 class="text-xl font-semibold mb-2">{{ $t('allocationPie') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('actualAllocation') }}</strong>: {{ $t('actualAllocationDesc') }}</li>
-            <li><strong>{{ $t('targetAllocation') }}</strong>: {{ $t('targetAllocationDesc') }}</li>
-            <li>{{ $t('allocationPieDesc1') }}</li>
-            <li><strong>{{ $t('rebalanceSuggestion') }}</strong>: {{ $t('rebalanceSuggestionDesc') }}</li>
-          </ul>
-
-          <h3 class="text-xl font-semibold mb-2">{{ $t('holdingsTable') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li>{{ $t('holdingsTableDesc1') }}</li>
-            <li>{{ $t('holdingsTableDesc2') }}</li>
-            <li>{{ $t('holdingsTableDesc3') }}</li>
-          </ul>
-        </section>
-
-        <section id="transactions" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">2. {{ $t('transactions') }}</h2>
-          <p class="mb-4">{{ $t('transactionsIntro') }}</p>
-
-          <h3 class="text-xl font-semibold mb-2">{{ $t('operations') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('addTransaction') }}</strong>: {{ $t('addTransactionDesc') }}</li>
-            <li><strong>{{ $t('editDeleteTransaction') }}</strong>: {{ $t('editDeleteTransactionDesc') }}</li>
-            <li><strong>{{ $t('exportData') }}</strong>: {{ $t('exportDataDesc') }}</li>
-          </ul>
-        </section>
-
-        <section id="holdings" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">3. {{ $t('holdings') }}</h2>
-          <p class="mb-4">{{ $t('holdingsIntro') }}</p>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('viewDetails') }}</strong>: {{ $t('viewDetailsDesc') }}</li>
-          </ul>
-        </section>
-
-        <section id="allocation" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">4. {{ $t('allocation') }}</h2>
-          <p class="mb-4">{{ $t('allocationIntro') }}</p>
-          
-          <h3 class="text-xl font-semibold mb-2">{{ $t('operations') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('setTargets') }}</strong>: {{ $t('setTargetsDesc') }}</li>
-            <li><strong>{{ $t('addTrackedAsset') }}</strong>: {{ $t('addTrackedAssetDesc') }}</li>
-          </ul>
-        </section>
-
-        <section id="rebalancing" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">5. {{ $t('rebalance') }}</h2>
-          <p class="mb-4">{{ $t('rebalancingIntro') }}</p>
-          
-          <h3 class="text-xl font-semibold mb-2">{{ $t('features') }}</h3>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('rebalanceTable') }}</strong>: {{ $t('rebalanceTableDesc') }}</li>
-            <li><strong>{{ $t('suggestions') }}</strong>: {{ $t('suggestionsDesc') }}</li>
-          </ul>
-        </section>
-
-        <section id="dividends" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">6. {{ $t('dividends') }}</h2>
-          <p class="mb-4">{{ $t('dividendsIntro') }}</p>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('viewDividends') }}</strong>: {{ $t('viewDividendsDesc') }}</li>
-          </ul>
-        </section>
-
-        <section id="backtesting" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">7. {{ $t('backtesting') }}</h2>
-          <p class="mb-4">{{ $t('backtestingIntro') }}</p>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('setParams') }}</strong>: {{ $t('setParamsDesc') }}</li>
-            <li><strong>{{ $t('viewResults') }}</strong>: {{ $t('viewResultsDesc') }}</li>
-          </ul>
-        </section>
-
-        <section id="settings" class="scroll-mt-24 mb-12">
-          <h2 class="text-2xl font-bold mb-4 border-b pb-2">8. {{ $t('userSettings') }}</h2>
-          <p class="mb-4">{{ $t('userSettingsIntro') }}</p>
-          <ul class="list-disc pl-6 mb-4 space-y-1">
-            <li><strong>{{ $t('generalSettings') }}</strong>: {{ $t('generalSettingsDesc') }}</li>
-            <li><strong>{{ $t('accountManagement') }}</strong>: {{ $t('accountManagementDesc') }}</li>
-          </ul>
-        </section>
-
-        <div class="bg-[var(--p-surface-ground)] p-4 rounded-lg border border-[var(--p-content-border-color)]">
-          <div class="flex gap-2">
-            <i class="pi pi-info-circle text-[var(--p-primary-color)] mt-1"></i>
-            <div>
-              <strong>{{ $t('tip') }}</strong>: {{ $t('dataAccuracyTip') }}
-            </div>
-          </div>
+  <div class="guide">
+    <!-- 左側目錄（GitLab Docs 風格） -->
+    <nav class="guide-nav" :aria-label="L(guide.ui.root)">
+      <div v-for="(group, gi) in guide.groups" :key="gi" class="guide-nav__group">
+        <button
+          type="button"
+          class="guide-nav__group-btn"
+          :aria-expanded="!collapsed[gi]"
+          @click="collapsed[gi] = !collapsed[gi]"
+        >
+          {{ L(group.label) }}
+          <i class="pi" :class="collapsed[gi] ? 'pi-angle-right' : 'pi-angle-down'" aria-hidden="true"></i>
+        </button>
+        <div v-show="!collapsed[gi]" class="guide-nav__items">
+          <RouterLink
+            v-for="key in group.pages"
+            :key="key"
+            :to="{ query: { page: key } }"
+            class="guide-nav__link"
+            :class="{ 'is-active': key === pageKey }"
+            :aria-current="key === pageKey ? 'page' : undefined"
+          >{{ L(guide.pages[key].title) }}</RouterLink>
         </div>
-
       </div>
-    </main>
+    </nav>
+
+    <article class="guide-doc">
+      <ol class="doc-crumbs">
+        <li>{{ L(guide.ui.root) }}</li>
+        <li>{{ L(group.label) }}</li>
+        <li aria-current="page">{{ L(page.title) }}</li>
+      </ol>
+
+      <h1 class="doc-title">{{ L(page.title) }}</h1>
+
+      <div v-if="page.to" class="doc-meta">
+        <div><strong>{{ L(guide.ui.location) }}</strong>：{{ L(group.label) }} › {{ L(page.title) }}</div>
+        <div>
+          <strong>{{ L(guide.ui.openPage) }}</strong>：
+          <RouterLink :to="page.to" class="doc-a">{{ page.to }}</RouterLink>
+        </div>
+      </div>
+
+      <p>{{ L(page.intro) }}</p>
+
+      <div v-if="page.note" class="doc-note">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        <p>{{ L(page.note) }}</p>
+      </div>
+
+      <section v-for="(section, si) in page.sections" :key="si">
+        <h2 class="doc-h2">{{ L(section.title) }}</h2>
+        <p v-if="section.text">{{ L(section.text) }}</p>
+        <ol v-if="section.steps" class="doc-list doc-list--ol">
+          <li v-for="(step, i) in section.steps" :key="i">{{ L(step) }}</li>
+        </ol>
+        <ul v-if="section.list" class="doc-list">
+          <li v-for="(item, i) in section.list" :key="i">{{ L(item) }}</li>
+        </ul>
+      </section>
+
+      <div class="doc-pager">
+        <RouterLink v-if="prevKey" :to="{ query: { page: prevKey } }" class="doc-pager__link">
+          <span class="doc-pager__hint">{{ L(guide.ui.prev) }}</span>
+          <span><i class="pi pi-angle-left" aria-hidden="true"></i> {{ L(guide.pages[prevKey].title) }}</span>
+        </RouterLink>
+        <RouterLink v-if="nextKey" :to="{ query: { page: nextKey } }" class="doc-pager__link doc-pager__link--next">
+          <span class="doc-pager__hint">{{ L(guide.ui.next) }}</span>
+          <span>{{ L(guide.pages[nextKey].title) }} <i class="pi pi-angle-right" aria-hidden="true"></i></span>
+        </RouterLink>
+      </div>
+    </article>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { computed, reactive, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+// ponytail: 指南內容是長篇巢狀文件，直接讀 yaml 依語系取值，不塞進扁平化的 i18n key
+import guide from '@/i18n/guide.yaml'
 
-const { t } = useI18n()
+const route = useRoute()
+const { locale } = useI18n()
+const L = (text) => text?.[locale.value] ?? text?.zh
 
-const activeSection = ref('dashboard')
-const selectedSection = ref('dashboard')
+const order = guide.groups.flatMap((g) => g.pages)
+// 網址 ?page=xxx 決定目前文件，無效值回到第一篇
+const pageKey = computed(() => (order.includes(route.query.page) ? route.query.page : order[0]))
+const page = computed(() => guide.pages[pageKey.value])
+const group = computed(() => guide.groups.find((g) => g.pages.includes(pageKey.value)))
+const prevKey = computed(() => order[order.indexOf(pageKey.value) - 1])
+const nextKey = computed(() => order[order.indexOf(pageKey.value) + 1])
 
-const menuItems = computed(() => [
-  { id: 'dashboard', label: '1. ' + t('dashboard') },
-  { id: 'transactions', label: '2. ' + t('transactions') },
-  { id: 'holdings', label: '3. ' + t('holdings') },
-  { id: 'allocation', label: '4. ' + t('allocation') },
-  { id: 'rebalance', label: '5. ' + t('rebalance') },
-  { id: 'dividends', label: '6. ' + t('dividends') },
-  { id: 'backtesting', label: '7. ' + t('backtesting') },
-  { id: 'settings', label: '8. ' + t('userSettings') },
-])
-
-const scrollToSection = (id) => {
-  const element = document.getElementById(id)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
-    activeSection.value = id
-  }
-}
-
-// Intersection Observer for active section
-let observer = null
-
-onMounted(() => {
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        activeSection.value = entry.target.id
-      }
-    })
-  }, {
-    rootMargin: '-20% 0px -50% 0px'
-  })
-
-  menuItems.value.forEach((item) => {
-    const el = document.getElementById(item.id)
-    if (el) observer.observe(el)
-  })
-})
-
-onUnmounted(() => {
-  if (observer) observer.disconnect()
+const collapsed = reactive({})
+watch(pageKey, () => {
+  collapsed[guide.groups.indexOf(group.value)] = false
+  document.querySelector('.guide-doc')?.scrollIntoView({ block: 'start' })
 })
 </script>
 
 <style scoped>
-/* Add any specific styles if needed, mostly using Tailwind */
+.guide {
+  display: flex;
+  gap: 3.5rem;
+  max-width: 76rem;
+}
+
+/* 左側目錄 */
+.guide-nav {
+  position: sticky;
+  top: 5rem;
+  align-self: flex-start;
+  width: 15rem;
+  flex-shrink: 0;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+}
+
+.guide-nav__group-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: none;
+  font-size: 0.95rem;
+  color: var(--p-text-color);
+  text-align: left;
+  cursor: pointer;
+}
+
+.guide-nav__group-btn:hover {
+  background: var(--p-content-hover-background);
+}
+
+.guide-nav__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin: 0.125rem 0 0.5rem 0.75rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--p-content-border-color);
+}
+
+.guide-nav__link {
+  position: relative;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+  color: var(--p-text-color);
+  text-decoration: none;
+}
+
+.guide-nav__link:hover {
+  background: var(--p-content-hover-background);
+}
+
+.guide-nav__link.is-active {
+  background: var(--p-content-hover-background);
+}
+
+.guide-nav__link.is-active::before {
+  content: '';
+  position: absolute;
+  left: calc(-0.5rem - 2px);
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--p-text-color);
+}
+
+/* 正文 */
+.guide-doc {
+  flex: 1;
+  min-width: 0;
+  max-width: 46rem;
+  scroll-margin-top: 6rem;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--p-text-color);
+}
+
+.guide-doc p {
+  margin: 0 0 1rem;
+}
+
+.doc-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+.doc-crumbs li + li::before {
+  content: '/';
+  margin-right: 0.5rem;
+}
+
+.doc-crumbs li[aria-current] {
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.doc-title {
+  margin-bottom: 1.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.doc-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.doc-a {
+  color: var(--p-primary-color);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.doc-note {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  background: var(--p-content-hover-background);
+}
+
+.doc-note .pi {
+  margin-top: 0.4rem;
+  color: var(--p-text-muted-color);
+}
+
+.guide-doc .doc-note p {
+  margin: 0;
+}
+
+.doc-h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.doc-list {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.doc-list--ol {
+  list-style: decimal;
+}
+
+.doc-list li + li {
+  margin-top: 0.35rem;
+}
+
+/* 上一篇／下一篇 */
+.doc-pager {
+  display: flex;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--p-content-border-color);
+}
+
+.doc-pager__link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 0.5rem;
+  color: var(--p-text-color);
+  text-decoration: none;
+}
+
+.doc-pager__link:hover {
+  border-color: var(--p-primary-color);
+}
+
+.doc-pager__link--next {
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.doc-pager__hint {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+@media (max-width: 1023px) {
+  .guide {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .guide-nav {
+    position: static;
+    width: 100%;
+    max-height: none;
+  }
+}
 </style>

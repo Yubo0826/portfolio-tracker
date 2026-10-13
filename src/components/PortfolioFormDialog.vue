@@ -106,8 +106,8 @@ watch(
     newPortfolio.value = {
       name: val.name || '',
       description: val.description || '',
-      drift_threshold: val.drift_threshold || 5,
-      enable_email_alert: val.enable_email_alert || true,
+      drift_threshold: val.drift_threshold ?? 5,
+      enable_email_alert: val.enable_email_alert ?? true,
     }
   },
   { immediate: true }

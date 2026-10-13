@@ -131,7 +131,7 @@
     </section>
 
     <!-- ============ Sticky actions ============ -->
-    <div class="set-footer">
+    <div v-if="!auth.isDemo" class="set-footer">
       <Button
         :label="$t('save')"
         :disabled="saveButtonDisabled"

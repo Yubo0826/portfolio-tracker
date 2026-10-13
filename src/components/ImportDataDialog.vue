@@ -246,7 +246,8 @@ function normalizeData(rows) {
       currency: String(currency || 'USD').toUpperCase(),
       fee: numFee,
       totalCost: +(numShares * numPrice + numFee).toFixed(2),
-      transactionType: type.toLowerCase() === 'buy' ? 'buy' : 'sell',
+      // 保留原值，confirmImport 時再擋掉 buy/sell 以外的值，不默默當成賣出
+      transactionType: String(type).trim().toLowerCase(),
     }
   })
 }
@@ -378,6 +379,13 @@ function closeDialog() {
 import { showLoading, hideLoading } from "@/composables/loading.js"
 
 async function confirmImport() {
+  // 在建立投資組合前先檢查，避免留下空的投資組合
+  const badRows = previewData.value.flatMap((trade, i) => (['buy', 'sell'].includes(trade.transactionType) ? [] : [i + 1]))
+  if (badRows.length > 0) {
+    toast.error(t('invalidTradeType', { rows: badRows.join(', ') }), '')
+    return
+  }
+
   showLoading()
   let targetPortfolioId = selectedPortfolioId.value
   const targetPortfolioName = portfolioName.value.trim()

@@ -396,9 +396,14 @@
                 <span>{{ splitAmountWithCode(data.currentValue).fraction }}</span>
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
               </div>
-              <div :class="{ 'text-up': data.profitPercentage >= 0, 'text-down': data.profitPercentage < 0 }">
-                <div class="font-bold text-xs">{{ formatSignedNumber(data.profitPercentage) }}%</div>
-              </div>
+            </template>
+          </Column>
+
+          <Column field="profitPercentage" :header="$t('comparisonReturnRate')" sortable>
+            <template #body="{ data }">
+              <span class="font-bold" :class="{ 'text-up': data.profitPercentage >= 0, 'text-down': data.profitPercentage < 0 }">
+                {{ formatSignedNumber(data.profitPercentage) }}%
+              </span>
             </template>
           </Column>
 
@@ -416,31 +421,6 @@
           </template>
         </DataTable>
       </template>
-      </Card>
-
-      <!-- 關注清單 -->
-      <Card class="app-panel mb-8 p-4">
-        <template #content>
-          <div class="mb-4 flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold">{{ $t('watchlist') }}</h2>
-            <Button @click="$router.push('/watchlist')" v-tooltip.top="{ value: $t('viewWatchlist'), showDelay: 500 }" :aria-label="$t('viewWatchlist')" icon="pi pi-arrow-right" text rounded severity="secondary" size="small" />
-          </div>
-          <ul v-if="watchlistStore.items.length" class="divide-y divide-[var(--p-content-border-color)]">
-            <li v-for="item in watchlistStore.items.slice(0, 5)" :key="item.symbol">
-              <RouterLink :to="{ name: 'asset', params: { symbol: item.symbol } }" class="flex items-center gap-3 py-2 hover:text-[var(--p-primary-color)]">
-                <span class="font-medium">{{ item.symbol }}</span>
-                <span class="ml-auto font-medium">{{ item.regularMarketPrice == null ? '--' : item.regularMarketPrice.toFixed(2) }}</span>
-                <span class="w-20 text-right text-sm" :class="(item.regularMarketChangePercent ?? 0) >= 0 ? 'text-up' : 'text-down'">
-                  {{ item.regularMarketChangePercent == null ? '--' : `${item.regularMarketChangePercent > 0 ? '+' : ''}${item.regularMarketChangePercent.toFixed(2)}%` }}
-                </span>
-              </RouterLink>
-            </li>
-          </ul>
-          <p v-else class="text-sm text-muted-color">
-            {{ $t('watchlistEmpty') }} ·
-            <RouterLink to="/watchlist" class="text-[var(--p-primary-color)]">{{ $t('addToWatchlist') }}</RouterLink>
-          </p>
-        </template>
       </Card>
     </div>
   </div>
@@ -464,7 +444,6 @@ import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
-import { useWatchlistStore } from '@/stores/watchlist'
 import NoData from '@/components/NoData.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import ImportDataDialog from '@/components/ImportDataDialog.vue'
@@ -476,7 +455,6 @@ const transactionsStore = useTransactionsStore()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 const holdingsStore = useHoldingsStore()
-const watchlistStore = useWatchlistStore()
 // 每日排程更新股價時會寫 last_updated，取最新一筆當作股價更新時間（ISO 字串可直接比大小）
 const pricesUpdatedAt = computed(() => holdingsStore.rawList.reduce((max, h) => (h.last_updated > max ? h.last_updated : max), ''))
 // ponytail: 與 AssetProfileView 同一行格式化，未抽共用 util

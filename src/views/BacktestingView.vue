@@ -299,10 +299,17 @@ function simulateBacktest(allocation, prices, { initialCapital, rebalance }) {
     const isQuarterEnd = isMonthEnd && (date.getMonth() + 1) % 3 === 0;
     const isYearEnd = isMonthEnd && date.getMonth() === 11;
 
+    // 閾值：任一資產實際比例偏離目標超過 5 個百分點（與選項標籤「閾值（5%）」一致）
+    const isDrifted = () => validAssets.some((asset) => {
+      const weight = (holdings[asset.symbol] * alignedPrices[asset.symbol][i].close / total) * 100;
+      return Math.abs(weight - asset.target) > 5;
+    });
+
     const doRebalance =
       (rebalance === "monthly" && isMonthEnd) ||
       (rebalance === "quarterly" && isQuarterEnd) ||
-      (rebalance === "yearly" && isYearEnd);
+      (rebalance === "yearly" && isYearEnd) ||
+      (rebalance === "threshold" && isDrifted());
 
     if (doRebalance && i < sortedDates.length - 1) {
       for (let asset of validAssets) {

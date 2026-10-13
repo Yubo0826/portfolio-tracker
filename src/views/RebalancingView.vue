@@ -86,7 +86,7 @@
               <div class="text-xs">{{ formatChange(data.amount) }}</div>
             </div>
             <Button
-              v-if="!executed.has(data.symbol)"
+              v-if="!auth.isDemo && !executed.has(data.symbol)"
               :icon="data.action === 'BUY' ? 'pi pi-plus' : 'pi pi-minus'"
               :aria-label="$t(data.action === 'BUY' ? 'buy' : 'sell')"
               class="p-button-rounded p-button-text"

@@ -1,0 +1,415 @@
+# 使用者指南內容（只有 UserGuideView 使用）
+# 結構：groups 決定左側目錄；pages.<key> 為各篇文件，sections 內可用 text / list / steps
+ui:
+  root:
+    en: User Guide
+    zh: 使用者指南
+  location:
+    en: Location
+    zh: 位置
+  openPage:
+    en: Open page
+    zh: 開啟頁面
+  prev:
+    en: Previous
+    zh: 上一篇
+  next:
+    en: Next
+    zh: 下一篇
+
+groups:
+  - label:
+      en: Getting started
+      zh: 開始使用
+    pages: [quick-start, interface]
+  - label:
+      en: Overview
+      zh: 總覽
+    pages: [dashboard, asset-details, watchlist, asset]
+  - label:
+      en: Analysis
+      zh: 分析
+    pages: [allocation, rebalancing, backtesting]
+  - label:
+      en: Manage
+      zh: 管理
+    pages: [portfolios, user-settings, preferences]
+
+pages:
+  quick-start:
+    title:
+      en: Quick start
+      zh: 快速開始
+    intro:
+      en: StockBar calculates your holdings, returns and allocation from the trades you record. Set up a portfolio, add your trades, and every page fills in automatically.
+      zh: StockBar 依據你記錄的交易，自動計算持股、報酬與資產配置。只要建立投資組合並輸入交易，其他頁面的數字都會自動產生。
+    note:
+      en: Without signing in you are browsing read-only demo data. Sign in with Google to create and edit your own portfolios.
+      zh: 未登入時看到的是唯讀的展示資料，只能瀏覽、無法修改。使用 Google 登入後，才能建立並編輯自己的投資組合。
+    sections:
+      - title:
+          en: Set up in three steps
+          zh: 三步驟完成設定
+        steps:
+          - en: "Create a portfolio: open Portfolios and select Create portfolio, or use Import portfolio in the portfolio menu to create one from a file."
+            zh: 建立投資組合：前往「投資組合」頁點「建立投資組合」，或從投資組合選單的「匯入投資組合」直接用檔案建立。
+          - en: "Record your trades: select Add Transaction at the top right, or choose Import Transactions from its dropdown to load a CSV or Excel file."
+            zh: 記錄交易：點右上角「新增交易」逐筆輸入，或從旁邊的下拉選單選「匯入交易紀錄」，一次匯入 CSV 或 Excel 檔。
+          - en: "Set target weights: open Analysis › Set Targets and give each symbol a target percentage. Rebalancing and backtesting use these targets."
+            zh: 設定目標配置：前往「分析 › 設定目標配置」，為各標的設定目標比例。再平衡與回測都會以這組目標為基礎。
+      - title:
+          en: Keep your data accurate
+          zh: 保持資料正確
+        text:
+          en: Cost, profit, IRR and allocation are all derived from your transaction records. After every buy or sell, add the trade so the numbers stay correct. Dividends are pulled in automatically and don't need to be entered.
+          zh: 成本、損益、IRR 與配置比例全部由交易紀錄推算。每次買賣後記得補上交易，數字才會正確。配息由系統自動抓取，不需要手動輸入。
+
+  interface:
+    title:
+      en: Finding your way around
+      zh: 介面導覽
+    intro:
+      en: The navigation, portfolio selector, search and the Add Transaction button are available on every page.
+      zh: 導覽列、投資組合切換、搜尋與「新增交易」按鈕在每個頁面都能使用。
+    sections:
+      - title:
+          en: Current portfolio
+          zh: 目前的投資組合
+        text:
+          en: Dashboard, Asset Details, Set Targets, Rebalance and Backtest all show the current portfolio. Switch it with the briefcase button; the app remembers your choice next time.
+          zh: 儀表板、資產明細、設定目標配置、再平衡與回測，顯示的都是「目前的投資組合」。用公事包按鈕即可切換，下次開啟時會記住你的選擇。
+        list:
+          - en: Recently used portfolios are listed first.
+            zh: 最近使用過的投資組合會排在最前面。
+          - en: The Manage submenu lets you duplicate, edit, delete, create or import a portfolio.
+            zh: 「管理」子選單可製作副本、編輯、刪除、建立新的或匯入投資組合。
+      - title:
+          en: Search
+          zh: 搜尋
+        text:
+          en: Press / or Ctrl+K anywhere to search by symbol or name. Selecting a result opens its asset page. With an empty query you see your recent searches and trending symbols.
+          zh: 在任何頁面按 / 或 Ctrl+K 即可依代號或名稱搜尋，選擇結果會開啟該標的的個股頁。未輸入時會列出最近搜尋與熱門標的。
+      - title:
+          en: User menu
+          zh: 使用者選單
+        text:
+          en: Select your avatar to open User Settings, this guide and Preferences, or to quickly switch language, currency (USD / TWD) and appearance.
+          zh: 點頭像可開啟使用者設定、本指南與偏好設定，也能快速切換語言、顯示幣別（USD / TWD）與外觀。
+        list:
+          - en: Amounts are converted to your display currency. Per-share prices stay in the asset's own currency, for example TWD for Taiwan stocks.
+            zh: 金額會換算成你選的顯示幣別；每股價格則維持標的本身的幣別，例如台股以 TWD 顯示。
+
+  dashboard:
+    title:
+      en: Dashboard
+      zh: 儀表板
+    to: /dashboard
+    intro:
+      en: The dashboard summarizes the current portfolio's performance, value trend and allocation on one page.
+      zh: 儀表板在同一頁彙整目前投資組合的績效、市值走勢與資產配置。
+    note:
+      en: Turn on Show details next to the title to see extra rows such as cost, dividends and period highs and lows.
+      zh: 開啟標題旁的「顯示明細」，可看到持倉成本、股息、區間高低點等更多資訊。
+    sections:
+      - title:
+          en: Key metrics
+          zh: 主要指標
+        list:
+          - en: "Unrealized P/L: gain or loss on what you still hold, with the share of winning and losing positions."
+            zh: 未實現損益：目前持股的帳面損益，並顯示獲利與虧損的檔數比例。
+          - en: "Realized P/L: gain or loss from sold shares (fees included), plus total dividends received."
+            zh: 已實現損益：已賣出部位的損益（已扣手續費），以及累計領到的股息。
+          - en: "IRR: annualized return that accounts for when you added money, so it reflects your actual performance."
+            zh: IRR：考量每筆資金投入時間點的年化報酬率，較能反映實際投資績效。
+      - title:
+          en: Total value chart
+          zh: 總價值走勢
+        text:
+          en: Shows how the portfolio's value changed over time. Switch between 5D, 1M, 6M, YTD, 1Y and 5Y; each button shows the return for that period. With details on, you also see the period high, low and max drawdown.
+          zh: 顯示投資組合市值隨時間的變化。可切換 5D、1M、6M、YTD、1Y、5Y，每個按鈕都會標示該區間的漲跌幅；開啟明細時另顯示區間最高、最低與最大回撤。
+      - title:
+          en: Allocation and holdings
+          zh: 資產配置與持有資產
+        list:
+          - en: The allocation card toggles between your actual weights and your target weights. Its slider icon opens Set Targets.
+            zh: 資產配置卡片可在「實際比例」與「目標配置」之間切換，右上角圖示可前往設定目標配置。
+          - en: The holdings table lists each position's price, shares, cost, value, return and weight. Select a symbol to open its asset page.
+            zh: 持有資產表列出每檔的現價、股數、總花費、總價值、報酬率與比重，點代號可開啟個股頁。
+
+  asset-details:
+    title:
+      en: Asset details
+      zh: 資產明細
+    to: /portfolio/holdings
+    intro:
+      en: Asset Details has three tabs, Holdings, Transactions and Dividends, for reviewing and editing the current portfolio's records.
+      zh: 資產明細分為「持有資產」、「交易」、「配息」三個分頁，用來檢視與管理目前投資組合的紀錄。
+    sections:
+      - title:
+          en: Holdings
+          zh: 持有資產
+        text:
+          en: Lists each position's shares, cost, current value, cumulative return and return including dividends. Filter by symbol, or select rows and delete them.
+          zh: 列出每檔持股的股數、總花費、現值、累計損益與含息報酬，可依代號篩選，也可勾選後刪除。
+        list:
+          - en: Deleting a holding also deletes its transactions and dividend records, and cannot be undone.
+            zh: 刪除持股會一併刪除該標的的交易與配息紀錄，且無法復原。
+      - title:
+          en: Transactions
+          zh: 交易
+        text:
+          en: Shows every buy and sell. Filter by symbol, type or date range, edit a trade with the pencil icon, or select several and delete them.
+          zh: 列出所有買賣紀錄，可依代號、類型、日期區間篩選；點鉛筆圖示可編輯，勾選多筆可一次刪除。
+        list:
+          - en: Export downloads all trades in the portfolio as a CSV file (filters are not applied).
+            zh: 「匯出」會將此投資組合的全部交易下載為 CSV 檔（不受篩選影響）。
+      - title:
+          en: Add a trade
+          zh: 新增交易
+        steps:
+          - en: Select Add Transaction at the top right. The portfolio in the dialog title can be changed if needed.
+            zh: 點右上角「新增交易」。對話框標題中的投資組合可視需要切換。
+          - en: Enter the symbol and date. The closing price and currency for that day are filled in automatically.
+            zh: 輸入代號與交易日期，系統會自動帶入當天收盤價與幣別。
+          - en: Enter shares, adjust the price if needed, add any fee and choose Buy or Sell.
+            zh: 輸入股數，視需要修改價格、填入手續費，並選擇買入或賣出。
+          - en: Select Save, or Save and add another to keep entering trades for the same symbol.
+            zh: 點「儲存」；若要連續輸入同一檔，可用「儲存並新增另一筆」。
+      - title:
+          en: Import trades
+          zh: 匯入交易
+        text:
+          en: Choose Import Transactions from the Add Transaction dropdown and drop in a CSV or Excel file. Columns are date, symbol, shares, currency, price, fee and type (buy or sell). Download the sample file to see the format. You can preview the rows before importing.
+          zh: 從「新增交易」下拉選單選「匯入交易紀錄」，拖入 CSV 或 Excel 檔。欄位為 date、symbol、shares、currency、price、fee、type（buy 或 sell），可先「下載範例」參考格式，匯入前會顯示預覽。
+        list:
+          - en: Taiwan symbols can be entered without a suffix; .TW or .TWO is added automatically.
+            zh: 台股代號可省略後綴，系統會自動補上 .TW 或 .TWO。
+          - en: If any symbol can't be found, nothing is imported. Fix the listed symbols and try again.
+            zh: 只要有任一代號找不到，整批都不會匯入；請依提示修正後再試一次。
+      - title:
+          en: Dividends
+          zh: 配息
+        text:
+          en: Dividends are recorded automatically from your holdings. This tab lists the shares held, dividend per share, total and date, with symbol and date filters.
+          zh: 配息會依持股自動記錄。此分頁列出持有股數、每股股息、總股息與發放日期，可依代號與日期篩選。
+
+  watchlist:
+    title:
+      en: Watchlist
+      zh: 關注清單
+    to: /watchlist
+    intro:
+      en: Keep an eye on symbols you don't own yet. The watchlist is shared across all portfolios.
+      zh: 追蹤尚未持有、但想持續觀察的標的。關注清單不分投資組合，所有組合共用。
+    note:
+      en: Sign in to edit your watchlist.
+      zh: 登入後才能編輯關注清單。
+    sections:
+      - title:
+          en: Add and remove symbols
+          zh: 新增與移除
+        text:
+          en: Select Add symbol, then search or pick from trending symbols. You can also use the star button on any asset page. Remove a symbol with the trash icon.
+          zh: 點「新增代號」後搜尋或從熱門標的中挑選，也可以在個股頁點星號加入。要移除時點垃圾桶圖示。
+      - title:
+          en: Target price alerts
+          zh: 目標價提醒
+        text:
+          en: Enter a target price for a symbol and press Enter. When the price reaches it, you get one email. The ≥ or ≤ sign shows which direction triggers the alert.
+          zh: 在「目標價」欄輸入價格後按 Enter 儲存。價格到達目標價時，會寄一次 email 通知你；旁邊的 ≥ 或 ≤ 表示觸發方向。
+
+  asset:
+    title:
+      en: Asset page
+      zh: 個股頁
+    intro:
+      en: Each symbol has its own page with price history, key statistics and company information. Open it from search or by selecting a symbol in any table.
+      zh: 每個代號都有專屬頁面，提供價格走勢、主要統計與公司資訊。可從搜尋或任一表格中點代號進入。
+    sections:
+      - title:
+          en: Price chart
+          zh: 價格走勢
+        text:
+          en: Switch between an area chart and a candlestick chart, and choose ranges from 1 day to 5 years.
+          zh: 可切換面積圖與 K 線圖，時間範圍從 1 天到 5 年。
+        list:
+          - en: Add up to 5 symbols to compare their performance on the same chart (area chart only).
+            zh: 可加入最多 5 檔對比標的，在同一張圖比較表現（僅限面積圖）。
+          - en: ETFs and funds also show sector weights and top 10 holdings.
+            zh: ETF 與基金另外顯示產業配置與前十大持股。
+      - title:
+          en: Watch it
+          zh: 加入關注
+        text:
+          en: Select the star next to the symbol to add it to or remove it from your watchlist.
+          zh: 點代號旁的星號，即可加入或移出關注清單。
+
+  allocation:
+    title:
+      en: Set targets
+      zh: 設定目標配置
+    to: /allocation
+    intro:
+      en: Define the ideal weight of each symbol in the current portfolio. Rebalancing and backtesting both use these targets.
+      zh: 為目前的投資組合設定每個標的的理想比例。再平衡與回測都會以這組目標為依據。
+    note:
+      en: Targets must add up to 100% before you can save.
+      zh: 所有目標比例合計必須等於 100% 才能儲存。
+    sections:
+      - title:
+          en: Set target weights
+          zh: 設定比例
+        steps:
+          - en: Under Add tracked asset, pick from your current holdings, or search for any symbol, including ones you don't own yet.
+            zh: 在「新增追蹤資產」從現有持股快速選擇，或搜尋任何代號（包含尚未持有的標的）。
+          - en: Enter a target percentage for each symbol. The total turns green when it reaches 100%.
+            zh: 為每個標的輸入目標百分比，合計達到 100% 時會顯示綠色。
+          - en: Check the preview chart and select Save. Cancel reverts to the last saved version.
+            zh: 確認右側預覽圖後點「儲存」；點「取消」可還原到上次儲存的設定。
+        list:
+          - en: Symbols you don't hold are marked Custom. Rebalancing will suggest buying them.
+            zh: 尚未持有的標的會標示「自訂標的」，再平衡時會建議買入。
+
+  rebalancing:
+    title:
+      en: Rebalance
+      zh: 再平衡
+    to: /rebalancing
+    intro:
+      en: Rebalancing compares your current weights with your targets and suggests how many shares to buy or sell to get back on target.
+      zh: 再平衡會比較目前比例與目標配置，建議要買賣多少股，才能讓投資組合回到目標比例。
+    note:
+      en: Suggestions are a reference only. StockBar doesn't place orders; trade with your broker and record the trade here afterwards.
+      zh: 建議僅供參考，StockBar 不會替你下單。請在券商完成交易後，再回來記錄交易。
+    sections:
+      - title:
+          en: Calculate a rebalance
+          zh: 計算再平衡
+        steps:
+          - en: Choose Deposit or Withdraw and enter the amount. Enter 0 to rebalance without adding or removing money.
+            zh: 選擇「存入」或「提取」並輸入金額；輸入 0 代表只調整比例、不增減資金。
+          - en: Choose a sell rule. Exact sells any overweight asset; the threshold option only sells assets that drift more than the portfolio's drift threshold.
+            zh: 選擇賣出規則：「精確」會賣出所有超配的標的；「偏離 > X% 才賣」只賣出偏離超過投資組合門檻的標的。
+          - en: Turn on Buy only if you never want to sell when depositing.
+            zh: 存入時若不想賣出任何持股，可開啟「只買不賣」。
+          - en: Select Rebalance to see the suggested trades.
+            zh: 點「再平衡」查看建議交易。
+      - title:
+          en: Read the results
+          zh: 解讀結果
+        list:
+          - en: Drift shows how many percentage points each asset is off target. Values above the threshold are highlighted.
+            zh: 「偏離」顯示各標的與目標相差幾個百分點，超過門檻會以橘色標示。
+          - en: Suggested trade shows the shares and amount to buy or sell. Select + or − to open a pre-filled transaction.
+            zh: 「建議交易」顯示建議買賣的股數與金額，點 + 或 − 可直接開啟已填好的交易表單。
+          - en: The summary shows total value before and after, total buys, total sells and any unused cash.
+            zh: 下方摘要顯示調整前後總價值、買入與賣出合計，以及未使用的現金。
+
+  backtesting:
+    title:
+      en: Backtest
+      zh: 回測
+    to: /backtesting
+    intro:
+      en: Backtesting simulates how the current portfolio's target allocation would have performed using historical prices.
+      zh: 回測以歷史價格模擬「目前投資組合的目標配置」在過去的表現。
+    note:
+      en: Backtests use your target allocation, not your actual holdings. Set targets first.
+      zh: 回測使用的是目標配置而非實際持股，請先完成目標配置設定。
+    sections:
+      - title:
+          en: Run a backtest
+          zh: 執行回測
+        steps:
+          - en: Choose the start and end dates.
+            zh: 選擇開始與結束日期。
+          - en: Enter the initial capital (USD).
+            zh: 輸入初始資金（USD）。
+          - en: Choose a rebalancing strategy, monthly, quarterly, yearly, or threshold (rebalance whenever any asset drifts more than 5 percentage points), then select Run backtest.
+            zh: 選擇再平衡策略：每月、每季、每年，或「閾值」（任一資產偏離目標超過 5 個百分點時再平衡），再點「開始回測」。
+        list:
+          - en: The simulation only uses dates where every asset has a price, so the period may start later than you chose.
+            zh: 模擬只採用所有標的都有價格的日期，實際起始日可能比設定的晚。
+      - title:
+          en: Results
+          zh: 回測結果
+        list:
+          - en: Cumulative and annualized return, Sharpe ratio, max drawdown, volatility and win rate.
+            zh: 累積報酬率、年化報酬率、Sharpe Ratio、最大回撤、波動率與勝率。
+          - en: A value chart over the whole period and a bar chart of yearly returns.
+            zh: 整段期間的資產走勢圖，以及各年度報酬率長條圖。
+
+  portfolios:
+    title:
+      en: Portfolios
+      zh: 投資組合
+    to: /portfolios
+    intro:
+      en: Manage all your portfolios in one place, for example to keep different accounts or strategies separate.
+      zh: 在此集中管理所有投資組合，例如將不同帳戶或策略分開記錄。
+    sections:
+      - title:
+          en: Create and edit
+          zh: 建立與編輯
+        text:
+          en: Select Create portfolio and enter a name and optional description. Turn on Apply after creating to switch to it right away. Use the pencil icon to edit an existing portfolio.
+          zh: 點「建立投資組合」並輸入名稱與描述（選填）；開啟「新增後立即套用」會直接切換到新組合。編輯現有組合請點鉛筆圖示。
+        list:
+          - en: "Drift threshold: how far (in percentage points) an asset may drift from its target before it counts as off target. Default 5%."
+            zh: 偏離閾值：標的與目標比例相差多少百分點視為偏離，預設 5%。
+          - en: "Email alert: get an email when the portfolio drifts past the threshold."
+            zh: 電子郵件通知：投資組合偏離超過門檻時寄信提醒。
+      - title:
+          en: Duplicate and delete
+          zh: 製作副本與刪除
+        list:
+          - en: Duplicate copies the portfolio's settings and all its transactions into a new portfolio named "… copy".
+            zh: 「製作副本」會複製設定與全部交易，建立名為「… 副本」的新組合。
+          - en: Deleting a portfolio removes all its data and cannot be undone. The Delete button unlocks after a 5-second countdown.
+            zh: 刪除投資組合會移除其所有資料且無法復原，「刪除」按鈕需等 5 秒倒數後才能按下。
+
+  user-settings:
+    title:
+      en: User settings
+      zh: 使用者設定
+    to: /user-settings
+    intro:
+      en: Configure email notifications. Available after signing in.
+      zh: 設定 email 通知，登入後才能使用。
+    sections:
+      - title:
+          en: Notification email
+          zh: 通知信箱
+        text:
+          en: Alerts go to the email you sign in with. Select Send test email to make sure messages arrive.
+          zh: 通知會寄到你登入使用的信箱，可點「寄送測試信」確認能正常收信。
+      - title:
+          en: Drift alerts
+          zh: 配置偏移警示
+        text:
+          en: Each portfolio has its own drift threshold and alert switch. Adjust them and select Save. The threshold can only be edited while the alert is on.
+          zh: 每個投資組合可分別設定偏離門檻與是否通知，調整後點「儲存」。關閉通知時無法修改門檻。
+
+  preferences:
+    title:
+      en: Preferences
+      zh: 偏好設定
+    to: /preferences
+    intro:
+      en: Customize how StockBar looks. Preferences are saved in this browser.
+      zh: 調整 StockBar 的外觀與顯示方式。偏好設定儲存在目前的瀏覽器中。
+    sections:
+      - title:
+          en: Available settings
+          zh: 可調整項目
+        list:
+          - en: "Color mode: light, dark or follow the system."
+            zh: 顯示模式：淺色、深色或跟隨系統。
+          - en: "Dark style: default, soft or standard dark colors."
+            zh: 深色風格：預設、柔和或標準三種深色配色。
+          - en: "Theme color: the accent color used for buttons and highlights."
+            zh: 主題色：按鈕與重點標示使用的強調色。
+          - en: "Navigation layout: a collapsible sidebar or a top bar with a wider content area."
+            zh: 導覽版面：可收合的側邊欄，或內容區更寬的上方列。
+          - en: "Language and display currency: Traditional Chinese or English; USD or TWD."
+            zh: 語言與顯示幣別：繁體中文或英文；USD 或 TWD。

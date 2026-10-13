@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, type Ref } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import { auth, provider } from '@/firebase'
 import {
   signInWithPopup,
@@ -96,5 +96,8 @@ export const useAuthStore = defineStore('auth', () => {
     resolveReady()
   })
 
-  return { user, authReady, whenReady, login, logout }
+  // demo 資料所有訪客共用，後端只允許讀取
+  const isDemo = computed(() => user.value.uid === 'demo-user')
+
+  return { user, authReady, whenReady, login, logout, isDemo }
 })
