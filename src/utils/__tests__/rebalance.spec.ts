@@ -695,3 +695,23 @@ describe('實際案例測試', () => {
     // 操作: 賣出 AAPL $4000, 買入 GOOGL $4000
   })
 })
+
+describe('只買不賣 / 偏離門檻', () => {
+  const assets = [
+    { symbol: 'AAPL', target: 50, shares: 70, currentPrice: 100 }, // 7000 (70%)
+    { symbol: 'GOOGL', target: 50, shares: 15, currentPrice: 200 }, // 3000 (30%)
+  ]
+
+  it('allowSell=false 時存入不賣超標資產，錢全拿去買不足的', () => {
+    const result = rebalanceAllocate({ action: 'deposit', amount: 1000, totalValue: 10000, assets, allowSell: false })
+    expect(result.assets[0].sharesToSell).toBe(0)
+    expect(result.assets[1].sharesToBuy).toBe(5)
+    expect(result.leftoverCash).toBe(0)
+  })
+
+  it('sellBand 是絕對百分點：偏離 20pp 時，門檻 25pp 不賣、15pp 會賣', () => {
+    const base = { action: 'deposit' as const, amount: 0, totalValue: 10000, assets }
+    expect(rebalanceAllocate({ ...base, sellBand: 0.25 }).assets[0].sharesToSell).toBe(0)
+    expect(rebalanceAllocate({ ...base, sellBand: 0.15 }).assets[0].sharesToSell).toBe(20)
+  })
+})

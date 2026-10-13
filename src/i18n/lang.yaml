@@ -361,9 +361,6 @@ xirrHint:
 costBasis:
   en: Cost Basis
   zh: 持倉成本
-marketValue:
-  en: Market Value
-  zh: 目前市值
 winLoss:
   en: Gainers / Losers
   zh: 獲利／虧損檔數
@@ -373,9 +370,6 @@ winLossValue:
 realizedPlusDividends:
   en: Realized + Dividends
   zh: 已實現＋股息
-sellTrades:
-  en: Sell Trades
-  zh: 賣出筆數
 investingSince:
   en: Investing Since
   zh: 投資起始
@@ -548,6 +542,9 @@ addToComparison:
 removeFromComparison:
   en: Remove from Compare
   zh: 移除對比
+showDetails:
+  en: Details
+  zh: 顯示明細
 lastUpdated:
   en: "Last updated: {time}"
   zh: "最後更新：{time}"
@@ -708,15 +705,6 @@ targetPercentage:
 setTargetsSubtitle:
   en: Set the ideal allocation for each asset
   zh: 設定每檔資產的理想配置比例
-distributeEven:
-  en: Distribute Evenly
-  zh: 平均分配
-remainingUnder:
-  en: remaining
-  zh: 尚待配置
-remainingOver:
-  en: over
-  zh: 超出配置
 customAssetTag:
   en: Custom
   zh: 自訂標的
@@ -816,9 +804,6 @@ deposit:
 withdraw:
   en: Withdraw
   zh: 提取
-amountGreaterThanZero:
-  en: Amount must be greater than 0
-  zh: 金額必須大於 0
 in_allocation:
   en: Already in allocation
   zh: 已在配置中
@@ -826,27 +811,57 @@ in_allocation:
 amountLabel:
   en: Amount
   zh: 金額
+rebalanceCashGroup:
+  en: Cash flow
+  zh: 資金異動
+rebalanceAmountHint:
+  en: Enter the amount to deposit or withdraw (0 for a pure rebalance); suggested buy/sell shares are calculated from your target allocation.
+  zh: 輸入要存入或提取的金額（填 0 即純再平衡），系統會依目標配置計算各標的建議買賣股數。
 rebalanceBtn:
   en: Rebalance
   zh: 再平衡
-currentShares:
-  en: Current Shares
-  zh: 持有股數
+rebalanceMode:
+  en: Sell rule
+  zh: 賣出規則
+rebalanceModeExact:
+  en: Exact
+  zh: 精確
+rebalanceModeBand:
+  en: "Drift > {band}% only"
+  zh: "偏離 > {band}% 才賣"
+rebalanceModeHelp:
+  en: "Exact sells any overweight asset; the threshold option only sells assets drifting more than {band} percentage points (the portfolio's drift threshold). Buy only never sells when depositing."
+  zh: 精確：超標就賣；門檻：偏離超過 {band} 個百分點（組合的偏離閾值）才賣。只買不賣：存入時不賣任何資產。
+buyOnly:
+  en: Buy only
+  zh: 只買不賣
+targetSumWarning:
+  en: "Targets add up to {sum}%, not 100%. They are scaled proportionally when rebalancing."
+  zh: 目標配置合計 {sum}%，不等於 100%，再平衡時會按比例換算。
 targetPct:
   en: Target (%)
   zh: 目標配置 (%)
-target:
-  en: Target
-  zh: 目標
-amount:
-  en: Amount ($)
-  zh: 金額 ($)
+currentPct:
+  en: Current (%)
+  zh: 目前比例 (%)
+drift:
+  en: Drift (pp)
+  zh: 偏離 (百分點)
+overDriftThreshold:
+  en: "Beyond the {band}% drift threshold"
+  zh: 超過 {band}% 偏離閾值
+afterPct:
+  en: After (%)
+  zh: 調整後 (%)
+suggestedTrade:
+  en: Suggested Trade
+  zh: 建議交易
+sharesCount:
+  en: "{n} sh"
+  zh: "{n} 股"
 unusedCash:
   en: Unused Cash
   zh: 未使用現金
-rebalance.executeAll:
-  en: Add All Suggested Trades
-  zh: 新增所有建議交易
 
 # 回測頁面
 backtest:
@@ -907,6 +922,18 @@ sharpeRatioHint:
 maxDrawdown:
   en: Max Drawdown
   zh: 最大回撤
+periodHigh:
+  en: Period High
+  zh: 區間最高
+periodLow:
+  en: Period Low
+  zh: 區間最低
+fromPeriodHigh:
+  en: From High
+  zh: 距區間高點
+atPeriodHigh:
+  en: At high
+  zh: 創區間新高
 maxDrawdownHint:
   en: Max Drawdown = (Peak Value − Trough Value) / Peak Value. Measures the largest drop from peak to trough during the backtest period.
   zh: 最大回撤＝（高峰值－低谷值）／高峰值。衡量投資組合在回測期間從高點到低點的最大跌幅。
@@ -1179,6 +1206,15 @@ setTargetsDesc:
 addTrackedAsset:
   en: Add Tracked Asset
   zh: 新增追蹤資產
+allocTargetsGroup:
+  en: Target weights
+  zh: 各標的目標比例
+allocSearchLabel:
+  en: Search symbol
+  zh: 搜尋代號
+allocSearchHint:
+  en: Search any symbol, including ones you don't hold yet.
+  zh: 可搜尋任何代號，包含尚未持有的自訂標的。
 addTrackedAssetDesc:
   en: If you plan to buy a new asset but don't hold it yet, you can add it here and set a target ratio. The system will suggest buying it on the rebalancing page.
   zh: 若您計畫買入新資產但尚未持有，可以在此新增該資產並設定目標比例，系統會在再平衡頁面建議您買入。
@@ -1552,3 +1588,38 @@ notifications:
     empty:
       en: No portfolios yet.
       zh: 尚未建立投資組合。
+insights:
+  title:
+    en: Insights
+    zh: 洞察
+  concentrationHigh:
+    en: "{symbol} makes up {pct}% of your portfolio. Its price swings will directly drive your overall returns."
+    zh: "{symbol} 佔投資組合 {pct}%，比重過高，它的漲跌會直接左右整體績效。"
+  concentration:
+    en: "{symbol} makes up {pct}% of your portfolio. Consider whether this concentration is intended."
+    zh: "{symbol} 佔投資組合 {pct}%，集中度偏高，請確認這是否符合你的規劃。"
+  singleAssetClass:
+    en: "All holdings are {type}. Consider other asset classes such as bonds or cash to spread risk."
+    zh: "所有持倉都是{type}，可考慮加入債券、現金等其他資產類別來分散風險。"
+  currencyConcentration:
+    en: "{pct}% of your portfolio is in {currency}, so exchange-rate moves will noticeably affect its value."
+    zh: "投資組合有 {pct}% 是 {currency} 計價，匯率變動會明顯影響資產價值。"
+  targetDrift:
+    en: "Drifted from target allocation (actual → target): {list}. Consider rebalancing."
+    zh: "已偏離目標配置（實際 → 目標）：{list}，可考慮再平衡。"
+  noTargets:
+    en: No target allocation set yet. Set one to track drift and get rebalancing suggestions.
+    zh: 尚未設定目標配置，設定後即可追蹤偏離程度並取得再平衡建議。
+  assetType:
+    stock:
+      en: stocks
+      zh: 個股
+    etf:
+      en: ETFs
+      zh: ETF
+    crypto:
+      en: crypto
+      zh: 加密貨幣
+    fund:
+      en: funds
+      zh: 基金

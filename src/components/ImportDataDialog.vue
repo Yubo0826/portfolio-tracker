@@ -120,6 +120,7 @@
 import { ref, watch, computed } from 'vue'
 import * as toast from '@/composables/toast'
 import { buildSymbolCandidates, normalizeSymbol } from '@/utils/symbol'
+import { toIsoDate } from '@/utils/portfolioMetrics'
 import InputText from 'primevue/inputtext'
 import Papa from 'papaparse'
 import api from '@/utils/api'
@@ -253,12 +254,11 @@ function normalizeData(rows) {
 function toDate(dateStr) {
   const regex = /^\d{4}-\d{2}-\d{2}$/
   if (regex.test(dateStr)) {
-    const [year, month, day] = dateStr.split('-').map(Number)
-    return new Date(year, month - 1, day).toISOString().split('T')[0]
+    return dateStr
   }
 
   const d = new Date(dateStr)
-  if (!isNaN(d)) return d.toISOString().split('T')[0]
+  if (!isNaN(d)) return toIsoDate(d)
   toast.error(t('InvalidDateString') + dateStr, '')
 }
 

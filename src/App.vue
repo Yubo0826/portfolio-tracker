@@ -1,6 +1,7 @@
 <template>
   <Toast position="bottom-center" group="standard" />
-  <div v-if="globalLoadingVisible" class="fixed inset-0 z-[2102] flex items-center justify-center bg-black/40">
+  <!-- ponytail: PrimeVue 浮層 z-index 會往上疊（選單 1001 → Dialog 2102），固定值給到 9999 壓過；若真疊超過再改用 ZIndex.set -->
+  <div v-if="globalLoadingVisible" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
     <ProgressSpinner />
   </div>
   <ConfirmDialog />
@@ -649,7 +650,7 @@ const menuItems = computed(() => {
   width: min(24rem, 100%);
   padding: 0.5rem 1rem;
   border: 1px solid var(--p-content-border-color);
-  border-radius: 999px;
+  border-radius: 15px;
   background: var(--p-content-background);
   color: var(--p-text-muted-color);
   text-align: left;
@@ -723,6 +724,12 @@ html[data-nav-layout='header'] .app-shell__main {
   --p-datatable-header-cell-selected-color: var(--p-datatable-header-cell-color);
 }
 
+/* PrimeVue 只對未排序的可排序欄 hover 變色，已排序欄也補上，讓所有可排序欄 hover 一致 */
+.p-datatable .p-datatable-column-sorted:hover {
+  background: var(--p-datatable-header-cell-hover-background);
+  color: var(--p-datatable-header-cell-hover-color);
+}
+
 /* 自訂 Primevue DataTable 排序圖示 */
 
 /* 1. 把原本的 SVG icon 藏起來 */
@@ -740,11 +747,10 @@ html[data-nav-layout='header'] .app-shell__main {
   transition: transform 0.2s ease;
 }
 
-/* 3. 未排序：上下箭頭（pi-sort-alt），淡色 */
+/* 3. 未排序：不顯示 icon，但保留 1em 寬度，避免排序切換時欄寬跳動 */
 .p-datatable th[aria-sort="none"] [data-pc-section="sort"]::before,
 .p-datatable th:not([aria-sort]) [data-pc-section="sort"]::before {
-  content: '\e99e';
-  color: var(--p-text-muted-color);
+  content: '';
 }
 
 /* 4. 升降冪共用 pi-chevron-down，升冪旋轉 180° 讓切換時有翻轉動畫（content 本身無法 transition） */

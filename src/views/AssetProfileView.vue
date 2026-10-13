@@ -18,6 +18,7 @@
         />
       </Teleport>
       <div class="flex items-center">
+        <StockIcon :symbol="symbol" class="asset-logo" />
         <p class="text-muted-color">{{ info.fullName }}</p>
       </div>
       <div class="chart-container">
@@ -102,7 +103,7 @@
                     <template #option="{ option }">
                       <div class="flex flex-col items-center text-xs font-bold">
                         <span>{{ option.label }}</span>
-                        <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-green-600' : 'text-red-600'">
+                        <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
                           {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
                         </span>
                       </div>
@@ -297,7 +298,6 @@
                       @keydown.enter.self="openAssetProfile(card.symbol)"
                     >
                       <div class="flex items-center gap-3 min-w-0">
-                        <StockIcon :symbol="card.symbol" class="recommend-list-icon" />
                         <div class="min-w-0">
                           <div class="text-sm font-semibold truncate">{{ card.name }}</div>
                           <div
@@ -415,8 +415,8 @@ import { ref, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
-import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
 import StockIcon from '@/components/StockIcon.vue'
+import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
 import api from '@/utils/api'
 import { percentChange, periodRange, filterByPeriod, toIsoDate, yAxisBounds } from '@/utils/portfolioMetrics'
 import { useRoute, useRouter } from 'vue-router'
@@ -731,7 +731,7 @@ function getSeriesColor(index) {
 function recommendationGrowthClass(value) {
   const normalized = Number(value)
   if (!Number.isFinite(normalized)) return 'recommend-growth-neutral'
-  return normalized >= 0 ? 'recommend-growth-up' : 'recommend-growth-down'
+  return normalized >= 0 ? 'text-up' : 'text-down'
 }
 
 function toNullableNumber(value) {
@@ -1686,12 +1686,8 @@ watch(compareSymbols, () => {
   background: rgba(244, 63, 94, 0.12);
 }
 
-.recommend-list-icon {
-  margin-right: 0 !important;
-}
-
 /* 透明背景的 logo 在深色模式看不清楚，墊白底；只套在圖片上，抓不到圖的文字 fallback 維持原樣 */
-img.recommend-list-icon {
+img.asset-logo {
   background-color: #fff;
 }
 
@@ -1737,14 +1733,6 @@ img.recommend-list-icon {
 }
 
 .recommend-error {
-  color: #dc2626;
-}
-
-.recommend-growth-up {
-  color: #16a34a;
-}
-
-.recommend-growth-down {
   color: #dc2626;
 }
 

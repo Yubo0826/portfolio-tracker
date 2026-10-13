@@ -1,130 +1,102 @@
 <template>
-  <div>
-    <!-- 設定表單 -->
-    <div class="grid gap-4 mb-6 md:grid-cols-2">
-      <div>
-        <label class="font-semibold block mb-1">{{ $t('startDate') }}</label>
-        <DatePicker
-          v-model="form.startDate"
-          :maxDate="new Date()"
-          showIcon
-          fluid
-          iconDisplay="input"
-          class="flex-auto"
-          :placeholder="$t('selectDatePlaceholder')"
-        />
-      </div>
-      <div>
-        <label class="font-semibold block mb-1">{{ $t('endDate') }}</label>
-        <DatePicker
-          v-model="form.endDate"
-          :maxDate="new Date()"
-          showIcon
-          fluid
-          iconDisplay="input"
-          class="flex-auto"
-          :placeholder="$t('selectDatePlaceholder')"
-        />
-      </div>
-      <div>
-        <label class="font-semibold block mb-1">{{ $t('initialCapital') }}</label>
-        <InputNumber
-          v-model="form.initialCapital"
-          mode="currency"
-          currency="USD"
-          locale="en-US"
-          :min="1000"
-        />
-      </div>
-      <div>
-        <label class="font-semibold block mb-1">{{ $t('rebalanceStrategy') }}</label>
-        <Select 
-          v-model="form.rebalance" 
-          :options="rebalanceOptions" 
-          optionLabel="label" 
-          optionValue="value"
-          :placeholder="$t('selectStrategy')" 
-          class="w-full md:w-56" 
-        />
-      </div>
-    </div>
+  <div class="set-page">
+    <p class="set-intro">{{ $t('viewResultsDesc') }}</p>
 
-    <!-- 執行按鈕 -->
-    <div class="flex justify-center my-16">
-      <Button :label="$t('runBacktest')" @click="runBacktest" :loading="isLoading" size="large" class="mb-4" />
-    </div>
-
-    <!-- 結果 -->
-    <Card v-if="result">
-      <template #title>{{ $t('resultTitle') }}</template>
-      <template #content>
-        <div class="grid md:grid-cols-2 gap-4 mb-6">
-          <div class="result">
-            <p>
-              <span>{{ $t('cumulativeReturn') }}</span>
-              {{ (result.cumulativeReturn * 100).toFixed(2) }}%
-            </p>
-            <p>
-              <span>{{ $t('annualizedReturn') }}</span>
-              {{ (result.annualizedReturn * 100).toFixed(2) }}%
-            </p>
-            <p>
-              <span>
-                Sharpe Ratio 
-                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('sharpeRatioHint')"></i>
-              </span>
-              {{ result.sharpeRatio.toFixed(2) }}
-            </p>
+    <!-- ============ 設定參數 ============ -->
+    <section class="set-group">
+      <div class="set-group__head">{{ $t('setParams') }}</div>
+      <div class="set-group__body">
+        <div class="set-row grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="set-label">{{ $t('startDate') }}</label>
+            <DatePicker
+              v-model="form.startDate"
+              :maxDate="new Date()"
+              showIcon
+              fluid
+              iconDisplay="input"
+              :placeholder="$t('selectDatePlaceholder')"
+            />
           </div>
-          <div class="result">
-            <p>
-              <span>
-                {{ $t('maxDrawdown') }}
-                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('maxDrawdownHint')"></i>
-              </span>
-              {{ (result.maxDrawdown * 100).toFixed(2) }}%
-            </p>
-            <p>
-              <span>
-                {{ $t('volatility') }}
-                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('volatilityHint')"></i>
-              </span>
-              {{ (result.volatility * 100).toFixed(2) }}%
-            </p>
-            <p>
-              <span>
-                {{ $t('winRate') }}
-                <i class="pi pi-info-circle ml-1" v-tooltip.bottom="$t('winRateHint')"></i>
-              </span>
-              {{ (result.winRate * 100).toFixed(2) }}%
-            </p>
+          <div>
+            <label class="set-label">{{ $t('endDate') }}</label>
+            <DatePicker
+              v-model="form.endDate"
+              :maxDate="new Date()"
+              showIcon
+              fluid
+              iconDisplay="input"
+              :placeholder="$t('selectDatePlaceholder')"
+            />
+          </div>
+          <div>
+            <label class="set-label">{{ $t('initialCapital') }}</label>
+            <InputNumber
+              v-model="form.initialCapital"
+              mode="currency"
+              currency="USD"
+              locale="en-US"
+              :min="1000"
+              fluid
+            />
+          </div>
+          <div>
+            <label class="set-label">{{ $t('rebalanceStrategy') }}</label>
+            <Select
+              v-model="form.rebalance"
+              :options="rebalanceOptions"
+              optionLabel="label"
+              optionValue="value"
+              :placeholder="$t('selectStrategy')"
+              fluid
+            />
+          </div>
+          <div class="md:col-span-2 flex justify-center mt-2">
+            <Button :label="$t('runBacktest')" @click="runBacktest" :loading="isLoading" />
           </div>
         </div>
-      </template>
-    </Card>
-    <!-- 資產走勢圖 -->
-    <Card class="my-6" v-if="lineData.length">
-      <template #title>{{ $t('chartTitle') }}</template>
-      <template #content>
-        <p class="text-sm text-muted-color mb-2">{{ $t('chartSubtitle') }}</p>
-        <highcharts
-          :options="highLineOptions"
-          style="width: 100%; height: 400px;"
-        />
-      </template>
-    </Card>
+      </div>
+    </section>
 
-    <!-- 年度報酬率圖 -->
-    <Card class="my-6" v-if="annualReturnsData.length">
-      <template #title>{{ $t('annualReturnChart') }}</template>
-      <template #content>
-        <p class="text-sm text-muted-color mb-2">{{ $t('annualReturnHint') }}</p>
-        <highcharts
-          :options="highBarOptions"
-          style="width: 100%; height: 400px;"
-        />
-      </template>
-    </Card>
+    <!-- ============ 回測結果 ============ -->
+    <section v-if="result" class="set-group">
+      <div class="set-group__head">{{ $t('resultTitle') }}</div>
+      <div class="set-group__body bt-metrics">
+        <div v-for="m in metrics" :key="m.label" class="bt-metric">
+          <span class="bt-metric__label">
+            {{ m.label }}
+            <i
+              v-if="m.hint"
+              class="pi pi-info-circle"
+              v-tooltip.bottom="{ value: m.hint, showDelay: 500 }"
+            />
+          </span>
+          <span class="bt-metric__value">{{ m.value }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 資產走勢圖 ============ -->
+    <section v-if="lineData.length" class="set-group">
+      <div class="set-group__head">{{ $t('chartTitle') }}</div>
+      <div class="set-group__body">
+        <div class="set-row">
+          <p class="set-help" style="margin: 0 0 0.5rem">{{ $t('chartSubtitle') }}</p>
+          <highcharts :options="highLineOptions" style="width: 100%; height: 400px;" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 年度報酬率圖 ============ -->
+    <section v-if="annualReturnsData.length" class="set-group">
+      <div class="set-group__head">{{ $t('annualReturnChart') }}</div>
+      <div class="set-group__body">
+        <div class="set-row">
+          <p class="set-help" style="margin: 0 0 0.5rem">{{ $t('annualReturnHint') }}</p>
+          <highcharts :options="highBarOptions" style="width: 100%; height: 400px;" />
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -133,6 +105,7 @@
 import { computed, ref } from "vue";
 import * as toast from '@/composables/toast'
 import api from "@/utils/api";
+import { toIsoDate } from "@/utils/portfolioMetrics";
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 import { useAuthStore } from "@/stores/auth";
@@ -159,6 +132,20 @@ const rebalanceOptions = [
 ];
 
 const result = ref(null);
+
+const pct = (v) => `${(v * 100).toFixed(2)}%`;
+const metrics = computed(() => {
+  const r = result.value;
+  if (!r) return [];
+  return [
+    { label: t('cumulativeReturn'), value: pct(r.cumulativeReturn) },
+    { label: t('annualizedReturn'), value: pct(r.annualizedReturn) },
+    { label: 'Sharpe Ratio', value: r.sharpeRatio.toFixed(2), hint: t('sharpeRatioHint') },
+    { label: t('maxDrawdown'), value: pct(r.maxDrawdown), hint: t('maxDrawdownHint') },
+    { label: t('volatility'), value: pct(r.volatility), hint: t('volatilityHint') },
+    { label: t('winRate'), value: pct(r.winRate), hint: t('winRateHint') },
+  ];
+});
 const isLoading = ref(false);
 const lineData = ref([]);
 const highLineOptions = computed(() => {
@@ -409,11 +396,7 @@ async function runBacktest() {
 
     // 取得價格(adjClose)資料
     const prices = await api.get(
-      `/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${form.value.startDate
-        .toISOString()
-        .split("T")[0]}&period2=${form.value.endDate
-        .toISOString()
-        .split("T")[0]}`
+      `/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${toIsoDate(form.value.startDate)}&period2=${toIsoDate(form.value.endDate)}`
     );
 
     const { portfolioValues, dates } = simulateBacktest(
@@ -462,29 +445,42 @@ async function runBacktest() {
 }
 </script>
 <style scoped>
-.result > p {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-left: 4px solid #6ce6b6;
-  /* box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); */
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+/* 指標格：三欄網格，格與格之間用細線分隔（沿用 set-group 線條） */
+.bt-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
 }
-
-.result > p > span {
-  display: flex;
-  align-items: center;
-  font-weight: 700;
+@media (max-width: 768px) {
+  .bt-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
-
-.result > p > span i {
+.bt-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1rem;
+  /* ponytail: 每格畫右、下線，外框多出的線被 .set-group__body 的 overflow 與 -1px 位移吃掉 */
+  border-right: 1px solid var(--p-content-border-color);
+  border-bottom: 1px solid var(--p-content-border-color);
+  margin: 0 -1px -1px 0;
+}
+.bt-metric__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--p-text-muted-color);
+}
+.bt-metric__label i {
   font-size: 0.75rem;
-  color: #6b7280;
-  margin-left: 0.25rem;
+  cursor: help;
+}
+.bt-metric__value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--p-text-color);
+  font-variant-numeric: tabular-nums;
 }
 </style>

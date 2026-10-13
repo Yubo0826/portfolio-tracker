@@ -22,7 +22,6 @@
             :to="{ name: 'asset', params: { symbol: data.symbol } }"
             class="flex items-center gap-3 p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
           >
-            <StockIcon :symbol="data.symbol" class="!m-0 shrink-0" />
             <div class="truncate">
               <span class="font-medium">{{ data.symbol }}</span>
               <div class="text-xs text-muted-color mt-1">{{ data.name }}</div>
@@ -99,7 +98,6 @@ import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
 import NoData from '@/components/NoData.vue'
-import StockIcon from '@/components/StockIcon.vue'
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
 import * as toast from '@/composables/toast'
 import { useWatchlistStore } from '@/stores/watchlist'
@@ -121,7 +119,7 @@ watch(() => store.items, (items) => {
 
 const formatNumber = (v) => v == null ? '--' : Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const formatSigned = (v) => v == null ? '--' : `${v > 0 ? '+' : ''}${formatNumber(v)}`
-const changeClass = (v) => v == null ? '' : v >= 0 ? 'text-emerald-600' : 'text-rose-600'
+const changeClass = (v) => v == null ? '' : v >= 0 ? 'text-up' : 'text-down'
 
 const onAdd = async () => {
   adding.value = true

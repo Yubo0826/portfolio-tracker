@@ -2,9 +2,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import api from '@/utils/api.js'
+import { toIsoDate } from '@/utils/portfolioMetrics'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useHoldingsStore } from '@/stores/holdings'
+import { useDividendsStore } from '@/stores/dividends'
 
 interface TransactionData {
   id: string
@@ -75,6 +77,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const auth = useAuthStore()
   const portfolioStore = usePortfolioStore()
   const holdingsStore = useHoldingsStore()
+  const dividendsStore = useDividendsStore()
 
   const uid: ComputedRef<string | null> = computed(() => auth.user?.uid || null)
   const portfolioId: ComputedRef<string | null> = computed(() => portfolioStore.currentPortfolio?.id || null)
@@ -162,7 +165,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       currency: form.currency || 'USD',
       transaction_type: form.operation, // 'buy' | 'sell'
       transaction_date: form.date instanceof Date
-        ? form.date.toISOString().split('T')[0]
+        ? toIsoDate(form.date)
         : form.date, // 允許事先就是 'YYYY-MM-DD'
     }
 
@@ -205,7 +208,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
         currency: form.currency || 'USD',
         transaction_type: form.transactionType, // 'buy' | 'sell'
         transaction_date: form.date instanceof Date
-          ? form.date.toISOString().split('T')[0]
+          ? toIsoDate(form.date)
           : form.date, // 允許事先就是 'YYYY-MM-DD'
       })),
     }
@@ -220,6 +223,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     if (result?.transactions) setTransactions(result.transactions)
     await holdingsStore.refreshPrices()
     await holdingsStore.fetchHoldings()
+    await dividendsStore.fetchDividends()
 
     return result
   }

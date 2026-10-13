@@ -88,8 +88,8 @@
                   v-tooltip.top="formatSignedAmountWithCode(data.totalProfit)"
                   class="mr-4 cursor-help whitespace-nowrap"
                   :class="{
-                  'text-emerald-600': data.totalProfit >= 0,
-                  'text-rose-600': data.totalProfit < 0,
+                  'text-up': data.totalProfit >= 0,
+                  'text-down': data.totalProfit < 0,
                 }"
                 >
                   <!-- <i v-if="data.profitPercentage >= 0" class="pi pi-arrow-right -rotate-90"></i>
@@ -107,7 +107,7 @@
               <span
                 v-tooltip.top="formatSignedAmountWithCode(data.profitWithDividends)"
                 class="cursor-help whitespace-nowrap"
-                :class="data.profitWithDividends >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+                :class="data.profitWithDividends >= 0 ? 'text-up' : 'text-down'"
               >{{ data.profitWithDividends >= 0 ? '+' : '-' }}{{ Math.abs(data.returnWithDividends).toFixed(2) }}%</span>
             </template>
           </Column>

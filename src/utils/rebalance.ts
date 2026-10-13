@@ -20,6 +20,8 @@ export interface RebalanceParams {
   totalValue: number               // 當前總資產
   assets: AssetInput[]             // 資產配置
   tolerance?: number               // 容忍閾值（預設 0.0025 = 0.25%）
+  allowSell?: boolean              // false = 只買不賣：不賣超標資產（提取時為了湊足現金仍會按比例賣）
+  sellBand?: number                // 絕對偏離門檻（0–1）：超標超過 band × 總資產才賣，對應組合的 drift_threshold
 }
 
 export interface AssetResult extends AssetInput {
@@ -54,7 +56,9 @@ export function rebalanceAllocate(params: RebalanceParams): RebalanceResult {
     amount,
     totalValue,
     assets: inputAssets,
-    tolerance = 0.0025  // 預設容忍閾值 0.25%
+    tolerance = 0.0025,  // 預設容忍閾值 0.25%
+    allowSell = true,
+    sellBand
   } = params
 
   const isWithdraw = action === 'withdraw'
@@ -118,10 +122,14 @@ export function rebalanceAllocate(params: RebalanceParams): RebalanceResult {
   // STEP 1：處理賣出（withdraw 和 deposit 都需要處理超標資產）
   // -----------------------------
   for (const a of assets) {
+    if (!allowSell) break
     if (!a.currentPrice || a.currentPrice <= 0) continue
-    
-    // 只在顯著超標才賣
-    if (a.currentValue > a.targetValue * (1 + tolerance)) {
+
+    // 只在顯著超標才賣；有 sellBand 時改用絕對百分點門檻
+    const overweight = sellBand != null
+      ? a.currentValue - a.targetValue > sellBand * futureTotal
+      : a.currentValue > a.targetValue * (1 + tolerance)
+    if (overweight) {
       const needToReduce = a.currentValue - a.targetValue
       const maxSellableShares = Math.max(a.originalShares - a.sharesToSell, 0)
       const sharesToSell = Math.min(Math.floor(needToReduce / a.currentPrice), maxSellableShares)

@@ -165,6 +165,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
+import { toIsoDate } from '@/utils/portfolioMetrics';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
 import * as toast from '@/composables/toast';
@@ -257,7 +258,7 @@ const applyQuoteData = async (symbol, date) => {
 const onSymbolSelected = ({ symbol, name, assetType }) => {
   form.value.name = name;
   form.value.assetType = assetType;
-  const date = form.value.date?.toISOString().split('T')[0];
+  const date = form.value.date && toIsoDate(form.value.date);
   if (symbol && date) {
     applyQuoteData(symbol, date);
   }
@@ -266,7 +267,7 @@ const onSymbolSelected = ({ symbol, name, assetType }) => {
 const onDateSelect = (d) => {
   form.value.date = d;
   if (form.value.symbol) {
-    const date = d.toISOString().split('T')[0];
+    const date = toIsoDate(d);
     applyQuoteData(form.value.symbol, date);
   }
 };
@@ -364,7 +365,7 @@ const onSave = async (saveAnother = false) => {
       // 保留上一筆的代號（連同名稱、類型、幣別），方便連續輸入同一檔的多筆交易
       const { symbol, name, assetType, currency } = form.value;
       form.value = { ...emptyForm(), symbol, name, assetType, currency };
-      applyQuoteData(symbol, form.value.date.toISOString().split('T')[0]);
+      applyQuoteData(symbol, toIsoDate(form.value.date));
     }
     else close();
   } catch (err) {

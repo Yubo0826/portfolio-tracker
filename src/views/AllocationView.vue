@@ -1,30 +1,19 @@
 <template>
-  <div class="alloc-grid mt-4">
-    <!-- ============ LEFT: Editor ============ -->
-    <section class="alloc-card">
-      <!-- Header -->
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <h2 class="alloc-title">{{ $t('setTargets') }}</h2>
-          <p class="alloc-subtitle mt-1">{{ $t('setTargetsSubtitle') }}</p>
-        </div>
-        <div class="flex flex-col items-end gap-1">
-          <span class="alloc-badge" :class="isTotalOk ? 'alloc-badge--ok' : 'alloc-badge--err'">
-            <i :class="isTotalOk ? 'pi pi-check-circle' : 'pi pi-exclamation-circle'" style="font-size: 0.7rem" />
-            {{ totalTarget }}%
-          </span>
-          <span v-if="remainingText" class="alloc-remain" :class="remaining > 0 ? 'alloc-remain--under' : 'alloc-remain--over'">
-            {{ remainingText }}
-          </span>
-        </div>
-      </div>
+  <div class="set-page">
+    <!-- 頁面標題由 App.vue 統一渲染，這裡只放說明與總和 -->
+    <p class="set-intro">{{ $t('setTargetsSubtitle') }}</p>
 
-      <!-- Asset rows -->
-      <div class="mt-4 flex flex-col">
+    <!-- ============ Target weights ============ -->
+    <section class="set-group">
+      <div class="set-group__head">
+        <span>{{ $t('allocTargetsGroup') }}</span>
+        <span class="alloc-badge" :class="isTotalOk ? 'alloc-badge--ok' : 'alloc-badge--err'">{{ totalTarget }}%</span>
+      </div>
+      <div class="set-group__body">
         <div
           v-for="(asset, index) in assets"
           :key="asset.symbol || index"
-          class="alloc-row"
+          class="set-row alloc-row"
         >
           <span class="alloc-bar" :style="{ background: colorFor(index) }" />
 
@@ -48,6 +37,7 @@
             />
 
             <Button
+              v-tooltip.top="{ value: $t('delete'), showDelay: 500 }"
               icon="pi pi-trash"
               :aria-label="$t('delete')"
               text
@@ -59,29 +49,29 @@
           </div>
         </div>
 
-        <div v-if="assets.length === 0" class="alloc-empty">
+        <div v-if="assets.length === 0" class="set-row alloc-empty">
           {{ $t('allocEmpty') }}
         </div>
       </div>
+    </section>
 
-      <!-- Add tracked asset (collapsible) -->
-      <div class="alloc-add">
-        <button type="button" class="alloc-add-toggle" @click="addOpen = !addOpen">
-          <span class="inline-flex items-center gap-2">
-            <i class="pi pi-plus" style="font-size: 0.72rem; color: var(--p-primary-color)" />
-            {{ $t('addTrackedAsset') }}
-          </span>
-          <i :class="addOpen ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" style="font-size: 0.72rem; color: var(--p-text-muted-color)" />
-        </button>
+    <!-- ============ Add tracked asset ============ -->
+    <section class="set-group">
+      <div class="set-group__head">{{ $t('addTrackedAsset') }}</div>
+      <div class="set-group__body">
+        <div class="set-row">
+          <label class="set-label">{{ $t('allocSearchLabel') }}</label>
+          <div class="alloc-search">
+            <SymbolAutoComplete
+              v-model="selectedSymbol"
+              @update="addFromSearch"
+            />
+          </div>
+          <p class="set-help">{{ $t('allocSearchHint') }}</p>
+        </div>
 
-        <div v-if="addOpen" class="alloc-add-body">
-          <SymbolAutoComplete
-            v-model="selectedSymbol"
-            @update="addFromSearch"
-          />
-
-          <div class="alloc-quickpick-label">{{ $t('quickPick') }}</div>
-
+        <div class="set-row">
+          <div class="set-label">{{ $t('quickPick') }}</div>
           <div v-if="candidates.length" class="flex flex-wrap gap-2">
             <button
               v-for="c in candidates"
@@ -95,70 +85,66 @@
               <i class="pi pi-plus" style="font-size: 0.62rem; color: var(--p-text-muted-color)" />
             </button>
           </div>
-          <div v-else class="alloc-quickpick-empty">{{ $t('allNamedInAllocation') }}</div>
+          <p v-else class="set-help">{{ $t('allNamedInAllocation') }}</p>
         </div>
-      </div>
-
-      <!-- Bottom actions -->
-      <div class="flex items-center justify-between mt-5">
-        <Button
-          :label="$t('distributeEven')"
-          icon="pi pi-percentage"
-          severity="secondary"
-          outlined
-          rounded
-          size="small"
-          :disabled="assets.length === 0"
-          @click="distributeEven"
-        />
-        <Button
-          :label="$t('save')"
-          icon="pi pi-check"
-          size="small"
-          :disabled="saveButtonDisabled"
-          @click="saveAllocation"
-        />
       </div>
     </section>
 
-    <!-- ============ RIGHT: Target preview ============ -->
-    <section class="alloc-card">
-      <h2 class="alloc-title mb-4">{{ $t('targetPreview') }}</h2>
-
-      <div class="flex items-center gap-5">
-        <div class="alloc-donut">
-          <svg viewBox="0 0 180 180" width="170" height="170" style="transform: rotate(-90deg)">
-            <circle
-              cx="90" cy="90" :r="donutRadius"
-              fill="none" :stroke="donutTrackColor" :stroke-width="26"
-            />
-            <circle
-              v-for="(seg, i) in donutSegments"
-              :key="i"
-              cx="90" cy="90" :r="donutRadius"
-              fill="none"
-              :stroke="seg.color"
-              :stroke-width="26"
-              :stroke-dasharray="seg.dash"
-              :stroke-dashoffset="seg.offset"
-            />
-          </svg>
-          <div class="alloc-donut-center">
-            <span class="alloc-donut-label">{{ $t('targetPreview') }}</span>
-            <span class="alloc-donut-total">{{ totalTarget }}%</span>
+    <!-- ============ Target preview ============ -->
+    <section class="set-group">
+      <div class="set-group__head">{{ $t('targetPreview') }}</div>
+      <div class="set-group__body">
+        <div class="set-row flex items-center gap-5 flex-wrap">
+          <div class="alloc-donut">
+            <svg viewBox="0 0 180 180" width="170" height="170" style="transform: rotate(-90deg)">
+              <circle
+                cx="90" cy="90" :r="donutRadius"
+                fill="none" :stroke="donutTrackColor" :stroke-width="26"
+              />
+              <circle
+                v-for="(seg, i) in donutSegments"
+                :key="i"
+                cx="90" cy="90" :r="donutRadius"
+                fill="none"
+                :stroke="seg.color"
+                :stroke-width="26"
+                :stroke-dasharray="seg.dash"
+                :stroke-dashoffset="seg.offset"
+              />
+            </svg>
+            <div class="alloc-donut-center">
+              <span class="alloc-donut-label">{{ $t('targetPreview') }}</span>
+              <span class="alloc-donut-total">{{ totalTarget }}%</span>
+            </div>
           </div>
-        </div>
 
-        <ul class="alloc-legend">
-          <li v-for="lg in donutLegend" :key="lg.name" class="alloc-legend-item">
-            <span class="alloc-legend-dot" :style="{ background: lg.color }" />
-            <span class="alloc-legend-name">{{ lg.name }}</span>
-            <span class="alloc-legend-pct">{{ lg.pct }}</span>
-          </li>
-          <li v-if="donutLegend.length === 0" class="alloc-legend-empty">{{ $t('allocEmpty') }}</li>
-        </ul>
+          <ul class="alloc-legend">
+            <li v-for="lg in donutLegend" :key="lg.name" class="alloc-legend-item">
+              <span class="alloc-legend-dot" :style="{ background: lg.color }" />
+              <span class="alloc-legend-name">{{ lg.name }}</span>
+              <span class="alloc-legend-pct">{{ lg.pct }}</span>
+            </li>
+            <li v-if="donutLegend.length === 0" class="alloc-legend-empty">{{ $t('allocEmpty') }}</li>
+          </ul>
+        </div>
       </div>
     </section>
+
+    <!-- ============ Sticky actions ============ -->
+    <div class="set-footer">
+      <Button
+        :label="$t('save')"
+        :disabled="saveButtonDisabled"
+        @click="saveAllocation"
+      />
+      <Button
+        :label="$t('cancel')"
+        severity="secondary"
+        outlined
+        :disabled="saveButtonDisabled"
+        @click="resetAllocation"
+      />
+    </div>
   </div>
 </template>
 
@@ -184,7 +170,6 @@ const holdingsStore = useHoldingsStore();
 const assets = ref([]); // allocation
 const oldAssets = ref([]);
 const selectedSymbol = ref("");
-const addOpen = ref(false);
 
 // 配色（沿用 Dashboard 資產配置圖的色盤，並延伸以支援更多標的）
 const CHART = ['#3b82f6', '#14b8a6', '#f59e0b', '#f97316', '#8b5cf6', '#ec4899', '#64748b'];
@@ -254,29 +239,16 @@ const removeAsset = (index) => {
   assets.value.splice(index, 1);
 };
 
-// 平均分配
-const distributeEven = () => {
-  const n = assets.value.length;
-  if (!n) return;
-  const each = Math.floor(100 / n);
-  const rem = 100 - each * n;
-  assets.value.forEach((a, idx) => {
-    a.target = each + (idx < rem ? 1 : 0);
-  });
+// 還原為上次儲存的配置
+const resetAllocation = () => {
+  assets.value = JSON.parse(JSON.stringify(oldAssets.value));
 };
 
-// 總和與剩餘
+// 總和
 const totalTarget = computed(() =>
   Math.round(assets.value.reduce((sum, a) => sum + (Number(a.target) || 0), 0) * 10) / 10
 );
 const isTotalOk = computed(() => Math.round(totalTarget.value) === 100);
-const remaining = computed(() => 100 - Math.round(totalTarget.value));
-const remainingText = computed(() => {
-  if (remaining.value === 0) return '';
-  return remaining.value > 0
-    ? `${remaining.value}% ${t('remainingUnder')}`
-    : `${Math.abs(remaining.value)}% ${t('remainingOver')}`;
-});
 
 const saveButtonDisabled = computed(
   () => JSON.stringify(assets.value) === JSON.stringify(oldAssets.value)
@@ -338,64 +310,23 @@ const monoColors = (sym) => {
 </script>
 
 <style scoped>
-.alloc-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 1.25rem;
-  align-items: start;
+/* 表單頁不需要滿版，限制寬度較好讀 */
+.set-page {
+  max-width: 56rem;
 }
 
-@media (max-width: 900px) {
-  .alloc-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.alloc-card {
-  background: var(--p-content-background);
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
-}
-
-.alloc-title {
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: var(--p-text-color);
-}
-
-.alloc-subtitle {
-  font-size: 0.8125rem;
-  color: var(--p-text-muted-color);
+.alloc-search {
+  max-width: 22rem;
 }
 
 /* Total badge */
 .alloc-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   font-variant-numeric: tabular-nums;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 999px;
 }
-.alloc-badge--ok {
-  background: color-mix(in srgb, var(--p-green-500) 15%, transparent);
-  color: var(--p-green-600, #16a34a);
-}
-.alloc-badge--err {
-  background: color-mix(in srgb, var(--p-red-500) 15%, transparent);
-  color: var(--p-red-600, #dc2626);
-}
-.alloc-remain {
-  font-size: 0.78rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.alloc-remain--under { color: var(--p-amber-600, #d97706); }
-.alloc-remain--over { color: var(--p-red-600, #dc2626); }
+.alloc-badge--ok { color: var(--p-green-600, #16a34a); }
+.alloc-badge--err { color: var(--p-red-600, #dc2626); }
 
 /* Rows */
 .alloc-row {
@@ -403,8 +334,6 @@ const monoColors = (sym) => {
   grid-template-columns: 5px 64px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--p-content-border-color);
 }
 .alloc-controls {
   display: flex;
@@ -448,51 +377,13 @@ const monoColors = (sym) => {
   text-align: right;
 }
 .alloc-empty {
-  padding: 1.75rem 0;
+  padding: 1.75rem 1rem;
   text-align: center;
   font-size: 0.8125rem;
   color: var(--p-text-muted-color);
 }
 
-/* Add section */
-.alloc-add {
-  margin-top: 0.875rem;
-  border: 1px dashed var(--p-content-border-color);
-  border-radius: 0.875rem;
-  overflow: hidden;
-}
-.alloc-add-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  height: 44px;
-  padding: 0 16px;
-  border: none;
-  background: color-mix(in srgb, var(--p-text-color) 4%, transparent);
-  color: var(--p-text-color);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.alloc-add-body {
-  padding: 14px 16px 16px;
-  border-top: 1px dashed var(--p-content-border-color);
-}
-.alloc-quickpick-label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--p-text-muted-color);
-  margin: 14px 0 9px;
-}
-.alloc-quickpick-empty {
-  font-size: 0.78rem;
-  color: var(--p-text-muted-color);
-  margin-top: 14px;
-}
+/* Quick-pick chips */
 .alloc-chip {
   display: inline-flex;
   align-items: center;

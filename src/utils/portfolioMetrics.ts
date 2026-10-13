@@ -160,3 +160,97 @@ export function yAxisBounds(values: number[]): { min?: number; max?: number } {
   const pad = max > min ? (max - min) * 0.08 : Math.max(Math.abs(max), 1) * 0.02
   return { min: min - pad, max: max + pad }
 }
+
+export interface PeriodStats<X> {
+  high: { x: X; y: number }
+  low: { x: X; y: number }
+  maxDrawdown: number   // 區間內從高點到後續低點的最大跌幅 (%)，正數
+  fromHigh: number      // 最後一點距區間最高點 (%)，≤ 0
+}
+
+/** 走勢區間統計：最高、最低、最大回撤、距高點；不足兩點時回傳 null */
+export function periodStats<X>(points: { x: X; y: number }[]): PeriodStats<X> | null {
+  if (points.length < 2) return null
+  let high = points[0], low = points[0], peak = points[0].y, maxDrawdown = 0
+  for (const p of points) {
+    if (p.y > high.y) high = p
+    if (p.y < low.y) low = p
+    peak = Math.max(peak, p.y)
+    if (peak > 0) maxDrawdown = Math.max(maxDrawdown, (peak - p.y) / peak * 100)
+  }
+  const last = points[points.length - 1].y
+  return { high, low, maxDrawdown, fromHigh: high.y ? (last - high.y) / high.y * 100 : 0 }
+}
+
+export interface InsightHolding {
+  symbol: string
+  assetType?: string
+  currency: string
+  currentValue: number
+}
+
+export interface Insight {
+  key: 'concentrationHigh' | 'concentration' | 'singleAssetClass' | 'currencyConcentration' | 'targetDrift' | 'noTargets'
+  severity: 'danger' | 'warn' | 'info'
+  params: Record<string, string | number>
+}
+
+/** assetType 直接存 Yahoo 的 quoteType / typeDisp，寫法不一（Equity、stock、ETF…），先歸成固定幾類 */
+export function normalizeAssetType(type?: string): 'stock' | 'etf' | 'crypto' | 'fund' | 'other' {
+  const t = String(type || '').toLowerCase()
+  if (t.includes('etf')) return 'etf'
+  if (t.includes('equity') || t.includes('stock')) return 'stock'
+  if (t.includes('crypto')) return 'crypto'
+  if (t.includes('fund')) return 'fund'
+  return 'other'
+}
+
+/**
+ * 規則型洞察（不呼叫 AI）。門檻寫死：
+ * 單一資產 > 30% / > 50%、單一幣別 > 80%、偏離目標 > 5 個百分點
+ * 幣別集中只看顯示幣別以外的幣別：持有本國幣不算匯率風險
+ */
+export function portfolioInsights(
+  holdings: InsightHolding[],
+  targets: { symbol: string; target: number }[],
+  homeCurrency: string,
+): Insight[] {
+  const total = holdings.reduce((s, h) => s + h.currentValue, 0)
+  if (total <= 0) return []
+  const pct = (v: number) => Math.round((v / total) * 1000) / 10
+  const insights: Insight[] = []
+
+  // 1. 單一資產集中
+  const top = holdings.reduce((a, b) => (b.currentValue > a.currentValue ? b : a))
+  const topPct = pct(top.currentValue)
+  if (topPct > 50) insights.push({ key: 'concentrationHigh', severity: 'danger', params: { symbol: top.symbol, pct: topPct } })
+  else if (topPct > 30) insights.push({ key: 'concentration', severity: 'warn', params: { symbol: top.symbol, pct: topPct } })
+
+  // 4. 資產類別單一（全部歸不出類別時不判斷）
+  const types = new Set(holdings.map(h => normalizeAssetType(h.assetType)))
+  const [onlyType] = types
+  if (types.size === 1 && onlyType !== 'other') insights.push({ key: 'singleAssetClass', severity: 'info', params: { type: onlyType } })
+
+  // 6. 幣別集中
+  const byCurrency = new Map<string, number>()
+  holdings.forEach(h => byCurrency.set(h.currency, (byCurrency.get(h.currency) || 0) + h.currentValue))
+  byCurrency.forEach((value, currency) => {
+    if (currency !== homeCurrency && pct(value) > 80) insights.push({ key: 'currencyConcentration', severity: 'warn', params: { currency, pct: pct(value) } })
+  })
+
+  // 7 / 8. 目標配置：未設定，或實際與目標差超過 5 個百分點（有目標但沒持有的視為 0%）
+  const activeTargets = targets.filter(t => Number(t.target) > 0)
+  if (!activeTargets.length) {
+    insights.push({ key: 'noTargets', severity: 'info', params: {} })
+  } else {
+    const actualBySymbol = new Map(holdings.map(h => [h.symbol, pct(h.currentValue)]))
+    const drifts = activeTargets
+      .map(t => ({ symbol: t.symbol, actual: actualBySymbol.get(t.symbol) || 0, target: Number(t.target) }))
+      .filter(d => Math.abs(d.actual - d.target) > 5)
+    if (drifts.length) {
+      insights.push({ key: 'targetDrift', severity: 'warn', params: { list: drifts.map(d => `${d.symbol} ${d.actual}% → ${d.target}%`).join(', ') } })
+    }
+  }
+
+  return insights
+}

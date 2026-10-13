@@ -11,7 +11,7 @@
         />
       </div>
   
-      <div class="mt-4 [&_.p-datatable-tbody>tr>td]:text-base">
+      <div class="mt-4 card-table">
         <div v-if="tab === 'holdings'"><HoldingsView /></div>
         <div v-else-if="tab === 'transactions'"><TransactionsView /></div>
         <div v-else><DividendsView /></div>
@@ -63,35 +63,3 @@ watch(tab, (t) => {
   }
 })
 </script>
-
-
-
-<style scoped>
-/* 表格當卡片用，圓角對齊 Card（Aura card 用 border.radius.xl） */
-:deep(.p-datatable) {
-  border-radius: var(--p-border-radius-xl);
-  overflow: hidden;
-}
-
-/* 表頭與內容同底色，分隔線用頁面底色做出凹槽感 */
-:deep(.p-datatable-header-cell),
-:deep(.p-datatable-tbody > tr > td) {
-  border-color: var(--p-surface-background);
-  border-bottom-width: 2px;
-}
-
-:deep(.p-datatable-header-cell) {
-  padding: 1.25rem 1rem;
-  font-weight: 700;
-  color: var(--p-text-color);
-}
-
-:deep(.p-datatable-tbody > tr > td) {
-  padding: 1rem;
-  font-weight: 500;
-}
-
-:deep(.p-datatable-paginator-bottom) {
-  border: 0;
-}
-</style>

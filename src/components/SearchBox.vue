@@ -22,7 +22,6 @@
 
       <template #option="{ option: item }">
         <div class="flex w-full min-w-0 items-center gap-3">
-          <StockIcon :symbol="item.symbol" class="!mr-0 shrink-0" />
 
           <div class="flex min-w-0 flex-1 items-baseline gap-1.5 overflow-hidden">
             <span class="shrink-0 text-sm font-semibold text-primary">{{ item.symbol }}</span>
@@ -35,7 +34,7 @@
 
           <span
             v-if="item.regularMarketChangePercent !== null && item.regularMarketChangePercent !== undefined"
-            :class="item.regularMarketChangePercent >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+            :class="item.regularMarketChangePercent >= 0 ? 'text-up' : 'text-down'"
             class="shrink-0 text-xs font-medium"
           >
             {{ item.regularMarketChangePercent >= 0 ? '+' : '' }}{{ item.regularMarketChangePercent.toFixed(2) }}%
@@ -59,15 +58,13 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AutoComplete from 'primevue/autocomplete'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import api from '@/utils/api'
-import StockIcon from '@/components/StockIcon.vue'
-import { preloadStockLogos } from '@/utils/stockLogo'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -75,8 +72,6 @@ const emit = defineEmits(['close'])
 
 const query = ref('')
 const groups = ref([])
-// 選項一出現就開始解析 logo，讓整個清單一起淡入，而不是一個一個跳出來
-watch(groups, (value) => preloadStockLogos(value.flatMap(g => g.items.map(item => item.symbol))))
 let trending = null
 
 const SEARCH_HISTORY_KEY = 'portfolio-tracker-search-history'

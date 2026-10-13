@@ -3,11 +3,21 @@
   <!--  max-w-screen-2xl -->
   <div class="w-full">
     <Teleport defer to="#page-title-aside">
-      <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
+      <div class="flex items-center gap-3">
+        <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+          <ToggleSwitch v-model="showDetails" class="dashboard-details-switch" />
+          {{ t('showDetails') }}
+        </label>
+      </div>
     </Teleport>
 
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Skeleton v-for="idx in 3" :key="`skeleton-top-${idx}`" width="100%" height="12rem" borderRadius="0.75rem" />
+      </div>
+
       <Card class="rounded-xl shadow-md">
         <template #content>
           <div class="space-y-4 py-1">
@@ -84,161 +94,179 @@
     <!-- Main Content -->
     <div v-else class="space-y-6">
 
-      <div class="grid grid-cols-12 gap-6 items-stretch">
-        <!-- 總資產走勢圖 -->
-        <div class="col-span-12 xl:col-span-8">
-          <Card class="app-panel dashboard-panel--hero h-full">
-            <template #content>
-              <div>
-                <div class="flex items-center justify-between">
-                  <div class="flex flex-col mb-2">
-                    <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
+      <!-- 損益資訊小卡 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card class="app-panel dashboard-metric-card h-full">
+          <template #content>
+            <div class="flex items-start justify-between gap-2">
+              <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
+              <span
+                v-if="holdingsStore.list.length"
+                class="asset-growth-pill asset-growth-pill--sm"
+                :class="totalReturn >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
+                v-tooltip.top="$t('cumulativeReturn')"
+              >{{ formatSignedNumber(totalReturn) }}%</span>
+            </div>
+            <div v-if="totalProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
+              <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
+              <span class="text-sm opacity-70">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+              <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+            </div>
+            <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
 
-                    <div class="mt-1 flex flex-wrap items-end gap-2">
-                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
-                        <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
-                        <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
-                      </div>
-                      <div v-else class="text-4xl font-bold">--</div>
+            <!-- 獲利／虧損檔數比例條 -->
+            <div v-if="holdingsStore.list.length" class="dashboard-winloss mt-3" :aria-label="$t('winLossValue', winLoss)">
+              <span v-if="winLoss.up" class="dashboard-winloss__up" :style="{ flexGrow: winLoss.up }" />
+              <span v-if="winLoss.down" class="dashboard-winloss__down" :style="{ flexGrow: winLoss.down }" />
+            </div>
 
-                      <div
-                        v-if="growthRateNumber !== null"
-                        class="inline-flex items-center gap-2 pb-1"
-                      >
-                        <span
-                          class="asset-growth-pill"
-                          :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
-                        >
-                          <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
-                          {{ Math.abs(growthRateNumber).toFixed(2) }}%
-                          <span>({{ formatSignedNumber(change) }})</span>
-                        </span>
-                      </div>
+            <dl v-show="showDetails" class="dashboard-metric-rows">
+              <div v-for="row in unrealizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+            </dl>
+          </template>
+        </Card>
 
-                      <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
-                        <span>--</span>
-                        <span>(--)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        <Card class="app-panel dashboard-metric-card h-full">
+          <template #content>
+            <p class="dashboard-kicker flex items-center gap-1.5">
+              {{ $t('realizedProfit') }}
+              <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
+            </p>
+            <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
+              <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
+              <span class="text-sm opacity-70">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
+              <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
+            </div>
+            <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
 
-                <!-- 面積圖 -->
-                <div v-if="holdingsStore.list.length" class="mt-2">
-                  <StockChart :options="areaChartOptions" :height="320" />
-                </div>
+            <dl v-show="showDetails" class="dashboard-metric-rows">
+              <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+            </dl>
+          </template>
+        </Card>
 
-                <!-- 沒有交易時：引導新增 -->
-                <div v-else class="dashboard-chart-empty mt-2">
-                  <div class="dashboard-chart-empty__body">
-                    <span class="dashboard-chart-empty__icon"><i class="pi pi-chart-line" /></span>
-                    <h3 class="text-base font-semibold">{{ $t('dashboardChartEmptyTitle') }}</h3>
-                    <p class="text-xs sm:text-sm text-muted-color max-w-sm">{{ $t('dashboardChartEmptyDesc') }}</p>
-                    <div class="mt-2 flex flex-wrap justify-center gap-2">
-                      <Button :label="$t('addInvestment')" icon="pi pi-plus" size="small" @click="transactionDialogVisible = true" />
-                      <Button :label="$t('importTransactions')" icon="pi pi-upload" size="small" severity="secondary" outlined @click="importDialogVisible = true" />
-                    </div>
-                  </div>
-                </div>
-                <TransactionDialog v-model="transactionDialogVisible" />
-                <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
+        <Card class="app-panel dashboard-metric-card h-full">
+          <template #content>
+            <p class="dashboard-kicker flex items-center gap-1.5">
+              {{ $t('irr') }}
+              <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
+            </p>
+            <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
+              <span class="text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr.toFixed(2) }}%</span>
+              <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
+            </div>
+            <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
 
-                <!-- 時間範圍選擇 -->
-                <SelectButton
-                  v-if="holdingsStore.list.length"
-                  v-model="selectedPeriod"
-                  :options="timeRangeOptionsWithGrowth"
-                  optionLabel="label"
-                  optionValue="value"
-                  :allowEmpty="false"
-                  fluid
-                  class="mt-4"
-                >
-                  <template #option="{ option }">
-                    <div class="flex flex-col items-center text-xs font-bold">
-                      <span>{{ option.label }}</span>
-                      <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-green-600' : 'text-red-600'">
-                        {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                      </span>
-                    </div>
-                  </template>
-                </SelectButton>
-              </div>
-            </template>
-          </Card>
-        </div>
-
-        <!-- 損益資訊小卡 -->
-        <div class="col-span-12 xl:col-span-4 flex flex-col gap-4">
-          <Card class="app-panel dashboard-metric-card flex-1">
-            <template #content>
-              <div class="flex items-start justify-between gap-2">
-                <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
-                <span
-                  v-if="holdingsStore.list.length"
-                  class="asset-growth-pill asset-growth-pill--sm"
-                  :class="totalReturn >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
-                  v-tooltip.top="$t('cumulativeReturn')"
-                >{{ formatSignedNumber(totalReturn) }}%</span>
-              </div>
-              <div v-if="totalProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
-                <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                <span class="text-sm opacity-70">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
-              </div>
-              <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
-
-              <!-- 獲利／虧損檔數比例條 -->
-              <div v-if="holdingsStore.list.length" class="dashboard-winloss mt-3" :aria-label="$t('winLossValue', winLoss)">
-                <span v-if="winLoss.up" class="dashboard-winloss__up" :style="{ flexGrow: winLoss.up }" />
-                <span v-if="winLoss.down" class="dashboard-winloss__down" :style="{ flexGrow: winLoss.down }" />
-              </div>
-
-              <dl class="dashboard-metric-rows">
-                <div v-for="row in unrealizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-              </dl>
-            </template>
-          </Card>
-
-          <Card class="app-panel dashboard-metric-card flex-1">
-            <template #content>
-              <p class="dashboard-kicker flex items-center gap-1.5">
-                {{ $t('realizedProfit') }}
-                <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
-              </p>
-              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
-                <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
-                <span class="text-sm opacity-70">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
-                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
-              </div>
-              <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
-
-              <dl class="dashboard-metric-rows">
-                <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-              </dl>
-            </template>
-          </Card>
-
-          <Card class="app-panel dashboard-metric-card flex-1">
-            <template #content>
-              <p class="dashboard-kicker flex items-center gap-1.5">
-                {{ $t('irr') }}
-                <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
-              </p>
-              <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
-                <span class="text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr.toFixed(2) }}%</span>
-                <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
-              </div>
-              <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
-
-              <dl class="dashboard-metric-rows">
-                <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-              </dl>
-            </template>
-          </Card>
-        </div>
+            <dl v-show="showDetails" class="dashboard-metric-rows">
+              <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+            </dl>
+          </template>
+        </Card>
       </div>
+
+      <!-- 總資產走勢圖 -->
+      <Card class="app-panel dashboard-panel--hero">
+        <template #content>
+          <div>
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col mb-2">
+                <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
+
+                <div class="mt-1 flex flex-wrap items-end gap-2">
+                  <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
+                    <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
+                    <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                    <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                  </div>
+                  <div v-else class="text-4xl font-bold">--</div>
+
+                  <div
+                    v-if="growthRateNumber !== null"
+                    class="inline-flex items-center gap-2 pb-1"
+                  >
+                    <span
+                      class="asset-growth-pill"
+                      :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
+                    >
+                      <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
+                      {{ Math.abs(growthRateNumber).toFixed(2) }}%
+                      <span>({{ formatSignedNumber(change) }})</span>
+                    </span>
+                  </div>
+
+                  <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
+                    <span>--</span>
+                    <span>(--)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 面積圖 -->
+            <div v-if="holdingsStore.list.length" class="mt-2">
+              <StockChart :options="areaChartOptions" :height="320" />
+            </div>
+
+            <!-- 沒有交易時：引導新增 -->
+            <div v-else class="dashboard-chart-empty mt-2">
+              <div class="dashboard-chart-empty__body">
+                <span class="dashboard-chart-empty__icon"><i class="pi pi-chart-line" /></span>
+                <h3 class="text-base font-semibold">{{ $t('dashboardChartEmptyTitle') }}</h3>
+                <p class="text-xs sm:text-sm text-muted-color max-w-sm">{{ $t('dashboardChartEmptyDesc') }}</p>
+                <div class="mt-2 flex flex-wrap justify-center gap-2">
+                  <Button :label="$t('addInvestment')" icon="pi pi-plus" size="small" @click="transactionDialogVisible = true" />
+                  <Button :label="$t('importTransactions')" icon="pi pi-upload" size="small" severity="secondary" outlined @click="importDialogVisible = true" />
+                </div>
+              </div>
+            </div>
+            <TransactionDialog v-model="transactionDialogVisible" />
+            <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
+
+            <!-- 時間範圍選擇 -->
+            <SelectButton
+              v-if="holdingsStore.list.length"
+              v-model="selectedPeriod"
+              :options="timeRangeOptionsWithGrowth"
+              optionLabel="label"
+              optionValue="value"
+              :allowEmpty="false"
+              fluid
+              class="mt-4"
+            >
+              <template #option="{ option }">
+                <div class="flex flex-col items-center text-xs font-bold">
+                  <span>{{ option.label }}</span>
+                  <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
+                    {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                  </span>
+                </div>
+              </template>
+            </SelectButton>
+
+            <!-- 區間統計：跟著選取的時間區間變動 -->
+            <dl v-if="stats" v-show="showDetails" class="dashboard-period-stats mt-4">
+              <div>
+                <dt>{{ $t('periodHigh') }}</dt>
+                <dd>{{ formatAmountWithCode(stats.high.y) }}</dd>
+                <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.high.x) }}</dd>
+              </div>
+              <div>
+                <dt>{{ $t('periodLow') }}</dt>
+                <dd>{{ formatAmountWithCode(stats.low.y) }}</dd>
+                <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.low.x) }}</dd>
+              </div>
+              <div>
+                <dt>{{ $t('maxDrawdown') }}</dt>
+                <dd :class="{ 'text-down': stats.maxDrawdown > 0 }">{{ formatSignedNumber(-stats.maxDrawdown) }}%</dd>
+              </div>
+              <div>
+                <dt>{{ $t('fromPeriodHigh') }}</dt>
+                <dd :class="stats.fromHigh < 0 ? 'text-down' : 'text-up'">{{ stats.fromHigh < 0 ? `${formatSignedNumber(stats.fromHigh)}%` : $t('atPeriodHigh') }}</dd>
+              </div>
+            </dl>
+          </div>
+        </template>
+      </Card>
 
       <!-- 資產配置 -->
       <div>
@@ -287,8 +315,7 @@
                     <template #body="{ data: item }">
                       <div class="flex min-w-0 items-center gap-2.5">
                         <span class="size-2 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
-                        <StockIcon :symbol="item.key" class="!m-0 !size-7 shrink-0" />
-                        <Tag :value="item.name" severity="secondary" class="truncate" />
+                        <span class="truncate">{{ item.name }}</span>
                       </div>
                     </template>
                   </Column>
@@ -300,7 +327,7 @@
                   </Column>
                   <Column v-if="selectedPieType === 'actual'" :header="$t('unrealizedProfit')">
                     <template #body="{ data: item }">
-                      <span :class="item.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ formatAmountWithCode(item.profit) }}</span>
+                      <span :class="item.profit >= 0 ? 'text-up' : 'text-down'">{{ formatAmountWithCode(item.profit) }}</span>
                     </template>
                   </Column>
                 </DataTable>
@@ -326,9 +353,8 @@
               <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }"
                   class="flex items-center cursor-pointer p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
                   :style="{ width: '300px', minWidth: '250px' }">
-                <StockIcon :symbol="data.symbol" class="mr-8" />
                 <div class="truncate">
-                  <Tag :value="data.symbol" severity="secondary" class="truncate" />
+                  <div class="truncate font-medium">{{ data.symbol }}</div>
                   <div class="text-xs text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
               </RouterLink>
@@ -370,7 +396,7 @@
                 <span>{{ splitAmountWithCode(data.currentValue).fraction }}</span>
                 <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
               </div>
-              <div :class="{ 'text-emerald-600': data.profitPercentage >= 0, 'text-rose-600': data.profitPercentage < 0 }">
+              <div :class="{ 'text-up': data.profitPercentage >= 0, 'text-down': data.profitPercentage < 0 }">
                 <div class="font-bold text-xs">{{ formatSignedNumber(data.profitPercentage) }}%</div>
               </div>
             </template>
@@ -402,10 +428,9 @@
           <ul v-if="watchlistStore.items.length" class="divide-y divide-[var(--p-content-border-color)]">
             <li v-for="item in watchlistStore.items.slice(0, 5)" :key="item.symbol">
               <RouterLink :to="{ name: 'asset', params: { symbol: item.symbol } }" class="flex items-center gap-3 py-2 hover:text-[var(--p-primary-color)]">
-                <StockIcon :symbol="item.symbol" class="!m-0 !size-7 shrink-0" />
                 <span class="font-medium">{{ item.symbol }}</span>
                 <span class="ml-auto font-medium">{{ item.regularMarketPrice == null ? '--' : item.regularMarketPrice.toFixed(2) }}</span>
-                <span class="w-20 text-right text-sm" :class="(item.regularMarketChangePercent ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                <span class="w-20 text-right text-sm" :class="(item.regularMarketChangePercent ?? 0) >= 0 ? 'text-up' : 'text-down'">
                   {{ item.regularMarketChangePercent == null ? '--' : `${item.regularMarketChangePercent > 0 ? '+' : ''}${item.regularMarketChangePercent.toFixed(2)}%` }}
                 </span>
               </RouterLink>
@@ -429,10 +454,10 @@
 import { ref, watch, computed } from 'vue'
 import Skeleton from 'primevue/skeleton'
 import ProgressBar from 'primevue/progressbar'
-import StockIcon from '@/components/StockIcon.vue'
+import ToggleSwitch from 'primevue/toggleswitch'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
-import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, percentChange, filterByPeriod, yAxisBounds } from '@/utils/portfolioMetrics'
+import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, percentChange, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
 import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 import { useAuthStore } from '@/stores/auth'
@@ -512,6 +537,13 @@ const change = computed(() => {
   const list = chartPoints.value
   return list.length < 2 ? 0 : list[list.length - 1].y - list[0].y
 })
+const stats = computed(() => periodStats(chartPoints.value))
+
+// 小卡明細列＋區間統計的顯示開關，記在 localStorage；無痕或封鎖儲存時就當預設顯示
+const SHOW_DETAILS_KEY = 'dashboard-show-details'
+const showDetails = ref((() => { try { return localStorage.getItem(SHOW_DETAILS_KEY) !== '0' } catch { return true } })())
+watch(showDetails, v => { try { localStorage.setItem(SHOW_DETAILS_KEY, v ? '1' : '0') } catch { /* 存不了就只在本次有效 */ } })
+const formatShortDate = d => d.toLocaleDateString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US')
 
 /* =========================
  *  Utils / Formatters
@@ -854,7 +886,7 @@ const irr = computed(() => holdingsStore.list.length
   : null)
 
 /* 損益小卡的明細列 */
-const profitColor = v => (v >= 0 ? 'text-emerald-500' : 'text-rose-500')
+const profitColor = v => (v >= 0 ? 'text-up' : 'text-down')
 const winLoss = computed(() => {
   const up = holdingsStore.list.filter(h => h.currentValue >= h.avgCost * h.shares).length
   return { up, down: holdingsStore.list.length - up }
@@ -869,13 +901,11 @@ const firstTradeDate = computed(() => transactionsStore.list.reduce(
 
 const unrealizedRows = computed(() => [
   { label: t('costBasis'), value: formatAmountWithCode(totalValue.value - totalProfit.value) },
-  { label: t('marketValue'), value: formatAmountWithCode(totalValue.value) },
   { label: t('winLoss'), value: t('winLossValue', winLoss.value) },
 ])
 const realizedRows = computed(() => [
   { label: t('dividendTotal'), value: formatAmountWithCode(totalDividends.value) },
   { label: t('realizedPlusDividends'), value: formatAmountWithCode(realizedProfit.value + totalDividends.value) },
-  { label: t('sellTrades'), value: transactionsStore.list.filter(tx => tx.transactionType === 'sell').length },
 ])
 const irrRows = computed(() => {
   const first = firstTradeDate.value
@@ -885,7 +915,6 @@ const irrRows = computed(() => {
     { label: t('totalInvested'), value: formatAmountWithCode(transactionsStore.list
       .filter(tx => tx.transactionType === 'buy')
       .reduce((s, tx) => s + convertAmountToUsd(tx.price * tx.shares + tx.fee, tx.currency), 0)) },
-    { label: t('cumulativeReturn'), value: holdingsStore.list.length ? `${formatSignedNumber(totalReturn.value)}%` : '--' },
   ]
 })
 
@@ -1091,6 +1120,47 @@ watch(displayCurrency, () => {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+.dashboard-details-switch {
+  --p-toggleswitch-width: 2rem;
+  --p-toggleswitch-height: 1.125rem;
+  --p-toggleswitch-handle-size: 0.75rem;
+}
+
+.dashboard-period-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  font-size: 0.78rem;
+}
+
+@media (min-width: 640px) {
+  .dashboard-period-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.dashboard-period-stats > div {
+  padding: 0.6rem 0.75rem;
+  border: 1px dashed var(--p-content-border-color);
+  border-radius: 0.5rem;
+}
+
+.dashboard-period-stats dt {
+  color: var(--p-text-muted-color);
+}
+
+.dashboard-period-stats dd {
+  margin-top: 0.15rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-period-stats .dashboard-period-stats__sub {
+  margin-top: 0;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--p-text-muted-color);
 }
 
 .dashboard-winloss {
