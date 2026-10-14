@@ -17,15 +17,17 @@
       :pt="{ content: { class: '!p-0' }, transition: { name: 'search-fade' } }"
     >
       <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
-        <i class="pi pi-search text-primary"></i>
-        <input
-          v-model="query"
-          autofocus
-          class="flex-1 bg-transparent outline-none"
-          :placeholder="$t('searchPlaceholder')"
-          :aria-label="$t('searchPlaceholder')"
-          @input="onSearch"
-        />
+        <label class="flex flex-1 items-center gap-3 px-3 py-2 rounded-md border border-surface focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+          <i class="pi pi-search text-primary"></i>
+          <input
+            v-model="query"
+            autofocus
+            class="flex-1 bg-transparent outline-none"
+            :placeholder="$t('searchPlaceholder')"
+            :aria-label="$t('searchPlaceholder')"
+            @input="onSearch"
+          />
+        </label>
         <Button icon="pi pi-times" text rounded severity="secondary" size="small" :aria-label="$t('close')"
           v-tooltip.bottom="{ value: $t('close'), showDelay: 500 }" @click="pickerVisible = false" />
       </div>

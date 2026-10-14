@@ -154,13 +154,10 @@
                     v-if="growthRateNumber !== null"
                     class="inline-flex items-center gap-2 pb-1"
                   >
-                    <span
-                      class="asset-growth-pill"
-                      :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
-                    >
+                    <span class="asset-growth-change" :class="growthRateNumber >= 0 ? 'text-up' : 'text-down'">
                       <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
-                      {{ Math.abs(growthRateNumber).toFixed(2) }}%
-                      <span>({{ formatSignedNumber(change) }})</span>
+                      {{ formatSignedNumber(growthRateNumber) }}%
+                      ({{ change >= 0 ? '+' : '-' }}{{ formatAmount(Math.abs(change)) }})
                     </span>
                   </div>
 
@@ -1025,6 +1022,31 @@ watch(displayCurrency, () => {
   font-size: 1rem;
   font-weight: 500;
   line-height: 1;
+}
+
+/* 總資產旁的漲跌：實心圓箭頭＋同色文字，圓底沿用 text-up/down 的 currentColor */
+.asset-growth-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.asset-growth-change i {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 9999px;
+  background: currentColor;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.asset-growth-change i::before {
+  color: var(--p-content-background);
 }
 
 .asset-growth-pill i {

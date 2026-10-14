@@ -3,19 +3,19 @@ import Aura from '@primeuix/themes/aura';
 
 export default definePreset(Aura, {
     semantic: {
-      // 主題色 #8aabcf（500），其餘色階由它與白/黑混色產生
+      // 主題色 #316dca（500），其餘色階由它與白/黑混色產生
       primary: {
-        50:  '#f6f8fb',
-        100: '#eaf0f6',
-        200: '#d3dfed',
-        300: '#bbcee3',
-        400: '#a1bcd9',
-        500: '#8aabcf',
-        600: '#718caa',
-        700: '#5b7189',
-        800: '#455668',
-        900: '#323e4b',
-        950: '#212932'
+        50:  '#eff3fb',
+        100: '#dae5f5',
+        200: '#b1c8eb',
+        300: '#88aae0',
+        400: '#5a8ad5',
+        500: '#316dca',
+        600: '#2859a6',
+        700: '#204885',
+        800: '#193765',
+        900: '#122749',
+        950: '#0c1a30'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -25,7 +25,7 @@ export default definePreset(Aura, {
         light: {
           primary: {
             color: '{primary.500}',
-            contrastColor: '{surface.950}', // #8aabcf 偏淺，白字對比不足，主色底上改用深色字
+            contrastColor: '#ffffff', // #316dca 上白字對比約 5:1
             hoverColor: '{primary.600}',
             activeColor: '{primary.700}'
           },
@@ -67,9 +67,9 @@ export default definePreset(Aura, {
         dark: {
           primary: {
             color: '{primary.500}',
-            contrastColor: '{surface.950}', // #8aabcf 偏淺，白字對比不足，主色底上改用深色字
-            hoverColor: '{primary.300}',
-            activeColor: '{primary.200}'
+            contrastColor: '#ffffff', // #316dca 上白字對比約 5:1
+            hoverColor: '{primary.400}', // 300/200 太淺，白字讀不清
+            activeColor: '{primary.600}'
           },
           formField: {
             background: 'transparent',

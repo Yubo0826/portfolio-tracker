@@ -1,17 +1,19 @@
 <template>
   <div @keydown.down.prevent="moveFocus(1)" @keydown.up.prevent="moveFocus(-1)">
     <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
-      <i class="pi pi-search text-primary"></i>
-      <input
-        ref="inputEl"
-        v-model="query"
-        autofocus
-        class="flex-1 bg-transparent outline-none"
-        :placeholder="$t('searchPlaceholder')"
-        :aria-label="$t('searchPlaceholder')"
-        @input="onSearch"
-        @keydown.enter="groups[0]?.items[0] && select(groups[0].items[0])"
-      />
+      <label class="flex flex-1 items-center gap-3 px-3 py-2 rounded-md border border-surface focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+        <i class="pi pi-search text-primary"></i>
+        <input
+          ref="inputEl"
+          v-model="query"
+          autofocus
+          class="flex-1 bg-transparent outline-none"
+          :placeholder="$t('searchPlaceholder')"
+          :aria-label="$t('searchPlaceholder')"
+          @input="onSearch"
+          @keydown.enter="groups[0]?.items[0] && select(groups[0].items[0])"
+        />
+      </label>
       <Button icon="pi pi-times" text rounded severity="secondary" size="small" :aria-label="$t('close')"
         v-tooltip.bottom="{ value: $t('close'), showDelay: 500 }" @click="emit('close')" />
     </div>
