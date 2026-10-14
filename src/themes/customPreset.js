@@ -3,18 +3,19 @@ import Aura from '@primeuix/themes/aura';
 
 export default definePreset(Aura, {
     semantic: {
+      // 主題色 #8aabcf（500），其餘色階由它與白/黑混色產生
       primary: {
-        50:  '{blue.50}',
-        100: '{blue.100}',
-        200: '{blue.200}',
-        300: '{blue.300}',
-        400: '{blue.400}',
-        500: '{blue.500}',
-        600: '{blue.600}',
-        700: '{blue.700}',
-        800: '{blue.800}',
-        900: '{blue.900}',
-        950: '{blue.950}'
+        50:  '#f6f8fb',
+        100: '#eaf0f6',
+        200: '#d3dfed',
+        300: '#bbcee3',
+        400: '#a1bcd9',
+        500: '#8aabcf',
+        600: '#718caa',
+        700: '#5b7189',
+        800: '#455668',
+        900: '#323e4b',
+        950: '#212932'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -24,7 +25,7 @@ export default definePreset(Aura, {
         light: {
           primary: {
             color: '{primary.500}',
-            contrastColor: '#ffffff',
+            contrastColor: '{surface.950}', // #8aabcf 偏淺，白字對比不足，主色底上改用深色字
             hoverColor: '{primary.600}',
             activeColor: '{primary.700}'
           },
@@ -66,7 +67,7 @@ export default definePreset(Aura, {
         dark: {
           primary: {
             color: '{primary.500}',
-            contrastColor: '#ffffff',
+            contrastColor: '{surface.950}', // #8aabcf 偏淺，白字對比不足，主色底上改用深色字
             hoverColor: '{primary.300}',
             activeColor: '{primary.200}'
           },

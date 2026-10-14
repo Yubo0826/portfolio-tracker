@@ -17,7 +17,7 @@ export const DARK_VARIANTS = ['default', 'dim', 'standard']
 // 可選的強調色（key 對應 i18n，palette 對應 PrimeVue/Tailwind 色盤，swatch 為預覽色）
 // palette 為 null 代表「跟隨 customPreset 的 primary 定義」，不做執行期覆寫
 export const ACCENT_OPTIONS = [
-  { key: 'blue', palette: null, swatch: '#3b82f6' },
+  { key: 'blue', palette: null, swatch: '#8aabcf' },
   { key: 'indigo', palette: 'indigo', swatch: '#6366f1' },
   { key: 'emerald', palette: 'emerald', swatch: '#10b981' },
   { key: 'rose', palette: 'rose', swatch: '#f43f5e' },

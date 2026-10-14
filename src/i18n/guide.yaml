@@ -108,8 +108,8 @@ pages:
       en: The dashboard summarizes the current portfolio's performance, value trend and allocation on one page.
       zh: 儀表板在同一頁彙整目前投資組合的績效、市值走勢與資產配置。
     note:
-      en: Turn on Show details next to the title to see extra rows such as cost, dividends and period highs and lows.
-      zh: 開啟標題旁的「顯示明細」，可看到持倉成本、股息、區間高低點等更多資訊。
+      en: Turn off Compact next to the title to see extra rows such as cost, dividends and period highs and lows.
+      zh: 關閉標題旁的「精簡模式」，可看到持倉成本、股息、區間高低點等更多資訊。
     sections:
       - title:
           en: Key metrics

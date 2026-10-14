@@ -70,6 +70,22 @@ export function realizedProfit(trades: Trade[], convert: Convert): number {
 }
 
 /**
+ * 某 symbol 目前這輪持有的交易（股數最後一次歸零之後），依日期、id 排序
+ * 後端用平均成本法，賣出不對應特定批次，所以只能列出這輪的買賣，無法只留「剩下的批次」
+ */
+export function currentLots<T extends Trade>(trades: T[], symbol: string): T[] {
+  const sorted = trades.filter((t) => t.symbol === symbol).sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime() || Number(a.id ?? 0) - Number(b.id ?? 0))
+  let shares = 0
+  let start = 0
+  sorted.forEach((t, i) => {
+    shares = Math.round((shares + (t.transactionType === 'sell' ? -t.shares : t.shares)) * 100) / 100
+    if (shares <= 0) start = i + 1
+  })
+  return sorted.slice(start)
+}
+
+/**
  * 年化內部報酬率 XIRR (%)
  * 現金流：買入為流出、賣出與股息為流入，目前持倉市值視為今天的最後一筆流入
  * 股息表沒有幣別欄位，以該 symbol 交易的幣別換算

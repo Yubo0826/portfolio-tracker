@@ -6,8 +6,8 @@
       <div class="flex items-center gap-3">
         <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
         <label class="inline-flex items-center gap-1.5 cursor-pointer">
-          <ToggleSwitch v-model="showDetails" class="dashboard-details-switch" />
-          {{ t('showDetails') }}
+          <ToggleSwitch :model-value="!showDetails" @update:model-value="v => showDetails = !v" class="dashboard-details-switch" />
+          {{ t('compactMode') }}
         </label>
       </div>
     </Teleport>
@@ -15,75 +15,45 @@
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Skeleton v-for="idx in 3" :key="`skeleton-top-${idx}`" width="100%" height="12rem" borderRadius="0.75rem" />
-      </div>
-
-      <Card class="rounded-xl shadow-md">
-        <template #content>
-          <div class="space-y-4 py-1">
-            <div class="flex justify-between items-center gap-4">
-              <Skeleton width="7rem" height="1rem" />
-              <Skeleton width="16rem" height="1.5rem" borderRadius="999px" />
-            </div>
+        <Card v-for="idx in 3" :key="`skeleton-metric-${idx}`" class="app-panel dashboard-metric-card h-full">
+          <template #content>
             <div class="space-y-3">
-              <Skeleton width="13rem" height="2.75rem" />
-              <Skeleton width="10rem" height="1rem" />
-            </div>
-            <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
-          </div>
-        </template>
-      </Card>
-
-      <div class="grid grid-cols-12 gap-6 items-stretch">
-        <div class="col-span-12 xl:col-span-8 space-y-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Card v-for="idx in skeletonStatCards.slice(0, 2)" :key="`skeleton-stat-${idx}`" class="rounded-xl shadow-md h-full">
-              <template #content>
-                <div class="space-y-3 py-2">
-                  <Skeleton width="6rem" height="1rem" />
-                  <Skeleton width="10rem" height="2rem" />
-                  <Skeleton width="8rem" height="0.85rem" />
-                </div>
-              </template>
-            </Card>
-          </div>
-
-          <Card class="rounded-xl shadow-md">
-          <template #content>
-            <div class="space-y-3 py-2">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <Skeleton v-for="idx in 3" :key="`skeleton-summary-${idx}`" width="100%" height="4.5rem" />
-              </div>
-            </div>
-          </template>
-          </Card>
-        </div>
-
-        <Card class="col-span-12 xl:col-span-4 rounded-xl shadow-md h-full">
-          <template #content>
-            <div class="space-y-4 py-1">
-              <div class="flex justify-between items-center gap-4">
-                <Skeleton width="8rem" height="1.5rem" borderRadius="999px" />
-                <Skeleton width="6rem" height="1rem" />
-              </div>
-              <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
-              <Skeleton width="100%" height="9rem" borderRadius="0.75rem" />
+              <Skeleton width="6rem" height="0.85rem" />
+              <Skeleton width="10rem" height="2rem" />
+              <Skeleton width="100%" height="0.5rem" borderRadius="999px" />
             </div>
           </template>
         </Card>
       </div>
 
-      <Card class="mb-8 p-4">
+      <Card class="app-panel dashboard-panel--hero">
         <template #content>
           <div class="space-y-3">
-            <Skeleton width="12rem" height="1rem" />
+            <Skeleton width="6rem" height="0.85rem" />
+            <Skeleton width="16rem" height="2.5rem" />
+            <Skeleton width="100%" height="320px" borderRadius="0.75rem" />
+            <Skeleton width="18rem" height="1.75rem" borderRadius="999px" />
+          </div>
+        </template>
+      </Card>
+
+      <Card class="app-panel dashboard-allocation-card">
+        <template #content>
+          <div class="space-y-4">
+            <Skeleton width="8rem" height="1.25rem" />
+            <Skeleton width="14rem" height="2rem" borderRadius="999px" />
+            <Skeleton width="100%" height="18rem" borderRadius="0.75rem" />
+          </div>
+        </template>
+      </Card>
+
+      <Card class="app-panel dashboard-table-panel mb-8 p-4">
+        <template #content>
+          <div class="space-y-3">
+            <Skeleton width="8rem" height="1rem" />
             <div class="space-y-2">
-              <div v-for="idx in skeletonTableRows" :key="`skeleton-row-${idx}`" class="grid grid-cols-5 gap-3 items-center">
-                <Skeleton width="100%" height="1.25rem" />
-                <Skeleton width="100%" height="1.25rem" />
-                <Skeleton width="100%" height="1.25rem" />
-                <Skeleton width="100%" height="1.25rem" />
-                <Skeleton width="100%" height="1.25rem" />
+              <div v-for="idx in 6" :key="`skeleton-row-${idx}`" class="grid grid-cols-5 gap-3 items-center">
+                <Skeleton v-for="col in 5" :key="col" width="100%" height="1.25rem" />
               </div>
             </div>
           </div>
@@ -152,7 +122,7 @@
               <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
             </p>
             <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
-              <span class="text-2xl font-bold tracking-tight text-[var(--p-primary-color)]">{{ irr.toFixed(2) }}%</span>
+              <span class="text-2xl font-bold tracking-tight">{{ irr.toFixed(2) }}%</span>
               <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
             </div>
             <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
@@ -347,7 +317,7 @@
       <template #content>
         <h2 class="mb-4 text-base font-semibold">{{ $t('holdings') }}</h2>
 
-        <DataTable :value="holdingsStore.list" :loading="isLoading" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
+        <DataTable :value="holdingsStore.list" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }"
@@ -475,8 +445,6 @@ const { displayCurrency } = storeToRefs(settingsStore)
 const isLoading = ref(true)
 const transactionDialogVisible = ref(false)
 const importDialogVisible = ref(false)
-const skeletonStatCards = [1, 2, 3]
-const skeletonTableRows = [1, 2, 3, 4, 5, 6]
 
 const allocation = ref([])
 const dividends = ref([])
@@ -717,7 +685,7 @@ async function loadData() {
     // await transactionsStore.fetchTransactions()
     await getAllocation()
     await getDividends()
-    fetchChartData()
+    await fetchChartData()
   } catch (e) {
     console.error('Error fetching data:', e)
   } finally {
@@ -1192,7 +1160,7 @@ watch(displayCurrency, () => {
 .dashboard-allocation-title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--p-text-color);
+  color: var(--p-text-muted-color);
 }
 
 .dashboard-allocation-content {

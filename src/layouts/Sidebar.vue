@@ -462,6 +462,11 @@ const goDashboard = () => {
   flex-shrink: 0;
 }
 
+.menu-group .menu-item:hover,
+.menu-group .menu-item.active {
+  color: var(--sidebar-text);
+}
+
 .menu-item:hover,
 .menu-item.active {
   background-color: var(--sidebar-active-bg);

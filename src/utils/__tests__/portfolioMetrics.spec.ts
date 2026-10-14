@@ -9,6 +9,7 @@ import {
   yAxisBounds,
   periodStats,
   portfolioInsights,
+  currentLots,
   type Trade,
 } from '../portfolioMetrics'
 
@@ -201,5 +202,18 @@ describe('portfolioInsights', () => {
 
   it('沒有市值時不產生洞察', () => {
     expect(portfolioInsights([], [], 'USD')).toEqual([])
+  })
+})
+
+describe('currentLots', () => {
+  it('只留股數最後一次歸零之後的交易，並依日期排序', () => {
+    const trades = [
+      trade({ id: 4, shares: 6, date: '2025-07-03' }),
+      trade({ id: 1, shares: 5, date: '2024-01-01' }),
+      trade({ id: 2, transactionType: 'sell', shares: 5, date: '2024-06-01' }),
+      trade({ id: 3, shares: 7, date: '2025-07-01' }),
+      trade({ id: 9, symbol: 'VT', shares: 1, date: '2025-07-02' }),
+    ]
+    expect(currentLots(trades, 'AAPL').map((t) => t.id)).toEqual([3, 4])
   })
 })

@@ -1,21 +1,7 @@
 <template>
   <div>
         <div class="flex flex-wrap items-center gap-2 mb-8">
-          <MultiSelect
-            v-model="selectedSymbols"
-            :options="symbolOptions"
-            display="chip"
-            :placeholder="$t('symbol')"
-            class="w-60"
-          />
-          <Button
-            v-if="hasActiveFilters"
-            icon="pi pi-filter-slash"
-            :aria-label="$t('clearFilters')"
-            severity="secondary"
-            size="small"
-            @click="clearFilters"
-          />
+          <FilterMenu v-model="filters" :groups="filterGroups" />
           <div class="flex items-center gap-2 ml-auto">
           <Button
             v-if="!auth.isDemo"
@@ -32,10 +18,15 @@
 
         <DataTable
           v-model:selection="selectedHoldings"
+          v-model:expandedRows="expandedRows"
+          :pt="{
+            rowExpansion: { class: 'hover:!bg-[var(--p-datatable-row-background)] hover:!text-[var(--p-datatable-row-color)]' },
+            rowExpansionCell: { class: '!p-0' },
+          }"
           selectionMode="multiple"
           :metaKeySelection="false"
           :value="filteredHoldings"
-          :loading="store.isLoading"
+          :loading="store.isLoading && !store.list.length"
           sortField="currentValue"
           :sortOrder="-1"
           dataKey="id"
@@ -113,6 +104,50 @@
             </template>
           </Column>
 
+          <Column headerStyle="width: 3rem">
+            <template #body="{ data }">
+              <Button
+                :icon="expandedRows[data.id] && !closing[data.id] ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                v-tooltip.top="{ value: $t(expandedRows[data.id] && !closing[data.id] ? 'collapse' : 'expand'), showDelay: 500 }"
+                :aria-label="$t(expandedRows[data.id] && !closing[data.id] ? 'collapse' : 'expand')"
+                text rounded severity="secondary" size="small"
+                @click="toggleRow(data.id)"
+              />
+            </template>
+          </Column>
+
+          <template #expansion="{ data }">
+            <div class="lot-expand" :class="{ closing: closing[data.id] }" @animationend="onExpandAnimEnd(data.id)">
+            <div class="min-h-0 overflow-hidden px-4">
+            <table class="w-full text-sm my-2">
+              <thead class="text-muted-color">
+                <tr>
+                  <th class="text-left font-medium py-2">{{ $t('date') }}</th>
+                  <th class="text-left font-medium py-2">{{ $t('type') }}</th>
+                  <th class="text-right font-medium py-2">{{ $t('price') }}</th>
+                  <th class="text-right font-medium py-2">{{ $t('shares') }}</th>
+                  <th class="text-right font-medium py-2">{{ $t('totalProfit') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="lot in lotsOf(data)" :key="lot.id" class="border-t border-surface">
+                  <td class="py-2">{{ lot.date }}</td>
+                  <td class="py-2">{{ $t(lot.transactionType) }}</td>
+                  <td class="py-2 text-right">{{ splitNativePrice(lot.price, lot.currency).main }}{{ splitNativePrice(lot.price, lot.currency).fraction }}</td>
+                  <td class="py-2 text-right">{{ lot.shares }}</td>
+                  <td class="py-2 text-right whitespace-nowrap">
+                    <span v-if="lot.profit != null" :class="lot.profit >= 0 ? 'text-up' : 'text-down'">
+                      {{ formatSignedAmountWithCode(lot.profit) }} ({{ lot.profit >= 0 ? '+' : '' }}{{ lot.profitPct.toFixed(2) }}%)
+                    </span>
+                    <span v-else class="text-muted-color">--</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+            </div>
+          </template>
+
           <template #empty>
             <NoData />
           </template>
@@ -123,6 +158,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import NoData from '@/components/NoData.vue';
+import FilterMenu from '@/components/FilterMenu.vue';
 import * as toast from '@/composables/toast'
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -142,8 +178,14 @@ const { formatAmountWithCode, formatPriceWithCode, convertAmountToUsd } = useCur
 import { useDividendsStore } from '@/stores/dividends';
 const dividendsStore = useDividendsStore();
 
+import { useTransactionsStore } from '@/stores/transactions';
+const transactionsStore = useTransactionsStore();
+
+import { currentLots } from '@/utils/portfolioMetrics';
+
+// fetchTransactions 內會一併重抓 holdings
 const loadData = () => {
-  store.fetchHoldings();
+  transactionsStore.fetchTransactions();
   dividendsStore.fetchDividends();
 };
 
@@ -217,21 +259,37 @@ const formatSignedAmountWithCode = (value) => {
 }
 
 const selectedHoldings = ref([]);
-const selectedSymbols = ref([]);
-
-const symbolOptions = computed(() =>
-  [...new Set(store.list.map((h) => h.symbol))].sort()
-);
-
-const hasActiveFilters = computed(() => selectedSymbols.value.length > 0);
-
-const clearFilters = () => {
-  selectedSymbols.value = [];
+const expandedRows = ref({});
+// PrimeVue 收合會直接移除展開列，所以收合時先標記 closing 播完動畫，再從 expandedRows 移除
+const closing = ref({});
+const toggleRow = (id) => {
+  if (!expandedRows.value[id]) expandedRows.value = { ...expandedRows.value, [id]: true };
+  else closing.value = { ...closing.value, [id]: true };
+};
+const onExpandAnimEnd = (id) => {
+  if (!closing.value[id]) return;
+  const { [id]: _, ...rest } = expandedRows.value;
+  expandedRows.value = rest;
+  const { [id]: __, ...restClosing } = closing.value;
+  closing.value = restClosing;
 };
 
+// 買入批次以現價算損益（含手續費），換成美金交給 formatAmount* 轉顯示幣別；賣出不算
+const lotsOf = (h) => currentLots(transactionsStore.list, h.symbol).map((lot) => {
+  if (lot.transactionType !== 'buy') return { ...lot, profit: null };
+  const cost = lot.price * lot.shares + lot.fee;
+  const profit = h.nativeCurrentPrice * lot.shares - cost;
+  return { ...lot, profit: convertAmountToUsd(profit, lot.currency), profitPct: cost ? (profit / cost) * 100 : 0 };
+});
+const filters = ref({ symbol: [] });
+
+const filterGroups = computed(() => [
+  { key: 'symbol', label: t('symbol'), options: [...new Set(store.list.map((h) => h.symbol))].sort().map((v) => ({ label: v, value: v })) },
+]);
+
 const filteredHoldings = computed(() => {
-  if (!selectedSymbols.value.length) return holdingsWithDividends.value;
-  return holdingsWithDividends.value.filter((h) => selectedSymbols.value.includes(h.symbol));
+  if (!filters.value.symbol.length) return holdingsWithDividends.value;
+  return holdingsWithDividends.value.filter((h) => filters.value.symbol.includes(h.symbol));
 });
 
 // 初始化＆監聽登入/投組變化後自動載入
@@ -289,3 +347,25 @@ const deleteConfirm = () => {
     });
 };
 </script>
+
+<style scoped>
+/* grid-template-rows 0fr↔1fr 可以從 0 動畫到內容實際高度 */
+.lot-expand {
+  display: grid;
+  animation: lot-open 0.2s ease-out;
+}
+.lot-expand.closing {
+  animation: lot-close 0.2s ease-in forwards;
+}
+@keyframes lot-open {
+  from { grid-template-rows: 0fr; opacity: 0; }
+  to { grid-template-rows: 1fr; opacity: 1; }
+}
+@keyframes lot-close {
+  from { grid-template-rows: 1fr; opacity: 1; }
+  to { grid-template-rows: 0fr; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lot-expand, .lot-expand.closing { animation-duration: 1ms; }
+}
+</style>

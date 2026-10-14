@@ -1,22 +1,7 @@
 <template>
   <div>
         <div class="flex flex-wrap items-center gap-2 mb-8">
-          <MultiSelect
-            v-model="selectedSymbols"
-            :options="symbolOptions"
-            :placeholder="$t('symbol')"
-            display="chip"
-            class="w-60"
-          />
-          <DateRangeFilter v-model="dateRange" />
-          <Button
-            v-if="hasActiveFilters"
-            icon="pi pi-filter-slash"
-            :aria-label="$t('clearFilters')"
-            severity="secondary"
-            size="small"
-            @click="clearFilters"
-          />
+          <FilterMenu v-model="filters" v-model:dateRange="dateRange" :groups="filterGroups" />
 
         </div>
         
@@ -24,7 +9,7 @@
           :value="filteredDividends"
           sortField="date"
           :sortOrder="-1"
-          :loading="store.isLoading"
+          :loading="store.isLoading && !store.list.length"
           dataKey="id"
           tableStyle="min-width: 50rem"
           rowHover 
@@ -71,7 +56,8 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import DateRangeFilter from '@/components/DateRangeFilter.vue';
+import { useI18n } from 'vue-i18n';
+import FilterMenu from '@/components/FilterMenu.vue';
 import NoData from '@/components/NoData.vue';
 import { useCurrency } from '@/composables/useCurrency';
 import { useDividendsStore } from '@/stores/dividends';
@@ -102,26 +88,18 @@ const splitDisplayAmount = (value, mode = 'amount') => {
   }
 }
 
+const { t } = useI18n();
 const dateRange = ref(null);
-const selectedSymbols = ref([]);
+const filters = ref({ symbol: [] });
 
-const symbolOptions = computed(() =>
-  [...new Set(store.list.map((d) => d.symbol))].sort()
-);
-
-const hasActiveFilters = computed(
-  () => selectedSymbols.value.length > 0 || !!dateRange.value
-);
-
-const clearFilters = () => {
-  selectedSymbols.value = [];
-  dateRange.value = null;
-};
+const filterGroups = computed(() => [
+  { key: 'symbol', label: t('symbol'), options: [...new Set(store.list.map((d) => d.symbol))].sort().map((v) => ({ label: v, value: v })) },
+]);
 
 const filteredDividends = computed(() => {
   let list = store.list;
-  if (selectedSymbols.value.length) {
-    list = list.filter((item) => selectedSymbols.value.includes(item.symbol));
+  if (filters.value.symbol.length) {
+    list = list.filter((item) => filters.value.symbol.includes(item.symbol));
   }
   if (dateRange.value) {
     const [start, end] = dateRange.value;

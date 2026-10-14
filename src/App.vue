@@ -39,8 +39,8 @@
         @login="auth.login"
       />
 
-      <div class="app-shell__scroll app-shell__content flex-1 overflow-y-auto">
-        <main class="mx-auto max-w-[1440px] px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+      <div class="app-shell__scroll app-shell__content flex flex-1 flex-col overflow-y-auto">
+        <main class="mx-auto w-full max-w-[1200px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
           <!-- header 導覽模式沒有側邊欄，投資組合切換放在頁面標題上方 -->
           <template v-if="isHeaderNav && PORTFOLIO_SCOPED_ROUTES.has(route.name)">
             <button
@@ -90,7 +90,7 @@
           <RouterView />
         </main>
 
-        <div class="mx-auto max-w-[1440px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
+        <div class="mx-auto w-full max-w-[1200px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
           <Footer />
         </div>
       </div>
@@ -107,7 +107,7 @@
     :showHeader="false"
     :draggable="false"
     class="w-[min(44rem,calc(100vw-2rem))]"
-    :pt="{ content: { class: '!p-0' } }"
+    :pt="{ content: { class: '!p-0' }, transition: { name: 'search-fade' } }"
   >
     <SearchBox @close="searchBoxVisible = false" />
   </Dialog>
@@ -648,7 +648,7 @@ const menuItems = computed(() => {
   align-items: center;
   gap: 0.75rem;
   width: min(24rem, 100%);
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 1rem;
   border: 1px solid var(--p-content-border-color);
   border-radius: 15px;
   background: var(--p-content-background);
@@ -682,7 +682,7 @@ const menuItems = computed(() => {
 
 .app-shell__content {
   min-height: 0;
-  margin: 16px 16px 16px 0;
+  margin: 0 16px 16px 0;
   border-radius: 16px;
 }
 
@@ -710,7 +710,6 @@ html[data-nav-layout='header'] .app-shell__main {
 .trade-actions-split {
   position: relative;
 }
-
 .trade-actions-split .p-tieredmenu {
   top: calc(100% + 0.35rem) !important;
   right: 0 !important;
@@ -765,6 +764,24 @@ html[data-nav-layout='header'] .app-shell__main {
 
 @media (prefers-reduced-motion: reduce) {
   .p-datatable th [data-pc-section="sort"]::before {
+    transition: none;
+  }
+}
+
+/* 搜尋 Dialog（含 WatchlistView 新增代號）改淡入淡出，取代 position="top" 預設的由上滑入 */
+.search-fade-enter-active,
+.search-fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.search-fade-enter-from,
+.search-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-fade-enter-active,
+  .search-fade-leave-active {
     transition: none;
   }
 }

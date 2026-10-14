@@ -136,8 +136,6 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding: 0.75rem 0;
-  border-top: 1px solid var(--p-content-border-color);
-  background: var(--p-content-background);
 }
 
 /* 卡片式表格（資產明細、再平衡共用）：圓角對齊 Card（Aura card 用 border.radius.xl），

@@ -5,6 +5,8 @@ import { useAuthStore } from '@/stores/auth'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior() {
+    // ponytail: app shell 內容在 .app-shell__scroll 捲動，不是 window；不還原上一頁位置（瀏覽器返回也置頂），要還原需自行記錄各路由 scrollTop
+    document.querySelector('.app-shell__scroll')?.scrollTo({ top: 0 })
     return { top: 0 }
   },
   routes: [

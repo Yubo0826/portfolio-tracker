@@ -14,7 +14,7 @@
       :showHeader="false"
       :draggable="false"
       class="w-[min(44rem,calc(100vw-2rem))]"
-      :pt="{ content: { class: '!p-0' } }"
+      :pt="{ content: { class: '!p-0' }, transition: { name: 'search-fade' } }"
     >
       <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
         <i class="pi pi-search text-primary"></i>

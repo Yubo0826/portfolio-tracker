@@ -1562,7 +1562,6 @@ watch(symbol, nextSymbol => {
   fetchRecommendedSymbols(normalized)
   fetchCompanyBasicInfo(normalized)
   fetchFundHoldings(normalized)
-  document.querySelector('.app-shell__scroll')?.scrollTo({ top: 0 })
 }, { immediate: true })
 
 watch(symbol, nextSymbol => {

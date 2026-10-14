@@ -20,13 +20,7 @@
       <!-- header 導覽模式：沒有側邊欄，品牌與主導覽改放這裡（投資組合切換在 App.vue 頁面標題上方） -->
       <template v-if="isHeaderNav">
         <button type="button" class="topbar-brand" :title="t('dashboard')" @click="router.push('/dashboard')">
-          <svg class="topbar-brand__logo" width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
-            <rect x="6" y="6" width="52" height="52" rx="16" class="topbar-brand__box" />
-            <rect x="18" y="34" width="7" height="14" rx="2" class="topbar-brand__bar" />
-            <rect x="28.5" y="26" width="7" height="22" rx="2" class="topbar-brand__bar" />
-            <rect x="39" y="18" width="7" height="30" rx="2" class="topbar-brand__bar topbar-brand__bar--accent" />
-          </svg>
-          <span class="topbar-brand__text hidden sm:inline">
+          <span class="topbar-brand__text">
             <span class="topbar-brand__stock">Stock</span><span class="topbar-brand__accent">Bar</span>
           </span>
         </button>
@@ -55,7 +49,7 @@
         >
           <i class="pi pi-search text-xs"></i>
           <span class="truncate">{{ t('searchPlaceholder') }}</span>
-          <span class="ml-auto inline-flex min-w-8 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-2 py-1 text-[11px] font-semibold text-[var(--p-text-muted-color)]">/</span>
+          <span class="ml-auto inline-flex min-w-8 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-1 py-1 text-[11px] font-semibold text-[var(--p-text-muted-color)]">/</span>
         </button>
 
         <button
@@ -203,22 +197,6 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
   background: none;
   cursor: pointer;
   flex-shrink: 0;
-}
-
-.topbar-brand__logo {
-  flex: 0 0 auto;
-}
-
-.topbar-brand__box {
-  fill: var(--p-primary-color);
-}
-
-.topbar-brand__bar {
-  fill: #ffffff;
-}
-
-.topbar-brand__bar--accent {
-  fill: color-mix(in srgb, var(--p-primary-color) 30%, #ffffff);
 }
 
 .topbar-brand__text {

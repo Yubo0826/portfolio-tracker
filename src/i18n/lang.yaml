@@ -233,6 +233,12 @@ openPortfolioMenu:
 openUserMenu:
   en: Open user menu
   zh: 開啟使用者選單
+expand:
+  en: Expand
+  zh: 展開
+collapse:
+  en: Collapse
+  zh: 收合
 collapseSidebar:
   en: Collapse sidebar
   zh: 收合側邊欄
@@ -542,9 +548,9 @@ addToComparison:
 removeFromComparison:
   en: Remove from Compare
   zh: 移除對比
-showDetails:
-  en: Details
-  zh: 顯示明細
+compactMode:
+  en: Compact
+  zh: 精簡模式
 lastUpdated:
   en: "Last updated: {time}"
   zh: "最後更新：{time}"
@@ -1094,8 +1100,11 @@ lastYear:
   en: Last year
   zh: 去年
 clearFilters:
-  en: Clear filters
-  zh: 清除篩選
+  en: Clear all
+  zh: 全部清除
+filter:
+  en: Filter
+  zh: 篩選
 edit:
   en: Edit
   zh: 編輯

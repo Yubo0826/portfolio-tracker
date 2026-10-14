@@ -1,31 +1,7 @@
 <template>
   <div>
         <div class="flex flex-wrap items-center gap-2 mb-8">
-          <!-- showClear -->
-          <MultiSelect
-            v-model="selectedSymbols"
-            :options="symbolOptions"
-            :placeholder="$t('symbol')"
-            display="chip"
-            class="w-60"
-          />
-          <MultiSelect
-            v-model="selectedTypes"
-            :options="typeOptions"
-            optionLabel="label"
-            optionValue="value"
-            :placeholder="$t('operation')"
-            class="w-30"
-          />
-          <DateRangeFilter v-model="dateRange" />
-          <Button
-            v-if="hasActiveFilters"
-            icon="pi pi-filter-slash"
-            :aria-label="$t('clearFilters')"
-            severity="secondary"
-            size="small"
-            @click="clearFilters"
-          />
+          <FilterMenu v-model="filters" v-model:dateRange="dateRange" :groups="filterGroups" />
           <div class="flex items-center gap-2 ml-auto">
             <Button
               v-if="!auth.isDemo"
@@ -58,7 +34,7 @@
           :value="filteredTransactions"
           sortField="date"
           :sortOrder="-1"
-          :loading="store.isLoading"
+          :loading="store.isLoading && !store.list.length"
           dataKey="id"
           tableStyle="min-width: 50rem"
           paginator :rows="15"
@@ -139,7 +115,7 @@ import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import TransactionDialog from '@/components/TransactionDialog.vue';
-import DateRangeFilter from '@/components/DateRangeFilter.vue';
+import FilterMenu from '@/components/FilterMenu.vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -168,39 +144,21 @@ const dialogVisible = ref(false);
 const editingId = ref(null);
 const selectedAssets = ref([]);
 
-const selectedSymbols = ref([]);
-const selectedTypes = ref([]);
+const filters = ref({ type: [], symbol: [] });
 const dateRange = ref(null);
 
-const symbolOptions = computed(() =>
-  [...new Set(store.list.map((r) => r.symbol))].sort()
-);
-
-const typeOptions = computed(() => [
-  { label: t('buy'), value: 'buy' },
-  { label: t('sell'), value: 'sell' },
+const filterGroups = computed(() => [
+  { key: 'type', label: t('operation'), options: [{ label: t('buy'), value: 'buy' }, { label: t('sell'), value: 'sell' }] },
+  { key: 'symbol', label: t('symbol'), options: [...new Set(store.list.map((r) => r.symbol))].sort().map((v) => ({ label: v, value: v })) },
 ]);
-
-const hasActiveFilters = computed(
-  () =>
-    selectedSymbols.value.length > 0 ||
-    selectedTypes.value.length > 0 ||
-    !!dateRange.value
-);
-
-const clearFilters = () => {
-  selectedSymbols.value = [];
-  selectedTypes.value = [];
-  dateRange.value = null;
-};
 
 const filteredTransactions = computed(() => {
   let list = store.list;
-  if (selectedSymbols.value.length) {
-    list = list.filter((r) => selectedSymbols.value.includes(r.symbol));
+  if (filters.value.symbol.length) {
+    list = list.filter((r) => filters.value.symbol.includes(r.symbol));
   }
-  if (selectedTypes.value.length) {
-    list = list.filter((r) => selectedTypes.value.includes(r.transactionType));
+  if (filters.value.type.length) {
+    list = list.filter((r) => filters.value.type.includes(r.transactionType));
   }
   if (dateRange.value) {
     const [start, end] = dateRange.value;

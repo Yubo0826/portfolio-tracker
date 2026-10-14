@@ -188,6 +188,9 @@ watch(() => route.path, () => {
   top: 100%;
   left: 0;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   min-width: 13rem;
   padding: 0.375rem;
   border: 1px solid var(--p-overlay-popover-border-color);
