@@ -111,7 +111,10 @@
     </div>
 
     <div class="flex justify-end">
-      <Button :label="$t('rebalanceBtn')" @click="clickRebalance" />
+      <!-- disabled 的按鈕收不到 hover，tooltip 掛在外層 span -->
+      <span v-tooltip.top="{ value: noAllocation ? $t('rebalanceNoAllocation') : null, showDelay: 500 }">
+        <Button :label="$t('rebalanceBtn')" :disabled="noAllocation" @click="clickRebalance" />
+      </span>
     </div>
   </div>
 
@@ -180,6 +183,7 @@ const baseRows = computed(() =>
 );
 const totalValue = computed(() => baseRows.value.reduce((s, r) => s + r.currentValue, 0));
 const targetSum = computed(() => baseRows.value.reduce((s, r) => s + r.target, 0));
+const noAllocation = computed(() => !isLoading.value && baseRows.value.length === 0);
 const targetSumOff = computed(() => baseRows.value.length > 0 && Math.abs(targetSum.value - 100) > 0.01);
 
 // 目前 % / 偏離跟著持股即時更新；再平衡結果依代號併入

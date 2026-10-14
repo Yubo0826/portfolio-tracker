@@ -52,7 +52,10 @@
             />
           </div>
           <div class="md:col-span-2 flex justify-center mt-2">
-            <Button :label="$t('runBacktest')" @click="runBacktest" :loading="isLoading" />
+            <!-- disabled 的按鈕收不到 hover，tooltip 掛在外層 span -->
+            <span v-tooltip.top="{ value: noAllocation ? $t('rebalanceNoAllocation') : null, showDelay: 500 }">
+              <Button :label="$t('runBacktest')" @click="runBacktest" :loading="isLoading" :disabled="noAllocation" />
+            </span>
           </div>
         </div>
       </div>
@@ -102,7 +105,7 @@
 
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import * as toast from '@/composables/toast'
 import api from "@/utils/api";
 import { toIsoDate } from "@/utils/portfolioMetrics";
@@ -147,6 +150,22 @@ const metrics = computed(() => {
   ];
 });
 const isLoading = ref(false);
+// 進頁就抓目標配置，沒設定時停用回測按鈕；null = 尚未載入
+const allocation = ref(null);
+const noAllocation = computed(() => Array.isArray(allocation.value) && allocation.value.length === 0);
+watch(
+  () => [auth.user?.uid, portfolioStore.currentPortfolio?.id],
+  async ([uid, pid]) => {
+    if (!uid || !pid) return;
+    allocation.value = null;
+    try {
+      allocation.value = await api.get(`/api/allocation?uid=${uid}&portfolio_id=${pid}`);
+    } catch (e) {
+      console.error('Error fetching allocation:', e);
+    }
+  },
+  { immediate: true }
+);
 const lineData = ref([]);
 const highLineOptions = computed(() => {
   const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg, legend: legendColor } =
@@ -397,17 +416,13 @@ async function runBacktest() {
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id) return;
   isLoading.value = true;
   try {
-    const allocation = await api.get(
-      `/api/allocation?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}`
-    );
-
     // 取得價格(adjClose)資料
     const prices = await api.get(
       `/api/yahoo/allocation-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&period1=${toIsoDate(form.value.startDate)}&period2=${toIsoDate(form.value.endDate)}`
     );
 
     const { portfolioValues, dates } = simulateBacktest(
-      allocation,
+      allocation.value ?? [],
       prices,
       form.value
     );

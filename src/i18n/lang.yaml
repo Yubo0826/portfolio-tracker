@@ -835,6 +835,9 @@ rebalanceAmountHint:
 rebalanceBtn:
   en: Rebalance
   zh: 再平衡
+rebalanceNoAllocation:
+  en: No target allocation yet. Set it up on the Allocation page first.
+  zh: 尚未設定目標配置，請先到資產配置頁設定。
 rebalanceMode:
   en: Sell rule
   zh: 賣出規則
