@@ -1497,3 +1497,6 @@ insights:
     fund:
       en: funds
       zh: 基金
+defaultPortfolioName:
+  en: My Portfolio
+  zh: 我的投資組合

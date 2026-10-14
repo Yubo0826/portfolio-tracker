@@ -10,6 +10,9 @@ import {
   type User
 } from 'firebase/auth'
 import api from '@/utils/api.js'
+import messages from '@/i18n/index.js'
+import { readStoredLocale } from '@/composables/useLocale.js'
+import { usePortfolioStore } from './portfolio'
 
 interface UserData {
   uid: string
@@ -66,9 +69,11 @@ export const useAuthStore = defineStore('auth', () => {
         displayName: user.value.displayName,
       }
 
-      api.post('/api/user', userData)
+      api.post('/api/user', { ...userData, portfolioName: messages[readStoredLocale()].defaultPortfolioName })
         .then((response: any) => {
           console.log('User data saved successfully:', response)
+          // 新使用者後端會一併建立預設投資組合；登入當下的 fetch 可能早於建立，補抓一次
+          if (response?.user) usePortfolioStore().fetchPortfolios()
         })
         .catch((error: any) => {
           console.error('Error saving user data:', error)
