@@ -5,7 +5,7 @@
     :alt="`${symbolText} logo`"
     decoding="async"
     @error="handleImageError"
-    class="w-8 h-8 mr-2 rounded-full object-cover"
+    class="w-8 h-8 mr-2 rounded-full object-contain"
   />
 
   <div

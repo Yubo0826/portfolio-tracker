@@ -1024,31 +1024,6 @@ watch(displayCurrency, () => {
   line-height: 1;
 }
 
-/* 總資產旁的漲跌：實心圓箭頭＋同色文字，圓底沿用 text-up/down 的 currentColor */
-.asset-growth-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.asset-growth-change i {
-  display: inline-grid;
-  place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 9999px;
-  background: currentColor;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.asset-growth-change i::before {
-  color: var(--p-content-background);
-}
-
 .asset-growth-pill i {
   font-size: 0.85em;
 }

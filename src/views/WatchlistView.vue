@@ -106,24 +106,41 @@
         </template>
         <template #body="{ data }">
           <div class="flex items-center gap-2">
-            <span class="w-3 text-muted-color">{{ data.target_price == null ? '' : (data.alert_above ? '≥' : '≤') }}</span>
             <InputNumber
-              v-model="drafts[data.symbol]"
+              v-if="editing === data.symbol"
+              v-model="draft"
+              :inputId="`target-${data.symbol}`"
               :minFractionDigits="0"
               :maxFractionDigits="3"
               :min="0"
-              :disabled="store.isReadOnly"
               :aria-label="`${$t('targetPrice')} ${data.symbol}`"
               size="small"
               inputClass="w-28"
               @blur="onTargetBlur(data)"
               @keydown.enter="$event.target.blur()"
+              @keydown.esc="editing = null; $event.target.blur()"
             />
+            <template v-else>
+              <span class="w-3 text-muted-color">{{ data.target_price == null ? '' : (data.alert_above ? '≥' : '≤') }}</span>
+              <span class="font-medium">{{ formatNumber(data.target_price) }}</span>
+            </template>
+            <span v-if="data.currency && (data.target_price != null || editing === data.symbol)" class="text-[10px] font-semibold text-muted-color">{{ data.currency }}</span>
           </div>
         </template>
       </Column>
-      <Column headerStyle="width: 4rem">
+      <Column headerStyle="width: 6rem">
         <template #body="{ data }">
+          <Button
+            icon="pi pi-pencil"
+            text
+            rounded
+            severity="secondary"
+            size="small"
+            :disabled="store.isReadOnly"
+            :aria-label="`${$t('edit')} ${$t('targetPrice')}`"
+            v-tooltip.top="{ value: `${$t('edit')} ${$t('targetPrice')}`, showDelay: 500 }"
+            @click="startEdit(data)"
+          />
           <Button
             icon="pi pi-trash"
             text
@@ -147,7 +164,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
 import debounce from 'lodash/debounce'
@@ -178,7 +195,7 @@ const loadOptions = async () => {
       : await (trending ??= api.get('/api/yahoo/trending').catch(() => { trending = null; return [] }))
     if (q === query.value.trim()) options.value = Array.isArray(data) ? data : [] // 丟掉過期回應
   } catch {
-    options.value = []
+    if (q === query.value.trim()) options.value = []
   } finally {
     searching.value = false
   }
@@ -206,23 +223,29 @@ const toggle = async (item) => {
   }
 }
 
-// 目標價輸入框的草稿值，blur 時跟 store 比對有變才存
-const drafts = reactive({})
-watch(() => store.items, (items) => {
-  items.forEach(i => { drafts[i.symbol] = i.target_price })
-}, { immediate: true })
+// 一次只編輯一列：點鉛筆進編輯，blur / Enter 儲存，Esc 取消
+const editing = ref(null)
+const draft = ref(null)
+const startEdit = async (item) => {
+  draft.value = item.target_price
+  editing.value = item.symbol
+  await nextTick()
+  document.getElementById(`target-${item.symbol}`)?.focus()
+}
 
 const formatNumber = (v) => v == null ? '--' : Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const formatSigned = (v) => v == null ? '--' : `${v > 0 ? '+' : ''}${formatNumber(v)}`
 const changeClass = (v) => v == null ? '' : v >= 0 ? 'text-up' : 'text-down'
 
 const onTargetBlur = async (item) => {
-  const value = drafts[item.symbol] ?? null
+  if (editing.value !== item.symbol) return // Esc 取消
+  await nextTick() // InputNumber 先 emit blur 才更新 v-model，等一拍才拿得到新值
+  editing.value = null
+  const value = draft.value ?? null
   if (value === item.target_price) return
   try {
     await store.setTarget(item.symbol, value)
   } catch (error) {
-    drafts[item.symbol] = item.target_price
     toast.error(t('saveFailed'), error.message)
   }
 }

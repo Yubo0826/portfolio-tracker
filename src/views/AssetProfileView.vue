@@ -42,13 +42,10 @@
                           v-if="growthRateNumber !== null"
                           class="inline-flex items-center gap-2 pb-1"
                         >
-                          <span
-                            class="asset-growth-pill"
-                            :class="growthRateNumber >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
-                          >
+                          <span class="asset-growth-change" :class="growthRateNumber >= 0 ? 'text-up' : 'text-down'">
                             <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
-                            {{ Math.abs(growthRateNumber).toFixed(2) }}%
-                            <span>({{ formatSignedNumber(change) }})</span>
+                            {{ formatSignedNumber(growthRateNumber) }}%
+                            ({{ formatSignedNumber(change) }})
                           </span>
                         </div>
 
@@ -1608,32 +1605,6 @@ watch(compareSymbols, () => {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--p-text-muted-color, #64748b);
-}
-
-.asset-growth-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border-radius: 0.5rem;
-  padding: 0.3rem 0.6rem;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.asset-growth-pill i {
-  font-size: 0.85em;
-}
-
-/* 實色底＋深色字，淺色／深色主題共用同一組色 */
-.asset-growth-pill--up {
-  color: #14381f;
-  background: #80c990;
-}
-
-.asset-growth-pill--down {
-  color: #4c1019;
-  background: #f2a3ab;
 }
 
 .compare-chip {

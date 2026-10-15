@@ -106,7 +106,7 @@
     position="top"
     :showHeader="false"
     :draggable="false"
-    class="w-[min(44rem,calc(100vw-2rem))]"
+    class="w-[min(44rem,calc(100vw-2rem))] !rounded-3xl !border-0 shadow-2xl dark:!bg-surface-800"
     :pt="{ content: { class: '!p-0' }, transition: { name: 'search-fade' } }"
   >
     <SearchBox @close="searchBoxVisible = false" />
@@ -648,18 +648,27 @@ const menuItems = computed(() => {
   align-items: center;
   gap: 0.75rem;
   width: min(24rem, 100%);
-  padding: 0.25rem 1rem;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 15px;
-  background: var(--p-content-background);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: var(--p-surface-100);
   color: var(--p-text-muted-color);
   text-align: left;
-  transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .app-shell__search:hover {
+  background: var(--p-surface-200);
   color: var(--p-text-color);
   cursor: text;
+}
+
+/* 與搜尋 Dialog 同底色 */
+.dark .app-shell__search {
+  background: var(--p-surface-800);
+}
+
+.dark .app-shell__search:hover {
+  background: var(--p-surface-700);
 }
 
 .app-shell__content {

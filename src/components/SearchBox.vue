@@ -1,13 +1,13 @@
 <template>
   <div @keydown.down.prevent="moveFocus(1)" @keydown.up.prevent="moveFocus(-1)">
     <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
-      <label class="flex flex-1 items-center gap-3 px-3 py-2 rounded-md border border-surface focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+      <label class="flex flex-1 items-center gap-3 px-3 py-2">
         <i class="pi pi-search text-primary"></i>
         <input
           ref="inputEl"
           v-model="query"
           autofocus
-          class="flex-1 bg-transparent outline-none"
+          class="flex-1 bg-transparent text-base outline-none"
           :placeholder="$t('searchPlaceholder')"
           :aria-label="$t('searchPlaceholder')"
           @input="onSearch"
@@ -21,8 +21,8 @@
     <div ref="listEl" class="max-h-[60vh] overflow-y-auto pb-2">
       <div v-if="searching" class="px-4 py-6 text-center"><i class="pi pi-spin pi-spinner"></i></div>
       <div v-else-if="!groups.length" class="px-4 py-6 text-center text-muted-color">{{ $t('noResults') }}</div>
-      <template v-for="g in groups" v-else :key="g.key">
-        <div class="px-4 pt-3 pb-1 text-sm text-muted-color">{{ g.label }}</div>
+      <template v-for="(g, i) in groups" v-else :key="g.key">
+        <div :class="{ 'mt-2 border-t border-surface': i }" class="px-4 pt-3 pb-1 text-xs text-muted-color">{{ g.label }}</div>
         <div
           v-for="item in g.items"
           :key="item.symbol"
@@ -31,20 +31,16 @@
           <button
             type="button"
             data-option
-            class="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left cursor-pointer outline-none focus-visible:bg-emphasis"
+            class="flex min-w-0 flex-1 items-center gap-3 px-4 py-2 text-left cursor-pointer outline-none focus-visible:bg-emphasis"
             @click="select(item)"
           >
-            <i :class="g.key === 'history' ? 'pi pi-history' : 'pi pi-chart-line'" class="w-4 text-primary"></i>
             <div class="min-w-0 flex-1">
-              <div class="truncate">
-                <span class="font-semibold">{{ item.symbol }}</span>
-                <span v-if="item.exchDisp" class="text-muted-color"> : {{ item.exchDisp }}</span>
-              </div>
-              <div class="truncate text-sm text-muted-color">{{ item.longname || item.shortname }}</div>
+              <div class="truncate text-base font-semibold">{{ item.symbol }}</div>
+              <div class="truncate text-xs text-muted-color">{{ [item.longname || item.shortname, item.exchDisp].filter(Boolean).join(' · ') }}</div>
             </div>
             <div class="shrink-0 text-right">
-              <div v-if="item.regularMarketPrice != null" class="font-semibold">{{ formatNumber(item.regularMarketPrice) }}</div>
-              <div v-if="item.regularMarketChangePercent != null" :class="item.regularMarketChangePercent >= 0 ? 'text-up' : 'text-down'" class="text-sm">
+              <div v-if="item.regularMarketPrice != null" class="text-base font-semibold">{{ formatNumber(item.regularMarketPrice) }}</div>
+              <div v-if="item.regularMarketChangePercent != null" :class="item.regularMarketChangePercent >= 0 ? 'text-up' : 'text-down'" class="text-xs">
                 {{ item.regularMarketChangePercent >= 0 ? '+' : '' }}{{ formatNumber(item.regularMarketChangePercent) }}%
               </div>
             </div>
@@ -150,7 +146,7 @@ async function loadGroups() {
     }
     if (q === query.value.trim()) groups.value = next // 丟掉過期回應
   } catch {
-    groups.value = []
+    if (q === query.value.trim()) groups.value = []
   } finally {
     searching.value = false
   }

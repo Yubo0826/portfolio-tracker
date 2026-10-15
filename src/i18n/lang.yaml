@@ -1384,11 +1384,11 @@ watchlistSignInHint:
   en: Sign in to edit your watchlist
   zh: 登入後即可編輯關注清單
 dailyChange:
-  en: Change
-  zh: 漲跌
+  en: Day Change
+  zh: 當日漲跌
 dailyChangePercent:
-  en: Change %
-  zh: 漲跌幅
+  en: Day Change %
+  zh: 當日漲跌幅
 targetPrice:
   en: Target price
   zh: 目標價
