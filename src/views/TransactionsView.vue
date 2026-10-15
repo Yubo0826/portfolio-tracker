@@ -113,6 +113,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
+import Papa from 'papaparse';
 const { t } = useI18n();
 import TransactionDialog from '@/components/TransactionDialog.vue';
 import FilterMenu from '@/components/FilterMenu.vue';
@@ -215,23 +216,20 @@ const exportCsv = () => {
     return;
   }
 
-  const headers = ['Symbol', 'Name', 'Shares', 'Price', 'Fee', 'Type', 'Date'];
-  const rows = store.list.map(item => [
-    item.symbol,
-    item.name,
-    item.shares,
-    item.price,
-    item.fee,
-    item.transactionType,
-    item.date
-  ]);
+  // 欄位與匯入格式一致；交給 Papa.unparse 處理含逗號的名稱（如 "Co., Ltd."），否則匯入時欄位會錯位
+  const csvContent = Papa.unparse(store.list.map(item => ({
+    date: item.date,
+    symbol: item.symbol,
+    name: item.name,
+    shares: item.shares,
+    currency: item.currency,
+    price: item.price,
+    fee: item.fee,
+    type: item.transactionType,
+  })));
 
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(r => r.join(','))
-  ].join('\n');
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  // BOM 讓 Excel 以 UTF-8 開啟中文名稱
+  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   const fileName = `transactions_${new Date().toISOString().slice(0,10)}.csv`;

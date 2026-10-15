@@ -79,7 +79,7 @@
             </div>
             <div v-if="totalProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
               <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
-              <span class="text-sm opacity-70">{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+              <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
               <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
             </div>
             <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
@@ -104,7 +104,7 @@
             </p>
             <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
               <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
-              <span class="text-sm opacity-70">{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
+              <span>{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
               <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
             </div>
             <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>

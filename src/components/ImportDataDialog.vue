@@ -46,8 +46,13 @@
 
     <!-- 格式說明 -->
       <div class="px-1 pt-4 pb-2 flex justify-between items-center">
-        <p class="text-muted-color">
-          {{ $t('importFileHint1') }}
+        <p class="text-muted-color inline-flex items-center gap-2">
+          <i
+            class="pi pi-info-circle cursor-help"
+            v-tooltip.bottom="$t('importFileHint1')"
+            tabindex="0"
+            :aria-label="$t('importFileHint1')"
+          />
           <button @click="downloadSampleCSV" class="py-1 text-primary text-md cursor-pointer hover:underline transition">
             {{ $t('downloadSampleCSV') }}
           </button>
@@ -383,6 +388,11 @@ async function confirmImport() {
   const badRows = previewData.value.flatMap((trade, i) => (['buy', 'sell'].includes(trade.transactionType) ? [] : [i + 1]))
   if (badRows.length > 0) {
     toast.error(t('invalidTradeType', { rows: badRows.join(', ') }), '')
+    return
+  }
+  const badDateRows = previewData.value.flatMap((trade, i) => (trade.date ? [] : [i + 1]))
+  if (badDateRows.length > 0) {
+    toast.error(`${t('InvalidDateString')}：#${badDateRows.join(', #')}`, '')
     return
   }
 
