@@ -1,35 +1,44 @@
-# asset-allocation-vue
+# Portfolio Tracker
 
-This template should help get you started developing with Vue 3 in Vite.
+投資組合追蹤工具：記錄交易、查看持股與配息、設定目標配置、再平衡試算與回測。
 
-## Recommended IDE Setup
+## 功能
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **儀表板**：總資產走勢、資產配置、報酬率（含 IRR）
+- **投資組合**：持股、交易、配息明細，支援 CSV / Excel 匯入
+- **資產頁**：個股與 ETF 走勢、產業配置、前十大持股
+- **目標配置 / 再平衡 / 回測**
+- **關注清單**
+- 多幣別顯示、中英文介面、明暗主題、Google 登入
 
-## Customize configuration
+## 技術
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Vue 3 · Vite · Pinia · Vue Router · PrimeVue 4 · Tailwind CSS 4 · Highcharts · Firebase Auth · vue-i18n · Vitest
 
-## Project Setup
+## 開始使用
 
 ```sh
 npm install
+npm run dev        # 只啟動前端
+npm run dev:all    # 同時啟動前端與後端（後端放在 ../portfolio-backend）
 ```
 
-### Compile and Hot-Reload for Development
+API 位址用環境變數 `VITE_API_URL_BASE` 設定，可以寫在 `.env.local`：
 
-```sh
-npm run dev
+```
+VITE_API_URL_BASE=http://localhost:3000
 ```
 
-### Compile and Minify for Production
+## 指令
 
-```sh
-npm run build
-```
+| 指令 | 說明 |
+| --- | --- |
+| `npm run dev` | 啟動開發伺服器 |
+| `npm run build` | 打包正式版 |
+| `npm run preview` | 預覽打包結果 |
+| `npm run test:unit` | 執行單元測試 |
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+## 文件
 
-```sh
-npm run test:unit
-```
+- [API_ENDPOINTS.md](API_ENDPOINTS.md)：後端 API 說明
+- [docs/design-system.md](docs/design-system.md)：設計規範
