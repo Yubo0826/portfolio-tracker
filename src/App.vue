@@ -35,7 +35,7 @@
         @open-sidebar="sidebarVisible = true"
         @open-search="openSearchBox"
         @create-portfolio="dialogVisible = true"
-        @open-transaction="transctionDialogVisible = true"
+        @open-transaction="openTransaction"
         @login="auth.login"
       />
 
@@ -114,7 +114,7 @@
 
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
-  <TransactionDialog v-model="transctionDialogVisible" />
+  <TransactionDialog v-model="transctionDialogVisible" :formData="transactionPrefill" />
 
   <PortfolioFormDialog
     :visible="dialogVisible"
@@ -174,6 +174,14 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const transctionDialogVisible = ref(false)
+const transactionPrefill = ref(null)
+// 在個股頁開啟時帶入該標的；每次給新物件，TransactionDialog 的 formData watcher 才會觸發
+const openTransaction = () => {
+  if (route.name === 'asset') {
+    transactionPrefill.value = { symbol: String(route.params.symbol).toUpperCase(), date: new Date(), transactionType: 'buy' }
+  }
+  transctionDialogVisible.value = true
+}
 const holdingsStore = useHoldingsStore()
 const transactionsStore = useTransactionsStore()
 const watchlistStore = useWatchlistStore()

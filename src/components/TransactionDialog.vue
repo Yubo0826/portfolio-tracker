@@ -165,6 +165,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
+import api from '@/utils/api.js';
 import { toIsoDate } from '@/utils/portfolioMetrics';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
@@ -319,8 +320,25 @@ watch(
       fee: newForm.fee,
       operation: newForm.transactionType,
     }
+    // 只帶代號進來（例如個股頁）時，補上名稱、類型、價格與幣別
+    if (!newForm.name) fillSymbolInfo(newForm.symbol);
+    if (newForm.price == null) applyQuoteData(newForm.symbol, toIsoDate(form.value.date));
   }
 );
+
+// 與 SymbolAutoComplete 相同的搜尋 API，取代號完全相符的那筆
+const fillSymbolInfo = async (symbol) => {
+  try {
+    const match = (await api.get('/api/yahoo/symbol?query=' + encodeURIComponent(symbol)))
+      .find(item => item.symbol === symbol);
+    if (match && form.value.symbol === symbol) {
+      form.value.name = match.longname;
+      form.value.assetType = match.typeDisp;
+    }
+  } catch (e) {
+    // 查不到就留空，使用者仍可手動重選代號
+  }
+};
 
 const onSave = async (saveAnother = false) => {
   if (hasError.value) {
