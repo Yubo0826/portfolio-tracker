@@ -1,102 +1,78 @@
-# 設計系統：帳與板（Ledger & Board）
+# 設計系統
 
-Token 定義在 [`src/assets/tokens.css`](../src/assets/tokens.css)。
-互動示範頁：[`docs/design-system.html`](design-system.html)（直接用瀏覽器開）。
+App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有另一層自訂 token。
+色票、級數一律看原始碼，這份文件只記錄**在哪裡**和**為什麼這樣選**，不複製數值。
 
-這份文件記錄**為什麼這樣選**。色票值、級數請一律看 `tokens.css`，不要在這裡複製一份。
-
-## 起點：原本的問題
-
-改版前這個 app 沒有自己的視覺識別，它穿著三家別人的衣服：
-
-- 深色模式抄 GitHub Dimmed（`#22272e` / `#2d333b` / `#373e47`）
-- 淺色側邊欄的註解直接寫著 `Reference light-mode palette (Cursor Settings)`，accent 是 `#3b82f6`（Tailwind 預設藍）
-- 字體是 `'Segoe UI', sans-serif`
-- PrimeVue 的 primary 設成 `stone`，等於**沒有品牌色**
-
-## 兩件器物
-
-視覺語言不從「fintech 該長什麼樣」推導，而是從這個產品自己的世界裡找實物：
-
-- **淺色 =「帳」**：綠條會計紙。偏白帶微暖的紙，配一階淡鼠尾草綠的橫條。
-- **深色 =「板」**：號子的行情看板。綠黑色的板底，刻意避開常見的藍灰近黑。
-
-## 脊椎規則：品牌色永遠不碰漲跌色
-
-黃銅（brass）＝品牌與所有可互動的東西：按鈕、連結、焦點框、比重條。
-紅與綠只有一個用途——損益。
-
-**為什麼**：多數財務介面把品牌綠和「跌綠」混用，使用者得在每個畫面重新判斷
-「這個顏色是語意還是裝飾」。把兩者徹底分開，顏色才能一眼直讀。
-這條規則也決定了資產配置圖不用彩虹色，而是黃銅的透明度階。
-
-## 漲跌極性是一級 token
-
-這個 app 有 zh / en 雙語，而**紅漲綠跌（台亞）和 green-up（美歐）是相反的**。
-所以不能把顏色寫死：
-
-```css
-:root, [data-polarity='asia'] { --gain: var(--c-up-hue);   --loss: var(--c-down-hue); }
-[data-polarity='west']        { --gain: var(--c-down-hue); --loss: var(--c-up-hue);   }
-```
-
-**元件一律只用 `--gain` / `--loss`，永遠不直接引用紅或綠。**
-新增任何顯示損益的元件時，這是唯一要遵守的事。
-
-## 簽名元素：條帶（the band）
-
-表格內**不畫任何橫線**，分隔完全交給隔行的條帶。這是綠條會計紙本來就在做的事，
-在密集財務表格裡比框線安靜得多。深色模式下同一條帶變成看板的掃描條。
-
-配套的節制規則：**只有損益的百分比帶顏色底，其餘數字維持墨色**。
-否則整張表會變成紅綠馬賽克，反而看不出重點。
-
-實作注意：條帶要從第二列開始。如果 body 列和表頭是同層兄弟，
-`nth-of-type` 會把表頭算進去，第一列就會跟表頭同色黏在一起——
-所以 body 列必須包在自己的容器裡（示範頁的 `.ds-tbody`）。
-
-## 字體：數字就是標題字
-
-| 角色 | 字型 |
+| 要改什麼 | 去哪裡 |
 | --- | --- |
-| 介面（拉丁） | Instrument Sans |
-| 數字 | IBM Plex Mono，等寬對齊 |
-| 中文 | Noto Sans TC |
+| 主色、淺／深色的 surface、content、文字色 | [`src/themes/customPreset.js`](../src/themes/customPreset.js) |
+| 三種深色風格的 surface 覆寫 | [`src/assets/dark-variants.css`](../src/assets/dark-variants.css) |
+| 主題、深色風格、強調色的切換邏輯與圖表配色 | [`src/composables/useTheme.js`](../src/composables/useTheme.js) |
+| 字體、body 底色、共用卡片與漲跌箭頭 | [`src/assets/base.css`](../src/assets/base.css) |
+| 漲跌色、設定頁版面、卡片式表格 | [`src/assets/main.css`](../src/assets/main.css) |
+| App shell、DataTable 排序圖示、頁面轉場 | [`src/App.vue`](../src/App.vue) 的全域 `<style>` |
 
-在這個產品裡數字是主角、文字是註解，所以**字級階層是反過來排的**：
-數字級數（`--fs-figure-*`）跳得比文字級數遠，hero 數字到 60px。
+## 一律透過 PrimeVue 的 CSS 變數
 
-凡是會被縱向比較的數字，一律 `font-variant-numeric: tabular-nums`（用 `.num`）。
-中文選 Noto Sans TC 是因為它是唯一撐得住繁體介面的高品質網頁字型——
-字體選擇不能只顧拉丁字母。
+元件裡要用顏色時，引用 `--p-*` 變數（`--p-text-color`、`--p-text-muted-color`、
+`--p-content-background`、`--p-content-border-color`、`--p-surface-*`），不要寫死 hex。
+這樣淺／深色、三種深色風格、使用者選的強調色都會自動跟著走。
 
-## 對比度
+例外：Highcharts 吃字串不吃 CSS 變數，圖表色要從 `useTheme.js` 的 `chartPalette` 拿；
+偏好設定頁的預覽色塊也是寫死的（因為要同時顯示非目前模式的顏色）。
+**改 `customPreset.js` 或 `dark-variants.css` 的色票時，這兩處要一起對。**
 
-淺色模式的黃銅、微弱文字色、紅色都是**解出來的值**，不是憑感覺挑的：
+## 主題的三個軸
 
-- `--lb-brass: #8a621c` — 要同時在紙、綠條、黃銅 tint 上都達 4.5:1
-- `--lb-ink-faint: #7f8c84` — 11px 標籤在紙上仍達 3:1
-- `--lb-red: #bf392b` — 在紅色 tint 底上達 4.5:1
+都存在 localStorage，由 `useTheme.js` 套到 `<html>` 上：
 
-全部 32 組前景／背景配對都通過 WCAG AA（一般文字 4.5:1、11px 標籤 3:1）。
-**改任何色票之後要重新驗算**，尤其是黃銅——它原本的 `#9a6e1f` 只有 4.35:1，不合格。
+- **theme**：`light` / `dark` / `system`。深色時掛 `.dark`——Tailwind 的 `dark:`
+  （`main.css` 的 `@custom-variant`）與 PrimeVue 的 `darkModeSelector` 都認它。
+- **darkVariant**：`default`（Knowt 配色，畫布 `#0d0d0d`、卡片 `#1d1e1e`）、
+  `dim`（GitHub Dimmed）、`standard`（GitHub Dark）。只用
+  `.dark[data-dark-variant='…']` 覆寫 surface ramp，不重新產生 PrimeVue theme，切換不閃色。
+- **accentColor**：預設藍 `#316dca`（`customPreset.js` 的 primary），
+  其餘選項在執行期用 `updatePrimaryPalette` 換成 Tailwind 色盤。
 
-另外刻意確認了「跌綠」和「條帶綠」的區辨度（4.63），兩者不會在同一張表格裡被誤認。
+## 主要按鈕不用主色
+
+實心 primary 按鈕被覆寫成 **contrast 配色**：淺色黑底白字、深色白底黑字
+（`customPreset.js` 的 `components.button`）。主色留給連結、焦點、選取狀態等次要互動，
+這樣不論使用者選哪個強調色，主要動作按鈕都長一樣，Header 的「新增交易」也和頁內按鈕一致。
+
+## 漲跌色
+
+全站統一用 `.text-up` / `.text-down`（`main.css`），**綠漲紅跌**。
+淺色用較深的 `#16a34a` / `#dc2626`，因為粉綠、粉紅在白底對比不足；深色才用亮的粉色系。
+
+總資產、現價旁的漲跌用 `.asset-growth-change`（`base.css`）：實心圓箭頭＋同色文字，
+圓底吃 `currentColor`，所以只要外層套 `.text-up/down` 就會自動上色。新增顯示漲跌的地方請沿用，不要再各頁自己寫。
+
+漲跌色目前是寫死的，沒有「紅漲綠跌」切換。
+
+## 字體與數字
+
+字體是 `'Segoe UI', sans-serif`（`base.css` 的 `--font-family-base`），body 基準 12px。
+單一標的的價格、成本、市值、損益、股息以**原幣**顯示（台股 TWD、美股 USD），
+金額拆分用 `useCurrency` 的 `splitDisplayAmount`，代號推斷幣別用 `utils/symbol.js` 的 `currencyOfSymbol`，不要各頁另寫。
+
+## 版面慣例
+
+- **卡片**：Dashboard 與資產頁用 `.app-panel`，無外框、靠漸層底和陰影浮起。
+- **表格**：資產明細、再平衡用 `.card-table`——表頭與內容同底，分隔線用頁面底色做出凹槽感。
+  已排序的表頭不變色，只靠排序圖示（自訂的 `pi-chevron-down`）表示狀態。
+- **設定頁**：`.set-page` / `.set-group` / `.set-row`，GitLab 風格的灰底標題列＋內嵌白卡＋sticky 底部操作列。
+- **搜尋**：Google 財經風格，代號為主、名稱與交易所為輔；Header 搜尋欄是無框膠囊。
+- **icon-only 按鈕**一律加 `v-tooltip`，`showDelay: 500`。
 
 ## 動態
 
-整套系統只有**一個**動態時刻：報價更新時該格閃一次，對應行情板上的跳動。
-`prefers-reduced-motion` 會關掉它。
+只有短的狀態轉場：頁面切換（`.page-main-*`）、搜尋視窗淡入淡出（`.search-fade-*`）、排序圖示翻轉。
+每一個都有 `prefers-reduced-motion` 的關閉分支，新增動畫時照做。
 
-其餘只有 120–180ms 的狀態轉場。不要再加。
+## 未採用的提案：帳與板（Ledger & Board）
 
-## 試過但沒有採用
-
-- **內容區左側的黃銅「帳簿邊界線」**——純裝飾，不編碼任何資訊，砍掉。
-- **資產配置用彩虹色**——違反脊椎規則，且和損益色搶注意力。
-- **表格框線**——條帶已經在做分隔，加上框線會變成兩套分隔語言。
-
-## 尚未套用
-
-Token 層和示範頁已完成，但**還沒接到 app 的實際頁面上**。
-接入時的順序建議：`customPreset.js` 的 semantic 色階 → `BaseTable.vue` 的條帶 → 各 view。
+[`src/assets/tokens.css`](../src/assets/tokens.css) 與 [`docs/design-system.html`](design-system.html)
+是一套沒有接進 app 的設計提案（綠條會計紙／行情看板、黃銅品牌色、`data-polarity` 切換紅漲綠跌、
+IBM Plex Mono 數字字體、條帶表格）。`tokens.css` 沒有被任何地方 import，app 後來走了上面描述的方向。
+保留作參考；如果要重拾其中的點子（例如漲跌極性切換），要改接到 PrimeVue 變數上，而不是整套搬進來。
