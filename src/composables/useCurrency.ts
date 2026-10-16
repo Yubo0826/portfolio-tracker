@@ -83,7 +83,7 @@ export const useCurrency = () => {
 
   /**
    * 格式化金額顯示（包含幣別符號）
-   * @param usdAmount 美金金額
+   * @param usdAmount 美金金額；有給 options.currency 時視為該幣別的原幣金額，不換算
    * @param options 格式化選項
    * @returns 格式化後的字串
    */
@@ -94,6 +94,7 @@ export const useCurrency = () => {
       minimumFractionDigits?: number
       maximumFractionDigits?: number
       compact?: boolean
+      currency?: string | null
     } = {}
   ): string => {
     const {
@@ -103,15 +104,19 @@ export const useCurrency = () => {
       compact = false
     } = options
 
+    // 個別標的（台股、美股）以原幣顯示；沒指定時才換成偏好設定的顯示幣別
+    const code = options.currency ? normalizeCurrency(options.currency) : displayCurrency.value
+    const symbol = code === 'TWD' ? 'NT$' : '$'
+
     if (usdAmount == null || isNaN(usdAmount)) {
-      return showSymbol ? `${currencySymbol.value}--` : '--'
+      return showSymbol ? `${symbol}--` : '--'
     }
 
-    const converted = convertAmount(usdAmount)
-    
+    const converted = options.currency ? usdAmount : convertAmount(usdAmount)
+
     // 根據幣別設定預設小數位數
-    const defaultMinDigits = displayCurrency.value === 'TWD' ? 0 : 2
-    const defaultMaxDigits = displayCurrency.value === 'TWD' ? 0 : 2
+    const defaultMinDigits = code === 'TWD' ? 0 : 2
+    const defaultMaxDigits = code === 'TWD' ? 0 : 2
 
     // 確保 min 不大於 max
     let minDigits = minimumFractionDigits ?? defaultMinDigits
@@ -134,15 +139,15 @@ export const useCurrency = () => {
     if (compact && Math.abs(converted) >= 10000) {
       // 使用緊湊格式顯示大數字
       const formatted = new Intl.NumberFormat(
-        displayCurrency.value === 'TWD' ? 'zh-TW' : 'en-US',
+        code === 'TWD' ? 'zh-TW' : 'en-US',
         { ...formatOptions, notation: 'compact', compactDisplay: 'short' }
       ).format(converted)
-      
-      return showSymbol ? `${currencySymbol.value}${formatted}` : formatted
+
+      return showSymbol ? `${symbol}${formatted}` : formatted
     }
 
     const formatted = converted.toLocaleString(
-      displayCurrency.value === 'TWD' ? 'zh-TW' : 'en-US',
+      code === 'TWD' ? 'zh-TW' : 'en-US',
       formatOptions
     )
 
@@ -150,10 +155,10 @@ export const useCurrency = () => {
 
     // 處理負數：將負號放在幣別符號前面
     if (converted < 0) {
-      return `-${currencySymbol.value}${formatted.replace('-', '')}`
+      return `-${symbol}${formatted.replace('-', '')}`
     }
 
-    return `${currencySymbol.value}${formatted}`
+    return `${symbol}${formatted}`
   }
 
   /**
@@ -168,6 +173,7 @@ export const useCurrency = () => {
       showSymbol?: boolean
       minimumFractionDigits?: number
       maximumFractionDigits?: number
+      currency?: string | null
     } = {}
   ): string => {
     if (usdAmount == null || isNaN(usdAmount)) {
@@ -192,11 +198,12 @@ export const useCurrency = () => {
       minimumFractionDigits?: number
       maximumFractionDigits?: number
       compact?: boolean
+      currency?: string | null
     } = {}
   ): string => {
     const formatted = formatAmount(usdAmount, { ...options, showSymbol: false })
     if (formatted === '--') return '--'
-    return `${formatted} ${currencyCode.value}`
+    return `${formatted} ${options.currency ? normalizeCurrency(options.currency) : currencyCode.value}`
   }
 
   /**
@@ -212,24 +219,26 @@ export const useCurrency = () => {
     })
   }
 
-  const formatPriceWithCode = (usdPrice: number | null | undefined): string => {
+  const formatPriceWithCode = (usdPrice: number | null | undefined, currency?: string | null): string => {
     return formatAmountWithCode(usdPrice, {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 3
+      maximumFractionDigits: 3,
+      currency
     })
   }
 
   /**
    * 把「數字 + 幣別代碼」拆成三段，讓表格能把小數與幣別代碼用較小字級排版。
    * 例如 1,234.56 USD -> { main: '1,234', fraction: '.56', code: 'USD' }
-   * @param value 美金金額
+   * @param value 美金金額；有給 currency 時視為該幣別的原幣金額，不換算
    * @param mode 'amount' 走 formatAmountWithCode，'price' 走 formatPriceWithCode（小數位較多）
    */
   const splitDisplayAmount = (
     value: number | null | undefined,
-    mode: 'amount' | 'price' = 'amount'
+    mode: 'amount' | 'price' = 'amount',
+    currency?: string | null
   ): { main: string; fraction: string; code: string } => {
-    const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
+    const formatted = mode === 'price' ? formatPriceWithCode(value, currency) : formatAmountWithCode(value, { currency })
     if (formatted === '--') {
       return { main: '--', fraction: '', code: '' }
     }

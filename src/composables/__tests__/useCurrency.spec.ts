@@ -30,6 +30,22 @@ describe('useCurrency', () => {
       expect(formatAmount(1234.567, { maximumFractionDigits: 0 })).toBe('$1,235')
       expect(formatAmount(1234.567, { minimumFractionDigits: 3 })).toBe('$1,234.567')
     })
+
+    it('指定 currency 時以原幣顯示，不受顯示幣別與匯率影響', () => {
+      const { formatAmountWithCode, splitDisplayAmount, displayCurrency, setExchangeRate } = useCurrency()
+
+      displayCurrency.value = 'USD'
+      setExchangeRate(32)
+
+      // 台股持股在顯示幣別為 USD 時仍顯示台幣，不能被貼上 USD 標籤
+      expect(formatAmountWithCode(562750, { currency: 'TWD' })).toBe('562,750 TWD')
+      expect(splitDisplayAmount(34.15, 'price', 'TWD')).toEqual({ main: '34', fraction: '.15', code: 'TWD' })
+      // 沒指定 currency 的加總值照舊依顯示幣別換算
+      displayCurrency.value = 'TWD'
+      expect(formatAmountWithCode(100)).toBe('3,200 TWD')
+      expect(formatAmountWithCode(300.13, { currency: 'USD' })).toBe('300.13 USD')
+      displayCurrency.value = 'USD' // 顯示幣別會存進 localStorage，還原避免影響其他測試
+    })
   })
 
   describe('formatPrice', () => {

@@ -424,11 +424,10 @@ import { useWatchlistStore } from '@/stores/watchlist'
 
 const { t, locale } = useI18n()
 const { isDark, chartPalette } = useTheme()
-const { formatPrice: formatUsdPrice, formatPriceWithCode: formatUsdPriceWithCode, convertAmountToUsd, displayCurrency } = useCurrency()
-// Yahoo 回傳的是標的原幣價格（0050.TW 是 TWD），formatPrice* 預設輸入為 USD，先轉回 USD 避免台股被再乘一次匯率
-const toUsd = (value) => (value == null ? value : convertAmountToUsd(value, info.currency))
-const formatPrice = (value) => formatUsdPrice(toUsd(value))
-const formatPriceWithCode = (value) => formatUsdPriceWithCode(toUsd(value))
+const { formatAmount, formatPriceWithCode: formatNativePriceWithCode, displayCurrency } = useCurrency()
+// Yahoo 回傳的是標的原幣價格（0050.TW 是 TWD），個股頁直接以原幣顯示，不換成偏好設定的顯示幣別
+const formatPrice = (value) => formatAmount(value, { minimumFractionDigits: 2, maximumFractionDigits: 3, currency: info.currency || 'USD' })
+const formatPriceWithCode = (value) => formatNativePriceWithCode(value, info.currency || 'USD')
 
 const route = useRoute()
 const router = useRouter()

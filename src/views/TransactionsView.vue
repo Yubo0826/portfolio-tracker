@@ -128,15 +128,12 @@ import NoData from '@/components/NoData.vue';
 const store = useTransactionsStore();
 const auth = useAuthStore();
 const toast = useToast();
-const { splitDisplayAmount, convertAmountToUsd } = useCurrency();
+const { splitDisplayAmount } = useCurrency();
 
-// 交易的價格／手續費是以交易幣別儲存（台股為 TWD），先轉回 USD 再交給顯示層換成顯示幣別
+// 交易的價格／手續費以交易幣別儲存（台股為 TWD），直接以原幣顯示
 // field 可為欄位名或 (row) => 值 的函式（例如價金）
 const displayAmount = (data, field, mode = 'amount') =>
-  splitDisplayAmount(
-    convertAmountToUsd(typeof field === 'function' ? field(data) : data[field], data.currency),
-    mode
-  );
+  splitDisplayAmount(typeof field === 'function' ? field(data) : data[field], mode, data.currency);
 
 // 價金 = 股數 × 單價（不含手續費）
 const tradeValue = (row) => row.shares * row.price;
@@ -232,7 +229,9 @@ const exportCsv = () => {
   const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  const fileName = `transactions_${new Date().toISOString().slice(0,10)}.csv`;
+  // 投資組合名稱可能含檔名不允許的字元，替換成底線
+  const portfolioName = (portfolioStore.currentPortfolio?.name || '').replace(/[\\/:*?"<>|]/g, '_');
+  const fileName = `transactions_${portfolioName ? portfolioName + '_' : ''}${new Date().toISOString().slice(0,10)}.csv`;
   link.download = fileName;
   link.click();
 };

@@ -246,14 +246,11 @@ const totalPrice = computed(() => {
   return Number((s * p).toFixed(2)) || 0;
 });
 
-// 查不到報價時依代號後綴推斷：.TW / .TWO 為台股
-const guessCurrency = (symbol) => (/\.TWO?$/i.test(symbol || '') ? 'TWD' : 'USD');
-
+// searchPrice 查不到報價時會依代號後綴推斷幣別（.TW / .TWO 為台股）
 const applyQuoteData = async (symbol, date) => {
   const quoteData = await store.searchPrice(symbol, date);
   form.value.price = quoteData?.price ?? form.value.price;
-  // searchPrice 查價失敗時也會回傳 'USD'，所以只在有價格時信任它的幣別
-  form.value.currency = quoteData?.price != null ? quoteData.currency : guessCurrency(symbol);
+  form.value.currency = quoteData?.currency ?? form.value.currency;
 };
 
 const onSymbolSelected = ({ symbol, name, assetType }) => {

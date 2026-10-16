@@ -50,34 +50,34 @@
           <Column field="totalCost" sortable :header="$t('totalCost')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
-                <span>{{ splitDisplayAmount(data.totalCost).main }}</span>
-                <span>{{ splitDisplayAmount(data.totalCost).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalCost).code }}</span>
+                <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
+                <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
           <Column field="currentPrice" sortable :header="$t('currentPrice')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
-                <span>{{ splitNativePrice(data.nativeCurrentPrice, data.currency).main }}</span>
-                <span>{{ splitNativePrice(data.nativeCurrentPrice, data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitNativePrice(data.nativeCurrentPrice, data.currency).code }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
               </div>
             </template>
           </Column>
           <Column field="currentValue" sortable :header="$t('currentValue')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
-                <span>{{ splitDisplayAmount(data.currentValue).main }}</span>
-                <span>{{ splitDisplayAmount(data.currentValue).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.currentValue).code }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
           <Column field="totalProfit" sortable :header="$t('totalProfit')">
             <template #body="{ data }">
                 <span
-                  v-tooltip.top="formatSignedAmountWithCode(data.totalProfit)"
+                  v-tooltip.top="formatSignedAmountWithCode(data.nativeTotalProfit, data.currency)"
                   class="mr-4 cursor-help whitespace-nowrap"
                   :class="{
                   'text-up': data.totalProfit >= 0,
@@ -97,7 +97,7 @@
           <Column field="profitWithDividends" sortable :header="$t('returnWithDividends')">
             <template #body="{ data }">
               <span
-                v-tooltip.top="formatSignedAmountWithCode(data.profitWithDividends)"
+                v-tooltip.top="formatSignedAmountWithCode(data.nativeProfitWithDividends, data.currency)"
                 class="cursor-help whitespace-nowrap"
                 :class="data.profitWithDividends >= 0 ? 'text-up' : 'text-down'"
               >{{ data.profitWithDividends >= 0 ? '+' : '-' }}{{ Math.abs(data.returnWithDividends).toFixed(2) }}%</span>
@@ -133,11 +133,11 @@
                 <tr v-for="lot in lotsOf(data)" :key="lot.id" class="border-t border-surface">
                   <td class="py-2">{{ lot.date }}</td>
                   <td class="py-2">{{ $t(lot.transactionType) }}</td>
-                  <td class="py-2 text-right">{{ splitNativePrice(lot.price, lot.currency).main }}{{ splitNativePrice(lot.price, lot.currency).fraction }}</td>
+                  <td class="py-2 text-right">{{ formatPriceWithCode(lot.price, lot.currency) }}</td>
                   <td class="py-2 text-right">{{ lot.shares }}</td>
                   <td class="py-2 text-right whitespace-nowrap">
                     <span v-if="lot.profit != null" :class="lot.profit >= 0 ? 'text-up' : 'text-down'">
-                      {{ formatSignedAmountWithCode(lot.profit) }} ({{ lot.profit >= 0 ? '+' : '' }}{{ lot.profitPct.toFixed(2) }}%)
+                      {{ formatSignedAmountWithCode(lot.profit, lot.currency) }} ({{ lot.profit >= 0 ? '+' : '' }}{{ lot.profitPct.toFixed(2) }}%)
                     </span>
                     <span v-else class="text-muted-color">--</span>
                   </td>
@@ -173,7 +173,8 @@ import { usePortfolioStore } from '@/stores/portfolio';
 const portfolioStore = usePortfolioStore();
 
 import { useCurrency } from '@/composables/useCurrency';
-const { formatAmountWithCode, formatPriceWithCode, convertAmountToUsd } = useCurrency();
+// 單一標的的欄位以原幣顯示（台股 TWD、美股 USD），不換成偏好設定的顯示幣別
+const { formatAmountWithCode, formatPriceWithCode, splitDisplayAmount, convertAmountToUsd } = useCurrency();
 
 import { useDividendsStore } from '@/stores/dividends';
 const dividendsStore = useDividendsStore();
@@ -189,7 +190,7 @@ const loadData = () => {
   dividendsStore.fetchDividends();
 };
 
-// 股息表沒有幣別欄位，以持股幣別換算成美金（與 holdings 金額同單位）
+// 股息表沒有幣別欄位，以持股幣別計算；profitWithDividends（美金）給排序用，native* 給畫面顯示
 // ponytail: 加總該代號全部股息，含已清倉又重新買進前領的，分母只用目前持股的成本
 const holdingsWithDividends = computed(() => {
   const dividendBySymbol = new Map();
@@ -197,56 +198,18 @@ const holdingsWithDividends = computed(() => {
     dividendBySymbol.set(d.symbol, (dividendBySymbol.get(d.symbol) ?? 0) + d.shares * d.amount);
   }
   return store.list.map((h) => {
-    const profitWithDividends = h.totalProfit + convertAmountToUsd(dividendBySymbol.get(h.symbol) ?? 0, h.currency);
-    return { ...h, profitWithDividends, returnWithDividends: h.totalCost ? (profitWithDividends / h.totalCost) * 100 : 0 };
+    const nativeProfitWithDividends = h.nativeTotalProfit + (dividendBySymbol.get(h.symbol) ?? 0);
+    return {
+      ...h,
+      nativeProfitWithDividends,
+      profitWithDividends: convertAmountToUsd(nativeProfitWithDividends, h.currency),
+      returnWithDividends: h.nativeTotalCost ? (nativeProfitWithDividends / h.nativeTotalCost) * 100 : 0,
+    };
   });
 });
 
-const splitDisplayAmount = (value, mode = 'amount') => {
-  const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
-  if (formatted === '--') {
-    return { main: '--', fraction: '', code: '' }
-  }
-
-  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
-  if (!match) {
-    return { main: formatted, fraction: '', code: '' }
-  }
-
-  return {
-    main: match[1] || formatted,
-    fraction: match[2] || '',
-    code: match[3] || ''
-  }
-}
-
-const splitNativePrice = (value, currency) => {
-  const amount = Number(value)
-  const code = String(currency || 'USD').toUpperCase()
-
-  if (value == null || Number.isNaN(amount)) {
-    return { main: '--', fraction: '', code }
-  }
-
-  const formatted = amount.toLocaleString(code === 'TWD' ? 'zh-TW' : 'en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-
-  const match = formatted.match(/^(.*?)([.,]\d+)?$/)
-  if (!match) {
-    return { main: formatted, fraction: '', code }
-  }
-
-  return {
-    main: match[1] || formatted,
-    fraction: match[2] || '',
-    code,
-  }
-}
-
-const formatSignedAmountWithCode = (value) => {
-  const formatted = formatAmountWithCode(value)
+const formatSignedAmountWithCode = (value, currency) => {
+  const formatted = formatAmountWithCode(value, { currency })
   if (formatted === '--' || value == null || Number.isNaN(Number(value))) {
     return '--'
   }
@@ -274,12 +237,12 @@ const onExpandAnimEnd = (id) => {
   closing.value = restClosing;
 };
 
-// 買入批次以現價算損益（含手續費），換成美金交給 formatAmount* 轉顯示幣別；賣出不算
+// 買入批次以現價算損益（含手續費），以原幣顯示；賣出不算
 const lotsOf = (h) => currentLots(transactionsStore.list, h.symbol).map((lot) => {
   if (lot.transactionType !== 'buy') return { ...lot, profit: null };
   const cost = lot.price * lot.shares + lot.fee;
   const profit = h.nativeCurrentPrice * lot.shares - cost;
-  return { ...lot, profit: convertAmountToUsd(profit, lot.currency), profitPct: cost ? (profit / cost) * 100 : 0 };
+  return { ...lot, profit, profitPct: cost ? (profit / cost) * 100 : 0 };
 });
 const filters = ref({ symbol: [] });
 

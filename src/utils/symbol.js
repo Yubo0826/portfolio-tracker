@@ -20,6 +20,12 @@ const hasExplicitSuffix = (symbol) => /[.=^]/.test(symbol)
 export const normalizeSymbol = (symbol) => String(symbol ?? '').trim().toUpperCase()
 
 /**
+ * 由代號推斷計價幣別：.TW / .TWO 為台股（TWD），其餘視為美股（USD）。
+ * ponytail: 全站只支援 USD / TWD；要加其他市場時改成查 Yahoo quote 的 currency
+ */
+export const currencyOfSymbol = (symbol) => (/\.TWO?$/i.test(String(symbol ?? '').trim()) ? 'TWD' : 'USD')
+
+/**
  * 判斷是否為「缺少交易所後綴的台股代號」。
  * currency 有值時以 currency 為準；沒有 currency 時，純數字代號在美股不存在，
  * 因此仍視為台股（不會誤傷 AAPL / QQQ 之類的代號）。

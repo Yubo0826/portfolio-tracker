@@ -124,7 +124,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import * as toast from '@/composables/toast'
-import { buildSymbolCandidates, normalizeSymbol } from '@/utils/symbol'
+import { buildSymbolCandidates, currencyOfSymbol, isBareTaiwanSymbol, normalizeSymbol } from '@/utils/symbol'
 import { toIsoDate } from '@/utils/portfolioMetrics'
 import InputText from 'primevue/inputtext'
 import Papa from 'papaparse'
@@ -231,7 +231,7 @@ function normalizeData(rows) {
       assettype = '',
       shares = 0,
       price = 0,
-      currency = 'USD',
+      currency = '',
       fee = 0,
       type = '',
     } = normalizedItem
@@ -248,7 +248,10 @@ function normalizeData(rows) {
       assetType: assettype,
       shares: numShares,
       price: numPrice,
-      currency: String(currency || 'USD').toUpperCase(),
+      // 沒有幣別欄時依代號推斷；原本一律預設 USD，台股會被存成美金，裸代號也補不到 .TW
+      currency: String(
+        currency || (isBareTaiwanSymbol(symbol, '') ? 'TWD' : currencyOfSymbol(symbol))
+      ).toUpperCase(),
       fee: numFee,
       totalCost: +(numShares * numPrice + numFee).toFixed(2),
       // 保留原值，confirmImport 時再擋掉 buy/sell 以外的值，不默默當成賣出
@@ -492,7 +495,7 @@ async function confirmImport() {
   previewData.value = previewData.value.map(trade => {
     const details = symbolDetails[trade.symbol]
     return details
-      ? { ...trade, symbol: details.symbol, name: details.name, assetType: details.assetType }
+      ? { ...trade, symbol: details.symbol, name: details.name, assetType: details.assetType, currency: currencyOfSymbol(details.symbol) }
       : trade
   })
 

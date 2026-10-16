@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import api from '@/utils/api.js'
 import { toIsoDate } from '@/utils/portfolioMetrics'
+import { currencyOfSymbol } from '@/utils/symbol'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useHoldingsStore } from '@/stores/holdings'
@@ -240,7 +241,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       if (data?.quotes?.length > 0) {
         return {
           price: Number(data.quotes[0].close.toFixed(2)),
-          currency: data?.meta?.currency || 'USD',
+          currency: data?.meta?.currency || currencyOfSymbol(symbol),
         }
       }
     } catch (e) {
@@ -248,7 +249,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
     return {
       price: null,
-      currency: 'USD',
+      currency: currencyOfSymbol(symbol),
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildSymbolCandidates, isBareTaiwanSymbol, normalizeSymbol } from '../symbol'
+import { buildSymbolCandidates, currencyOfSymbol, isBareTaiwanSymbol, normalizeSymbol } from '../symbol'
 
 describe('normalizeSymbol', () => {
   it('trims and uppercases', () => {
@@ -54,5 +54,15 @@ describe('buildSymbolCandidates', () => {
 
   it('returns an empty list for blank input', () => {
     expect(buildSymbolCandidates('', 'USD')).toEqual([])
+  })
+})
+
+describe('currencyOfSymbol', () => {
+  it('maps .TW / .TWO to TWD and everything else to USD', () => {
+    expect(currencyOfSymbol('00918.TW')).toBe('TWD')
+    expect(currencyOfSymbol('6488.two')).toBe('TWD')
+    expect(currencyOfSymbol('QQQM')).toBe('USD')
+    expect(currencyOfSymbol('BRK-B')).toBe('USD')
+    expect(currencyOfSymbol(null)).toBe('USD')
   })
 })

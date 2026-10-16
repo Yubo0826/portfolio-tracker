@@ -331,9 +331,9 @@
           <Column field="currentPrice" :header="$t('currentPrice')" sortable>
             <template #body="{ data }">
               <div class="font-medium mr-4 inline-flex items-end">
-                <span>{{ splitNativePriceWithCode(data.nativeCurrentPrice, data.currency).main }}</span>
-                <span>{{ splitNativePriceWithCode(data.nativeCurrentPrice, data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitNativePriceWithCode(data.nativeCurrentPrice, data.currency).code }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -346,12 +346,12 @@
           <Column field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
               <div
-                v-tooltip.top="formatAvgCostTooltip(data.avgCost)"
+                v-tooltip.top="formatAvgCostTooltip(data.nativeAvgCost, data.currency)"
                 class="font-medium mr-4 inline-flex items-end cursor-help"
               >
-                <span>{{ splitAmountWithCode(data.totalCost).main }}</span>
-                <span>{{ splitAmountWithCode(data.totalCost).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.totalCost).code }}</span>
+                <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
+                <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -359,9 +359,9 @@
           <Column field="currentValue" :header="$t('totalValue')" sortable>
             <template #body="{ data }">
               <div class="font-medium mr-4 inline-flex items-end">
-                <span>{{ splitAmountWithCode(data.currentValue).main }}</span>
-                <span>{{ splitAmountWithCode(data.currentValue).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitAmountWithCode(data.currentValue).code }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
+                <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -429,7 +429,7 @@ const formatUpdatedAt = iso => new Date(iso).toLocaleString(locale.value.startsW
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatAmountWithCode, formatPriceWithCode, convertAmountToUsd, currencySymbol } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatPriceWithCode, splitDisplayAmount, convertAmountToUsd, currencySymbol } = useCurrency()
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
@@ -515,56 +515,13 @@ function splitAmountForEmphasis(value) {
   }
 }
 
-function splitAmountWithCode(value, mode = 'amount') {
-  const formatted = mode === 'price' ? formatPriceWithCode(value) : formatAmountWithCode(value)
-  if (formatted === '--') {
-    return { main: '--', fraction: '', code: displayCurrency.value }
-  }
-
-  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
-  if (!match) {
-    return { main: formatted, fraction: '', code: displayCurrency.value }
-  }
-
-  return {
-    main: match[1] || formatted,
-    fraction: match[2] || '',
-    code: match[3] || displayCurrency.value,
-  }
-}
-
-function formatAvgCostTooltip(value) {
-  const formatted = formatPriceWithCode(value)
+function formatAvgCostTooltip(value, currency) {
+  const formatted = formatPriceWithCode(value, currency)
   if (formatted === '--') {
     return '--'
   }
 
   return `${formatted} ${t('perShare')}`
-}
-
-function splitNativePriceWithCode(value, currency) {
-  const amount = Number(value)
-  const code = String(currency || 'USD').toUpperCase()
-
-  if (value == null || Number.isNaN(amount)) {
-    return { main: '--', fraction: '', code }
-  }
-
-  const formatted = amount.toLocaleString(code === 'TWD' ? 'zh-TW' : 'en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-
-  const match = formatted.match(/^(.*?)([.,]\d+)?$/)
-  if (!match) {
-    return { main: formatted, fraction: '', code }
-  }
-
-  return {
-    main: match[1] || formatted,
-    fraction: match[2] || '',
-    code,
-  }
 }
 
 function formatSignedNumber(value, digits = 2) {

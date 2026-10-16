@@ -27,6 +27,10 @@ interface Holding {
   currency: string
   shares: number
   nativeCurrentPrice: number
+  nativeAvgCost: number
+  nativeTotalCost: number
+  nativeCurrentValue: number
+  nativeTotalProfit: number
   avgCost: number
   currentPrice: number
   target: number
@@ -67,6 +71,9 @@ export const useHoldingsStore = defineStore('holdings', () => {
 
       // 一律換算成美金保存；顯示端由 formatAmount* 再轉成使用者的顯示幣別。
       // 這裡若直接轉成顯示幣別，畫面上會被 formatAmount* 轉第二次。
+      // native* 為原幣金額，給單一標的的欄位以原幣顯示；加總與排序用美金欄位
+      const nativeTotalCost = roundAmount(avgCostRaw * shares)
+      const nativeCurrentValue = roundAmount(currentPriceRaw * shares)
       const avgCost = roundAmount(convertAmountToUsd(avgCostRaw, currency))
       const currentPrice = roundAmount(convertAmountToUsd(currentPriceRaw, currency))
       const totalCost = roundAmount(convertAmountToUsd(avgCostRaw * shares, currency))
@@ -82,6 +89,10 @@ export const useHoldingsStore = defineStore('holdings', () => {
         currency,
         shares,
         nativeCurrentPrice: currentPriceRaw,
+        nativeAvgCost: avgCostRaw,
+        nativeTotalCost,
+        nativeCurrentValue,
+        nativeTotalProfit: roundAmount(nativeCurrentValue - nativeTotalCost),
         avgCost,
         currentPrice,
         totalCost,
