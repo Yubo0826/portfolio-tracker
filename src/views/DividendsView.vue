@@ -29,18 +29,18 @@
           <Column field="amount" sortable :header="$t('dividendPerShare')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
-                <span>{{ splitDisplayAmount(data.amount, 'price', currencyOfSymbol(data.symbol)).main }}</span>
-                <span>{{ splitDisplayAmount(data.amount, 'price', currencyOfSymbol(data.symbol)).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.amount, 'price', currencyOfSymbol(data.symbol)).code }}</span>
+                <span>{{ splitDisplayAmount(data.amount, 'price', currencyOf(data.symbol)).main }}</span>
+                <span>{{ splitDisplayAmount(data.amount, 'price', currencyOf(data.symbol)).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.amount, 'price', currencyOf(data.symbol)).code }}</span>
               </div>
             </template>
           </Column>
           <Column field="totalAmount" sortable :header="$t('dividendTotal')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
-                <span>{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOfSymbol(data.symbol)).main }}</span>
-                <span>{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOfSymbol(data.symbol)).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOfSymbol(data.symbol)).code }}</span>
+                <span>{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOf(data.symbol)).main }}</span>
+                <span>{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOf(data.symbol)).fraction }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOf(data.symbol)).code }}</span>
               </div>
             </template>
           </Column>
@@ -61,10 +61,12 @@ import FilterMenu from '@/components/FilterMenu.vue';
 import NoData from '@/components/NoData.vue';
 import { useCurrency } from '@/composables/useCurrency';
 import { useDividendsStore } from '@/stores/dividends';
+import { useHoldingsStore } from '@/stores/holdings';
 import { useAuthStore } from '@/stores/auth';
 import { usePortfolioStore } from '@/stores/portfolio';
 
 const store = useDividendsStore();
+const holdingsStore = useHoldingsStore();
 const auth = useAuthStore();
 const portfolioStore = usePortfolioStore();
 
@@ -72,6 +74,12 @@ import { currencyOfSymbol } from '@/utils/symbol';
 
 // 股息表沒有幣別欄位，原本以 USD 格式化會把台股股息當美金換算；改以標的原幣顯示
 const { splitDisplayAmount } = useCurrency();
+
+// 幣別以持股實際存的為準（Yahoo 報價回傳的幣別）；持股已賣光而查不到時才由代號推斷
+const currencyBySymbol = computed(() =>
+  Object.fromEntries(holdingsStore.list.map((h) => [h.symbol, h.currency]))
+);
+const currencyOf = (symbol) => currencyBySymbol.value[symbol] || currencyOfSymbol(symbol);
 
 const { t } = useI18n();
 const dateRange = ref(null);

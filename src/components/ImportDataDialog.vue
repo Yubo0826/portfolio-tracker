@@ -134,6 +134,7 @@ import Message from 'primevue/message'
 import Paginator from 'primevue/paginator'
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
+const confirm = useConfirm();
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions'
 import { useHoldingsStore } from '@/stores/holdings'
@@ -252,6 +253,8 @@ function normalizeData(rows) {
       currency: String(
         currency || (isBareTaiwanSymbol(symbol, '') ? 'TWD' : currencyOfSymbol(symbol))
       ).toUpperCase(),
+      // 檔案有沒有明寫幣別：沒寫的裸代號是我們猜交易所補出來的，匯入前要請使用者確認
+      currencyFromFile: Boolean(String(currency).trim()),
       fee: numFee,
       totalCost: +(numShares * numPrice + numFee).toFixed(2),
       // 保留原值，confirmImport 時再擋掉 buy/sell 以外的值，不默默當成賣出
@@ -385,6 +388,7 @@ function closeDialog() {
 }
 
 import { showLoading, hideLoading } from "@/composables/loading.js"
+import { useConfirm } from 'primevue/useconfirm'
 
 async function confirmImport() {
   // 在建立投資組合前先檢查，避免留下空的投資組合
@@ -441,8 +445,10 @@ async function confirmImport() {
 
   // 同一檔標的以第一筆出現的幣別為準，用來判斷是否為缺後綴的台股代號
   const currencyBySymbol = {}
+  const currencyProvidedBySymbol = {}
   for (const trade of previewData.value) {
     if (!currencyBySymbol[trade.symbol]) currencyBySymbol[trade.symbol] = trade.currency
+    if (trade.currencyFromFile) currencyProvidedBySymbol[trade.symbol] = true
   }
 
   const lookupSymbol = async candidate => {
@@ -459,10 +465,15 @@ async function confirmImport() {
 
     if (!matched?.symbol) return null
 
+    const symbol = normalizeSymbol(matched.symbol)
+
     return {
-      symbol: normalizeSymbol(matched.symbol),
+      symbol,
       name: matched.longname || matched.shortname || '',
       assetType: matched.quoteType || '',
+      // 搜尋結果沒有 currency，向 Yahoo 的 chart meta 問一次真正的計價幣別，
+      // 日股 JPY、港股 HKD 才不會被當成美金
+      currency: await store.fetchSymbolCurrency(symbol),
     }
   }
 
@@ -492,15 +503,30 @@ async function confirmImport() {
     return
   }
 
+  // 裸代號是靠補 .TW / .TWO 猜出來的，而日股（4 位數）、港股（5 位數）會與台股撞號，
+  // 猜錯會查到另一家公司且完全看不出來，所以檔案沒明寫幣別時一定要讓使用者確認一次
+  const guessed = symbolList
+    .filter(symbol => symbolDetails[symbol] && symbolDetails[symbol].symbol !== symbol && !currencyProvidedBySymbol[symbol])
+    .map(symbol => `${symbol} → ${symbolDetails[symbol].symbol}（${symbolDetails[symbol].currency}）`)
+
+  if (guessed.length > 0) {
+    hideLoading()
+    const accepted = await confirmGuessedSymbols(guessed)
+    if (!accepted) return
+    showLoading()
+  }
+
   previewData.value = previewData.value.map(trade => {
     const details = symbolDetails[trade.symbol]
     return details
-      ? { ...trade, symbol: details.symbol, name: details.name, assetType: details.assetType, currency: currencyOfSymbol(details.symbol) }
+      ? { ...trade, symbol: details.symbol, name: details.name, assetType: details.assetType, currency: details.currency || currencyOfSymbol(details.symbol) }
       : trade
   })
 
   try {
-    const result = await store.saveTransactionBulk(previewData.value, String(targetPortfolioId))
+    // currencyFromFile 只在匯入流程中用來判斷幣別是不是使用者給的，不要寫進資料庫
+    const payload = previewData.value.map(({ currencyFromFile, ...trade }) => trade)
+    const result = await store.saveTransactionBulk(payload, String(targetPortfolioId))
     console.log('Bulk import result:', result)
     if (isPortfolioMode.value) {
       toast.success(t('importPortfolioSuccess', { name: targetPortfolioName }), '')
@@ -513,6 +539,22 @@ async function confirmImport() {
   } finally {
     hideLoading()
   }
+}
+
+/** 列出補完後的代號請使用者確認；確認才繼續匯入 */
+function confirmGuessedSymbols(mappings) {
+  return new Promise(resolve => {
+    confirm.require({
+      header: t('warning'),
+      message: t('symbolExchangeGuessed', { symbols: mappings.join('、') }),
+      icon: 'pi pi-exclamation-triangle',
+      rejectProps: { label: t('cancel'), severity: 'secondary', outlined: true },
+      acceptProps: { label: t('import') },
+      accept: () => resolve(true),
+      reject: () => resolve(false),
+      onHide: () => resolve(false),
+    })
+  })
 }
 
 function onPage(event) {

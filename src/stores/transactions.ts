@@ -4,6 +4,7 @@ import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import api from '@/utils/api.js'
 import { toIsoDate } from '@/utils/portfolioMetrics'
 import { currencyOfSymbol } from '@/utils/symbol'
+import { fromQuoteCurrency, normalizeQuoteCurrency } from '@/utils/currency'
 import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { useHoldingsStore } from '@/stores/holdings'
@@ -21,6 +22,7 @@ interface TransactionData {
   transaction_type: string
   transaction_date?: string
   date?: string
+  fx_rate?: string | number | null
 }
 
 interface Transaction {
@@ -34,6 +36,8 @@ interface Transaction {
   shares: number
   transactionType: string
   date: string
+  /** 成交當天的匯率：1 USD = fxRate currency；舊資料沒有這個值時為 null */
+  fxRate: number | null
 }
 
 interface TransactionForm {
@@ -96,6 +100,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       shares: parseFloat(String(item.shares)) || 0,
       transactionType: item.transaction_type,
       date: item.transaction_date?.split('T')[0] || item.date || '',
+      fxRate: Number(item.fx_rate) > 0 ? Number(item.fx_rate) : null,
     }))
   }
 
@@ -239,9 +244,11 @@ export const useTransactionsStore = defineStore('transactions', () => {
         `/api/yahoo/chart/?symbol=${symbol}&period1=${dateYYYYMMDD}&period2=${nextDay}`
       )
       if (data?.quotes?.length > 0) {
+        // 倫敦等交易所 Yahoo 回的是輔幣（GBp = 便士），要連同價格一起換回主幣
+        const quoted = fromQuoteCurrency(data.quotes[0].close, data?.meta?.currency)
         return {
-          price: Number(data.quotes[0].close.toFixed(2)),
-          currency: data?.meta?.currency || currencyOfSymbol(symbol),
+          price: quoted.amount == null ? null : Number(quoted.amount.toFixed(2)),
+          currency: data?.meta?.currency ? quoted.currency : currencyOfSymbol(symbol),
         }
       }
     } catch (e) {
@@ -251,6 +258,29 @@ export const useTransactionsStore = defineStore('transactions', () => {
       price: null,
       currency: currencyOfSymbol(symbol),
     }
+  }
+
+  /**
+   * 取得標的的計價幣別。
+   *
+   * Yahoo 的 symbol 搜尋結果沒有 currency 欄位，只有 chart 的 meta 有，
+   * 因此匯入時要另外查一次 chart（取最近區間，真正用到的只有 meta）。
+   * 查不到時退回由代號推斷，只保證台股/美股正確。
+   */
+  const fetchSymbolCurrency = async (symbol: string): Promise<string> => {
+    if (!symbol) return 'USD'
+    const period2 = new Date()
+    const period1 = new Date(period2.getTime() - 14 * 24 * 60 * 60 * 1000)
+    try {
+      const data = await api.get(
+        `/api/yahoo/chart/?symbol=${encodeURIComponent(symbol)}` +
+          `&period1=${period1.toISOString().split('T')[0]}&period2=${period2.toISOString().split('T')[0]}`
+      )
+      if (data?.meta?.currency) return normalizeQuoteCurrency(data.meta.currency)
+    } catch (e) {
+      // ignore，走下面的代號推斷
+    }
+    return currencyOfSymbol(symbol)
   }
 
   return {
@@ -263,6 +293,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     getTransactionById,
     canSell,
     /* actions */
+    fetchSymbolCurrency,
     fetchTransactions,
     deleteTransactions,
     saveTransaction,

@@ -16,23 +16,31 @@ export interface Trade {
   fee: number
   currency: string
   date: string | Date
+  /** 成交當天的匯率：1 USD = fxRate currency。沒有時 convert 會退回用當下匯率 */
+  fxRate?: number | null
 }
 
 export interface Holding {
   currentValue: number
   avgCost: number
   shares: number
+  /** 以成交當時匯率換算的美金總成本；有給就用它，avgCost * shares 只是反推後的近似值 */
+  totalCost?: number
 }
 
-/** 把原幣金額換算成顯示幣別；測試時傳 (x) => x 即可 */
-export type Convert = (amount: number, currency: string) => number
+/**
+ * 把原幣金額換算成顯示幣別；測試時傳 (x) => x 即可。
+ * fxRate 是該筆交易成交當天的匯率，有給就該用它，而不是今天的匯率——
+ * 否則 2024 年賣出的已實現損益會被今天的匯率重新評價，每天都在變。
+ */
+export type Convert = (amount: number, currency: string, fxRate?: number | null) => number
 
 /**
  * 投資報酬率 (%) = (市值 - 成本) / 成本
  * 注意：這不是年化報酬，年化請用 portfolioXirr
  */
 export function totalReturnPct(holdings: Holding[]): number {
-  const cost = holdings.reduce((s, h) => s + h.avgCost * h.shares, 0)
+  const cost = holdings.reduce((s, h) => s + (h.totalCost ?? h.avgCost * h.shares), 0)
   if (cost === 0) return 0
   const value = holdings.reduce((s, h) => s + h.currentValue, 0)
   return ((value - cost) / cost) * 100
@@ -52,11 +60,11 @@ export function realizedProfit(trades: Trade[], convert: Convert): number {
 
     if (tx.transactionType === 'buy') {
       state.shares += shares
-      state.costBasis += convert(tx.price * shares + tx.fee, tx.currency)
+      state.costBasis += convert(tx.price * shares + tx.fee, tx.currency, tx.fxRate)
     } else if (tx.transactionType === 'sell' && state.shares > 0) {
       const soldShares = Math.min(shares, state.shares)
       const costOfSoldShares = (state.costBasis / state.shares) * soldShares
-      const proceeds = convert(tx.price * soldShares - tx.fee, tx.currency)
+      const proceeds = convert(tx.price * soldShares - tx.fee, tx.currency, tx.fxRate)
 
       realizedGain += proceeds - costOfSoldShares
       state.shares -= soldShares
@@ -105,7 +113,8 @@ export function portfolioXirr(
     ...trades.map(tx => ({
       amount: convert(
         tx.transactionType === 'buy' ? -(tx.price * tx.shares + tx.fee) : tx.price * tx.shares - tx.fee,
-        tx.currency
+        tx.currency,
+        tx.fxRate
       ),
       when: new Date(tx.date),
     })),

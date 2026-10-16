@@ -94,10 +94,11 @@
             :maxFractionDigits="3"
             :placeholder="form.currency || 'USD'"
           />
-          <!-- 幣別：查價時自動帶入，也可手動切換（台股輸入台幣） -->
+          <!-- 幣別：查價時自動帶入，也可手動切換（台股輸入台幣、日股輸入日圓） -->
           <Select
             v-model="form.currency"
-            :options="['TWD', 'USD']"
+            :options="currencyOptions"
+            filter
             :aria-label="$t('currency.label')"
             class="shrink-0"
           />
@@ -167,6 +168,7 @@ import { ref, computed, watch } from 'vue';
 import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue';
 import api from '@/utils/api.js';
 import { toIsoDate } from '@/utils/portfolioMetrics';
+import { PRIMARY_CURRENCIES, SUPPORTED_CURRENCIES } from '@/utils/currency';
 import { useTransactionsStore } from '@/stores/transactions';
 import { usePortfolioStore } from '@/stores/portfolio';
 import * as toast from '@/composables/toast';
@@ -245,6 +247,9 @@ const totalPrice = computed(() => {
   const p = Number(form.value.price) || 0;
   return Number((s * p).toFixed(2)) || 0;
 });
+
+// 常用在前，其餘照字母排序，避免每次都要捲到清單底部找 TWD / USD
+const currencyOptions = [...PRIMARY_CURRENCIES, ...SUPPORTED_CURRENCIES.filter((c) => !PRIMARY_CURRENCIES.includes(c)).sort()];
 
 // searchPrice 查不到報價時會依代號後綴推斷幣別（.TW / .TWO 為台股）
 const applyQuoteData = async (symbol, date) => {

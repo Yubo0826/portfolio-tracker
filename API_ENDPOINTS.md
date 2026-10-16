@@ -5,6 +5,12 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 
 ---
 
+> **幣別**：金額一律以原幣儲存（`currency` 欄），以 USD 為基準幣加總。
+> 新增／更新交易時後端會自動查「成交當天」的匯率寫入 `transactions.fx_rate`（1 USD = fx_rate currency，USD 為 1），
+> 並由 `recalcHolding` 換算出 `holdings.total_cost_usd`。成本用成交當時的匯率、市值用當下匯率，
+> 兩者相減才分得出股價損益與匯兌損益。抓不到歷史匯率時留 `null`，前端退回用當下匯率換算。
+> 既有資料可用 `node scripts/backfill-fx-rate.mjs` 回填（支援 `--dry-run`）。
+
 ## `/api/transactions`（`routes/transactions.js`）
 
 | Method | Path | 說明 | 參數 |
@@ -70,7 +76,7 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | GET | `/api/yahoo/symbol` | 股票代號搜尋（自動完成） | query: `query` |
 | GET | `/api/yahoo/quote` | 即時報價 | query: `symbol` |
 | GET | `/api/yahoo/chart` | 歷史 K 線資料 | query: `symbol, period1, period2, interval` |
-| GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2, currency`（USD 或 TWD，逐日用 TWD=X 歷史匯率換算） |
+| GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2, currency`（見 `services/fx.js` 的 `SUPPORTED_CURRENCIES`，每個用到的幣別各抓一條 `XXX=X` 歷史匯率逐日換算） |
 | GET | `/api/yahoo/allocation-chart` | 回傳目標配置中各標的歷史收盤價 | query: `uid, portfolio_id, period1, period2, interval` |
 | GET | `/api/yahoo/summary` | Yahoo quoteSummary（公司概況/財務資料等） | query: `symbol` |
 | GET | `/api/yahoo/trending` | 熱門漲幅股（前 5 名） | query: `region, lang` — *前端未呼叫* |

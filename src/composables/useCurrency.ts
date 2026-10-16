@@ -1,16 +1,15 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '@/stores/settings'
+import { getCurrencyMeta, getCurrencySymbol, getDecimalSeparator, normalizeCurrency } from '@/utils/currency'
 
 export const useCurrency = () => {
   const settingsStore = useSettingsStore()
-  const { displayCurrency, exchangeRate, isLoadingRate, lastRateUpdate, rateSource } = storeToRefs(settingsStore)
-  const { toggleCurrency, fetchExchangeRate, setExchangeRate, getLastUpdateDisplay } = settingsStore
+  const { displayCurrency, rates, exchangeRate, isLoadingRate, lastRateUpdate, rateSource } = storeToRefs(settingsStore)
+  const { rateOf, toggleCurrency, fetchExchangeRate, setExchangeRate, getLastUpdateDisplay } = settingsStore
 
   // 當前幣別符號
-  const currencySymbol = computed(() => {
-    return displayCurrency.value === 'TWD' ? 'NT$' : '$'
-  })
+  const currencySymbol = computed(() => getCurrencySymbol(displayCurrency.value))
 
   // 當前幣別代碼
   const currencyCode = computed(() => {
@@ -20,12 +19,8 @@ export const useCurrency = () => {
   // 是否顯示台幣
   const isTWD = computed(() => displayCurrency.value === 'TWD')
 
-  const normalizeCurrency = (currency: string | null | undefined): string => {
-    return String(currency || 'USD').toUpperCase()
-  }
-
   /**
-   * 依來源幣別轉成目前顯示幣別。
+   * 依來源幣別轉成目前顯示幣別（一律經過 USD 這個基準幣中轉）。
    */
   const convertAmountFromCurrency = (
     amount: number | null | undefined,
@@ -40,15 +35,11 @@ export const useCurrency = () => {
       return amount
     }
 
-    if (fromCurrency === 'USD' && toCurrency === 'TWD') {
-      return amount * exchangeRate.value
-    }
+    const usd = convertAmountToUsd(amount, fromCurrency)
+    const targetRate = rateOf(toCurrency)
 
-    if (fromCurrency === 'TWD' && toCurrency === 'USD') {
-      return exchangeRate.value > 0 ? amount / exchangeRate.value : amount
-    }
-
-    return amount
+    // 匯率表還沒載到該幣別時寧可原樣顯示，也不要乘上錯誤的倍率
+    return targetRate > 0 ? usd * targetRate : amount
   }
 
   /**
@@ -65,11 +56,30 @@ export const useCurrency = () => {
     if (amount == null || isNaN(amount)) return 0
 
     const fromCurrency = normalizeCurrency(sourceCurrency)
-
     if (fromCurrency === 'USD') return amount
-    if (fromCurrency === 'TWD') return exchangeRate.value > 0 ? amount / exchangeRate.value : amount
 
-    return amount
+    const sourceRate = rateOf(fromCurrency)
+
+    // 匯率表沒有這個幣別（API 尚未回來，或非支援幣別）時原樣回傳，
+    // 寧可讓加總偏少也不要把 100 JPY 當成 100 USD 灌爆投組總值
+    return sourceRate > 0 ? amount / sourceRate : amount
+  }
+
+  /**
+   * 依「成交當時的匯率」把原幣金額換算成 USD。
+   *
+   * 成本用這個、市值用 convertAmountToUsd（今日匯率），兩者相減才分得出
+   * 股價損益與匯兌損益，歷史成本也不會每天跟著匯率變。
+   * fxRate 缺漏（後端抓不到、或加這個欄位之前的舊資料）時退回用當下匯率。
+   */
+  const convertAmountToUsdAt = (
+    amount: number | null | undefined,
+    sourceCurrency: string | null | undefined,
+    fxRate: number | null | undefined
+  ): number => {
+    if (amount == null || isNaN(amount)) return 0
+    if (!(Number(fxRate) > 0)) return convertAmountToUsd(amount, sourceCurrency)
+    return amount / Number(fxRate)
   }
 
   /**
@@ -104,9 +114,10 @@ export const useCurrency = () => {
       compact = false
     } = options
 
-    // 個別標的（台股、美股）以原幣顯示；沒指定時才換成偏好設定的顯示幣別
+    // 個別標的以原幣顯示；沒指定時才換成偏好設定的顯示幣別
     const code = options.currency ? normalizeCurrency(options.currency) : displayCurrency.value
-    const symbol = code === 'TWD' ? 'NT$' : '$'
+    const meta = getCurrencyMeta(code)
+    const symbol = getCurrencySymbol(code)
 
     if (usdAmount == null || isNaN(usdAmount)) {
       return showSymbol ? `${symbol}--` : '--'
@@ -114,9 +125,9 @@ export const useCurrency = () => {
 
     const converted = options.currency ? usdAmount : convertAmount(usdAmount)
 
-    // 根據幣別設定預設小數位數
-    const defaultMinDigits = code === 'TWD' ? 0 : 2
-    const defaultMaxDigits = code === 'TWD' ? 0 : 2
+    // 根據幣別設定預設小數位數（JPY / KRW / TWD 習慣不顯示小數）
+    const defaultMinDigits = meta.fractionDigits
+    const defaultMaxDigits = meta.fractionDigits
 
     // 確保 min 不大於 max
     let minDigits = minimumFractionDigits ?? defaultMinDigits
@@ -139,17 +150,14 @@ export const useCurrency = () => {
     if (compact && Math.abs(converted) >= 10000) {
       // 使用緊湊格式顯示大數字
       const formatted = new Intl.NumberFormat(
-        code === 'TWD' ? 'zh-TW' : 'en-US',
+        meta.locale,
         { ...formatOptions, notation: 'compact', compactDisplay: 'short' }
       ).format(converted)
 
       return showSymbol ? `${symbol}${formatted}` : formatted
     }
 
-    const formatted = converted.toLocaleString(
-      code === 'TWD' ? 'zh-TW' : 'en-US',
-      formatOptions
-    )
+    const formatted = converted.toLocaleString(meta.locale, formatOptions)
 
     if (!showSymbol) return formatted
 
@@ -220,9 +228,11 @@ export const useCurrency = () => {
   }
 
   const formatPriceWithCode = (usdPrice: number | null | undefined, currency?: string | null): string => {
+    // 無小數幣別（JPY / KRW / TWD）的股價不該補成 1,234.00
+    const digits = getCurrencyMeta(currency ?? displayCurrency.value).fractionDigits
     return formatAmountWithCode(usdPrice, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 3,
+      minimumFractionDigits: digits === 0 ? 0 : 2,
+      maximumFractionDigits: digits === 0 ? 2 : 3,
       currency
     })
   }
@@ -243,15 +253,23 @@ export const useCurrency = () => {
       return { main: '--', fraction: '', code: '' }
     }
 
-    const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
+    const match = formatted.match(/^(.+)\s([A-Z]{3})$/)
     if (!match) {
       return { main: formatted, fraction: '', code: '' }
     }
 
+    const [, numberPart, code] = match
+
+    // 不能直接用 /[.,]\d+$/ 比對：zh-TW 的 562,750 會把千分位當成小數，
+    // 要依 locale 取得真正的小數分隔符號（de-DE 是逗號，en-US 是點）
+    const separator = getDecimalSeparator(getCurrencyMeta(currency ?? displayCurrency.value).locale)
+    const index = numberPart.lastIndexOf(separator)
+    const hasFraction = index > -1 && /^\d+$/.test(numberPart.slice(index + 1))
+
     return {
-      main: match[1] || formatted,
-      fraction: match[2] || '',
-      code: match[3] || ''
+      main: hasFraction ? numberPart.slice(0, index) : numberPart,
+      fraction: hasFraction ? numberPart.slice(index) : '',
+      code
     }
   }
 
@@ -261,16 +279,20 @@ export const useCurrency = () => {
    */
   const getRateInfo = (): string => {
     if (displayCurrency.value === 'USD') return ''
-    
+
+    const rate = rateOf(displayCurrency.value)
+    if (!(rate > 0)) return ''
+
     const lastUpdate = getLastUpdateDisplay()
     const sourceText = rateSource.value === 'manual' ? '手動設定' : '自動更新'
-    
-    return `1 USD = ${exchangeRate.value.toFixed(2)} TWD (${sourceText}${lastUpdate ? `, ${lastUpdate}` : ''})`
+
+    return `1 USD = ${rate.toFixed(2)} ${displayCurrency.value} (${sourceText}${lastUpdate ? `, ${lastUpdate}` : ''})`
   }
 
   return {
     // State
     displayCurrency,
+    rates,
     exchangeRate,
     isLoadingRate,
     lastRateUpdate,
@@ -279,7 +301,9 @@ export const useCurrency = () => {
     isTWD,
     
     // Methods
+    rateOf,
     convertAmount,
+    convertAmountToUsdAt,
     convertAmountFromCurrency,
     convertAmountToUsd,
     formatAmount,

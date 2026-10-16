@@ -191,7 +191,7 @@ const { setLocale } = useLocale()
 
 
 // Currency settings
-import { useSettingsStore } from '@/stores/settings'
+import { useSettingsStore, CURRENCY_OPTIONS } from '@/stores/settings'
 import { useTheme } from '@/composables/useTheme'
 const settingsStore = useSettingsStore()
 
@@ -494,10 +494,9 @@ const menuItems = computed(() => {
       choice('繁體中文', locale.value === 'zh', () => setLocale('zh')),
       choice('English', locale.value === 'en', () => setLocale('en')),
     ] },
-    { label: t('currency.label'), icon: 'pi pi-dollar', items: ['USD ($)', 'TWD (NT$)'].map((label) => {
-      const code = label.slice(0, 3)
-      return choice(label, settingsStore.displayCurrency === code, () => settingsStore.setDisplayCurrency(code))
-    }) },
+    { label: t('currency.label'), icon: 'pi pi-dollar', items: CURRENCY_OPTIONS.map((option) =>
+      choice(`${option.code} (${option.symbol.trim()})`, settingsStore.displayCurrency === option.code, () => settingsStore.setDisplayCurrency(option.code))
+    ) },
     { label: t('appearance'), icon: 'pi pi-palette', items: [
       choice(t('lightMode'), theme.value === 'light', () => setTheme('light')),
       choice(t('darkMode'), theme.value === 'dark', () => setTheme('dark')),

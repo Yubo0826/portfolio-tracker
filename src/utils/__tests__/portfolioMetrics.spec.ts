@@ -56,6 +56,23 @@ describe('realizedProfit', () => {
     ]
     expect(realizedProfit(trades, x => x * 30)).toBe(1500)
   })
+
+  it('每筆交易用自己成交當時的匯率，不是同一個今日匯率', () => {
+    // 1,000 JPY 買進（當時 1 USD = 100 JPY）→ 成本 10 USD
+    // 1,500 JPY 賣出（當時 1 USD = 150 JPY）→ 收入 10 USD，已實現損益為 0：
+    // 日圓上漲的帳面獲利被匯率貶值吃掉了，用今日匯率算會看不出這件事
+    const trades = [
+      trade({ currency: 'JPY', shares: 1, price: 1000, fxRate: 100 }),
+      trade({ currency: 'JPY', transactionType: 'sell', shares: 1, price: 1500, fxRate: 150, date: '2025-02-01' }),
+    ]
+    const convert = (amount: number, _currency: string, fxRate?: number | null) =>
+      fxRate ? amount / fxRate : amount / 120 // 今日匯率 120
+
+    expect(realizedProfit(trades, convert)).toBe(0)
+    // 沒有 fxRate 的舊資料退回用今日匯率：(1500 - 1000) / 120
+    const legacy = trades.map(({ fxRate, ...rest }) => rest)
+    expect(realizedProfit(legacy, convert)).toBeCloseTo(500 / 120, 10)
+  })
 })
 
 describe('portfolioXirr', () => {

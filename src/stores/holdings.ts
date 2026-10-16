@@ -14,6 +14,7 @@ interface HoldingData {
   total_shares: string | number
   avg_cost: string | number
   current_price: string | number
+  total_cost_usd?: string | number | null
   currency?: string
   target_percentage: string | number
   last_updated?: string
@@ -53,7 +54,7 @@ export const useHoldingsStore = defineStore('holdings', () => {
 
   const auth = useAuthStore()
   const portfolioStore = usePortfolioStore()
-  const { exchangeRate, convertAmountToUsd } = useCurrency()
+  const { rates, convertAmountToUsd } = useCurrency()
 
   const uid: ComputedRef<string | null> = computed(() => auth.user?.uid || null)
   const portfolioId: ComputedRef<string | null> = computed(() => portfolioStore.currentPortfolio?.id || null)
@@ -68,15 +69,22 @@ export const useHoldingsStore = defineStore('holdings', () => {
       const currency = String(item.currency || 'USD').toUpperCase()
       const target = parseFloat(String(item.target_percentage)) || 0
       const lastUpdated = item.last_updated?.split('T')[0] || ''
+      // 後端已用各筆買入「當時的匯率」算好美金成本；舊資料沒有這個值時才退回用當下匯率，
+      // 退回時成本會隨匯率浮動（也就是加 fx_rate 之前的行為）
+      const storedCostUsd = item.total_cost_usd == null ? null : Number(item.total_cost_usd)
 
       // 一律換算成美金保存；顯示端由 formatAmount* 再轉成使用者的顯示幣別。
       // 這裡若直接轉成顯示幣別，畫面上會被 formatAmount* 轉第二次。
       // native* 為原幣金額，給單一標的的欄位以原幣顯示；加總與排序用美金欄位
       const nativeTotalCost = roundAmount(avgCostRaw * shares)
       const nativeCurrentValue = roundAmount(currentPriceRaw * shares)
-      const avgCost = roundAmount(convertAmountToUsd(avgCostRaw, currency))
       const currentPrice = roundAmount(convertAmountToUsd(currentPriceRaw, currency))
-      const totalCost = roundAmount(convertAmountToUsd(avgCostRaw * shares, currency))
+      const totalCost = roundAmount(
+        storedCostUsd != null && storedCostUsd > 0
+          ? storedCostUsd
+          : convertAmountToUsd(avgCostRaw * shares, currency)
+      )
+      const avgCost = shares > 0 ? roundAmount(totalCost / shares) : 0
       const currentValue = roundAmount(convertAmountToUsd(currentPriceRaw * shares, currency))
       const totalProfit = roundAmount(currentValue - totalCost)
       const profitPercentage = ((currentValue / (totalCost || 1)) * 100 - 100).toFixed(2)
@@ -118,9 +126,9 @@ export const useHoldingsStore = defineStore('holdings', () => {
   }
 
   // 金額以美金保存，切換顯示幣別不需要重算；但非美金持股的美金值會隨匯率變動
-  watch(exchangeRate, () => {
+  watch(rates, () => {
     recalculateHoldings()
-  })
+  }, { deep: true })
 
   // 取得 holdings
   const fetchHoldings = async (): Promise<void> => {

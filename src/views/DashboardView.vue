@@ -429,7 +429,8 @@ const formatUpdatedAt = iso => new Date(iso).toLocaleString(locale.value.startsW
 
 // Currency settings
 import { useCurrency } from '@/composables/useCurrency'
-const { formatAmount, formatAmountWithCode, formatPriceWithCode, splitDisplayAmount, convertAmountToUsd, currencySymbol } = useCurrency()
+const { formatAmount, formatAmountWithCode, formatPriceWithCode, splitDisplayAmount, convertAmountToUsd, convertAmountToUsdAt, currencySymbol } = useCurrency()
+import { getCurrencyMeta } from '@/utils/currency'
 
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
@@ -450,7 +451,7 @@ const totalValue = computed(() => {
   return holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
 })
 const totalProfit = computed(() => {
-  return holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.avgCost * h.shares), 0)
+  return holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.totalCost), 0)
 })
 const selectedPieType = ref('actual')
 const pieChartType = computed(() => ([
@@ -491,28 +492,9 @@ const formatShortDate = d => d.toLocaleDateString(locale.value.startsWith('zh') 
 /* =========================
  *  Utils / Formatters
  * =======================*/
+// 小數位與拆解規則由 useCurrency 統一處理（各自實作會把千分位逗號誤判成小數）
 function splitAmountForEmphasis(value) {
-  const fractionDigits = displayCurrency.value === 'TWD' ? 0 : 2
-  const formatted = formatAmount(value, {
-    showSymbol: false,
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  })
-
-  if (formatted === '--') {
-    return { main: '--', fraction: '', code: displayCurrency.value }
-  }
-
-  const match = formatted.match(/^(.*?)([.,]\d+)?$/)
-  if (!match) {
-    return { main: formatted, fraction: '', code: displayCurrency.value }
-  }
-
-  return {
-    main: match[1] || formatted,
-    fraction: match[2] || '',
-    code: displayCurrency.value,
-  }
+  return splitDisplayAmount(value)
 }
 
 function formatAvgCostTooltip(value, currency) {
@@ -565,7 +547,7 @@ function formatCompactAmount(value) {
   return formatAmount(value, {
     compact: true,
     minimumFractionDigits: 0,
-    maximumFractionDigits: displayCurrency.value === 'TWD' ? 0 : 1,
+    maximumFractionDigits: getCurrencyMeta(displayCurrency.value).fractionDigits === 0 ? 0 : 1,
   })
 }
 
@@ -656,7 +638,7 @@ const actualAllocationBreakdown = computed(() => {
   return buildAllocationBreakdown(holdingsStore.list, holding => {
     const amount = Number(holding.currentValue)
     const percentage = total > 0 ? (amount / total) * 100 : 0
-    const profit = amount - Number(holding.avgCost) * Number(holding.shares)
+    const profit = amount - Number(holding.totalCost)
 
     return {
       key: holding.symbol,
@@ -780,15 +762,17 @@ const selectedAllocationChart = computed(() => ({
 }))
 
 const totalReturn = computed(() => totalReturnPct(holdingsStore.list))
-const realizedProfit = computed(() => calcRealizedProfit(transactionsStore.list, convertAmountToUsd))
+// 已實現損益與 XIRR 都是歷史現金流，用成交當時的匯率換算；
+// 用今日匯率會讓早就結算完的損益每天跟著匯率變動
+const realizedProfit = computed(() => calcRealizedProfit(transactionsStore.list, convertAmountToUsdAt))
 const irr = computed(() => holdingsStore.list.length
-  ? portfolioXirr(transactionsStore.list, dividends.value, totalValue.value, convertAmountToUsd)
+  ? portfolioXirr(transactionsStore.list, dividends.value, totalValue.value, convertAmountToUsdAt)
   : null)
 
 /* 損益小卡的明細列 */
 const profitColor = v => (v >= 0 ? 'text-up' : 'text-down')
 const winLoss = computed(() => {
-  const up = holdingsStore.list.filter(h => h.currentValue >= h.avgCost * h.shares).length
+  const up = holdingsStore.list.filter(h => h.currentValue >= h.totalCost).length
   return { up, down: holdingsStore.list.length - up }
 })
 // 股息表沒有幣別欄位，與 portfolioXirr 相同以該 symbol 交易的幣別換算；資料層一律用 USD，顯示時 formatAmount* 才轉幣別
@@ -814,7 +798,7 @@ const irrRows = computed(() => {
     { label: t('investingSince'), value: first ? `${first.toLocaleDateString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US')} · ${t('yearsShort', { n: years.toFixed(1) })}` : '--' },
     { label: t('totalInvested'), value: formatAmountWithCode(transactionsStore.list
       .filter(tx => tx.transactionType === 'buy')
-      .reduce((s, tx) => s + convertAmountToUsd(tx.price * tx.shares + tx.fee, tx.currency), 0)) },
+      .reduce((s, tx) => s + convertAmountToUsdAt(tx.price * tx.shares + tx.fee, tx.currency, tx.fxRate), 0)) },
   ]
 })
 

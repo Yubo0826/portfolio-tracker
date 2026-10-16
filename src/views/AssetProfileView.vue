@@ -424,7 +424,7 @@ import { useWatchlistStore } from '@/stores/watchlist'
 
 const { t, locale } = useI18n()
 const { isDark, chartPalette } = useTheme()
-const { formatAmount, formatPriceWithCode: formatNativePriceWithCode, displayCurrency } = useCurrency()
+const { formatAmount, formatPriceWithCode: formatNativePriceWithCode, splitDisplayAmount, displayCurrency } = useCurrency()
 // Yahoo 回傳的是標的原幣價格（0050.TW 是 TWD），個股頁直接以原幣顯示，不換成偏好設定的顯示幣別
 const formatPrice = (value) => formatAmount(value, { minimumFractionDigits: 2, maximumFractionDigits: 3, currency: info.currency || 'USD' })
 const formatPriceWithCode = (value) => formatNativePriceWithCode(value, info.currency || 'USD')
@@ -790,22 +790,11 @@ function canAddRecommendationSymbol(targetSymbol) {
   return compareSymbols.value.length < MAX_COMPARE_SYMBOLS
 }
 
+// 小數位與拆解規則由 useCurrency 統一處理（各自實作會把千分位逗號誤判成小數）
+// 個股頁的價格一律以該標的的原幣顯示，不換算成顯示幣別
 function splitPriceForEmphasis(value) {
-  const formatted = formatPriceWithCode(value)
-  if (formatted === '--') {
-    return { main: '--', fraction: '', code: displayCurrency.value }
-  }
-
-  const match = formatted.match(/^(.*?)([.,]\d+)?\s([A-Z]{3})$/)
-  if (!match) {
-    return { main: formatted, fraction: '', code: displayCurrency.value }
-  }
-
-  return {
-    main: match[1] || formatted,
-    fraction: match[2] || '',
-    code: match[3] || displayCurrency.value,
-  }
+  const split = splitDisplayAmount(value, 'price', info.currency || 'USD')
+  return split.code ? split : { ...split, code: displayCurrency.value }
 }
 
 function formatSignedNumber(value, digits = 2) {

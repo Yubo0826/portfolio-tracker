@@ -411,6 +411,9 @@ functions:
   zh: 功能
 
 # 新增/編輯交易視窗
+clear:
+  en: Clear
+  zh: 清除
 inputSymbol:
   en: Search symbol
   zh: 輸入代號搜尋
@@ -1500,3 +1503,6 @@ insights:
 defaultPortfolioName:
   en: My Portfolio
   zh: 我的投資組合
+symbolExchangeGuessed:
+  en: "No currency column in the file, so the exchange was inferred from the code. Japanese (4-digit) and Hong Kong (5-digit) codes overlap with Taiwan ones — please confirm these are the right stocks: {symbols}"
+  zh: "檔案沒有幣別欄，以下代號的交易所是依代號推斷的。日股（4 碼）、港股（5 碼）會與台股撞號，請確認是您要的標的：{symbols}"
