@@ -1,4 +1,5 @@
 <template>
+    <div ref="root" class="relative w-full">
     <AutoComplete
         :modelValue="modelValue"
         @update:modelValue="(val) => emit('update:modelValue', val?.symbol ?? val)"
@@ -9,6 +10,7 @@
         @item-select="onItemSelect"
         :placeholder="$t('inputSymbol')"
         class="w-full"
+        :inputClass="clearable ? '!pr-9' : undefined"
         forceSelection
         >
         <template #option="slotProps">
@@ -23,6 +25,17 @@
             </div>
         </template>
     </AutoComplete>
+    <button
+        v-if="clearable && modelValue && !disabled"
+        type="button"
+        class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full text-muted-color hover:text-color hover:bg-emphasis cursor-pointer"
+        :aria-label="$t('clear')"
+        v-tooltip.top="{ value: $t('clear'), showDelay: 500 }"
+        @click="clear"
+    >
+        <i class="pi pi-times text-xs" />
+    </button>
+    </div>
 </template>
 <script setup>
 import { ref } from 'vue';
@@ -35,11 +48,17 @@ const props = defineProps({
     disabled: {
         type: Boolean,
         default: false
+    },
+    // 在輸入框右側顯示清除按鈕
+    clearable: {
+        type: Boolean,
+        default: false
     }
 });
 const emit = defineEmits(['update:modelValue', 'update']);
 
 const filteredSymbols = ref([]);
+const root = ref(null);
 
 const search = async (event) => {
     if (!event.query.trim().length) return;
@@ -70,5 +89,13 @@ const onItemSelect = (event) => {
         name: event.value.name,
         assetType: event.value.assetType
     });
+};
+
+// 清空後重設 lastSelected，否則重新選回同一檔時會被上方的防重複判斷擋掉、不會帶入報價
+const clear = () => {
+    lastSelected = null;
+    filteredSymbols.value = [];
+    emit('update:modelValue', null);
+    root.value?.querySelector('input')?.focus();
 };
 </script>

@@ -43,6 +43,7 @@
           v-model="form.symbol"
           @update="onSymbolSelected"
           :disabled="!!editingId"
+          clearable
         />
       </div>
 
