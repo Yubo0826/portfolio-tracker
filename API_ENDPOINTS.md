@@ -79,7 +79,8 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2, currency`（見 `services/fx.js` 的 `SUPPORTED_CURRENCIES`，每個用到的幣別各抓一條 `XXX=X` 歷史匯率逐日換算） |
 | GET | `/api/yahoo/allocation-chart` | 回傳目標配置中各標的歷史收盤價 | query: `uid, portfolio_id, period1, period2, interval` |
 | GET | `/api/yahoo/summary` | Yahoo quoteSummary（公司概況/財務資料等） | query: `symbol` |
-| GET | `/api/yahoo/trending` | 熱門漲幅股（前 5 名） | query: `region, lang` — *前端未呼叫* |
+| GET | `/api/yahoo/fund-holdings` | ETF/基金產業配置與前十大持股，回傳 `{ sectorWeightings: [{sector, weight}], holdings: [{symbol, name, weight}] }` | query: `symbol` |
+| GET | `/api/yahoo/trending` | Yahoo 熱門標的（Trending tickers，前 5 名），含價格、漲跌、前次收盤；`spark=1` 時多回 `spark`：最後一個交易時段的 5 分 K 收盤價陣列（迷你走勢圖用） | query: `region, lang, spark` |
 | GET | `/api/yahoo/recommend` | Yahoo 原始推薦結果 | query: `symbol` — *前端未呼叫* |
 | GET | `/api/yahoo/recommend/cards` | 推薦卡片（含報價與漲跌） | query: `symbol, limit`（上限 10） |
 | GET | `/api/yahoo/recommend/symbols` | 跨多檔持股的投組擴展推薦 | query: `symbols`（逗號分隔）, `limit` — *前端未呼叫* |
