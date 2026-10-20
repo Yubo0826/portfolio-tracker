@@ -155,9 +155,8 @@
                     class="inline-flex items-center gap-2 pb-1"
                   >
                     <span class="asset-growth-change" :class="growthRateNumber >= 0 ? 'text-up' : 'text-down'">
-                      <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
                       {{ formatSignedNumber(growthRateNumber) }}%
-                      ({{ change >= 0 ? '+' : '-' }}{{ formatAmount(Math.abs(change)) }})
+                      ({{ change >= 0 ? '+' : '-' }}{{ Math.abs(change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }})
                     </span>
                   </div>
 

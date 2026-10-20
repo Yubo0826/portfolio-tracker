@@ -32,7 +32,7 @@
                         <div class="text-4xl font-bold inline-flex items-end">
                           <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
                           <span>{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
-                          <span class="ml-1 text-[10px] leading-none pb-1 font-semibold">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
+                          <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
                         </div>
 
                         <div
@@ -40,9 +40,8 @@
                           class="inline-flex items-center gap-2 pb-1"
                         >
                           <span class="asset-growth-change" :class="growthRateNumber >= 0 ? 'text-up' : 'text-down'">
-                            <i :class="growthRateNumber >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" aria-hidden="true"></i>
                             {{ formatSignedNumber(growthRateNumber) }}%
-                            ({{ formatSignedNumber(change) }})
+                            ({{ change >= 0 ? '+' : '-' }}{{ formatAxisPrice(Math.abs(change)) }})
                           </span>
                         </div>
 

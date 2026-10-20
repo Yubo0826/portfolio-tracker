@@ -100,27 +100,9 @@ select,
   box-shadow: 0 18px 36px rgba(10, 14, 24, 0.08);
 }
 
-/* 總資產／現價旁的漲跌（Dashboard、Asset 頁共用）：實心圓箭頭＋同色文字，圓底沿用 text-up/down 的 currentColor */
+/* 總資產／現價旁的漲跌（Dashboard、Asset 頁共用）：只用漲跌色文字，不加箭頭 */
 .asset-growth-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 500;
   line-height: 1;
-}
-
-.asset-growth-change i {
-  display: inline-grid;
-  place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 9999px;
-  background: currentColor;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.asset-growth-change i::before {
-  color: var(--p-content-background);
 }
