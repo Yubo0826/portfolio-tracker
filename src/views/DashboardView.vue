@@ -282,7 +282,8 @@
                     <template #body="{ data: item }">
                       <div class="flex min-w-0 items-center gap-2.5">
                         <span class="size-2 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
-                        <span class="truncate">{{ item.name }}</span>
+                        <span v-if="item.key === 'others'" class="truncate">{{ item.name }}</span>
+                        <RouterLink v-else :to="{ name: 'asset', params: { symbol: item.key } }" class="truncate hover:text-[var(--p-primary-color)]">{{ item.name }}</RouterLink>
                       </div>
                     </template>
                   </Column>
