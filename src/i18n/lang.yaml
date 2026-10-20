@@ -1109,8 +1109,11 @@ lastYear:
   en: Last year
   zh: 去年
 clearFilters:
-  en: Clear all
-  zh: 全部清除
+  en: Reset filters
+  zh: 重設篩選
+all:
+  en: All
+  zh: 全部
 filter:
   en: Filter
   zh: 篩選
