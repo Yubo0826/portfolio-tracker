@@ -14,7 +14,7 @@
           :aria-label="watchLabel"
           :aria-pressed="isWatched"
           v-tooltip.top="{ value: watchLabel, showDelay: 500 }"
-          @click="toggleWatch"
+          @click="toggleWatch()"
         />
       </Teleport>
       <div class="flex items-center">
@@ -27,11 +27,9 @@
             <Card class="app-panel w-full">
               <template #content>
                 <div>
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="flex flex-col mb-2">
-                      <p class="asset-kicker">{{ t('currentPrice') }}</p>
-
-                      <div class="mt-1 flex flex-wrap items-end gap-2">
+                  <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div class="flex flex-col">
+                      <div class="flex flex-wrap items-end gap-2">
                         <div class="text-4xl font-bold inline-flex items-end">
                           <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
                           <span>{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
@@ -56,22 +54,156 @@
                       </div>
                     </div>
 
-                    <div class="flex items-center space-x-2">
-                      <SelectButton
-                        v-model="chartType"
-                        :options="chartTypeOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        class="text-sm"
-                        :allowEmpty="false"
+                  <div class="chart-toolbar">
+                      <Button
+                        size="small"
+                        text
+                        severity="secondary"
+                        aria-haspopup="menu"
+                        :aria-expanded="chartTypeMenuOpen"
+                        @click="chartTypeMenu.toggle($event)"
                       >
-                        <template #option="slotProps">
-                          <div class="flex items-center space-x-2">
-                            <i :class="slotProps.option.icon"></i>
+                        <i :class="activeChartType.icon" aria-hidden="true"></i>
+                        <span class="font-semibold">{{ activeChartType.label }}</span>
+                        <i class="pi text-xs" :class="chartTypeMenuOpen ? 'pi-chevron-up' : 'pi-chevron-down'" aria-hidden="true"></i>
+                      </Button>
+                      <Menu
+                        ref="chartTypeMenu"
+                        :model="chartTypeMenuItems"
+                        popup
+                        @show="chartTypeMenuOpen = true"
+                        @hide="chartTypeMenuOpen = false"
+                      />
+
+                      <Button
+                        size="small"
+                        text
+                        severity="secondary"
+                        :disabled="isComparisonDisabled"
+                        aria-haspopup="dialog"
+                        :aria-expanded="comparePopoverOpen"
+                        @click="comparePopover.toggle($event)"
+                      >
+                        <i class="pi pi-chart-line" aria-hidden="true"></i>
+                        <span class="font-semibold">{{ t('compareAssets') }}</span>
+                        <i class="pi text-xs" :class="comparePopoverOpen ? 'pi-chevron-up' : 'pi-chevron-down'" aria-hidden="true"></i>
+                      </Button>
+                      <Popover
+                        ref="comparePopover"
+                        @show="onComparePopoverShow"
+                        @hide="comparePopoverOpen = false"
+                      >
+                        <div class="compare-popover">
+                          <div class="flex items-center gap-1">
+                            <IconField class="flex-1">
+                              <InputIcon class="pi pi-search" />
+                              <InputText
+                                ref="compareSearchInput"
+                                v-model="compareQuery"
+                                :placeholder="t('inputSymbol')"
+                                :aria-label="t('inputSymbol')"
+                                fluid
+                              />
+                            </IconField>
+                            <Button
+                              v-if="compareQuery"
+                              icon="pi pi-times"
+                              text
+                              rounded
+                              severity="secondary"
+                              size="small"
+                              :aria-label="t('clear')"
+                              v-tooltip.top="{ value: t('clear'), showDelay: 500 }"
+                              @click="compareQuery = ''; compareSearchInput?.$el?.focus()"
+                            />
                           </div>
-                        </template>
-                      </SelectButton>
-                    </div>
+
+                          <div class="compare-popover-heading">
+                            <span>{{ t(compareQuery.trim() ? 'compareAssets' : 'relatedStocks') }}</span>
+                            <span>{{ t('comparisonLimitHint', { max: MAX_COMPARE_SYMBOLS }) }}</span>
+                          </div>
+
+                          <Listbox
+                            :modelValue="compareSymbols"
+                            :options="compareOptions"
+                            optionLabel="symbol"
+                            optionValue="symbol"
+                            multiple
+                            :metaKeySelection="false"
+                            :optionDisabled="item => !isCardCompared(item.symbol) && !canAddRecommendationSymbol(item.symbol)"
+                            :emptyMessage="t(compareQuery.trim() ? 'noResults' : (recommendationErrorKey || 'recommendationEmpty'))"
+                            :ariaLabel="t('compareAssets')"
+                            scrollHeight="20rem"
+                            class="w-full !border-0 !bg-transparent !shadow-none"
+                            @update:modelValue="onCompareListChange"
+                          >
+                            <template #option="{ option }">
+                              <div class="flex w-full min-w-0 items-center justify-between gap-3">
+                                <div class="min-w-0">
+                                  <div class="font-semibold">{{ option.symbol }}</div>
+                                  <div class="truncate text-xs text-muted-color">{{ option.name }}</div>
+                                </div>
+                                <div v-if="Number.isFinite(option.regularMarketPrice)" class="shrink-0 text-right">
+                                  <div class="font-semibold">{{ Number(option.regularMarketPrice).toFixed(2) }}</div>
+                                  <div class="text-xs font-semibold" :class="recommendationGrowthClass(option.regularMarketChangePercent)">
+                                    {{ formatSignedNumber(option.regularMarketChangePercent) }}%
+                                  </div>
+                                </div>
+                                <i v-if="isCardCompared(option.symbol)" class="pi pi-check shrink-0 text-xs" aria-hidden="true"></i>
+                              </div>
+                            </template>
+                          </Listbox>
+
+                          <div v-if="compareSymbols.length" class="compare-popover-footer">
+                            <Button
+                              size="small"
+                              text
+                              severity="secondary"
+                              :label="t('clearComparisons')"
+                              @click="clearComparisonSymbols"
+                            />
+                          </div>
+                        </div>
+                      </Popover>
+                  </div>
+                  </div>
+
+                  <p
+                    v-if="isComparisonDisabled && compareSymbols.length"
+                    class="mt-2 text-xs text-muted-color"
+                  >
+                    {{ t('comparisonDisabledForCandlestick') }}
+                  </p>
+                  <p
+                    v-else-if="comparisonNoticeText"
+                    class="mt-2 text-xs text-orange-600 dark:text-orange-300"
+                  >
+                    {{ comparisonNoticeText }}
+                  </p>
+
+                  <div v-if="compareSymbols.length && !isComparisonDisabled" class="mt-3 flex flex-wrap gap-2">
+                    <span class="compare-chip compare-chip--static">
+                      <span class="compare-chip-dot" :style="{ background: getSeriesColor(0) }"></span>
+                      <span class="font-semibold">{{ String(symbol || '').toUpperCase() }}</span>
+                    </span>
+                    <button
+                      v-for="(item, index) in compareSymbols"
+                      :key="item"
+                      type="button"
+                      class="compare-chip"
+                      :aria-label="`${t('removeFromComparison')} ${item}`"
+                      @click="removeComparisonSymbol(item)"
+                    >
+                      <span class="compare-chip-dot" :style="{ background: getSeriesColor(index + 1) }"></span>
+                      <span class="font-semibold">{{ item }}</span>
+                      <span
+                        v-if="compareNameMap[item] && compareNameMap[item] !== item"
+                        class="ml-1 max-w-28 truncate text-xs text-muted-color"
+                      >
+                        {{ compareNameMap[item] }}
+                      </span>
+                      <i class="pi pi-times ml-2 text-xs" />
+                    </button>
                   </div>
 
                   <div class="mt-2">
@@ -106,6 +238,13 @@
                       </div>
                     </template>
                   </SelectButton>
+
+                  <dl class="mt-5 grid grid-cols-1 gap-x-8 text-xs sm:grid-cols-2">
+                    <div v-for="row in quoteStatsRows" :key="row.label" class="flex items-baseline justify-between gap-4 border-b border-surface py-2">
+                      <dt class="whitespace-nowrap text-muted-color">{{ t(row.label) }}</dt>
+                      <dd class="whitespace-nowrap font-semibold text-right">{{ row.value }}</dd>
+                    </div>
+                  </dl>
                 </div>
               </template>
             </Card>
@@ -159,193 +298,76 @@
               </template>
             </Card>
 
-            <Card class="app-panel w-full">
-              <template #content>
-                <div>
-                  <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-sm font-semibold">{{ t('compareAssets') }}</span>
-                    <span class="text-xs text-muted-color">
-                      {{ t('comparisonLimitHint', { max: MAX_COMPARE_SYMBOLS }) }}
-                    </span>
-                  </div>
-
-                  <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <div class="flex-1">
-                      <SymbolAutoComplete
-                        v-model="compareInput"
-                        :disabled="isComparisonDisabled"
-                        @update="onCompareSymbolSelected"
-                      />
-                    </div>
-
-                    <Button
-                      size="small"
-                      :label="t('addComparison')"
-                      :disabled="!canAddComparison"
-                      @click="addComparisonSymbol"
-                    />
-
-                    <Button
-                      size="small"
-                      text
-                      severity="secondary"
-                      :label="t('clearComparisons')"
-                      :disabled="!compareSymbols.length"
-                      @click="clearComparisonSymbols"
-                    />
-                  </div>
-
-                  <p
-                    v-if="isComparisonDisabled && compareSymbols.length"
-                    class="mt-2 text-xs text-muted-color"
-                  >
-                    {{ t('comparisonDisabledForCandlestick') }}
-                  </p>
-                  <p
-                    v-else-if="comparisonNoticeText"
-                    class="mt-2 text-xs text-orange-600 dark:text-orange-300"
-                  >
-                    {{ comparisonNoticeText }}
-                  </p>
-
-                  <div v-if="compareSymbols.length" class="mt-3 flex flex-wrap gap-2">
-                    <button
-                      v-for="item in compareSymbols"
-                      :key="item"
-                      type="button"
-                      class="compare-chip"
-                      @click="removeComparisonSymbol(item)"
-                    >
-                      <span class="font-semibold">{{ item }}</span>
-                      <span
-                        v-if="compareNameMap[item] && compareNameMap[item] !== item"
-                        class="ml-1 max-w-28 truncate text-xs text-muted-color"
-                      >
-                        {{ compareNameMap[item] }}
-                      </span>
-                      <i class="pi pi-times ml-2 text-xs" />
-                    </button>
-                  </div>
-                </div>
-              </template>
-            </Card>
-
           </div>
 
           <div class="min-w-0 flex flex-col gap-4">
             <Card class="app-panel w-full">
               <template #content>
                 <div>
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-sm font-semibold">{{ t('recommendedStocks') }}</span>
-                  </div>
+                  <span class="text-lg font-bold">{{ t('popularSymbols') }}</span>
 
-                  <p
-                    v-if="recommendationPartialText"
-                    class="recommend-hint mt-2 text-xs"
-                  >
-                    {{ recommendationPartialText }}
-                  </p>
-
-                  <p
-                    v-if="recommendationErrorText"
-                    class="recommend-error mt-2 text-xs"
-                  >
-                    {{ recommendationErrorText }}
-                  </p>
-
-                  <div
-                    v-if="recommendLoading"
-                    class="recommend-list mt-3"
-                  >
-                    <div
-                      v-for="item in recommendSkeletonItems"
-                      :key="`recommend-skeleton-${item.id}`"
-                      class="recommend-list-item cursor-default"
-                    >
-                      <div class="flex items-center gap-3 min-w-0">
-                        <Skeleton shape="circle" size="2rem" class="shrink-0" />
-                        <div class="min-w-0 flex-1">
-                          <Skeleton width="66%" height="0.75rem" />
-                          <Skeleton width="33%" height="0.75rem" class="mt-2" />
-                        </div>
+                  <div v-if="trendingLoading" class="trending-list mt-2">
+                    <div v-for="n in 5" :key="n" class="trending-row cursor-default">
+                      <div class="min-w-0">
+                        <Skeleton width="3rem" height="0.8rem" />
+                        <Skeleton width="7rem" height="0.8rem" class="mt-1" />
                       </div>
+                      <Skeleton width="4.5rem" height="1.75rem" />
+                      <Skeleton width="4.5rem" height="1.75rem" />
                     </div>
                   </div>
 
-                  <p
-                    v-else-if="!recommendedCards.length"
-                    class="recommend-muted mt-3 text-xs"
-                  >
-                    {{ t('recommendationEmpty') }}
+                  <p v-else-if="!trendingTickers.length" class="mt-3 text-xs text-muted-color">
+                    {{ t('noData') }}
                   </p>
 
-                  <div
-                    v-else
-                    class="recommend-list mt-3"
-                  >
+                  <div v-else class="trending-list mt-2">
                     <div
-                      v-for="card in recommendedCards"
-                      :key="card.symbol"
-                      class="recommend-list-item"
-                      :class="{ 'recommend-list-item--active': isCardCompared(card.symbol) }"
+                      v-for="item in trendingTickers"
+                      :key="item.symbol"
+                      class="trending-row"
                       role="link"
                       tabindex="0"
-                      @click="openAssetProfile(card.symbol)"
-                      @keydown.enter.self="openAssetProfile(card.symbol)"
+                      @click="openAssetProfile(item.symbol)"
+                      @keydown.enter.self="openAssetProfile(item.symbol)"
                     >
-                      <div class="flex items-center gap-3 min-w-0">
-                        <div class="min-w-0">
-                          <div class="text-sm font-semibold truncate">{{ card.name }}</div>
-                          <div
-                            class="text-xs font-semibold"
-                            :class="recommendationGrowthClass(card.regularMarketChangePercent)"
-                          >
-                            {{ formatSignedNumber(card.regularMarketChangePercent) }}%
-                          </div>
+                      <div class="min-w-0">
+                        <div class="font-semibold">{{ item.symbol }}</div>
+                        <div class="truncate text-xs text-muted-color">{{ item.longname || item.shortname }}</div>
+                      </div>
+
+                      <svg
+                        v-if="item.sparkPath"
+                        class="trending-spark"
+                        viewBox="0 0 72 28"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                        :class="item.regularMarketChange >= 0 ? 'text-up' : 'text-down'"
+                      >
+                        <path :d="`${item.sparkPath} L72,28 L0,28 Z`" fill="currentColor" fill-opacity="0.2" />
+                        <path :d="item.sparkPath" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" />
+                      </svg>
+                      <span v-else></span>
+
+                      <div class="text-right">
+                        <div class="font-semibold">{{ Number(item.regularMarketPrice).toFixed(2) }}</div>
+                        <div class="whitespace-nowrap text-xs font-semibold" :class="recommendationGrowthClass(item.regularMarketChange)">
+                          {{ formatSignedNumber(item.regularMarketChange) }} ({{ formatSignedNumber(item.regularMarketChangePercent) }}%)
                         </div>
                       </div>
 
                       <button
                         type="button"
-                        class="recommend-list-action"
-                        :class="{ 'recommend-list-action--active': isCardCompared(card.symbol) }"
-                        :disabled="!isCardCompared(card.symbol) && (isComparisonDisabled || !canAddRecommendationSymbol(card.symbol))"
-                        v-tooltip.top="{ value: t(isCardCompared(card.symbol) ? 'removeFromComparison' : 'addToComparison'), showDelay: 500 }"
-                        :aria-label="`${t(isCardCompared(card.symbol) ? 'removeFromComparison' : 'addToComparison')} ${card.symbol}`"
-                        :aria-pressed="isCardCompared(card.symbol)"
-                        @click.stop="toggleRecommendationCompare(card)"
+                        class="trending-watch"
+                        :class="{ 'trending-watch--active': watchlistStore.symbolSet.has(item.symbol) }"
+                        v-tooltip.top="{ value: t(watchlistStore.symbolSet.has(item.symbol) ? 'removeFromWatchlist' : 'addToWatchlist'), showDelay: 500 }"
+                        :aria-label="`${t(watchlistStore.symbolSet.has(item.symbol) ? 'removeFromWatchlist' : 'addToWatchlist')} ${item.symbol}`"
+                        :aria-pressed="watchlistStore.symbolSet.has(item.symbol)"
+                        @click.stop="toggleWatch(item.symbol, item.longname || item.shortname, item.quoteType)"
                       >
-                        <i :class="isCardCompared(card.symbol) ? 'pi pi-check' : 'pi pi-plus'"></i>
+                        <i :class="watchlistStore.symbolSet.has(item.symbol) ? 'pi pi-star-fill' : 'pi pi-star'"></i>
                       </button>
                     </div>
-                  </div>
-                </div>
-              </template>
-            </Card>
-
-            <Card class="app-panel w-full">
-              <template #content>
-                <div class="flex flex-col gap-3 text-sm">
-                  <div class="flex justify-between border-b border-surface py-4 px-0">
-                    <span>{{ t('assetPreviousClose') }}</span>
-                    <span class="font-semibold">{{ formatPrice(info.chartPreviousClose) }}</span>
-                  </div>
-                  <div class="flex justify-between border-b border-surface py-4 px-0">
-                    <span>{{ t('assetDayRange') }}</span>
-                    <span class="font-semibold">{{ formatPrice(info.regularMarketDayLow) }} - {{ formatPrice(info.regularMarketDayHigh) }}</span>
-                  </div>
-                  <div class="flex justify-between border-b border-surface py-4 px-0">
-                    <span>{{ t('assetYearRange') }}</span>
-                    <span class="font-semibold">{{ formatPrice(info.fiftyTwoWeekLow) }} - {{ formatPrice(info.fiftyTwoWeekHigh) }}</span>
-                  </div>
-                  <div class="flex justify-between border-b border-surface py-4 px-0">
-                    <span>{{ t('assetTodayVolume') }}</span>
-                    <span class="font-semibold">{{ info.regularMarketVolume }}</span>
-                  </div>
-                  <div class="flex justify-between border-surface py-4 px-0">
-                    <span>{{ t('assetPrimaryExchange') }}</span>
-                    <span class="font-semibold">{{ info.fullExchangeName }}</span>
                   </div>
                 </div>
               </template>
@@ -413,7 +435,12 @@ import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import StockIcon from '@/components/StockIcon.vue'
-import SymbolAutoComplete from '@/components/SymbolAutoComplete.vue'
+import Popover from 'primevue/popover'
+import Menu from 'primevue/menu'
+import Listbox from 'primevue/listbox'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import debounce from 'lodash/debounce'
 import api from '@/utils/api'
 import { percentChange, periodRange, filterByPeriod, toIsoDate, yAxisBounds } from '@/utils/portfolioMetrics'
 import { useRoute, useRouter } from 'vue-router'
@@ -439,15 +466,15 @@ const isWatched = computed(() => watchlistStore.symbolSet.has(String(symbol.valu
 const watchLabel = computed(() => watchlistStore.isReadOnly
   ? t('watchlistSignInHint')
   : t(isWatched.value ? 'removeFromWatchlist' : 'addToWatchlist'))
-const toggleWatch = async () => {
+// 預設是本頁標的；熱門清單的星號會帶入該列的代號
+const toggleWatch = async (s = String(symbol.value).toUpperCase(), name = info.fullName, quoteType = info.quoteType) => {
   if (watchlistStore.isReadOnly) return toast.info(t('watchlistSignInHint'))
-  const s = String(symbol.value).toUpperCase()
   try {
-    if (isWatched.value) {
+    if (watchlistStore.symbolSet.has(s)) {
       await watchlistStore.removeSymbol(s)
       toast.success(t('removedFromWatchlist', { symbol: s }))
     } else {
-      await watchlistStore.addSymbol(s, info.fullName || null, info.quoteType || null)
+      await watchlistStore.addSymbol(s, name || null, quoteType || null)
       toast.success(t('addedToWatchlist', { symbol: s }))
     }
   } catch (error) {
@@ -461,7 +488,6 @@ const currentRange = ref('3mo')
 const MAX_COMPARE_SYMBOLS = 5
 const MAX_RECOMMENDATION_CARDS = 5
 const comparisonColorPalette = ['#60a5fa', '#f59e0b', '#22c55e', '#ef4444', '#a855f7', '#14b8a6']
-const recommendSkeletonItems = ref(Array.from({ length: MAX_RECOMMENDATION_CARDS }, (_, idx) => ({ id: idx + 1 })))
 
 let mainRequestId = 0
 let intradayRequestId = 0
@@ -470,15 +496,16 @@ let recommendRequestId = 0
 let companyRequestId = 0
 let fundHoldingsRequestId = 0
 
-const compareInput = ref('')
+const comparePopover = ref(null)
+const comparePopoverOpen = ref(false)
+const compareSearchInput = ref(null)
+const compareQuery = ref('')
+const compareSearchResults = ref([])
 const compareSymbols = ref([])
 const compareRawSeries = ref([])
-const compareSelection = ref(null)
 const compareNameMap = reactive({})
 const comparisonNotice = ref({ key: '', params: {} })
 const recommendedCards = ref([])
-const recommendLoading = ref(false)
-const recommendationWarningCount = ref(0)
 const recommendationErrorKey = ref('')
 const companyInfoLoading = ref(false)
 const companyInfoError = ref(false)
@@ -559,6 +586,47 @@ const chartTypeOptions = computed(() => [
   { label: t('klineChart'), value: 'candlestick', icon: 'pi pi-chart-bar' },
 ])
 
+const quoteStatsRows = computed(() => [
+  { label: 'assetPreviousClose', value: formatPrice(info.chartPreviousClose) },
+  { label: 'assetDayRange', value: `${formatPrice(info.regularMarketDayLow)} - ${formatPrice(info.regularMarketDayHigh)}` },
+  { label: 'assetYearRange', value: `${formatPrice(info.fiftyTwoWeekLow)} - ${formatPrice(info.fiftyTwoWeekHigh)}` },
+  { label: 'assetTodayVolume', value: Number.isFinite(info.regularMarketVolume) ? info.regularMarketVolume.toLocaleString() : '--' },
+  { label: 'assetPrimaryExchange', value: info.fullExchangeName || '--' },
+])
+
+const chartTypeMenu = ref(null)
+const chartTypeMenuOpen = ref(false)
+const activeChartType = computed(() => chartTypeOptions.value.find(option => option.value === chartType.value))
+const chartTypeMenuItems = computed(() => chartTypeOptions.value.map(option => ({
+  label: option.label,
+  icon: option.icon,
+  class: option.value === chartType.value ? 'chart-type-item--active' : undefined,
+  command: () => { chartType.value = option.value },
+})))
+
+// 熱門標的（Yahoo Trending tickers），與本頁標的無關，只在掛載時抓一次
+const trendingTickers = ref([])
+const trendingLoading = ref(true)
+
+// 收盤價陣列 → 72x28 viewBox 內的折線路徑
+function toSparkPath(closes) {
+  if (!Array.isArray(closes) || closes.length < 2) return ''
+  const min = Math.min(...closes)
+  const span = Math.max(...closes) - min || 1
+  return closes
+    .map((close, index) => `${index ? 'L' : 'M'}${(index / (closes.length - 1) * 72).toFixed(2)},${(26 - (close - min) / span * 24).toFixed(2)}`)
+    .join(' ')
+}
+
+api.get('/api/yahoo/trending?spark=1')
+  .then(data => {
+    trendingTickers.value = (Array.isArray(data) ? data : [])
+      .filter(item => item?.symbol && Number.isFinite(item.regularMarketPrice))
+      .map(item => ({ ...item, symbol: item.symbol.toUpperCase(), sparkPath: toSparkPath(item.spark) }))
+  })
+  .catch(error => console.error('熱門標的載入失敗:', error))
+  .finally(() => { trendingLoading.value = false })
+
 
 const rangeOptions = computed(() => ([
   { label: t('period1d'), value: '1d' },
@@ -597,16 +665,6 @@ const change = computed(() => {
 const comparisonNoticeText = computed(() => {
   if (!comparisonNotice.value.key) return ''
   return t(comparisonNotice.value.key, comparisonNotice.value.params)
-})
-
-const recommendationPartialText = computed(() => {
-  if (!recommendationWarningCount.value) return ''
-  return t('recommendationPartialHint', { count: recommendationWarningCount.value })
-})
-
-const recommendationErrorText = computed(() => {
-  if (!recommendationErrorKey.value) return ''
-  return t(recommendationErrorKey.value)
 })
 
 const companyTotalAssetsText = computed(() => {
@@ -711,10 +769,36 @@ const hasCompanyInfo = computed(() => {
 
 const isComparisonDisabled = computed(() => chartType.value === 'candlestick')
 
-const canAddComparison = computed(() => {
-  if (isComparisonDisabled.value) return false
-  return compareInput.value.trim().length > 0 && compareSymbols.value.length < MAX_COMPARE_SYMBOLS
-})
+// 比較選單：沒輸入時列推薦標的（帶價格），輸入後列搜尋結果
+const compareOptions = computed(() => compareQuery.value.trim() ? compareSearchResults.value : recommendedCards.value)
+
+const searchCompareSymbols = debounce(async query => {
+  if (!query.trim()) {
+    compareSearchResults.value = []
+    return
+  }
+  try {
+    const data = await api.get(`/api/yahoo/symbol?query=${encodeURIComponent(query)}`)
+    if (query !== compareQuery.value) return
+    compareSearchResults.value = data.map(item => ({ symbol: item.symbol, name: item.longname || item.shortname || item.symbol }))
+  } catch {
+    compareSearchResults.value = []
+  }
+}, 250)
+
+watch(compareQuery, searchCompareSymbols)
+
+function onComparePopoverShow() {
+  comparePopoverOpen.value = true
+  compareSearchInput.value?.$el?.focus()
+}
+
+// Listbox 多選只回傳新陣列：多出來的代號走加入流程（帶名稱、檢查上限），少掉的移除
+function onCompareListChange(next) {
+  const added = next.find(item => !compareSymbols.value.includes(item))
+  if (added) return addComparisonBySymbol(compareOptions.value.find(option => option.symbol === added))
+  compareSymbols.value.filter(item => !next.includes(item)).forEach(removeComparisonSymbol)
+}
 
 function setComparisonNotice(key = '', params = {}) {
   comparisonNotice.value = { key, params }
@@ -841,12 +925,10 @@ async function fetchRecommendedSymbols(targetSymbol = symbol.value) {
 
   if (!activeSymbol) {
     recommendedCards.value = []
-    recommendationWarningCount.value = 0
     recommendationErrorKey.value = ''
     return
   }
 
-  recommendLoading.value = true
   recommendationErrorKey.value = ''
 
   try {
@@ -867,17 +949,12 @@ async function fetchRecommendedSymbols(targetSymbol = symbol.value) {
         currency: item.currency || '',
       }))
 
-    recommendationWarningCount.value = Array.isArray(data?.warnings) ? data.warnings.length : 0
     recommendationErrorKey.value = ''
   } catch (error) {
     if (requestId !== recommendRequestId) return
     recommendedCards.value = []
-    recommendationWarningCount.value = 0
     recommendationErrorKey.value = 'recommendationLoadFailed'
     console.error('推薦股票載入失敗:', error)
-  } finally {
-    if (requestId !== recommendRequestId) return
-    recommendLoading.value = false
   }
 }
 
@@ -995,11 +1072,25 @@ function addComparisonBySymbol(payload) {
   const nextSymbol = String(payload?.symbol || '').trim().toUpperCase()
   if (!nextSymbol) return
 
-  compareInput.value = nextSymbol
-  if (payload?.name) {
-    compareNameMap[nextSymbol] = payload.name
+  const primarySymbol = String(symbol.value || '').trim().toUpperCase()
+  if (nextSymbol === primarySymbol) {
+    setComparisonNotice('comparisonCannotMatchPrimary')
+    return
   }
-  addComparisonSymbol()
+
+  if (compareSymbols.value.includes(nextSymbol)) {
+    setComparisonNotice('comparisonDuplicate')
+    return
+  }
+
+  if (compareSymbols.value.length >= MAX_COMPARE_SYMBOLS) {
+    setComparisonNotice('comparisonMaxReached', { max: MAX_COMPARE_SYMBOLS })
+    return
+  }
+
+  compareSymbols.value = [...compareSymbols.value, nextSymbol]
+  compareNameMap[nextSymbol] = payload.name || nextSymbol
+  compareQuery.value = ''
 }
 
 function isCardCompared(targetSymbol) {
@@ -1060,17 +1151,26 @@ function toPriceSeries(points) {
     .filter(Boolean)
 }
 
+const isComparing = computed(() => compareRawSeries.value.some(item => item.data.length))
+
 const areaSeries = computed(() => {
   const merged = []
   const primarySymbol = String(symbol.value || '').toUpperCase() || t('closePrice')
   const primarySeries = toPriceSeries(chartSeries.value[0].data)
   const primaryColor = getSeriesColor(0)
+  // 日線各市場的時間戳不同（台股 01:00Z、美股 13:30Z），shared tooltip 只合併 x 完全相同的點，故對齊到 UTC 日界
+  const DAY_MS = 86400000
+  const toX = currentRange.value === '1d' ? date => date.getTime() : date => Math.floor(date.getTime() / DAY_MS) * DAY_MS
+  // 有對比時各線改畫相對區間首日的漲跌 %，價差大的標的才能比較走勢；原價留在 point.price 給 tooltip
+  const toPoints = series => isComparing.value
+    ? series.map(point => ({ x: toX(point.x), y: (point.y / series[0].y - 1) * 100, price: point.y }))
+    : series.map(point => [toX(point.x), point.y])
 
   if (primarySeries.length) {
     merged.push({
       type: 'area',
       name: primarySymbol,
-      data: primarySeries.map(point => [point.x.getTime(), point.y]),
+      data: toPoints(primarySeries),
       color: primaryColor,
       fillColor: {
         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
@@ -1086,8 +1186,9 @@ const areaSeries = computed(() => {
     merged.push({
       type: 'line',
       name: item.symbol,
-      data: priceSeries.map(point => [point.x.getTime(), point.y]),
-      color: getSeriesColor(index + 1),
+      data: toPoints(priceSeries),
+      // 依 compareSymbols 的位置配色，與 chip 色點一致（某檔載入失敗時 compareRawSeries 會少一筆）
+      color: getSeriesColor(compareSymbols.value.indexOf(item.symbol) + 1),
       lineWidth: 2,
     })
   })
@@ -1113,10 +1214,7 @@ const highAreaOptions = computed(() => {
     chart: { type: 'area', backgroundColor: 'transparent', animation: { duration: 400 } },
     title: { text: null },
     credits: { enabled: false },
-    legend: {
-      enabled: areaSeries.value.length > 1,
-      itemStyle: { color: axisColor },
-    },
+    legend: { enabled: false }, // 對比 chip 已帶系列色點，等同圖例
     xAxis: {
       type: 'datetime',
       labels: {
@@ -1129,13 +1227,14 @@ const highAreaOptions = computed(() => {
       tickColor: gridColor,
     },
     yAxis: {
-      title: { text: t('closePrice'), style: { color: axisColor } },
-      ...yAxisBounds(areaSeries.value.flatMap(series => series.data.map(point => Number(point[1])))),
+      title: { text: t(isComparing.value ? 'comparisonReturnRate' : 'closePrice'), style: { color: axisColor } },
+      ...yAxisBounds(areaSeries.value.flatMap(series => series.data.map(point => Number(point.y ?? point[1])))),
       startOnTick: false,
       endOnTick: false,
+      plotLines: isComparing.value ? [{ value: 0, color: axisColor, dashStyle: 'Dot', width: 1 }] : [],
       labels: {
         formatter: function () {
-          return formatPrice(this.value)
+          return isComparing.value ? `${Number(this.value.toFixed(2))}%` : formatPrice(this.value)
         },
         style: { fontSize: '12px', color: axisColor },
       },
@@ -1146,6 +1245,12 @@ const highAreaOptions = computed(() => {
       xDateFormat: isIntradayView ? '%Y/%m/%d %H:%M' : '%Y/%m/%d',
       valueDecimals: 2,
       shared: true,
+      ...(isComparing.value && {
+        pointFormatter: function () {
+          const pct = `${this.y >= 0 ? '+' : ''}${this.y.toFixed(2)}%`
+          return `<span style="color:${this.color}">●</span> ${this.series.name}: <b>${pct}</b> (${this.price.toFixed(2)})<br/>`
+        },
+      }),
       backgroundColor: tooltipBg,
       style: { color: tooltipFg },
     },
@@ -1487,44 +1592,6 @@ async function fetchIntradayChartData(targetSymbol) {
   }
 }
 
-function onCompareSymbolSelected(payload) {
-  if (!payload?.symbol) return
-  compareSelection.value = payload
-  compareInput.value = payload.symbol
-}
-
-function addComparisonSymbol() {
-  const nextSymbol = String(compareInput.value || '').trim().toUpperCase()
-  if (!nextSymbol) return
-
-  const primarySymbol = String(symbol.value || '').trim().toUpperCase()
-  if (nextSymbol === primarySymbol) {
-    setComparisonNotice('comparisonCannotMatchPrimary')
-    return
-  }
-
-  if (compareSymbols.value.includes(nextSymbol)) {
-    setComparisonNotice('comparisonDuplicate')
-    return
-  }
-
-  if (compareSymbols.value.length >= MAX_COMPARE_SYMBOLS) {
-    setComparisonNotice('comparisonMaxReached', { max: MAX_COMPARE_SYMBOLS })
-    return
-  }
-
-  compareSymbols.value = [...compareSymbols.value, nextSymbol]
-
-  if (compareSelection.value?.symbol?.toUpperCase() === nextSymbol) {
-    compareNameMap[nextSymbol] = compareSelection.value.name || nextSymbol
-  } else if (!compareNameMap[nextSymbol]) {
-    compareNameMap[nextSymbol] = nextSymbol
-  }
-
-  compareInput.value = ''
-  compareSelection.value = null
-}
-
 function removeComparisonSymbol(targetSymbol) {
   compareSymbols.value = compareSymbols.value.filter(item => item !== targetSymbol)
   delete compareNameMap[targetSymbol]
@@ -1533,8 +1600,6 @@ function removeComparisonSymbol(targetSymbol) {
 function clearComparisonSymbols() {
   compareSymbols.value = []
   compareRawSeries.value = []
-  compareInput.value = ''
-  compareSelection.value = null
   setComparisonNotice()
 }
 
@@ -1587,14 +1652,6 @@ watch(compareSymbols, () => {
   min-width: 3.5rem;
 }
 
-.asset-kicker {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--p-text-muted-color, #64748b);
-}
-
 .compare-chip {
   display: inline-flex;
   align-items: center;
@@ -1613,85 +1670,127 @@ watch(compareSymbols, () => {
   color: var(--p-primary-color);
 }
 
-.recommend-list {
+.compare-chip--static,
+.compare-chip--static:hover {
+  cursor: default;
+  border-color: var(--p-surface-300, #d1d5db);
+  color: inherit;
+}
+
+.compare-popover {
+  width: min(22rem, calc(100vw - 2rem));
+  margin: -0.5rem;
+}
+
+.compare-popover-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color);
+}
+
+.compare-popover-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0.5rem 0;
+  border-top: 1px solid var(--p-content-border-color);
+}
+
+.compare-chip-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  margin-right: 0.4rem;
+  flex-shrink: 0;
+}
+
+.chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: -0.75rem;
+}
+
+.chart-toolbar .pi {
+  font-size: 0.8rem;
+}
+
+.chart-toolbar .pi-chevron-down,
+.chart-toolbar .pi-chevron-up {
+  font-size: 0.625rem;
+}
+
+:global(.chart-type-item--active .p-menu-item-content) {
+  color: var(--p-primary-color);
+  font-weight: 600;
+}
+
+.trending-list {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
 }
 
-.recommend-list-item {
-  display: flex;
+.trending-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.5rem auto 1.75rem;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
-  border-radius: 0.75rem;
-  padding: 0.5rem 0.6rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px dashed var(--p-content-border-color);
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.recommend-list-item:hover:not(.recommend-list-item--active) {
+.trending-row:last-child {
+  border-bottom: 0;
+}
+
+.trending-row:hover {
   background: color-mix(in srgb, var(--p-primary-color) 6%, transparent);
 }
 
-.recommend-list-item--active {
-  background: rgba(244, 63, 94, 0.08);
-  border-color: rgba(244, 63, 94, 0.18);
+.trending-spark {
+  width: 4.5rem;
+  height: 1.75rem;
 }
 
-.recommend-list-item--active:hover {
-  background: rgba(244, 63, 94, 0.12);
+.trending-watch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  color: var(--p-text-muted-color);
+  cursor: pointer;
+}
+
+.trending-watch:hover {
+  background: var(--p-content-hover-background);
+}
+
+.trending-watch--active {
+  color: #f59e0b;
+}
+
+/* 有滑鼠的裝置 hover 該列才顯示星號；觸控裝置沒有 hover，維持常駐 */
+@media (hover: hover) {
+  .trending-watch {
+    opacity: 0;
+  }
+
+  .trending-row:hover .trending-watch,
+  .trending-row:focus-within .trending-watch {
+    opacity: 1;
+  }
 }
 
 /* 透明背景的 logo 在深色模式看不清楚，墊白底；只套在圖片上，抓不到圖的文字 fallback 維持原樣 */
 img.asset-logo {
   background-color: #fff;
-}
-
-.recommend-list-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 9999px;
-  border: none;
-  background: transparent;
-  color: var(--p-text-muted-color, #64748b);
-  cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.recommend-list-action:hover:not(:disabled):not(.recommend-list-action--active) {
-  color: var(--p-primary-color);
-  background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
-}
-
-.recommend-list-action--active:hover {
-  background: rgba(244, 63, 94, 0.14);
-}
-
-.recommend-list-action--active {
-  color: #be123c;
-}
-
-.recommend-list-action:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.recommend-muted {
-  color: var(--p-text-muted-color, #64748b);
-}
-
-.recommend-hint {
-  color: #d97706;
-}
-
-.recommend-error {
-  color: #dc2626;
 }
 
 .recommend-growth-neutral {

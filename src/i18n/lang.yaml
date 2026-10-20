@@ -527,9 +527,9 @@ comparisonNoData:
 comparisonLoadFailed:
   en: Failed to load comparison data.
   zh: 對比資料載入失敗。
-recommendedStocks:
-  en: Recommended
-  zh: 推薦股票
+relatedStocks:
+  en: Related symbols
+  zh: 相關股票
 recommendationScore:
   en: score {score}
   zh: 分數 {score}
@@ -542,9 +542,6 @@ recommendationEmpty:
 recommendationLoadFailed:
   en: Failed to load recommendation data.
   zh: 推薦資料載入失敗。
-recommendationPartialHint:
-  en: "{count} recommendation item(s) were partially loaded."
-  zh: 有 {count} 檔推薦資料不完整。
 addToComparison:
   en: Add to Compare
   zh: 加入對比
