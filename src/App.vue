@@ -80,7 +80,7 @@
               </template>
             </TieredMenu>
           </template>
-          <div v-if="route.name !== 'not-found' && route.name !== 'user-guide'" class="mb-6 flex items-center justify-between gap-4">
+          <div v-if="route.name !== 'not-found' && route.name !== 'user-guide'" class="flex items-center justify-between gap-4" :class="{ 'mb-6': route.name !== 'asset' }">
             <div class="flex items-center gap-1">
               <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
               <div id="page-title-actions" class="flex items-center"></div>

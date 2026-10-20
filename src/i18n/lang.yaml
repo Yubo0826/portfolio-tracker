@@ -551,6 +551,12 @@ removeFromComparison:
 compactMode:
   en: Compact
   zh: 精簡模式
+marketOpenAsOf:
+  en: "As of {time}. Market Open."
+  zh: "截至 {time}，開盤中"
+marketClosedAt:
+  en: "At close: {time}"
+  zh: "收盤：{time}"
 lastUpdated:
   en: "Last updated: {time}"
   zh: "最後更新：{time}"
@@ -1334,9 +1340,6 @@ year:
 klineChart:
   en: Candlestick Chart
   zh: K線圖
-priceUSD:
-  en: Price (USD)
-  zh: 價格 (美元)
 stockPriceUSD:
   en: Stock Price (USD)
   zh: 股價 (美元)

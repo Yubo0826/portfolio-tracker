@@ -18,7 +18,6 @@
         />
       </Teleport>
       <div class="flex items-center">
-        <StockIcon :symbol="symbol" class="asset-logo" />
         <p class="text-muted-color">{{ info.fullName }}</p>
       </div>
       <div class="chart-container">
@@ -52,6 +51,7 @@
                           <span>(--)</span>
                         </div>
                       </div>
+                      <p v-if="marketTimeText" class="mt-1 text-xs text-muted-color">{{ marketTimeText }}</p>
                     </div>
 
                   <div class="chart-toolbar">
@@ -304,9 +304,9 @@
             <Card class="app-panel w-full">
               <template #content>
                 <div>
-                  <span class="text-lg font-bold">{{ t('popularSymbols') }}</span>
+                  <span class="text-sm font-semibold">{{ t('relatedStocks') }}</span>
 
-                  <div v-if="trendingLoading" class="trending-list mt-2">
+                  <div v-if="recommendLoading" class="trending-list mt-2">
                     <div v-for="n in 5" :key="n" class="trending-row cursor-default">
                       <div class="min-w-0">
                         <Skeleton width="3rem" height="0.8rem" />
@@ -317,13 +317,13 @@
                     </div>
                   </div>
 
-                  <p v-else-if="!trendingTickers.length" class="mt-3 text-xs text-muted-color">
-                    {{ t('noData') }}
+                  <p v-else-if="!recommendedCards.length" class="mt-3 text-xs text-muted-color">
+                    {{ t(recommendationErrorKey || 'recommendationEmpty') }}
                   </p>
 
                   <div v-else class="trending-list mt-2">
                     <div
-                      v-for="item in trendingTickers"
+                      v-for="item in recommendedCards"
                       :key="item.symbol"
                       class="trending-row"
                       role="link"
@@ -333,7 +333,7 @@
                     >
                       <div class="min-w-0">
                         <div class="font-semibold">{{ item.symbol }}</div>
-                        <div class="truncate text-xs text-muted-color">{{ item.longname || item.shortname }}</div>
+                        <div class="truncate text-xs text-muted-color">{{ item.name }}</div>
                       </div>
 
                       <svg
@@ -363,7 +363,7 @@
                         v-tooltip.top="{ value: t(watchlistStore.symbolSet.has(item.symbol) ? 'removeFromWatchlist' : 'addToWatchlist'), showDelay: 500 }"
                         :aria-label="`${t(watchlistStore.symbolSet.has(item.symbol) ? 'removeFromWatchlist' : 'addToWatchlist')} ${item.symbol}`"
                         :aria-pressed="watchlistStore.symbolSet.has(item.symbol)"
-                        @click.stop="toggleWatch(item.symbol, item.longname || item.shortname, item.quoteType)"
+                        @click.stop="toggleWatch(item.symbol, item.name, item.quoteType)"
                       >
                         <i :class="watchlistStore.symbolSet.has(item.symbol) ? 'pi pi-star-fill' : 'pi pi-star'"></i>
                       </button>
@@ -383,8 +383,8 @@
                     {{ t('companyInfoLoadFailed') }}
                   </p>
 
-                  <div class="pt-3">
-                    <p class="text-xs font-semibold text-muted-color pb-3">{{ t('companyKeyStats') }}</p>
+                  <div>
+                    <p class="text-sm font-semibold pb-3">{{ t('companyKeyStats') }}</p>
 
                     <div
                       v-for="(row, index) in companyKeyStatsRows"
@@ -434,7 +434,6 @@ import { ref, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
-import StockIcon from '@/components/StockIcon.vue'
 import Popover from 'primevue/popover'
 import Menu from 'primevue/menu'
 import Listbox from 'primevue/listbox'
@@ -453,7 +452,9 @@ const { t, locale } = useI18n()
 const { isDark, chartPalette } = useTheme()
 const { formatAmount, formatPriceWithCode: formatNativePriceWithCode, splitDisplayAmount, displayCurrency } = useCurrency()
 // Yahoo 回傳的是標的原幣價格（0050.TW 是 TWD），個股頁直接以原幣顯示，不換成偏好設定的顯示幣別
-const formatPrice = (value) => formatAmount(value, { minimumFractionDigits: 2, maximumFractionDigits: 3, currency: info.currency || 'USD' })
+// 圖表座標軸只顯示數字，幣別已標在現價旁
+const formatAxisPrice = value => value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const formatPrice = (value) =>formatAmount(value, { minimumFractionDigits: 2, maximumFractionDigits: 3, currency: info.currency || 'USD' })
 const formatPriceWithCode = (value) => formatNativePriceWithCode(value, info.currency || 'USD')
 
 const route = useRoute()
@@ -506,6 +507,7 @@ const compareRawSeries = ref([])
 const compareNameMap = reactive({})
 const comparisonNotice = ref({ key: '', params: {} })
 const recommendedCards = ref([])
+const recommendLoading = ref(false)
 const recommendationErrorKey = ref('')
 const companyInfoLoading = ref(false)
 const companyInfoError = ref(false)
@@ -551,6 +553,26 @@ const info = reactive({
   fullExchangeName: '',
   regularMarketVolume: 0,
   currency: '',
+  timezone: '',
+  exchangeTimezoneName: '',
+  tradingStart: '',
+  tradingEnd: '',
+})
+
+// 仿 Yahoo：盤中顯示「As of 時間. Market Open.」，盤後顯示收盤日期時間；一律用交易所當地時區
+// ponytail: 只看當日正規盤起訖，港股午休等盤中休市不另外判斷
+const marketTimeText = computed(() => {
+  if (!info.regularMarketTime) return ''
+  const now = Date.now()
+  const isOpen = now >= new Date(info.tradingStart).getTime() && now < new Date(info.tradingEnd).getTime()
+  const time = new Intl.DateTimeFormat(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US', {
+    timeZone: info.exchangeTimezoneName || undefined,
+    ...(!isOpen && { month: 'long', day: 'numeric' }),
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(new Date(info.regularMarketTime))
+  return t(isOpen ? 'marketOpenAsOf' : 'marketClosedAt', { time: `${time} ${info.timezone}`.trim() })
 })
 
 const companyInfo = reactive({
@@ -604,10 +626,6 @@ const chartTypeMenuItems = computed(() => chartTypeOptions.value.map(option => (
   command: () => { chartType.value = option.value },
 })))
 
-// 熱門標的（Yahoo Trending tickers），與本頁標的無關，只在掛載時抓一次
-const trendingTickers = ref([])
-const trendingLoading = ref(true)
-
 // 收盤價陣列 → 72x28 viewBox 內的折線路徑
 function toSparkPath(closes) {
   if (!Array.isArray(closes) || closes.length < 2) return ''
@@ -617,15 +635,6 @@ function toSparkPath(closes) {
     .map((close, index) => `${index ? 'L' : 'M'}${(index / (closes.length - 1) * 72).toFixed(2)},${(26 - (close - min) / span * 24).toFixed(2)}`)
     .join(' ')
 }
-
-api.get('/api/yahoo/trending?spark=1')
-  .then(data => {
-    trendingTickers.value = (Array.isArray(data) ? data : [])
-      .filter(item => item?.symbol && Number.isFinite(item.regularMarketPrice))
-      .map(item => ({ ...item, symbol: item.symbol.toUpperCase(), sparkPath: toSparkPath(item.spark) }))
-  })
-  .catch(error => console.error('熱門標的載入失敗:', error))
-  .finally(() => { trendingLoading.value = false })
 
 
 const rangeOptions = computed(() => ([
@@ -930,9 +939,10 @@ async function fetchRecommendedSymbols(targetSymbol = symbol.value) {
   }
 
   recommendationErrorKey.value = ''
+  recommendLoading.value = true
 
   try {
-    const data = await api.get(`/api/yahoo/recommend/cards?symbol=${encodeURIComponent(activeSymbol)}&limit=${MAX_RECOMMENDATION_CARDS}`)
+    const data = await api.get(`/api/yahoo/recommend/cards?symbol=${encodeURIComponent(activeSymbol)}&limit=${MAX_RECOMMENDATION_CARDS}&spark=1`)
     if (requestId !== recommendRequestId) return
 
     const recommendations = Array.isArray(data?.recommendations) ? data.recommendations : []
@@ -947,6 +957,8 @@ async function fetchRecommendedSymbols(targetSymbol = symbol.value) {
         regularMarketChange: toNullableNumber(item.regularMarketChange),
         regularMarketChangePercent: toNullableNumber(item.regularMarketChangePercent),
         currency: item.currency || '',
+        quoteType: item.quoteType || null,
+        sparkPath: toSparkPath(item.spark),
       }))
 
     recommendationErrorKey.value = ''
@@ -955,6 +967,8 @@ async function fetchRecommendedSymbols(targetSymbol = symbol.value) {
     recommendedCards.value = []
     recommendationErrorKey.value = 'recommendationLoadFailed'
     console.error('推薦股票載入失敗:', error)
+  } finally {
+    if (requestId === recommendRequestId) recommendLoading.value = false
   }
 }
 
@@ -1227,14 +1241,14 @@ const highAreaOptions = computed(() => {
       tickColor: gridColor,
     },
     yAxis: {
-      title: { text: t(isComparing.value ? 'comparisonReturnRate' : 'closePrice'), style: { color: axisColor } },
+      title: { text: null },
       ...yAxisBounds(areaSeries.value.flatMap(series => series.data.map(point => Number(point.y ?? point[1])))),
       startOnTick: false,
       endOnTick: false,
       plotLines: isComparing.value ? [{ value: 0, color: axisColor, dashStyle: 'Dot', width: 1 }] : [],
       labels: {
         formatter: function () {
-          return isComparing.value ? `${Number(this.value.toFixed(2))}%` : formatPrice(this.value)
+          return isComparing.value ? `${Number(this.value.toFixed(2))}%` : formatAxisPrice(this.value)
         },
         style: { fontSize: '12px', color: axisColor },
       },
@@ -1296,10 +1310,10 @@ const highCandleOptions = computed(() => {
       },
     },
     yAxis: {
-      title: { text: t('priceUSD'), style: { color: axisColor } },
+      title: { text: null },
       labels: {
         formatter: function () {
-          return `$${this.value.toFixed(2)}`
+          return formatAxisPrice(this.value)
         },
         style: { color: axisColor },
       },
@@ -1560,6 +1574,10 @@ async function fetchChartData(targetSymbol) {
       fullExchangeName: meta.fullExchangeName || '',
       regularMarketVolume: meta.regularMarketVolume || 0,
       currency: meta.currency || '',
+      timezone: meta.timezone || '',
+      exchangeTimezoneName: meta.exchangeTimezoneName || '',
+      tradingStart: meta.currentTradingPeriod?.regular?.start || '',
+      tradingEnd: meta.currentTradingPeriod?.regular?.end || '',
     })
 
     rawQuotes.value = quotes
@@ -1666,8 +1684,7 @@ watch(compareSymbols, () => {
 }
 
 .compare-chip:hover {
-  border-color: var(--p-primary-color);
-  color: var(--p-primary-color);
+  background: var(--p-content-hover-background);
 }
 
 .compare-chip--static,
@@ -1675,6 +1692,7 @@ watch(compareSymbols, () => {
   cursor: default;
   border-color: var(--p-surface-300, #d1d5db);
   color: inherit;
+  background: transparent;
 }
 
 .compare-popover {
@@ -1786,11 +1804,6 @@ watch(compareSymbols, () => {
   .trending-row:focus-within .trending-watch {
     opacity: 1;
   }
-}
-
-/* 透明背景的 logo 在深色模式看不清楚，墊白底；只套在圖片上，抓不到圖的文字 fallback 維持原樣 */
-img.asset-logo {
-  background-color: #fff;
 }
 
 .recommend-growth-neutral {
