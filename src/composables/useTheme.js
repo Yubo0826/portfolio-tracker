@@ -5,14 +5,15 @@ import customPreset from '@/themes/customPreset.js'
 /*
   外觀設定（放在 function 外層，整個 app 共用）
   - theme:       'light' | 'dark' | 'system'（system 跟隨系統偏好）
-  - darkVariant: 'default' | 'dim' | 'standard'（深色的配色，色票見 src/assets/dark-variants.css）
+  - darkVariant: 'dim' | 'standard'（深色的配色，色票見 src/assets/dark-variants.css）
   - accentColor: 主題強調色，對應 Tailwind 色盤名稱
 */
 const THEME_KEY = 'theme'
 const DARK_VARIANT_KEY = 'darkVariant'
 const ACCENT_KEY = 'accentColor'
 
-export const DARK_VARIANTS = ['default', 'dim', 'standard']
+// 舊的 'default'（近黑）已移除；localStorage 存著它的使用者會由 readStored 退回 'dim'
+export const DARK_VARIANTS = ['dim', 'standard']
 
 // 可選的強調色（key 對應 i18n，palette 對應 PrimeVue/Tailwind 色盤，swatch 為預覽色）
 // palette 為 null 代表「跟隨 customPreset 的 primary 定義」，不做執行期覆寫
@@ -35,7 +36,7 @@ const readStored = (key, allowed, fallback) => {
 }
 
 const theme = ref(readStored(THEME_KEY, ['light', 'dark', 'system'], 'system'))
-const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'default'))
+const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'dim'))
 const accentColor = ref(readStored(ACCENT_KEY, ACCENT_OPTIONS.map((o) => o.key), 'blue'))
 
 const isDark = computed(() => theme.value === 'dark' || (theme.value === 'system' && systemDark.value))
@@ -85,23 +86,14 @@ const CHART_PALETTES = {
     border: '#ffffff',
     legend: '#374151',
   },
-  default: {
-    axis: '#9ca3af',
-    grid: '#374151',
-    tooltipBg: '#1f2937',
-    tooltipFg: '#f3f4f6',
-    tooltipFgStrong: '#f8fafc',
-    border: '#1d1e1e',
-    legend: '#d1d5db',
-  },
   dim: {
-    axis: '#768390',
-    grid: '#373e47',
-    tooltipBg: '#22272e',
-    tooltipFg: '#cdd9e5',
-    tooltipFgStrong: '#cdd9e5',
-    border: '#2d333b',
-    legend: '#adbac7',
+    axis: '#9aa0a6',
+    grid: '#434b56',
+    tooltipBg: '#282c32',
+    tooltipFg: '#e8eaed',
+    tooltipFgStrong: '#f1f4f9',
+    border: '#353b43',
+    legend: '#bdc1c6',
   },
   standard: {
     axis: '#8b949e',

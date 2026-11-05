@@ -1,11 +1,13 @@
 /* =============================================================================
    深色風格（dark variants）
 
-   深色模式有三種配色，由 useTheme.js 掛在 <html> 上的 data-dark-variant 決定：
+   深色模式有兩種配色，由 useTheme.js 掛在 <html> 上的 data-dark-variant 決定：
 
-     default   Knowt 配色，畫布 #0d0d0d、卡片 #1d1e1e —— customPreset.js 的原生深色，預設值
-     dim       GitHub Dimmed，畫布 #22272e —— 對比較柔和的藍灰
-     standard  GitHub Dark，  畫布 #0d1117 —— 對比較強的藍黑
+     dim       柔和（預設），仿 Google Cloud Console：畫布 #282c32、卡片 #353b43 的冷調炭灰，
+               文字不用純白（#e8eaed / #9aa0a6），對比約 10:1，長時間看不刺眼
+     standard  GitHub Dark，畫布 #0d1117 —— 對比較強的藍黑
+
+   兩種都一定會套用，customPreset.js 裡的原生深色（#0d0d0d）只剩下沒被覆寫的 token 會用到。
 
    .dark class 本身不動：Tailwind 的 dark: variant（main.css 的 @custom-variant）
    與 PrimeVue 的 darkModeSelector 都認它，動了會牽連全站。這裡只用
@@ -26,21 +28,32 @@
    --p-text-muted-color 是 var(--p-surface-400)，因此 PrimeVue 元件的文字色維持一致。
    ========================================================================== */
 
+/* 色階取樣自 GCP Console 深色：每一層只比下一層亮一階，用明度區分層次而非邊框 */
 .dark[data-dark-variant='dim'] {
-  --p-surface-500: #545d68;
-  --p-surface-600: #444c56;
-  --p-surface-700: #373e47;
-  --p-surface-800: #2d333b;
-  --p-surface-900: #22272e;
-  --p-surface-950: #1c2128;
+  --p-surface-500: #6b7480;
+  --p-surface-600: #535c68;
+  --p-surface-700: #434b56;
+  --p-surface-800: #3c434d;
+  --p-surface-900: #282c32;
+  --p-surface-950: #202328;
 
-  --p-surface-background: #22272e; /* app shell 底色 */
-  --p-surface-card: #2d333b;
+  --p-surface-background: #282c32; /* app shell 底色 */
+  --p-surface-card: #353b43;
 
-  --p-content-background: #2d333b; /* 卡片、側邊欄（同 remote：content 比底色亮一階） */
-  --p-content-border-color: #373e47;
-  --p-content-color: #adbac7;
-  --p-content-focus-color: #cdd9e5;
+  --p-content-background: #353b43; /* 卡片、側邊欄（比底色亮一階） */
+  --p-content-border-color: #434b56;
+  --p-content-hover-background: #3c434d;
+  --p-content-color: #e8eaed;
+  --p-content-focus-color: #f1f4f9;
+
+  /* 柔和的關鍵：文字不用純白，次要文字偏冷灰 */
+  --p-text-color: #e8eaed;
+  --p-text-muted-color: #9aa0a6;
+}
+
+/* 側欄選中項：GCP 用帶色的暗底而非中性灰，這裡跟隨使用者選的主題色 */
+.dark[data-dark-variant='dim'] .sidebar {
+  --sidebar-active-bg: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-background));
 }
 
 .dark[data-dark-variant='standard'] {

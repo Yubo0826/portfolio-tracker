@@ -554,7 +554,7 @@ const menuItems = computed(() => {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
-/* 深色：主內容區與底色一致，卡片 (#1d1e1e) 浮在 #0d0d0d 上 */
+/* 深色：主內容區與底色一致，卡片（content-background）浮在底色（surface-background）上 */
 .dark .app-shell__content {
   background-color: var(--p-surface-background);
   box-shadow: none;

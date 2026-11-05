@@ -13,7 +13,7 @@ export const SECTOR_META = {
   realestate: { labelKey: 'sectorRealEstate', light: '#8f8d86', dark: '#b9b7ae' },
   basic_materials: { labelKey: 'sectorBasicMaterials', light: '#52514e', dark: '#7d7b74' },
   // 債券 ETF、加密貨幣、現金等沒有產業資料，以及 ETF 權重加總不足 100% 的部分
-  other: { labelKey: 'sectorOther', light: '#c4c2bb', dark: '#4a4945' },
+  other: { labelKey: 'sectorOther', light: '#c4c2bb', dark: '#7d8590' },
 }
 
 /**

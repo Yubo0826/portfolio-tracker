@@ -1281,18 +1281,12 @@ preferences:
     desc:
       en: Choose the dark mode palette. Applies whenever dark mode is active.
       zh: 選擇深色模式的配色，套用於任何進入深色的情況。
-    default:
-      en: Default
-      zh: 預設
-    defaultHint:
-      en: Neutral black with soft gray cards
-      zh: 中性黑底配灰色卡片
     dim:
       en: Soft
       zh: 柔和
     dimHint:
-      en: Muted blue-gray, easier on the eyes
-      zh: 藍灰色調，長時間閱讀較不刺眼
+      en: Cool charcoal with gentle contrast, easy on the eyes (default)
+      zh: 冷調炭灰、對比柔和，長時間閱讀不刺眼（預設）
     standard:
       en: Standard
       zh: 標準

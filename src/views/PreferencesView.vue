@@ -209,25 +209,14 @@ const colorModeOptions = computed(() => [
 */
 const darkStyleOptions = computed(() => [
   {
-    value: 'default',
-    label: t('preferences.darkStyle.default'),
-    hint: t('preferences.darkStyle.defaultHint'),
-    swatch: {
-      '--dv-canvas': '#0d0d0d',
-      '--dv-card': '#1d1e1e',
-      '--dv-border': '#444454',
-      '--dv-text': '#dedede',
-    },
-  },
-  {
     value: 'dim',
     label: t('preferences.darkStyle.dim'),
     hint: t('preferences.darkStyle.dimHint'),
     swatch: {
-      '--dv-canvas': '#22272e',
-      '--dv-card': '#2d333b',
-      '--dv-border': '#373e47',
-      '--dv-text': '#adbac7',
+      '--dv-canvas': '#282c32',
+      '--dv-card': '#353b43',
+      '--dv-border': '#434b56',
+      '--dv-text': '#e8eaed',
     },
   },
   {
