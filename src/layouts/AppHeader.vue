@@ -41,6 +41,9 @@
       </template>
 
       <template v-else>
+        <!-- 左右兩欄都 flex-1，搜尋欄才會置中；投資組合切換由 App.vue teleport 進來 -->
+        <div id="header-portfolio" class="flex min-w-0 flex-1 items-center"></div>
+
         <!-- 搜尋欄位 -->
         <button
           aria-label="Search"
@@ -59,11 +62,9 @@
         >
           <i class="pi pi-search text-sm"></i>
         </button>
-
-        <div class="flex-1" />
       </template>
 
-      <div class="ml-auto flex items-center gap-2">
+      <div class="flex items-center justify-end gap-2" :class="isHeaderNav ? 'ml-auto' : 'flex-1'">
         <template v-if="showAddTradeButtonBar && !isDemoUser">
           <Button
             v-if="!hasPortfolios"

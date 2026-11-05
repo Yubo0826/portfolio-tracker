@@ -12,9 +12,6 @@
     <Sidebar
       v-if="!isHeaderNav"
       persistent
-      :currentPortfolioName="currentPortfolioName"
-      :portfolioMenuItems="portfolioMenuItems"
-      :portfolioListItems="portfolioListItems"
       :menuItems="menuItems"
       :isDemoUser="auth.user?.uid === 'demo-user'"
       :userDisplayName="displayUserName"
@@ -41,12 +38,13 @@
 
       <div class="app-shell__scroll app-shell__content flex flex-1 flex-col overflow-y-auto">
         <main class="mx-auto w-full max-w-[1200px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
-          <!-- header 導覽模式沒有側邊欄，投資組合切換放在頁面標題上方 -->
-          <template v-if="isHeaderNav && PORTFOLIO_SCOPED_ROUTES.has(route.name)">
+          <!-- 投資組合切換：側邊欄模式送進 AppHeader 左側（#header-portfolio）；header 導覽模式頂欄放不下，留在頁面標題上方 -->
+          <Teleport defer to="#header-portfolio" :disabled="isHeaderNav">
+          <template v-if="!isHeaderNav || PORTFOLIO_SCOPED_ROUTES.has(route.name)">
             <button
               type="button"
-              class="page-portfolio -mt-3 mb-6"
-              :class="{ 'is-open': portfolioMenuVisible }"
+              class="page-portfolio"
+              :class="[isHeaderNav ? '-mt-3 mb-6' : 'page-portfolio--header', { 'is-open': portfolioMenuVisible }]"
               :aria-label="t('openPortfolioMenu')"
               :aria-expanded="portfolioMenuVisible"
               @click="portfolioMenu?.toggle($event)"
@@ -80,6 +78,7 @@
               </template>
             </TieredMenu>
           </template>
+          </Teleport>
           <div v-if="route.name !== 'not-found' && route.name !== 'user-guide'" class="flex items-center justify-between gap-4" :class="{ 'mb-6': route.name !== 'asset' }">
             <div class="flex items-center gap-1">
               <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
@@ -126,9 +125,6 @@
   <!-- Sidebar -->
   <Sidebar
     v-model:visible="sidebarVisible"
-    :currentPortfolioName="currentPortfolioName"
-    :portfolioMenuItems="portfolioMenuItems"
-    :portfolioListItems="portfolioListItems"
     :menuItems="menuItems"
     :isDemoUser="auth.user?.uid === 'demo-user'"
     :userDisplayName="displayUserName"
@@ -576,6 +572,13 @@ const menuItems = computed(() => {
   transition: border-color 0.16s ease;
 }
 
+/* 頂欄版：與搜尋框同高的 pill，字級縮小 */
+.page-portfolio--header {
+  height: 2.25rem;
+  border-radius: 9999px;
+  font-size: 1rem;
+}
+
 .page-portfolio:hover,
 .page-portfolio.is-open {
   border-color: var(--p-primary-color);
@@ -657,14 +660,16 @@ const menuItems = computed(() => {
   width: min(24rem, 100%);
   padding: 0.5rem 1rem;
   border-radius: 9999px;
-  background: var(--p-surface-100);
+  /* 淺色頂欄底色就是 surface 灰，搜尋框改白底加框才分得出來（與投資組合 pill 同款） */
+  border: 1px solid var(--p-content-border-color);
+  background: var(--p-content-background);
   color: var(--p-text-muted-color);
   text-align: left;
   transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .app-shell__search:hover {
-  background: var(--p-surface-200);
+  background: var(--p-surface-50);
   color: var(--p-text-color);
   cursor: text;
 }

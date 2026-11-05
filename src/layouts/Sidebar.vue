@@ -26,54 +26,10 @@
             </button>
           </div>
 
-          <!-- Portfolio Menu -->
-          <div class="sidebar-portfolio">
-            <button
-              type="button"
-              class="portfolio-menu-trigger menu-item sidebar-portfolio__trigger"
-              :class="{ 'is-open': portfolioMenuVisible }"
-              :title="collapsed ? currentPortfolioName : null"
-              :aria-label="t('openPortfolioMenu')"
-              :aria-expanded="portfolioMenuVisible"
-              @click="portfolioMenu?.toggle($event)"
-            >
-              <span class="menu-item-left">
-                <i class="pi pi-briefcase"></i>
-                <span v-show="!collapsed" class="sidebar-portfolio__text">
-                  <span class="portfolio-menu-current__label truncate">{{ currentPortfolioName }}</span>
-                </span>
-              </span>
-              <i v-show="!collapsed" class="pi pi-chevron-down portfolio-menu-trigger__icon"></i>
-            </button>
-
-            <TieredMenu
-              ref="portfolioMenu"
-              :model="portfolioMenuItems"
-              :popup="true"
-              @show="portfolioMenuVisible = true"
-              @hide="portfolioMenuVisible = false"
-            >
-              <!-- 清單獨立捲動：放進 model 的話，根列表的 overflow 會把子選單裁掉 -->
-              <template #start>
-                <div class="p-menu-submenu-label">{{ t('selectPortfolio') }}</div>
-                <ul class="portfolio-menu-list" role="menu">
-                  <li v-for="item in portfolioListItems" :key="item.key" class="p-tieredmenu-item" role="none">
-                    <div class="p-tieredmenu-item-content" @click="selectPortfolioItem(item)">
-                      <a href="#" class="p-tieredmenu-item-link" role="menuitem" @click.prevent>
-                        <span :class="['p-tieredmenu-item-icon', item.icon]"></span>
-                        <span class="p-tieredmenu-item-label">{{ item.label }}</span>
-                      </a>
-                    </div>
-                  </li>
-                </ul>
-                <div class="p-tieredmenu-separator" role="separator"></div>
-              </template>
-            </TieredMenu>
-
-            <div v-if="isDemoUser && !collapsed" class="sidebar-demo-notice">
-              <i class="pi pi-info-circle"></i>
-              <span>{{ $t('demoUserMessage') }}</span>
-            </div>
+          <!-- 投資組合切換已移到 AppHeader（由 App.vue teleport 進去） -->
+          <div v-if="isDemoUser && !collapsed" class="sidebar-demo-notice">
+            <i class="pi pi-info-circle"></i>
+            <span>{{ $t('demoUserMessage') }}</span>
           </div>
 
           <template v-for="(section, index) in sidebarSections" :key="section.key">
@@ -159,18 +115,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  currentPortfolioName: {
-    type: String,
-    required: true,
-  },
-  portfolioMenuItems: {
-    type: Array,
-    required: true,
-  },
-  portfolioListItems: {
-    type: Array,
-    default: () => [],
-  },
   menuItems: {
     type: Array,
     required: true,
@@ -205,13 +149,6 @@ const wrapperProps = computed(() => props.persistent
       class: 'sidebar-drawer w-[19rem] max-w-[88vw]',
     })
 
-const portfolioMenu = ref()
-const portfolioMenuVisible = ref(false)
-
-const selectPortfolioItem = (item) => {
-  item.command()
-  portfolioMenu.value?.hide()
-}
 const userMenu = ref()
 const userMenuVisible = ref(false)
 const sidebarSections = computed(() => buildSidebarSections(t))
@@ -361,26 +298,7 @@ const goDashboard = () => {
   color: var(--p-primary-color);
 }
 
-.sidebar-portfolio {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar-portfolio__trigger {
-  width: 100%;
-  border: 1px solid var(--p-content-border-color);
-  background: var(--p-content-background);
-  cursor: pointer;
-  text-align: left;
-}
-
-/* 與 Header 搜尋欄同款 pill 外框；需壓過後面 .menu-item 的 6px 圓角 */
-.menu-item.sidebar-portfolio__trigger {
-  border-radius: 999px;
-}
-
-/* p-menu-submenu-label 的樣式屬於 PrimeVue Menu，沒有載入 Menu 時要自己補（Sidebar 與 AppHeader 的投資組合選單共用） */
+/* p-menu-submenu-label 的樣式屬於 PrimeVue Menu，沒有載入 Menu 時要自己補（App.vue 的投資組合選單用） */
 .p-tieredmenu .p-menu-submenu-label {
   padding: var(--p-tieredmenu-item-padding);
   font-size: 0.8rem;
@@ -397,13 +315,6 @@ const goDashboard = () => {
   margin: 0;
   padding: var(--p-tieredmenu-list-padding);
   list-style: none;
-}
-
-.sidebar-portfolio__text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
 }
 
 .sidebar-demo-notice {
@@ -487,7 +398,6 @@ const goDashboard = () => {
 }
 
 .sidebar--collapsed .menu-item,
-.sidebar--collapsed .portfolio-menu-trigger,
 .sidebar--collapsed .user-profile {
   justify-content: center;
   padding-left: 8px;
@@ -569,35 +479,6 @@ const goDashboard = () => {
 
 .user-profile.is-open .user-profile__chevron {
   transform: rotate(180deg);
-}
-
-.portfolio-menu-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--sidebar-text);
-  transition: background-color 0.16s ease, color 0.16s ease;
-}
-
-.portfolio-menu-trigger:hover,
-.portfolio-menu-trigger.is-open {
-  background: var(--sidebar-hover-bg);
-}
-
-.portfolio-menu-trigger__icon {
-  font-size: 10px;
-  color: var(--sidebar-text-muted);
-  transition: transform 0.16s ease;
-}
-
-.portfolio-menu-trigger.is-open .portfolio-menu-trigger__icon {
-  transform: rotate(180deg);
-}
-
-.portfolio-menu-current__label {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.2;
 }
 
 .p-menu-item.menu-item-danger .p-menu-item-label,
