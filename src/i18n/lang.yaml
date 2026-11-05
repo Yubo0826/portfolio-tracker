@@ -204,8 +204,11 @@ portfolioAdded:
   en: Portfolio "{name}" added
   zh: 投資組合「{name}」已新增
 portfolioSwitched:
-  en: Added and switched to portfolio "{name}
+  en: Added and switched to portfolio "{name}"
   zh: 已新增並切換到投資組合「{name}」
+portfolioSwitchedTo:
+  en: Switched to portfolio "{name}"
+  zh: 已切換到投資組合「{name}」
 portfolioModified:
   en: Portfolio modified
   zh: 投資組合已修改
@@ -251,6 +254,9 @@ navSectionMain:
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
+searchPortfolio:
+  en: Search portfolios
+  zh: 搜尋投資組合
 duplicatePortfolio:
   en: Duplicate...
   zh: 製作副本...

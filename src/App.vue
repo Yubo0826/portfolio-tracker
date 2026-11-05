@@ -44,39 +44,15 @@
             <button
               type="button"
               class="page-portfolio"
-              :class="[isHeaderNav ? '-mt-3 mb-6' : 'page-portfolio--header', { 'is-open': portfolioMenuVisible }]"
+              :class="[isHeaderNav ? '-mt-3 mb-6' : 'page-portfolio--header', { 'is-open': portfolioPickerVisible }]"
               :aria-label="t('openPortfolioMenu')"
-              :aria-expanded="portfolioMenuVisible"
-              @click="portfolioMenu?.toggle($event)"
+              aria-haspopup="dialog"
+              @click="portfolioPickerVisible = true"
             >
               <i class="pi pi-briefcase page-portfolio__icon"></i>
               <span class="page-portfolio__name">{{ currentPortfolioName }}</span>
               <i class="pi pi-chevron-down page-portfolio__chevron"></i>
             </button>
-
-            <!-- 結構同 Sidebar 的投資組合選單：清單放在 #start 才能獨立捲動 -->
-            <TieredMenu
-              ref="portfolioMenu"
-              :model="portfolioMenuItems"
-              :popup="true"
-              @show="portfolioMenuVisible = true"
-              @hide="portfolioMenuVisible = false"
-            >
-              <template #start>
-                <div class="p-menu-submenu-label">{{ t('selectPortfolio') }}</div>
-                <ul class="portfolio-menu-list" role="menu">
-                  <li v-for="item in portfolioListItems" :key="item.key" class="p-tieredmenu-item" role="none">
-                    <div class="p-tieredmenu-item-content" @click="selectPortfolioItem(item)">
-                      <a href="#" class="p-tieredmenu-item-link" role="menuitem" @click.prevent>
-                        <span :class="['p-tieredmenu-item-icon', item.icon]"></span>
-                        <span class="p-tieredmenu-item-label">{{ item.label }}</span>
-                      </a>
-                    </div>
-                  </li>
-                </ul>
-                <div class="p-tieredmenu-separator" role="separator"></div>
-              </template>
-            </TieredMenu>
           </template>
           </Teleport>
           <div v-if="route.name !== 'not-found' && route.name !== 'user-guide'" class="flex items-center justify-between gap-4" :class="{ 'mb-6': route.name !== 'asset' }">
@@ -113,6 +89,13 @@
 
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
+  <PortfolioPickerDialog
+    v-model:visible="portfolioPickerVisible"
+    :recentIds="recentPortfolioIds"
+    @create="openCreatePortfolioDialog"
+    @import="openImportPortfolioDialog"
+  />
+
   <TransactionDialog v-model="transctionDialogVisible" :formData="transactionPrefill" />
 
   <PortfolioFormDialog
@@ -137,7 +120,6 @@
 // 同原始邏輯，無變動
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
-import { useConfirm } from 'primevue/useconfirm'
 import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
@@ -149,8 +131,8 @@ import AppHeader from './layouts/AppHeader.vue'
 import Sidebar from './layouts/Sidebar.vue'
 import Footer from './layouts/Footer.vue'
 import ProgressSpinner from 'primevue/progressspinner'
-import TieredMenu from 'primevue/tieredmenu'
 import ImportDataDialog from './components/ImportDataDialog.vue'
+import PortfolioPickerDialog from './components/PortfolioPickerDialog.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
@@ -162,7 +144,6 @@ import { useNavLayout } from '@/composables/useNavLayout.js'
 import { useLocale } from '@/composables/useLocale.js'
 
 const { locale, t } = useI18n()
-const confirm = useConfirm()
 const dialogVisible = ref(false)
 const importDialogVisible = ref(false)
 const importDialogMode = ref('transactions')
@@ -260,20 +241,6 @@ const currentPageLabel = computed(() => {
   return currentPortfolioName.value
 })
 
-// 全部投資組合，最近使用的排前面
-const recentPortfolios = computed(() => {
-  const recent = recentPortfolioIds.value
-    .map((id) => portfolioStore.portfolios.find((portfolio) => portfolio.id === id))
-    .filter(Boolean)
-  const others = portfolioStore.portfolios.filter((portfolio) => !recentPortfolioIds.value.includes(portfolio.id))
-  return [...recent, ...others]
-})
-
-const switchPortfolio = (portfolio) => {
-  if (!portfolio || portfolio.id === portfolioStore.currentPortfolio?.id) return
-  portfolioStore.setCurrentPortfolio(portfolio)
-}
-
 const rememberRecentPortfolio = (portfolio) => {
   if (!portfolio?.id) return
   recentPortfolioIds.value = [portfolio.id, ...recentPortfolioIds.value.filter((id) => id !== portfolio.id)].slice(0, 6)
@@ -291,22 +258,6 @@ const openCreatePortfolioDialog = () => {
   dialogVisible.value = true
 }
 
-const openEditPortfolioDialog = (portfolio = portfolioStore.currentPortfolio) => {
-  if (!portfolio) return
-  editPortfolio.value = {
-    id: portfolio.id,
-    name: portfolio.name,
-    description: portfolio.description || '',
-    drift_threshold: portfolio.drift_threshold ?? 5,
-    enable_email_alert: portfolio.enable_email_alert ?? true,
-  }
-  dialogVisible.value = true
-}
-
-const openPortfolioManagement = () => {
-  router.push('/portfolios')
-}
-
 const openImportTransactionsDialog = () => {
   importDialogMode.value = 'transactions'
   importDialogVisible.value = true
@@ -317,92 +268,7 @@ const openImportPortfolioDialog = () => {
   importDialogVisible.value = true
 }
 
-const buildDuplicatePortfolioName = (name) => t('portfolioCopyName', { name })
-
-const duplicatePortfolio = async (portfolio = portfolioStore.currentPortfolio) => {
-  if (!portfolio) return
-
-  try {
-    await portfolioStore.addPortfolio({
-      name: buildDuplicatePortfolioName(portfolio.name),
-      description: portfolio.description || '',
-      drift_threshold: portfolio.drift_threshold ?? 5,
-      enable_email_alert: portfolio.enable_email_alert ?? true,
-      source_id: portfolio.id,
-    })
-
-    const duplicatedPortfolio = portfolioStore.portfolios[portfolioStore.portfolios.length - 1]
-
-    if (duplicatedPortfolio) {
-      portfolioStore.setCurrentPortfolio(duplicatedPortfolio)
-      toast.success(t('portfolioDuplicated', { name: duplicatedPortfolio.name }), '')
-    }
-  } catch (error) {
-    console.error('Error duplicating portfolio:', error)
-    toast.error(t('errorOccurred'), error.message || '')
-  }
-}
-
-const confirmDeletePortfolio = (portfolio = portfolioStore.currentPortfolio) => {
-  if (!portfolio) return
-
-  confirm.require({
-    message: t('deletePortfolioConfirm', { name: portfolio.name }),
-    header: t('warning'),
-    icon: 'pi pi-info-circle',
-    rejectProps: {
-      label: t('cancel'),
-      severity: 'secondary',
-      outlined: true,
-    },
-    acceptProps: {
-      label: t('delete'),
-      severity: 'danger',
-    },
-    accept: async () => {
-      await portfolioStore.removePortfolio([portfolio.id])
-      toast.success(t('portfolioDeleted'), '')
-    },
-  })
-}
-
-const buildPortfolioMenuItem = (portfolio) => ({
-  key: portfolio.id,
-  label: portfolio.name,
-  icon: portfolio.id === portfolioStore.currentPortfolio?.id ? 'pi pi-fw pi-check' : 'pi pi-fw',
-  command: () => switchPortfolio(portfolio),
-})
-
-const portfolioMenuItems = computed(() => {
-  const manageItems = auth.isDemo
-    ? []
-    : [
-        { label: t('duplicatePortfolio'), icon: 'pi pi-copy', command: () => duplicatePortfolio() },
-        { label: t('updatePortfolio'), icon: 'pi pi-pencil', command: () => openEditPortfolioDialog() },
-        { label: t('delete'), icon: 'pi pi-trash', class: 'menu-item-danger', command: () => confirmDeletePortfolio() },
-        { separator: true },
-        { label: t('createNewPortfolio'), icon: 'pi pi-plus', command: openCreatePortfolioDialog },
-        { separator: true },
-        { label: t('importPortfolio'), icon: 'pi pi-upload', command: openImportPortfolioDialog },
-      ]
-
-  return [
-    {
-      label: t('managePortfolio'),
-      icon: 'pi pi-cog',
-      items: manageItems,
-    },
-  ]
-})
-
-const portfolioListItems = computed(() => recentPortfolios.value.map(buildPortfolioMenuItem))
-
-const portfolioMenu = ref()
-const portfolioMenuVisible = ref(false)
-const selectPortfolioItem = (item) => {
-  item.command()
-  portfolioMenu.value?.hide()
-}
+const portfolioPickerVisible = ref(false)
 
 async function getPortfolios() {
   try {

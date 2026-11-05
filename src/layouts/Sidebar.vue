@@ -298,25 +298,6 @@ const goDashboard = () => {
   color: var(--p-primary-color);
 }
 
-/* p-menu-submenu-label 的樣式屬於 PrimeVue Menu，沒有載入 Menu 時要自己補（App.vue 的投資組合選單用） */
-.p-tieredmenu .p-menu-submenu-label {
-  padding: var(--p-tieredmenu-item-padding);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--p-text-muted-color);
-}
-
-.portfolio-menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-tieredmenu-list-gap);
-  max-height: 240px;
-  overflow-y: auto;
-  margin: 0;
-  padding: var(--p-tieredmenu-list-padding);
-  list-style: none;
-}
-
 .sidebar-demo-notice {
   display: flex;
   align-items: flex-start;
