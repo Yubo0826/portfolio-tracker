@@ -80,6 +80,7 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | GET | `/api/yahoo/allocation-chart` | 回傳目標配置中各標的歷史收盤價 | query: `uid, portfolio_id, period1, period2, interval` |
 | GET | `/api/yahoo/summary` | Yahoo quoteSummary（公司概況/財務資料等） | query: `symbol` |
 | GET | `/api/yahoo/fund-holdings` | ETF/基金產業配置與前十大持股，回傳 `{ sectorWeightings: [{sector, weight}], holdings: [{symbol, name, weight}] }` | query: `symbol` |
+| GET | `/api/yahoo/sectors` | 多檔標的的產業權重（資產明細「組合分析」），回傳 `{ AAPL: [{sector, weight}], ... }`；ETF 用 `sectorWeightings`，個股用 `summaryProfile.sector`（權重 1），債券／加密貨幣回空陣列；行程內快取一天 | query: `symbols`（逗號分隔，上限 100） |
 | GET | `/api/yahoo/trending` | Yahoo 熱門標的（Trending tickers，前 5 名），含價格、漲跌、前次收盤 | query: `region, lang` |
 | GET | `/api/yahoo/recommend` | Yahoo 原始推薦結果 | query: `symbol` — *前端未呼叫* |
 | GET | `/api/yahoo/recommend/cards` | 推薦卡片（含報價與漲跌）；`spark=1` 時每張卡片多回 `spark`：最後一個交易時段的 5 分 K 收盤價陣列（迷你走勢圖用） | query: `symbol, limit`（上限 10）, `spark` |

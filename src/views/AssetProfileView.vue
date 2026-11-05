@@ -440,6 +440,7 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
+import { SECTOR_META } from '@/utils/sectors'
 import { percentChange, periodRange, filterByPeriod, toIsoDate, yAxisBounds } from '@/utils/portfolioMetrics'
 import { useRoute, useRouter } from 'vue-router'
 import { useCurrency } from '@/composables/useCurrency'
@@ -521,21 +522,6 @@ const fundHoldingsTabOptions = computed(() => [
   { label: t('topHoldingsTitle'), value: 'holdings' },
 ])
 
-// Yahoo topHoldings.sectorWeightings 的固定色彩對應，讓同一產業在不同 ETF 之間顏色一致
-const SECTOR_META = {
-  technology: { labelKey: 'sectorTechnology', light: '#2a78d6', dark: '#3987e5' },
-  healthcare: { labelKey: 'sectorHealthcare', light: '#1baf7a', dark: '#199e70' },
-  financial_services: { labelKey: 'sectorFinancialServices', light: '#eda100', dark: '#c98500' },
-  consumer_cyclical: { labelKey: 'sectorConsumerCyclical', light: '#008300', dark: '#008300' },
-  industrials: { labelKey: 'sectorIndustrials', light: '#4a3aa7', dark: '#9085e9' },
-  communication_services: { labelKey: 'sectorCommunicationServices', light: '#e34948', dark: '#e66767' },
-  consumer_defensive: { labelKey: 'sectorConsumerDefensive', light: '#e87ba4', dark: '#d55181' },
-  energy: { labelKey: 'sectorEnergy', light: '#eb6834', dark: '#d95926' },
-  // 較少見的產業別權重通常很小，使用中性灰階以免和主要 8 色搶戲
-  utilities: { labelKey: 'sectorUtilities', light: '#6b6b66', dark: '#9a9990' },
-  realestate: { labelKey: 'sectorRealEstate', light: '#8f8d86', dark: '#b9b7ae' },
-  basic_materials: { labelKey: 'sectorBasicMaterials', light: '#52514e', dark: '#7d7b74' },
-}
 
 const rawQuotes = ref([])
 const rawIntradayQuotes = ref([])

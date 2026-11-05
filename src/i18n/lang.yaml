@@ -697,6 +697,26 @@ sectorRealEstate:
 sectorBasicMaterials:
   en: Basic Materials
   zh: 原物料
+sectorOther:
+  en: Other / Unclassified
+  zh: 其他／未分類
+
+# 資產明細「組合分析」分頁
+portfolioAnalysis:
+  en: Analysis
+  zh: 組合分析
+portfolioSectorTitle:
+  en: Sector Breakdown
+  zh: 產業分布
+holdingsGrowthTitle:
+  en: Holdings Performance
+  zh: 持股走勢比較
+holdingsGrowthHint:
+  en: Return since the start of the period (dividend-adjusted). Top {n} holdings by value are shown; click the legend to toggle others. Drag to zoom.
+  zh: 自區間首日起的漲跌幅（含息還原）。預設顯示市值前 {n} 大，點圖例可切換其他標的，拖曳可放大。
+holdingsGrowthLoadFailed:
+  en: Failed to load price history.
+  zh: 歷史價格載入失敗。
 
 # 圓餅圖/配置
 actualAllocation:

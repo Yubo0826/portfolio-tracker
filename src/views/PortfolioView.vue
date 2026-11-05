@@ -29,13 +29,14 @@ import { useRoute } from 'vue-router'
 import HoldingsView from './HoldingsView.vue'
 import TransactionsView from './TransactionsView.vue'
 import DividendsView from './DividendsView.vue'
+import PortfolioAnalysisView from './PortfolioAnalysisView.vue'
 
-const views = { holdings: HoldingsView, transactions: TransactionsView, dividends: DividendsView }
+const views = { holdings: HoldingsView, transactions: TransactionsView, dividends: DividendsView, analysis: PortfolioAnalysisView }
 
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
-const VALID_TABS = ['holdings', 'transactions', 'dividends']
+const VALID_TABS = ['holdings', 'transactions', 'dividends', 'analysis']
 const normalize = (t) => (VALID_TABS.includes(t) ? t : 'holdings')
 
 // 分頁選項
@@ -43,6 +44,7 @@ const options = computed(() => [
   { label: t('holding'), value: 'holdings' },
   { label: t('transactions'), value: 'transactions' },
   { label: t('dividends'), value: 'dividends' },
+  { label: t('portfolioAnalysis'), value: 'analysis' },
 ])
 
 const route = useRoute()

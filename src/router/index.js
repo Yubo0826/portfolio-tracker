@@ -29,9 +29,9 @@ const router = createRouter({
     // 舊網址導到 PortfolioView 的對應分頁，保留書籤可用
     { path: '/:tab(holdings|transactions|dividends)', redirect: (to) => `/portfolio/${to.params.tab}` },
 
-    // 用路由參數承載分頁值，只允許三種
+    // 用路由參數承載分頁值，只允許這四種
     {
-      path: '/portfolio/:tab(holdings|transactions|dividends)',
+      path: '/portfolio/:tab(holdings|transactions|dividends|analysis)',
       name: 'portfolio',
       component: () => import('../views/PortfolioView.vue'),
     },
