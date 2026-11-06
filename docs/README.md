@@ -15,3 +15,4 @@
 | --- | --- |
 | [stock-logo-cache.md](stock-logo-cache.md) | 股票 logo 圖片的解析結果快取（搜尋下拉選單圖示逐張延遲顯示的修正） |
 | [design-system.md](design-system.md) | 設計系統「帳與板」的取捨理由（品牌色與漲跌色分離、漲跌極性 token、條帶分隔、對比度驗算） |
+| [candle-chart-plan.md](candle-chart-plan.md) | 資產頁 K 線圖強化計畫（成交量、週期、指標、我的交易標記；規劃中） |
