@@ -69,6 +69,17 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | GET | `/api/dividends` | 取得股利紀錄 | query: `uid, portfolio_id` |
 | POST | `/api/dividends/sync` | 依持股同步 Yahoo 股利歷史 | body: `uid, portfolio_id` |
 
+## `/api/fx-exchanges`（`routes/fxExchanges.js`）
+
+換匯紀錄（使用者層級，不分投資組合）。一筆為 TWD ↔ 外幣；建立／改日期或幣別時，後端以 Yahoo 當天收盤寫入 `market_rate`（1 外幣 = ? TWD，抓不到為 null）。
+
+| Method | Path | 說明 | 參數 |
+|---|---|---|---|
+| GET | `/api/fx-exchanges` | 取得換匯紀錄（日期新到舊） | query: `uid` |
+| POST | `/api/fx-exchanges` | 新增換匯 | body: `side`（`buy` 台幣換外幣／`sell` 換回台幣）, `currency, foreign_amount, twd_amount, fee`（TWD）, `date, note` |
+| PUT | `/api/fx-exchanges/:id` | 編輯換匯 | body: 同 POST |
+| DELETE | `/api/fx-exchanges/:id` | 刪除換匯 | query: `uid` |
+
 ## `/api/yahoo`（`routes/yahooFinance.js`）
 
 | Method | Path | 說明 | 參數 |

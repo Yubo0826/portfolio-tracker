@@ -56,6 +56,11 @@ const router = createRouter({
       component: () => import('../views/WatchlistView.vue'),
     },
     {
+      path: '/fx-exchanges',
+      name: 'fx-exchanges',
+      component: () => import('../views/FxExchangesView.vue'),
+    },
+    {
       path: '/asset/:symbol',
       name: 'asset',
       component: () => import('../views/AssetProfileView.vue'),

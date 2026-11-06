@@ -29,6 +29,13 @@ export function buildSidebarSections(t) {
           icon: 'pi pi-star',
           activePaths: ['/watchlist'],
         },
+        {
+          key: 'fx-exchanges',
+          label: t('fxExchanges'),
+          to: '/fx-exchanges',
+          icon: 'pi pi-arrow-right-arrow-left',
+          activePaths: ['/fx-exchanges'],
+        },
       ],
     },
     {

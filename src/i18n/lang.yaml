@@ -1529,3 +1529,97 @@ defaultPortfolioName:
 symbolExchangeGuessed:
   en: "No currency column in the file, so the exchange was inferred from the code. Japanese (4-digit) and Hong Kong (5-digit) codes overlap with Taiwan ones — please confirm these are the right stocks: {symbols}"
   zh: "檔案沒有幣別欄，以下代號的交易所是依代號推斷的。日股（4 碼）、港股（5 碼）會與台股撞號，請確認是您要的標的：{symbols}"
+# 換匯紀錄
+fxExchanges:
+  en: "FX Exchanges"
+  zh: "換匯紀錄"
+fxIntro:
+  en: "Record each currency exchange to see the spread you paid versus the market rate that day, and your average cost for foreign currency."
+  zh: "記錄每次換匯，比較當天市場匯率算出被收走的價差，並追蹤外幣的平均成本。"
+fxSignInHint:
+  en: "Sign in to record exchanges"
+  zh: "登入後即可記錄換匯"
+fxAdd:
+  en: "Add Exchange"
+  zh: "新增換匯"
+fxEdit:
+  en: "Edit Exchange"
+  zh: "編輯換匯"
+fxSummary:
+  en: "Summary"
+  zh: "摘要"
+fxBuy:
+  en: "TWD → {currency}"
+  zh: "台幣 → {currency}"
+fxSell:
+  en: "{currency} → TWD"
+  zh: "{currency} → 台幣"
+fxCurrency:
+  en: "Foreign currency"
+  zh: "外幣"
+fxForeignAmount:
+  en: "Foreign amount"
+  zh: "外幣金額"
+fxTwdAmount:
+  en: "TWD amount"
+  zh: "台幣金額"
+fxPaid:
+  en: "Paid"
+  zh: "付出"
+fxReceived:
+  en: "Received"
+  zh: "換得"
+fxRate:
+  en: "Your rate"
+  zh: "成交匯率"
+fxMarketTipWorse:
+  en: "Market close that day {rate} · {pct}% worse than market"
+  zh: "當天市場收盤 {rate}・比市場差 {pct}%"
+fxMarketTipBetter:
+  en: "Market close that day {rate} · {pct}% better than market"
+  zh: "當天市場收盤 {rate}・比市場好 {pct}%"
+fxCost:
+  en: "Spread cost"
+  zh: "價差成本"
+fxCostHint:
+  en: "(Your rate − market close that day) × amount + fee. Market rate is the daily close from Yahoo and rates move during the day, so a single trade can even show a negative cost — the total over many trades is more meaningful."
+  zh: "（成交匯率 − 當天市場收盤匯率）× 金額 + 手續費。市場匯率取 Yahoo 每日收盤，盤中本來就會波動，單筆甚至可能是負的，看累計較有參考價值。"
+fxNote:
+  en: "Note"
+  zh: "備註"
+fxNotePlaceholder:
+  en: "e.g. bank or broker"
+  zh: "例如：銀行、複委託"
+fxHolding:
+  en: "Net exchanged"
+  zh: "淨換入"
+fxHoldingHint:
+  en: "Foreign currency exchanged in minus exchanged back. Spending it on stocks does not reduce this."
+  zh: "換入減去換回的外幣；拿去買股票不會扣掉。"
+fxAvgRate:
+  en: "Average cost rate"
+  zh: "平均成本匯率"
+fxTodayRate:
+  en: "Today {rate}"
+  zh: "今日 {rate}"
+fxTotalCost:
+  en: "Total spread cost"
+  zh: "累計價差成本"
+fxTotalCostSub:
+  en: "{pct}% of amount exchanged"
+  zh: "佔換匯金額 {pct}%"
+fxPnl:
+  en: "FX gain / loss"
+  zh: "匯兌損益"
+fxPnlSub:
+  en: "Unrealized {unrealized} · Realized {realized}"
+  zh: "未實現 {unrealized}・已實現 {realized}"
+fxPnlHint:
+  en: "Unrealized: net exchanged valued at today's rate minus its average cost. Realized: gain or loss when exchanging back, using the moving-average cost."
+  zh: "未實現：淨換入外幣以今日匯率計價減去平均成本。已實現：換回台幣時以移動平均成本計算的損益。"
+fxSaved:
+  en: "Exchange saved"
+  zh: "已儲存換匯紀錄"
+fxAuto:
+  en: "auto"
+  zh: "自動計算"
