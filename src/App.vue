@@ -34,6 +34,7 @@
         @create-portfolio="dialogVisible = true"
         @open-transaction="openTransaction"
         @login="auth.login"
+        @open-preferences="preferencesVisible = true"
       />
 
       <div class="app-shell__scroll app-shell__content flex flex-1 flex-col overflow-y-auto">
@@ -87,6 +88,18 @@
     <SearchBox @close="searchBoxVisible = false" />
   </Dialog>
 
+  <Dialog
+    v-model:visible="preferencesVisible"
+    :header="t('preferences.title')"
+    modal
+    dismissableMask
+    blockScroll
+    :draggable="false"
+    class="w-[min(52rem,calc(100vw-2rem))]"
+  >
+    <PreferencesPanel />
+  </Dialog>
+
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
   <PortfolioPickerDialog
@@ -133,6 +146,7 @@ import Footer from './layouts/Footer.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 import ImportDataDialog from './components/ImportDataDialog.vue'
 import PortfolioPickerDialog from './components/PortfolioPickerDialog.vue'
+import PreferencesPanel from './components/PreferencesPanel.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
 import { useTransactionsStore } from '@/stores/transactions'
@@ -231,7 +245,6 @@ const currentPageLabel = computed(() => {
   if (route.name === 'asset') return String(route.params.symbol || t('currentAsset'))
   if (route.name === 'user-settings') return t('userSettings')
   if (route.name === 'user-guide') return t('userGuide')
-  if (route.name === 'preferences') return t('preferences.title')
 
   const activeItem = sidebarSections.value
     .flatMap((section) => section.items)
@@ -269,6 +282,7 @@ const openImportPortfolioDialog = () => {
 }
 
 const portfolioPickerVisible = ref(false)
+const preferencesVisible = ref(false)
 
 async function getPortfolios() {
   try {
@@ -351,7 +365,7 @@ const menuItems = computed(() => {
   const list = [
     { label: t('userGuide'), icon: 'pi pi-book', command: () => router.push('/user-guide') },
     { separator: true },
-    { label: t('preferences.title'), icon: 'pi pi-sliders-h', command: () => router.push('/preferences') },
+    { label: t('preferences.title'), icon: 'pi pi-sliders-h', command: () => { preferencesVisible.value = true } },
     { label: t('language'), icon: 'pi pi-language', items: [
       choice('繁體中文', locale.value === 'zh', () => setLocale('zh')),
       choice('English', locale.value === 'en', () => setLocale('en')),

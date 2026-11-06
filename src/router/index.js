@@ -71,11 +71,7 @@ const router = createRouter({
       component: () => import('../views/UserSettingView.vue'),
       meta: { requiresAuth: true },
     },
-    {
-      path: '/preferences',
-      name: 'preferences',
-      component: () => import('../views/PreferencesView.vue'),
-    },
+    { path: '/preferences', redirect: '/dashboard' }, // 偏好設定改為視窗（頂欄右上角開啟），保留舊網址
     {
       path: '/user-guide',
       name: 'user-guide',

@@ -120,6 +120,20 @@
             @hide="userMenuVisible = false"
           />
         </template>
+
+        <!-- 手機頂欄放不下，改由側欄使用者選單的「偏好設定」開啟同一個視窗。
+             hidden 要放在外層：PrimeVue Button 自帶的 display 會蓋過 Tailwind 的 hidden -->
+        <span class="hidden sm:inline-flex">
+          <Button
+            icon="pi pi-sliders-h"
+            text
+            rounded
+            severity="secondary"
+            :aria-label="t('preferences.title')"
+            v-tooltip.bottom="{ value: t('preferences.title'), showDelay: 500 }"
+            @click="$emit('open-preferences')"
+          />
+        </span>
       </div>
     </div>
   </header>
@@ -139,7 +153,7 @@ const { t } = useI18n()
 const router = useRouter()
 const { isHeaderNav } = useNavLayout()
 
-defineEmits(['open-sidebar', 'open-search', 'create-portfolio', 'open-transaction', 'login'])
+defineEmits(['open-sidebar', 'open-search', 'create-portfolio', 'open-transaction', 'login', 'open-preferences'])
 
 
 const props = defineProps({

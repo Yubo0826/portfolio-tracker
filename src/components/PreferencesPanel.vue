@@ -1,7 +1,43 @@
 <template>
   <div class="preferences">
-    <!-- 頁面標題由 App.vue 統一渲染，這裡只放說明 -->
+    <!-- 偏好設定視窗的內容（App.vue 的 Dialog，由頂欄右上角開啟）；標題由 Dialog header 顯示 -->
     <p class="preferences__intro">{{ t('preferences.intro') }}</p>
+
+    <!-- 最常改的兩項放最上面，寬螢幕並排 -->
+    <div class="grid gap-6 sm:grid-cols-2">
+      <!-- 語言 -->
+      <section class="pref-section">
+        <div class="pref-section__head">
+          <h2 class="pref-section__title">{{ t('preferences.language.label') }}</h2>
+          <p class="pref-section__desc">{{ t('preferences.language.desc') }}</p>
+        </div>
+        <SelectButton
+          :modelValue="locale"
+          :options="languageOptions"
+          optionLabel="label"
+          optionValue="value"
+          :allowEmpty="false"
+          @update:modelValue="onLanguageChange"
+        />
+      </section>
+      <!-- 幣別 -->
+      <section class="pref-section">
+        <div class="pref-section__head">
+          <h2 class="pref-section__title">{{ t('preferences.currency.label') }}</h2>
+          <p class="pref-section__desc">{{ t('preferences.currency.desc') }}</p>
+        </div>
+        <SelectButton
+          :modelValue="displayCurrency"
+          :options="currencyOptions"
+          optionLabel="label"
+          optionValue="value"
+          :allowEmpty="false"
+          @update:modelValue="onCurrencyChange"
+        />
+      </section>
+    </div>
+
+    <div class="pref-divider"></div>
 
     <!-- 1. Color mode -->
     <section class="pref-section">
@@ -139,41 +175,6 @@
       </div>
     </section>
 
-    <div class="pref-divider"></div>
-
-    <!-- 5. Language -->
-    <section class="pref-section">
-      <div class="pref-section__head">
-        <h2 class="pref-section__title">{{ t('preferences.language.label') }}</h2>
-        <p class="pref-section__desc">{{ t('preferences.language.desc') }}</p>
-      </div>
-      <SelectButton
-        :modelValue="locale"
-        :options="languageOptions"
-        optionLabel="label"
-        optionValue="value"
-        :allowEmpty="false"
-        @update:modelValue="onLanguageChange"
-      />
-    </section>
-
-    <div class="pref-divider"></div>
-
-    <!-- 6. Currency -->
-    <section class="pref-section">
-      <div class="pref-section__head">
-        <h2 class="pref-section__title">{{ t('preferences.currency.label') }}</h2>
-        <p class="pref-section__desc">{{ t('preferences.currency.desc') }}</p>
-      </div>
-      <SelectButton
-        :modelValue="displayCurrency"
-        :options="currencyOptions"
-        optionLabel="label"
-        optionValue="value"
-        :allowEmpty="false"
-        @update:modelValue="onCurrencyChange"
-      />
-    </section>
   </div>
 </template>
 
