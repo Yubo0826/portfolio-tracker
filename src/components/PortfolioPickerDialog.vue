@@ -52,9 +52,9 @@
         </template>
       </div>
 
-      <div v-if="!auth.isDemo" class="flex flex-wrap items-center gap-1 border-t border-surface px-3 py-2">
-        <Button :label="t('createNewPortfolio')" icon="pi pi-plus" text size="small" @click="close(() => emit('create'))" />
-        <Button :label="t('importPortfolio')" icon="pi pi-upload" text size="small" severity="secondary" @click="close(() => emit('import'))" />
+      <div v-if="!auth.isDemo" class="flex flex-wrap items-center gap-2 border-t border-surface px-3 py-2">
+        <Button :label="t('createNewPortfolio')" icon="pi pi-plus" severity="contrast" size="small" @click="close(() => emit('create'))" />
+        <Button :label="t('importPortfolio')" icon="pi pi-upload" severity="contrast" size="small" @click="close(() => emit('import'))" />
         <Button :label="t('managePortfolio')" icon="pi pi-cog" text size="small" severity="secondary" class="ml-auto" @click="close(() => router.push('/portfolios'))" />
       </div>
     </div>
