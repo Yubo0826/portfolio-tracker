@@ -1372,6 +1372,36 @@ chartValue:
 areaChart:
   en: Area Chart
   zh: 面積圖
+candlePeriod:
+  en: Candle period
+  zh: K 線週期
+candleDay:
+  en: D
+  zh: 日
+candleWeek:
+  en: W
+  zh: 週
+candleMonth:
+  en: M
+  zh: 月
+indicators:
+  en: Indicators
+  zh: 指標
+indicatorOverlay:
+  en: Overlay
+  zh: 主圖
+indicatorPane:
+  en: Separate pane
+  zh: 副圖
+volume:
+  en: Volume
+  zh: 成交量
+chartZoomHint:
+  en: Hold Ctrl (⌘) and scroll to zoom
+  zh: 按住 Ctrl（⌘）再滾動滑鼠滾輪即可縮放
+vwapCumulative:
+  en: VWAP (from range start)
+  zh: VWAP（區間起點累計）
 
 allocationNoSettings:
   en: No allocation settings found. Please set your target allocation first.

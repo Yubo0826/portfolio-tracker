@@ -51,6 +51,13 @@ import Highcharts from 'highcharts'
 import HighchartsVue from 'highcharts-vue'
 import 'highcharts/modules/stock'
 import 'highcharts/modules/treemap'
+// 資產頁 K 線圖的技術指標（indicators 為核心，含 SMA／EMA；stochastic 需在 slow-stochastic 之前）
+import 'highcharts/indicators/indicators'
+import 'highcharts/indicators/bollinger-bands'
+import 'highcharts/indicators/rsi'
+import 'highcharts/indicators/macd'
+import 'highcharts/indicators/stochastic'
+import 'highcharts/indicators/slow-stochastic'
 
 Highcharts.setOptions({
   lang: {

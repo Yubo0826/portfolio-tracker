@@ -74,11 +74,54 @@
                         @hide="chartTypeMenuOpen = false"
                       />
 
+                      <template v-if="chartType === 'candlestick'">
+                        <span class="toolbar-divider hidden sm:block" aria-hidden="true"></span>
+                        <SelectButton
+                          v-if="currentRange !== '1d'"
+                          v-model="candlePeriod"
+                          :options="candlePeriodOptions"
+                          optionLabel="label"
+                          optionValue="value"
+                          :allowEmpty="false"
+                          size="small"
+                          class="candle-period"
+                          :aria-label="t('candlePeriod')"
+                        />
+                        <MultiSelect
+                          v-model="selectedIndicators"
+                          :options="indicatorGroups"
+                          optionLabel="label"
+                          optionValue="id"
+                          optionGroupLabel="label"
+                          optionGroupChildren="items"
+                          :optionDisabled="option => option.needsVolume && !hasVolume"
+                          :placeholder="t('indicators')"
+                          :maxSelectedLabels="0"
+                          :selectedItemsLabel="`${t('indicators')} ({0})`"
+                          :showToggleAll="false"
+                          size="small"
+                          class="indicator-select"
+                          :aria-label="t('indicators')"
+                        >
+                          <!-- 外觀比照左邊的圖表類型按鈕（文字按鈕＋圖示＋箭頭），不用輸入框樣式 -->
+                          <template #value>
+                            <span class="inline-flex items-center gap-2">
+                              <i class="pi pi-wave-pulse" aria-hidden="true"></i>
+                              <span class="font-semibold">{{ t('indicators') }}</span>
+                              <span v-if="selectedIndicators.length" class="indicator-count">{{ selectedIndicators.length }}</span>
+                            </span>
+                          </template>
+                          <template #dropdownicon>
+                            <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                          </template>
+                        </MultiSelect>
+                      </template>
+
                       <Button
+                        v-if="chartType === 'area'"
                         size="small"
                         text
                         severity="secondary"
-                        :disabled="isComparisonDisabled"
                         aria-haspopup="dialog"
                         :aria-expanded="comparePopoverOpen"
                         @click="comparePopover.toggle($event)"
@@ -168,13 +211,7 @@
                   </div>
 
                   <p
-                    v-if="isComparisonDisabled && compareSymbols.length"
-                    class="mt-2 text-xs text-muted-color"
-                  >
-                    {{ t('comparisonDisabledForCandlestick') }}
-                  </p>
-                  <p
-                    v-else-if="comparisonNoticeText"
+                    v-if="comparisonNoticeText && !isComparisonDisabled"
                     class="mt-2 text-xs text-orange-600 dark:text-orange-300"
                   >
                     {{ comparisonNoticeText }}
@@ -212,11 +249,17 @@
                       style="width: 100%; height: 300px;"
                     />
 
-                    <highcharts
-                      v-else-if="chartType === 'candlestick'"
-                      :options="highCandleOptions"
-                      style="width: 100%; height: 300px;"
-                    />
+                    <div v-else-if="chartType === 'candlestick'" class="relative">
+                      <highcharts
+                        :key="paneKey"
+                        constructorType="stockChart"
+                        :options="candleOptions"
+                        :style="{ width: '100%', height: `${candleHeight}px` }"
+                      />
+                      <Transition name="fade">
+                        <div v-if="wheelHint" class="wheel-hint" aria-hidden="true">{{ t('chartZoomHint') }}</div>
+                      </Transition>
+                    </div>
                   </div>
 
                   <SelectButton
@@ -447,6 +490,8 @@ import { useCurrency } from '@/composables/useCurrency'
 import { useTheme } from '@/composables/useTheme.js'
 import * as toast from '@/composables/toast'
 import { useWatchlistStore } from '@/stores/watchlist'
+import { aggregateCandles } from '@/utils/candles'
+import { INDICATORS, useCandleChart } from '@/composables/useCandleChart'
 
 const { t, locale } = useI18n()
 const { isDark, chartPalette } = useTheme()
@@ -640,7 +685,48 @@ function quotesForRange(range) {
 const currentRangeQuotes = computed(() => quotesForRange(currentRange.value))
 
 const chartSeries = computed(() => [{ name: t('closePrice'), data: toLineSeriesFromQuotes(currentRangeQuotes.value) }])
-const candleSeries = computed(() => [{ name: t('klineChart'), data: toCandleSeriesFromQuotes(currentRangeQuotes.value) }])
+// K 線畫全部資料（均線在區間起點就有值），以 x 軸範圍顯示目前區間；1D 用 5 分 K、不合併週期
+const candlePeriod = ref('day')
+const candlePeriodOptions = computed(() => [
+  { label: t('candleDay'), value: 'day' },
+  { label: t('candleWeek'), value: 'week' },
+  { label: t('candleMonth'), value: 'month' },
+])
+const indicatorGroups = computed(() => [
+  { label: t('indicatorOverlay'), items: INDICATORS.filter(i => i.pane === 'main') },
+  { label: t('indicatorPane'), items: INDICATORS.filter(i => i.pane === 'sub') },
+])
+const candles = computed(() => currentRange.value === '1d'
+  ? aggregateCandles(rawIntradayQuotes.value, 'day')
+  : aggregateCandles(rawQuotes.value, candlePeriod.value))
+
+const { selectedIndicators, candleOptions, candleHeight, hasVolume, paneKey, wheelHint } = useCandleChart(() => {
+  const isIntradayView = currentRange.value === '1d'
+  const list = candles.value
+  const ts = c => new Date(c.date).getTime()
+  // 顯示區間起點落在哪根（週／月）K 線，就從那根開始顯示
+  const rangeStart = isIntradayView ? null : new Date(currentRangeQuotes.value[0]?.date).getTime()
+  const first = rangeStart ? list.findLast(c => ts(c) <= rangeStart) ?? list[0] : null
+  const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
+  const dateFormatter = new Intl.DateTimeFormat(
+    chartLocale,
+    isIntradayView
+      ? { hour: '2-digit', minute: '2-digit', hour12: false }
+      : candlePeriod.value === 'month'
+        ? { year: 'numeric', month: 'numeric' }
+        : locale.value.startsWith('zh') ? { month: 'numeric', day: 'numeric' } : { month: 'short', day: 'numeric' }
+  )
+  return {
+    candles: list,
+    xMin: first ? ts(first) : undefined,
+    xMax: list.length && !isIntradayView ? ts(list.at(-1)) : undefined,
+    palette: chartPalette.value,
+    formatPrice: formatAxisPrice,
+    formatDate: value => dateFormatter.format(new Date(value)),
+    xDateFormat: isIntradayView ? '%Y/%m/%d %H:%M' : '%Y/%m/%d',
+    labels: { price: t('klineChart'), volume: t('volume'), vwap: isIntradayView ? 'VWAP' : t('vwapCumulative') },
+  }
+})
 
 const rangeOptionsWithGrowth = computed(() => rangeOptions.value.map(option => ({
   ...option,
@@ -1119,22 +1205,6 @@ function toLineSeriesFromQuotes(quotes) {
     .sort((a, b) => a.x - b.x)
 }
 
-function toCandleSeriesFromQuotes(quotes) {
-  return quotes
-    .filter(item => item?.open !== null && item?.close !== null && item?.high !== null && item?.low !== null && item?.date)
-    .map(item => ({
-      x: new Date(item.date),
-      y: [
-        Number(Number(item.open).toFixed(2)),
-        Number(Number(item.high).toFixed(2)),
-        Number(Number(item.low).toFixed(2)),
-        Number(Number(item.close).toFixed(2)),
-      ],
-    }))
-    .filter(item => !Number.isNaN(item.x.getTime()))
-    .sort((a, b) => a.x - b.x)
-}
-
 function toPriceSeries(points) {
   return points
     .map(point => {
@@ -1264,67 +1334,6 @@ const highAreaOptions = computed(() => {
       },
     },
     series: areaSeries.value,
-  }
-})
-
-const highCandleOptions = computed(() => {
-  const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg } = chartPalette.value
-  const isIntradayView = currentRange.value === '1d'
-  const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
-  const chartDateFormatter = new Intl.DateTimeFormat(
-    chartLocale,
-    isIntradayView
-      ? { hour: '2-digit', minute: '2-digit', hour12: false }
-      : locale.value.startsWith('zh')
-        ? { month: 'numeric', day: 'numeric' }
-        : { month: 'short', day: 'numeric' }
-  )
-
-  return {
-    chart: { type: 'candlestick', backgroundColor: 'transparent', animation: { duration: 400 } },
-    title: { text: null },
-    credits: { enabled: false },
-    legend: { enabled: false },
-    xAxis: {
-      type: 'datetime',
-      labels: {
-        formatter: function () {
-          return chartDateFormatter.format(new Date(this.value))
-        },
-        style: { color: axisColor },
-      },
-    },
-    yAxis: {
-      title: { text: null },
-      labels: {
-        formatter: function () {
-          return formatAxisPrice(this.value)
-        },
-        style: { color: axisColor },
-      },
-      gridLineColor: gridColor,
-    },
-    tooltip: {
-      xDateFormat: isIntradayView ? '%Y/%m/%d %H:%M' : '%Y/%m/%d',
-      backgroundColor: tooltipBg,
-      style: { color: tooltipFg },
-    },
-    plotOptions: {
-      candlestick: {
-        color: '#ef4444',
-        upColor: '#10b981',
-        lineColor: '#ef4444',
-        upLineColor: '#10b981',
-      },
-    },
-    series: [{
-      type: 'candlestick',
-      name: t('klineChart'),
-      data: candleSeries.value[0].data.map(d => {
-        const ts = d.x instanceof Date ? d.x.getTime() : new Date(d.x).getTime()
-        return [ts, d.y[0], d.y[1], d.y[2], d.y[3]]
-      }),
-    }],
   }
 })
 
@@ -1716,6 +1725,87 @@ watch(compareSymbols, () => {
   align-items: center;
   gap: 0.25rem;
   margin-right: -0.75rem;
+}
+
+.wheel-hint {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  background: rgb(0 0 0 / 0.65);
+  color: #fff;
+  font-size: 0.8125rem;
+  pointer-events: none;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 1.25rem;
+  margin: 0 0.25rem;
+  background: var(--p-content-border-color);
+}
+
+/* K 線週期：緊湊的分段切換 */
+.candle-period {
+  padding: 2px;
+}
+
+.candle-period :deep(.p-togglebutton) {
+  padding: 0.125rem;
+  font-size: 0.8125rem;
+}
+
+.candle-period :deep(.p-togglebutton-content) {
+  padding: 0.2rem 0.75rem;
+}
+
+/* 指標選單做成文字按鈕外觀 */
+.indicator-select.p-multiselect,
+.indicator-select.p-multiselect:not(.p-disabled):hover,
+.indicator-select.p-multiselect:not(.p-disabled).p-focus {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.indicator-select.p-multiselect:not(.p-disabled):hover {
+  background: var(--p-button-text-secondary-hover-background);
+}
+
+.indicator-select :deep(.p-multiselect-label) {
+  padding-inline: 0.75rem 0.25rem;
+  color: var(--p-button-text-secondary-color);
+  font-size: 0.875rem;
+}
+
+.indicator-select :deep(.p-multiselect-dropdown) {
+  width: auto;
+  padding-right: 0.75rem;
+  color: var(--p-button-text-secondary-color);
+}
+
+.indicator-count {
+  min-width: 1.125rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--p-primary-color);
+  color: var(--p-primary-contrast-color);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  text-align: center;
 }
 
 .chart-toolbar .pi {
