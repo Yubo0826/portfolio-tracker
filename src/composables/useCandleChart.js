@@ -69,6 +69,47 @@ export const vwapFrom = (candles, fromTs = -Infinity) => {
   return out
 }
 
+const BUY_COLOR = '#2563eb'
+const SELL_COLOR = '#ea580c'
+
+/**
+ * 我的交易旗標（K 線圖與面積圖共用）。買在下方、賣在上方，同日同方向已在 tradeMarkers 合併。
+ * @param points [{ x, side, text }]
+ * @param candle K 線用 low／high 讓旗標貼著 K 棒，面積圖用 y
+ */
+export const tradeFlagSeries = (points, { onSeries, candle, names }) => ['buy', 'sell'].map((side) => {
+  const color = side === 'buy' ? BUY_COLOR : SELL_COLOR
+  return {
+    type: 'flags',
+    name: names[side],
+    onSeries,
+    onKey: candle ? (side === 'buy' ? 'low' : 'high') : 'y',
+    data: points.filter((p) => p.side === side).map((p) => ({ x: p.x, title: side === 'buy' ? 'B' : 'S', text: p.text })),
+    shape: 'circlepin',
+    width: 12,
+    y: side === 'buy' ? 14 : -30,
+    color,
+    fillColor: color,
+    lineColor: color,
+    style: { color: '#fff', fontSize: '10px', fontWeight: '700' },
+    states: { hover: { fillColor: color, lineColor: color } },
+    // 標題用 text 裡的實際交易日，不顯示吸附到的 K 線日期
+    tooltip: { headerFormat: '', pointFormat: '{point.text}' },
+    showInLegend: false,
+    zIndex: 5,
+  }
+})
+
+/** 平均成本虛線；搭配 yAxis softMin／softMax 讓成本價在顯示範圍外時也看得到 */
+export const avgCostPlotLine = (value, label) => ({
+  value,
+  color: BUY_COLOR,
+  width: 1,
+  dashStyle: 'Dash',
+  zIndex: 4,
+  label: { text: label, align: 'right', x: -4, y: -5, style: { color: BUY_COLOR, fontSize: '11px', fontWeight: '600' } },
+})
+
 const MIN_BARS = 10 // 最多放大到畫面剩 10 根 K 線
 
 /**
@@ -126,7 +167,7 @@ export function useCandleChart(source) {
   })
 
   const options = computed(() => {
-    const { candles, xMin, xMax, palette, formatPrice, formatDate, xDateFormat, labels } = source()
+    const { candles, xMin, xMax, palette, formatPrice, formatDate, xDateFormat, labels, trades = [], avgCost = null } = source()
     const { hasVolume, hasOverlay, active, subs, panesH, height } = layout.value
     const { axis, grid, tooltipBg, tooltipFg } = palette
     const pct = (px) => `${(px / panesH) * 100}%`
@@ -142,7 +183,10 @@ export function useCandleChart(source) {
       return yAxis
     }
 
-    const yAxes = [pane(MAIN_H, { labels: { ...axisBase.labels, formatter() { return formatPrice(this.value) } } })]
+    const yAxes = [pane(MAIN_H, {
+      labels: { ...axisBase.labels, formatter() { return formatPrice(this.value) } },
+      ...(avgCost && { plotLines: [avgCostPlotLine(avgCost, labels.avgCost)], softMin: avgCost, softMax: avgCost }),
+    })]
     if (hasVolume) {
       yAxes.push(pane(VOLUME_H, {
         title: paneTitle(labels.volume),
@@ -179,6 +223,8 @@ export function useCandleChart(source) {
         showInLegend: false,
       })
     }
+
+    if (trades.length) series.push(...tradeFlagSeries(trades, { onSeries: 'main', candle: true, names: labels.trades }))
 
     for (const indicator of active) {
       if (indicator.pane === 'main') {
@@ -236,7 +282,8 @@ export function useCandleChart(source) {
       },
       yAxis: yAxes,
       tooltip: { split: false, shared: true, xDateFormat, backgroundColor: tooltipBg, style: { color: tooltipFg }, valueDecimals: 2 },
-      plotOptions: { series: { animation: false, dataGrouping: { enabled: false } } },
+      // inactive 關掉：滑到旗標時不要把 K 線淡化
+      plotOptions: { series: { animation: false, dataGrouping: { enabled: false }, states: { inactive: { enabled: false } } } },
       series,
     }
   })

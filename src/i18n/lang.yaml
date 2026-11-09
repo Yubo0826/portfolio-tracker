@@ -1396,6 +1396,21 @@ indicatorPane:
 volume:
   en: Volume
   zh: 成交量
+myTrades:
+  en: "My trades"
+  zh: "我的交易"
+avgCostLine:
+  en: "Avg cost {price}"
+  zh: "平均成本 {price}"
+tradeMarkerBuy:
+  en: "Buy {shares} {'@'} {price}"
+  zh: "買 {shares} 股 {'@'} {price}"
+tradeMarkerSell:
+  en: "Sell {shares} {'@'} {price}"
+  zh: "賣 {shares} 股 {'@'} {price}"
+tradeMarkerAdjusted:
+  en: " (split-adjusted {price})"
+  zh: "（分割調整後 {price}）"
 chartZoomHint:
   en: Hold Ctrl (⌘) and scroll to zoom
   zh: 按住 Ctrl（⌘）再滾動滑鼠滾輪即可縮放

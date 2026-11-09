@@ -117,6 +117,19 @@
                         </MultiSelect>
                       </template>
 
+                      <!-- 我的交易：圖上的買賣點與平均成本線 -->
+                      <Button
+                        v-if="symbolTrades.length && !(chartType === 'area' && isComparing)"
+                        size="small"
+                        text
+                        :severity="showTrades ? undefined : 'secondary'"
+                        :aria-pressed="showTrades"
+                        @click="showTrades = !showTrades"
+                      >
+                        <i class="pi pi-flag" aria-hidden="true"></i>
+                        <span class="font-semibold">{{ t('myTrades') }}</span>
+                      </Button>
+
                       <Button
                         v-if="chartType === 'area'"
                         size="small"
@@ -491,7 +504,9 @@ import { useTheme } from '@/composables/useTheme.js'
 import * as toast from '@/composables/toast'
 import { useWatchlistStore } from '@/stores/watchlist'
 import { aggregateCandles } from '@/utils/candles'
-import { INDICATORS, useCandleChart } from '@/composables/useCandleChart'
+import { INDICATORS, useCandleChart, tradeFlagSeries, avgCostPlotLine } from '@/composables/useCandleChart'
+import { tradeMarkers, adjustedAvgCost, snapIndex } from '@/utils/tradeMarkers'
+import { useTransactionsStore } from '@/stores/transactions'
 
 const { t, locale } = useI18n()
 const { isDark, chartPalette } = useTheme()
@@ -696,6 +711,32 @@ const indicatorGroups = computed(() => [
   { label: t('indicatorOverlay'), items: INDICATORS.filter(i => i.pane === 'main') },
   { label: t('indicatorPane'), items: INDICATORS.filter(i => i.pane === 'sub') },
 ])
+// 我的交易：目前投資組合中這個代號、且幣別與圖表相同的交易（幣別不同時價格軸對不上，不畫）
+const transactionsStore = useTransactionsStore()
+const splits = ref([])
+const showTrades = ref(true)
+const symbolTrades = computed(() => {
+  const sym = String(symbol.value || '').toUpperCase()
+  return transactionsStore.list.filter(tr => tr.symbol?.toUpperCase() === sym && tr.currency === info.currency)
+})
+const tradesVisible = computed(() => showTrades.value && symbolTrades.value.length > 0)
+const avgCost = computed(() => (tradesVisible.value ? adjustedAvgCost(symbolTrades.value, splits.value) : null))
+const avgCostLabel = computed(() => avgCost.value && t('avgCostLine', { price: formatAxisPrice(avgCost.value) }))
+const tradeNames = computed(() => ({ buy: t('buy'), sell: t('sell') }))
+
+/** 交易旗標的點：對到 bars（[{ ts, day }]）中當天或之前最近的一根，1D 不畫（盤中 x 軸對不上交易日） */
+function tradePoints(bars) {
+  if (!tradesVisible.value || currentRange.value === '1d' || !bars.length) return []
+  const days = bars.map(b => b.day)
+  return tradeMarkers(symbolTrades.value, splits.value, { from: days[0] }).flatMap(m => {
+    const index = snapIndex(m.day, days)
+    if (index < 0) return []
+    const lines = m.items.map(i => t(m.side === 'buy' ? 'tradeMarkerBuy' : 'tradeMarkerSell', { shares: i.shares, price: formatAxisPrice(i.price) })
+      + (i.factor !== 1 ? t('tradeMarkerAdjusted', { price: formatAxisPrice(i.adjPrice) }) : ''))
+    return [{ x: bars[index].ts, side: m.side, text: `${m.day}<br/>${lines.join('<br/>')}` }]
+  })
+}
+
 const candles = computed(() => currentRange.value === '1d'
   ? aggregateCandles(rawIntradayQuotes.value, 'day')
   : aggregateCandles(rawQuotes.value, candlePeriod.value))
@@ -712,7 +753,7 @@ const { selectedIndicators, candleOptions, candleHeight, hasVolume, paneKey, whe
     chartLocale,
     isIntradayView
       ? { hour: '2-digit', minute: '2-digit', hour12: false }
-      : candlePeriod.value === 'month'
+      : candlePeriod.value === 'month' || currentRange.value === '5y'
         ? { year: 'numeric', month: 'numeric' }
         : locale.value.startsWith('zh') ? { month: 'numeric', day: 'numeric' } : { month: 'short', day: 'numeric' }
   )
@@ -724,7 +765,9 @@ const { selectedIndicators, candleOptions, candleHeight, hasVolume, paneKey, whe
     formatPrice: formatAxisPrice,
     formatDate: value => dateFormatter.format(new Date(value)),
     xDateFormat: isIntradayView ? '%Y/%m/%d %H:%M' : '%Y/%m/%d',
-    labels: { price: t('klineChart'), volume: t('volume'), vwap: isIntradayView ? 'VWAP' : t('vwapCumulative') },
+    labels: { price: t('klineChart'), volume: t('volume'), vwap: isIntradayView ? 'VWAP' : t('vwapCumulative'), trades: tradeNames.value, avgCost: avgCostLabel.value },
+    trades: tradePoints(list.map(c => ({ ts: ts(c), day: String(c.date).slice(0, 10) }))),
+    avgCost: avgCost.value,
   }
 })
 
@@ -1238,6 +1281,7 @@ const areaSeries = computed(() => {
   if (primarySeries.length) {
     merged.push({
       type: 'area',
+      id: 'primary',
       name: primarySymbol,
       data: toPoints(primarySeries),
       color: primaryColor,
@@ -1261,6 +1305,13 @@ const areaSeries = computed(() => {
       lineWidth: 2,
     })
   })
+
+  // 對比模式的 y 軸是報酬率 %，交易價格對不上，不畫旗標
+  if (primarySeries.length && !isComparing.value) {
+    const bars = primarySeries.map(point => { const x = toX(point.x); return { ts: x, day: new Date(x).toISOString().slice(0, 10) } })
+    const points = tradePoints(bars)
+    if (points.length) merged.push(...tradeFlagSeries(points, { onSeries: 'primary', candle: false, names: tradeNames.value }))
+  }
 
   return merged
 })
@@ -1297,10 +1348,16 @@ const highAreaOptions = computed(() => {
     },
     yAxis: {
       title: { text: null },
-      ...yAxisBounds(areaSeries.value.flatMap(series => series.data.map(point => Number(point.y ?? point[1])))),
+      // 平均成本也算進範圍，成本價在區間外時仍看得到；旗標系列沒有 y 值，排除
+      ...yAxisBounds([
+        ...areaSeries.value.filter(series => series.type !== 'flags').flatMap(series => series.data.map(point => Number(point.y ?? point[1]))),
+        ...(avgCost.value && !isComparing.value ? [avgCost.value] : []),
+      ]),
       startOnTick: false,
       endOnTick: false,
-      plotLines: isComparing.value ? [{ value: 0, color: axisColor, dashStyle: 'Dot', width: 1 }] : [],
+      plotLines: isComparing.value
+        ? [{ value: 0, color: axisColor, dashStyle: 'Dot', width: 1 }]
+        : avgCost.value ? [avgCostPlotLine(avgCost.value, avgCostLabel.value)] : [],
       labels: {
         formatter: function () {
           return isComparing.value ? `${Number(this.value.toFixed(2))}%` : formatAxisPrice(this.value)
@@ -1326,6 +1383,7 @@ const highAreaOptions = computed(() => {
     plotOptions: {
       series: {
         marker: { enabled: false },
+        states: { inactive: { enabled: false } },
       },
       area: {
         threshold: null,
@@ -1575,9 +1633,11 @@ async function fetchChartData(targetSymbol) {
     })
 
     rawQuotes.value = quotes
+    splits.value = data?.events?.splits || []
   } catch (error) {
     if (requestId !== mainRequestId) return
     rawQuotes.value = []
+    splits.value = []
     compareRawSeries.value = []
     console.error('取得資料失敗:', error)
     if (compareSymbols.value.length) {
