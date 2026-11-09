@@ -29,8 +29,6 @@
 
         <HeaderNav class="hidden lg:flex" />
 
-        <div class="flex-1" />
-
         <button
           :aria-label="t('searchPlaceholder')"
           class="flex h-10 w-10 items-center justify-center rounded-full text-[var(--p-text-muted-color)] transition-colors hover:bg-[var(--p-content-background)]"
@@ -38,6 +36,8 @@
         >
           <i class="pi pi-search text-sm"></i>
         </button>
+
+        <div class="flex-1" />
       </template>
 
       <template v-else>

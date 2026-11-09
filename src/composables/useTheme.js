@@ -12,8 +12,8 @@ const THEME_KEY = 'theme'
 const DARK_VARIANT_KEY = 'darkVariant'
 const ACCENT_KEY = 'accentColor'
 
-// 舊的 'default'（近黑）已移除；localStorage 存著它的使用者會由 readStored 退回 'dim'
-export const DARK_VARIANTS = ['dim', 'standard']
+// 舊的 'default'（近黑）已移除；localStorage 存著它的使用者會由 readStored 退回預設 'standard'
+export const DARK_VARIANTS = ['standard', 'dim']
 
 // 可選的強調色（key 對應 i18n，palette 對應 PrimeVue/Tailwind 色盤，swatch 為預覽色）
 // palette 為 null 代表「跟隨 customPreset 的 primary 定義」，不做執行期覆寫
@@ -36,7 +36,7 @@ const readStored = (key, allowed, fallback) => {
 }
 
 const theme = ref(readStored(THEME_KEY, ['light', 'dark', 'system'], 'system'))
-const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'dim'))
+const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'standard'))
 const accentColor = ref(readStored(ACCENT_KEY, ACCENT_OPTIONS.map((o) => o.key), 'blue'))
 
 const isDark = computed(() => theme.value === 'dark' || (theme.value === 'system' && systemDark.value))

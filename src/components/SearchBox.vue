@@ -2,7 +2,6 @@
   <div @keydown.down.prevent="moveFocus(1)" @keydown.up.prevent="moveFocus(-1)">
     <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
       <label class="flex flex-1 items-center gap-3 px-3 py-2">
-        <i class="pi pi-search text-primary"></i>
         <input
           ref="inputEl"
           v-model="query"
@@ -16,6 +15,23 @@
       </label>
       <Button icon="pi pi-times" text rounded severity="secondary" size="small" :aria-label="$t('close')"
         v-tooltip.bottom="{ value: $t('close'), showDelay: 500 }" @click="emit('close')" />
+    </div>
+
+    <!-- 選中：以文字色當底、內容底色當字，深淺色模式自動反轉 -->
+    <div class="flex gap-2 px-4 pt-3">
+      <button
+        v-for="option in tabs"
+        :key="option.value"
+        type="button"
+        :aria-pressed="tab === option.value"
+        class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
+        :class="tab === option.value
+          ? 'bg-[var(--p-text-color)] text-[var(--p-content-background)]'
+          : 'bg-emphasis text-color hover:bg-[var(--p-content-hover-background)]'"
+        @click="tab = option.value"
+      >
+        {{ option.label }}
+      </button>
     </div>
 
     <div ref="listEl" class="max-h-[60vh] overflow-y-auto pb-2">
@@ -64,13 +80,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
+import { useHoldingsStore } from '@/stores/holdings'
 
 const { t } = useI18n()
+const holdingsStore = useHoldingsStore()
 const router = useRouter()
 const emit = defineEmits(['close'])
 
@@ -80,9 +98,15 @@ const searching = ref(false)
 const inputEl = ref(null)
 const listEl = ref(null)
 let trending = null
+let holdingQuotes = null
+const tab = ref('all')
+const tabs = computed(() => [
+  { label: t('all'), value: 'all' },
+  { label: t('searchHeld'), value: 'held' },
+])
 
 const SEARCH_HISTORY_KEY = 'portfolio-tracker-search-history'
-const SEARCH_HISTORY_LIMIT = 5
+const SEARCH_HISTORY_LIMIT = 3
 
 const formatNumber = (v) => Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -125,34 +149,60 @@ function loadTrending() {
   return trending
 }
 
+// ponytail: 全部持股一次批次報價、視窗開著時不重抓；持股多到數百檔時 query string 會過長，再改成 POST 或分批
+function loadHoldingQuotes() {
+  const top = [...holdingsStore.list].sort((a, b) => b.currentValue - a.currentValue)
+  if (!top.length) return Promise.resolve([])
+  holdingQuotes ??= api.get('/api/yahoo/quote?' + top.map(h => 'symbol=' + encodeURIComponent(h.symbol)).join('&'))
+    .then(data => [].concat(data ?? [])) // 只查一檔時後端回物件而非陣列
+    .catch(() => [])
+    .then(quotes => top.map(h => normalizeSearchItem({
+      name: h.name,
+      ...quotes.find(q => q?.symbol?.toUpperCase() === h.symbol.toUpperCase()),
+      symbol: h.symbol,
+    })))
+  return holdingQuotes
+}
+
 const group = (label, key, items) => ({ label, key, items })
 
 async function idleGroups() {
   return [
-    group(t('recentlyUsed'), 'history', readSearchHistory()),
+    group(t('recentSearches'), 'history', readSearchHistory()),
     group(t('popularSymbols'), 'trending', await loadTrending()),
   ].filter(g => g.items.length)
 }
 
+// 「持有」分頁：有輸入時只在持股裡比對代號與名稱，不查 Yahoo
+async function heldGroups(q) {
+  const needle = q.toUpperCase()
+  const items = (await loadHoldingQuotes()).filter(h => `${h.symbol} ${h.longname}`.toUpperCase().includes(needle))
+  return items.length ? [group(t('holdings'), 'holdings', items)] : []
+}
+
 async function loadGroups() {
   const q = query.value.trim()
+  const currentTab = tab.value
+  const isStale = () => q !== query.value.trim() || currentTab !== tab.value
   searching.value = true
   try {
     let next
-    if (!q) next = await idleGroups()
+    if (currentTab === 'held') next = await heldGroups(q)
+    else if (!q) next = await idleGroups()
     else {
       const data = await api.get('/api/yahoo/symbol?query=' + encodeURIComponent(q))
       next = Array.isArray(data) && data.length ? [group(t('searchResults'), 'result', data.map(normalizeSearchItem).filter(Boolean))] : []
     }
-    if (q === query.value.trim()) groups.value = next // 丟掉過期回應
+    if (!isStale()) groups.value = next // 丟掉過期回應
   } catch {
-    if (q === query.value.trim()) groups.value = []
+    if (!isStale()) groups.value = []
   } finally {
     searching.value = false
   }
 }
 const onSearch = debounce(loadGroups, 300)
 loadGroups()
+watch(tab, loadGroups)
 
 // 上下鍵在輸入框與選項之間移動焦點
 function moveFocus(step) {

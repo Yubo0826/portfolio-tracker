@@ -10,13 +10,17 @@
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-.dark {
-  /* SelectButton／ToggleButton：未選取的底色（軌道）比卡片暗一階，選取的那一顆再亮回來 */
-  --p-togglebutton-background: var(--p-surface-950);
-  --p-togglebutton-checked-background: var(--p-surface-950);
-  --p-togglebutton-hover-background: var(--p-surface-950);
-  --p-togglebutton-border-color: var(--p-surface-700);
-  --p-togglebutton-checked-border-color: var(--p-surface-700);
+/* :root.dark 而非 .dark：PrimeVue 執行期把自己的 .dark { --p-togglebutton-* } 插在 <head> 最後，
+   同特異度會蓋掉這裡（dark-variants.css 用 .dark[data-dark-variant] 也是同樣原因） */
+:root.dark {
+  /* SelectButton／ToggleButton：軌道用頁面底色（surface-900，兩種深色風格都等於畫布色）比卡片暗一階，選取的那一顆再亮回來。
+     不用 950：標準風格的 950 是近純黑 #010409，壓在 #161b22 卡片上太突兀 */
+  --p-togglebutton-background: var(--p-surface-900);
+  --p-togglebutton-checked-background: var(--p-surface-900);
+  --p-togglebutton-hover-background: var(--p-surface-900);
+  /* 邊框與軌道同色＝不顯示邊框，只靠底色區分 */
+  --p-togglebutton-border-color: var(--p-surface-900);
+  --p-togglebutton-checked-border-color: var(--p-surface-900);
   --p-togglebutton-content-checked-background: var(--p-surface-700);
 }
 

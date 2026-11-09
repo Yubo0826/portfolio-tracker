@@ -272,15 +272,15 @@ uploadPortfolio:
 uploadTransactions:
   en: Upload transactions
   zh: 上傳交易紀錄
-recentlyUsed:
-  en: Recently used
-  zh: 最近使用
 managePortfolio:
   en: Manage
   zh: 管理
 recentSearches:
   en: Recent searches
-  zh: 最近搜尋紀錄
+  zh: 最近查詢
+searchHeld:
+  en: Held
+  zh: 持有
 noRecentSearches:
   en: No recent searches
   zh: 尚無搜尋紀錄
@@ -1285,14 +1285,14 @@ preferences:
       en: Soft
       zh: 柔和
     dimHint:
-      en: Cool charcoal with gentle contrast, easy on the eyes (default)
-      zh: 冷調炭灰、對比柔和，長時間閱讀不刺眼（預設）
+      en: Cool charcoal with gentle contrast, easy on the eyes
+      zh: 冷調炭灰、對比柔和，長時間閱讀不刺眼
     standard:
       en: Standard
       zh: 標準
     standardHint:
-      en: Deep blue-black, stronger contrast
-      zh: 藍黑底色，對比更強
+      en: Deep blue-black, stronger contrast (default)
+      zh: 藍黑底色，對比更強（預設）
   theme:
     label:
       en: Theme

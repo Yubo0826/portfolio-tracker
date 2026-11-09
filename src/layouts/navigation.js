@@ -22,20 +22,6 @@ export function buildSidebarSections(t) {
             '/portfolio/dividends',
           ],
         },
-        {
-          key: 'watchlist',
-          label: t('watchlist'),
-          to: '/watchlist',
-          icon: 'pi pi-star',
-          activePaths: ['/watchlist'],
-        },
-        {
-          key: 'fx-exchanges',
-          label: t('fxExchanges'),
-          to: '/fx-exchanges',
-          icon: 'pi pi-arrow-right-arrow-left',
-          activePaths: ['/fx-exchanges'],
-        },
       ],
     },
     {
@@ -70,7 +56,22 @@ export function buildSidebarSections(t) {
     {
       key: 'manage',
       label: t('navManage'),
+      collapseInHeaderNav: true,
       items: [
+        {
+          key: 'watchlist',
+          label: t('watchlist'),
+          to: '/watchlist',
+          icon: 'pi pi-star',
+          activePaths: ['/watchlist'],
+        },
+        {
+          key: 'fx-exchanges',
+          label: t('fxExchanges'),
+          to: '/fx-exchanges',
+          icon: 'pi pi-arrow-right-arrow-left',
+          activePaths: ['/fx-exchanges'],
+        },
         {
           key: 'portfolios',
           label: t('portfolioManagement'),

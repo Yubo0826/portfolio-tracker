@@ -14,7 +14,6 @@
     <div @keydown.down.prevent="moveFocus(1)" @keydown.up.prevent="moveFocus(-1)">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-surface">
         <label class="flex flex-1 items-center gap-3 px-3 py-2">
-          <i class="pi pi-briefcase text-primary"></i>
           <input
             ref="inputEl"
             v-model="query"
@@ -53,9 +52,10 @@
       </div>
 
       <div v-if="!auth.isDemo" class="flex flex-wrap items-center gap-2 border-t border-surface px-3 py-2">
-        <Button :label="t('createNewPortfolio')" icon="pi pi-plus" severity="contrast" size="small" @click="close(() => emit('create'))" />
-        <Button :label="t('importPortfolio')" icon="pi pi-upload" severity="contrast" size="small" @click="close(() => emit('import'))" />
-        <Button :label="t('managePortfolio')" icon="pi pi-cog" text size="small" severity="secondary" class="ml-auto" @click="close(() => router.push('/portfolios'))" />
+        <!-- PrimeVue text 按鈕的 hover 底色在深色下與 Dialog 底色（surface-800）相同看不出來，改用 bg-emphasis 並加 ! 蓋過 -->
+        <Button :label="t('createNewPortfolio')" icon="pi pi-plus" text size="small" severity="secondary" class="hover:!bg-emphasis" @click="close(() => emit('create'))" />
+        <Button :label="t('importPortfolio')" icon="pi pi-upload" text size="small" severity="secondary" class="hover:!bg-emphasis" @click="close(() => emit('import'))" />
+        <Button :label="t('managePortfolio')" icon="pi pi-cog" text size="small" severity="secondary" class="ml-auto hover:!bg-emphasis" @click="close(() => router.push('/portfolios'))" />
       </div>
     </div>
   </Dialog>
@@ -87,7 +87,7 @@ const currentId = computed(() => portfolioStore.currentPortfolio?.id)
 
 watch(visible, (v) => { if (v) query.value = '' })
 
-// 沒輸入時分「最近使用」與「其他」兩組；有輸入時搜尋全部（比對名稱與描述）
+// 沒輸入時一組「全部」，最近使用排前面；有輸入時搜尋全部（比對名稱與描述）
 const groups = computed(() => {
   const all = portfolioStore.portfolios
   const q = query.value.trim().toLowerCase()
@@ -97,10 +97,7 @@ const groups = computed(() => {
   }
   const recent = props.recentIds.map((id) => all.find((p) => p.id === id)).filter(Boolean)
   const others = all.filter((p) => !recent.includes(p))
-  return [
-    { key: 'recent', label: t('recentlyUsed'), items: recent },
-    { key: 'all', label: t('all'), items: others },
-  ].filter((g) => g.items.length)
+  return all.length ? [{ key: 'all', label: t('all'), items: [...recent, ...others] }] : []
 })
 
 // 上下鍵在輸入框與選項之間移動焦點（同 SearchBox）

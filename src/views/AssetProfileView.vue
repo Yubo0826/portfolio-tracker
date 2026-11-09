@@ -76,17 +76,19 @@
 
                       <template v-if="chartType === 'candlestick'">
                         <span class="toolbar-divider hidden sm:block" aria-hidden="true"></span>
-                        <SelectButton
-                          v-if="currentRange !== '1d'"
-                          v-model="candlePeriod"
-                          :options="candlePeriodOptions"
-                          optionLabel="label"
-                          optionValue="value"
-                          :allowEmpty="false"
-                          size="small"
-                          class="candle-period"
-                          :aria-label="t('candlePeriod')"
-                        />
+                        <div v-if="currentRange !== '1d'" class="seg candle-period" role="group" :aria-label="t('candlePeriod')">
+                          <button
+                            v-for="option in candlePeriodOptions"
+                            :key="option.value"
+                            type="button"
+                            class="seg__btn"
+                            :class="{ 'is-active': candlePeriod === option.value }"
+                            :aria-pressed="candlePeriod === option.value"
+                            @click="candlePeriod = option.value"
+                          >
+                            {{ option.label }}
+                          </button>
+                        </div>
                         <MultiSelect
                           v-model="selectedIndicators"
                           :options="indicatorGroups"
@@ -275,24 +277,22 @@
                     </div>
                   </div>
 
-                  <SelectButton
-                    v-model="currentRange"
-                    :options="rangeOptionsWithGrowth"
-                    optionLabel="label"
-                    optionValue="value"
-                    :allowEmpty="false"
-                    fluid
-                    class="range-select mt-4"
-                  >
-                    <template #option="{ option }">
-                      <div class="flex flex-col items-center text-xs font-bold">
-                        <span>{{ option.label }}</span>
-                        <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
-                          {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                        </span>
-                      </div>
-                    </template>
-                  </SelectButton>
+                  <div class="seg range-select mt-4" role="group">
+                    <button
+                      v-for="option in rangeOptionsWithGrowth"
+                      :key="option.value"
+                      type="button"
+                      class="seg__btn flex flex-col items-center text-xs font-bold"
+                      :class="{ 'is-active': currentRange === option.value }"
+                      :aria-pressed="currentRange === option.value"
+                      @click="currentRange = option.value"
+                    >
+                      <span>{{ option.label }}</span>
+                      <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
+                        {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                      </span>
+                    </button>
+                  </div>
 
                   <dl class="mt-5 grid grid-cols-1 gap-x-8 text-xs sm:grid-cols-2">
                     <div v-for="row in quoteStatsRows" :key="row.label" class="flex items-baseline justify-between gap-4 border-b border-surface py-2">
@@ -310,14 +310,19 @@
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <span class="text-sm font-semibold">{{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsTitle' : 'topHoldingsTitle') }}</span>
 
-                    <SelectButton
-                      v-model="fundHoldingsTab"
-                      :options="fundHoldingsTabOptions"
-                      optionLabel="label"
-                      optionValue="value"
-                      :allowEmpty="false"
-                      size="small"
-                    />
+                    <div class="seg candle-period" role="group">
+                      <button
+                        v-for="option in fundHoldingsTabOptions"
+                        :key="option.value"
+                        type="button"
+                        class="seg__btn"
+                        :class="{ 'is-active': fundHoldingsTab === option.value }"
+                        :aria-pressed="fundHoldingsTab === option.value"
+                        @click="fundHoldingsTab = option.value"
+                      >
+                        {{ option.label }}
+                      </button>
+                    </div>
                   </div>
 
                   <p
@@ -487,7 +492,6 @@
 <script setup>
 import { ref, watch, computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
-import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import Popover from 'primevue/popover'
 import Menu from 'primevue/menu'
@@ -1719,9 +1723,10 @@ watch(compareSymbols, () => {
   overflow-x: auto;
 }
 
-.range-select :deep(.p-togglebutton) {
+.range-select .seg__btn {
   flex: 1 0 auto;
   min-width: 3.5rem;
+  padding: 0.5rem 0.25rem;
 }
 
 .compare-chip {
@@ -1817,18 +1822,40 @@ watch(compareSymbols, () => {
   background: var(--p-content-border-color);
 }
 
-/* K 線週期：緊湊的分段切換 */
-.candle-period {
-  padding: 2px;
+/* 分段切換（區間、K 線週期）：無軌道無邊框，選中的那顆用文字色疊一層半透明底，淺色／標準／柔和自動適配 */
+.seg {
+  display: flex;
+  gap: 0.25rem;
 }
 
-.candle-period :deep(.p-togglebutton) {
-  padding: 0.125rem;
+.seg__btn {
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--p-text-color);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.seg__btn:hover {
+  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+}
+
+.seg__btn.is-active {
+  background: color-mix(in srgb, var(--p-text-color) 12%, transparent);
+}
+
+.seg__btn:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 1px;
+}
+
+/* K 線週期：緊湊 */
+.candle-period .seg__btn {
+  padding: 0.3rem 0.75rem;
   font-size: 0.8125rem;
-}
-
-.candle-period :deep(.p-togglebutton-content) {
-  padding: 0.2rem 0.75rem;
+  font-weight: 600;
 }
 
 /* 指標選單做成文字按鈕外觀 */
