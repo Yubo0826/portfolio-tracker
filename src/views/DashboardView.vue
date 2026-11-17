@@ -851,7 +851,7 @@ const areaChartOptions = computed(() => {
       startOnTick: false,
       endOnTick: false,
       labels: {
-        formatter: function () { return `${currencySymbol.value}${this.value.toFixed(2)}` },
+        formatter: function () { return `${currencySymbol.value}${this.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
         style: { fontSize: '11px', color: axisColor },
       },
       gridLineDashStyle: 'Dash',
