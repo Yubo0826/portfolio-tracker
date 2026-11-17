@@ -851,7 +851,8 @@ const areaChartOptions = computed(() => {
       startOnTick: false,
       endOnTick: false,
       labels: {
-        formatter: function () { return `${currencySymbol.value}${this.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}` },
+        // 縮寫成 1.4M；小數兩位，避免 1.35M、1.4M 這種相鄰刻度四捨五入成同一個字
+        formatter: function () { return `${currencySymbol.value}${Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 }).format(this.value)}` },
         style: { fontSize: '11px', color: axisColor },
       },
       gridLineDashStyle: 'Dash',
