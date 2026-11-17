@@ -401,7 +401,7 @@ import ProgressBar from 'primevue/progressbar'
 import ToggleSwitch from 'primevue/toggleswitch'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
-import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, percentChange, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
+import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, twrChange, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
 import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 import { useAuthStore } from '@/stores/auth'
@@ -473,11 +473,10 @@ const selectedPeriod = ref('5d')
 // 後端回傳「最早交易日 ~ 今天」的完整資料，切換時間區間只在前端切片，避免重打 API
 const rawChartPoints = ref([])
 const chartPoints = computed(() => filterByPeriod(rawChartPoints.value, selectedPeriod.value, p => p.x))
-const growthRateNumber = computed(() => percentChange(chartPoints.value))
-const change = computed(() => {
-  const list = chartPoints.value
-  return list.length < 2 ? 0 : list[list.length - 1].y - list[0].y
-})
+// 區間漲跌用時間加權報酬，扣掉期間買賣的資金進出
+const periodChange = computed(() => twrChange(chartPoints.value))
+const growthRateNumber = computed(() => periodChange.value.pct)
+const change = computed(() => periodChange.value.amount)
 const stats = computed(() => periodStats(chartPoints.value))
 
 // 小卡明細列＋區間統計的顯示開關，記在 localStorage；無痕或封鎖儲存時就當預設顯示
@@ -579,7 +578,7 @@ function buildAllocationBreakdown(items, mapItem) {
 
 const timeRangeOptionsWithGrowth = computed(() => timeRangeOptions.map(option => ({
   ...option,
-  growth: percentChange(filterByPeriod(rawChartPoints.value, option.value, p => p.x)),
+  growth: twrChange(filterByPeriod(rawChartPoints.value, option.value, p => p.x)).pct,
 })))
 
 /* =========================
@@ -881,7 +880,7 @@ async function fetchChartData() {
   try {
     const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&currency=${displayCurrency.value}`)
     rawChartPoints.value = data
-      .map(item => ({ x: new Date(item.date), y: item.close }))
+      .map(item => ({ x: new Date(item.date), y: item.close, flow: item.flow ?? 0 }))
       .sort((a, b) => a.x - b.x)
   } catch (e) {
     console.error('Error fetching total value chart data:', e)

@@ -137,6 +137,31 @@ export function percentChange(points: { y: number }[]): number | null {
   return Number((((last - first) / first) * 100).toFixed(2))
 }
 
+/**
+ * 時間加權報酬（TWR）：扣掉資金進出後的區間報酬，加碼／減碼不會讓報酬虛增或虛減。
+ * flow 是當日淨投入（買入為正、賣出為負，含手續費），視為收盤時進出：
+ * 當日報酬 = (當日市值 − 當日淨投入) / 前一日市值 − 1，逐日連乘。
+ * amount = 期末市值 − 期初市值 − 期間淨投入（即區間損益，不含本金）。
+ * 前一日市值為 0（還沒買或已全數賣出）的那天不計報酬。資料不足時 pct 為 null。
+ * ponytail: 只算價格報酬，現金股利不在市值序列裡，不計入
+ */
+export function twrChange(points: { y: number; flow?: number }[]): { pct: number | null; amount: number } {
+  if (points.length < 2) return { pct: null, amount: 0 }
+  let growth = 1, flows = 0, counted = false
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1].y, flow = points[i].flow ?? 0
+    flows += flow
+    if (prev > 0) {
+      growth *= (points[i].y - flow) / prev
+      counted = true
+    }
+  }
+  return {
+    pct: counted ? Number(((growth - 1) * 100).toFixed(2)) : null,
+    amount: points[points.length - 1].y - points[0].y - flows,
+  }
+}
+
 /** 本地時區的 YYYY-MM-DD（toISOString 是 UTC，台北早上 8 點前會變成昨天） */
 export function toIsoDate(date: Date): string {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]

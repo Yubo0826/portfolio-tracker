@@ -4,6 +4,7 @@ import {
   realizedProfit,
   portfolioXirr,
   percentChange,
+  twrChange,
   periodRange,
   filterByPeriod,
   yAxisBounds,
@@ -232,5 +233,27 @@ describe('currentLots', () => {
       trade({ id: 9, symbol: 'VT', shares: 1, date: '2025-07-02' }),
     ]
     expect(currentLots(trades, 'AAPL').map((t) => t.id)).toEqual([3, 4])
+  })
+})
+
+describe('twrChange', () => {
+  it('excludes a large buy from the period return', () => {
+    // 100 → 漲到 110（+10%），隔天加碼 1000，市值 1110 → 報酬仍是 +10%，損益 10
+    const r = twrChange([{ y: 100 }, { y: 110 }, { y: 1110, flow: 1000 }])
+    expect(r.pct).toBe(10)
+    expect(r.amount).toBeCloseTo(10)
+  })
+
+  it('chains daily returns and handles sells', () => {
+    // +10%；隔天收盤賣出一半（市值 55、當日報酬 0）；再跌到 49.5（-10%）→ 1.1 × 0.9 − 1 = −1%
+    const r = twrChange([{ y: 100 }, { y: 110 }, { y: 55, flow: -55 }, { y: 49.5 }])
+    expect(r.pct).toBe(-1)
+    expect(r.amount).toBeCloseTo(4.5)
+  })
+
+  it('skips days with no prior value and returns null without data', () => {
+    expect(twrChange([{ y: 0 }, { y: 100, flow: 100 }]).pct).toBeNull()
+    expect(twrChange([{ y: 100 }]).pct).toBeNull()
+    expect(twrChange([{ y: 0 }, { y: 100, flow: 100 }, { y: 120 }]).pct).toBe(20)
   })
 })
