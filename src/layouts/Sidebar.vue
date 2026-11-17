@@ -180,10 +180,11 @@ const goDashboard = () => {
   --sidebar-border: var(--p-content-border-color);
   --sidebar-text: var(--p-text-color);
   --sidebar-text-muted: var(--p-text-muted-color);
-  --sidebar-active-bg: color-mix(in srgb, var(--p-text-color) 12%, transparent);
+  --sidebar-active-bg: var(--sb-container);
+  --sidebar-active-text: var(--sb-on-container);
   --sidebar-input-bg: var(--p-content-background);
   --sidebar-avatar-bg: color-mix(in srgb, var(--p-text-muted-color) 35%, transparent);
-  --sidebar-hover-bg: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+  --sidebar-hover-bg: color-mix(in srgb, var(--p-text-color) 8%, transparent);
 
   position: fixed;
   inset: 0 auto 0 0;
@@ -201,7 +202,6 @@ const goDashboard = () => {
 
 .dark .sidebar {
   --sidebar-bg: var(--p-content-background);
-  --sidebar-active-bg: #3a3a3a;
 }
 
 /* 不用 Tailwind 的 hidden lg:flex：v4 utilities 在 @layer 裡，會被上面的 display: flex 蓋掉 */
@@ -326,7 +326,7 @@ const goDashboard = () => {
   justify-content: space-between;
   margin: 3px 0;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: 9999px;
   color: var(--sidebar-text);
   text-decoration: none;
   font-size: 14px;
@@ -356,15 +356,15 @@ const goDashboard = () => {
   flex-shrink: 0;
 }
 
-.menu-group .menu-item:hover,
-.menu-group .menu-item.active {
-  color: var(--sidebar-text);
+/* Material 3 導覽：hover 疊 8% state layer；目前所在頁填淡色容器並加粗 */
+.menu-item:hover {
+  background-color: var(--sidebar-hover-bg);
 }
 
-.menu-item:hover,
 .menu-item.active {
   background-color: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text, var(--sidebar-text));
+  color: var(--sidebar-active-text);
+  font-weight: 600;
 }
 
 .menu-section-label {

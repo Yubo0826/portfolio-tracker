@@ -3,19 +3,19 @@ import Aura from '@primeuix/themes/aura';
 
 export default definePreset(Aura, {
     semantic: {
-      // 主題色 #316dca（500），其餘色階由它與白/黑混色產生
+      // 主題色 #3a72d8（500，與 logo 主藍一致），其餘色階由它與白/黑混色產生
       primary: {
-        50:  '#eff3fb',
-        100: '#dae5f5',
-        200: '#b1c8eb',
-        300: '#88aae0',
-        400: '#5a8ad5',
-        500: '#316dca',
-        600: '#2859a6',
-        700: '#204885',
-        800: '#193765',
-        900: '#122749',
-        950: '#0c1a30'
+        50:  '#f0f4fc',
+        100: '#dce6f8',
+        200: '#b0c7ef',
+        300: '#89aae8',
+        400: '#618ee0',
+        500: '#3a72d8',
+        600: '#305db1',
+        700: '#264b8f',
+        800: '#1e3a6e',
+        900: '#152a50',
+        950: '#0e1c35'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -25,49 +25,50 @@ export default definePreset(Aura, {
         light: {
           primary: {
             color: '{primary.500}',
-            contrastColor: '#ffffff', // #316dca 上白字對比約 5:1
+            contrastColor: '#ffffff', // #3a72d8 上白字對比約 4.6:1
             hoverColor: '{primary.600}',
             activeColor: '{primary.700}'
           },
           content: {
             // background: '{zinc.50}',
-            background: '#ffffff',
-            focusBackground: '{zinc.700}',
-            color: '{zinc.900}',
-            focusColor: '{zinc.900}',
-            borderColor: '{zinc.300}'
+            // 淺色中性色取自 Material 3 帶藍紫調的色階（與 vocabulary-app 同一套），不用冷灰
+            background: '#fbf8ff',
+            focusBackground: '{surface.700}',
+            color: '{surface.900}',
+            focusColor: '{surface.900}',
+            borderColor: '{surface.300}'
           },
           text: {
-            color: '{zinc.800}',
-            hoverColor: '{zinc.900}',
-            // 次要文字（icon、說明文字、次要標籤等）預設 zinc.500 對比度過低（約 4.6:1），偏淡不易閱讀，改用 zinc.600 (約 7:1)
-            mutedColor: '{zinc.600}',
-            hoverMutedColor: '{zinc.700}'
+            color: '{surface.900}',
+            hoverColor: '{surface.950}',
+            // 次要文字 #5d5e67 在 #fbf8ff 上約 6.4:1
+            mutedColor: '{surface.600}',
+            hoverMutedColor: '{surface.700}'
           },
           surface: {
               // background: '#ffffff',
               // background: '#f4f6fe',
               // background: '#f1f5f9',
-              background: '#f0f4f8', // app shell / sidebar 底色
-              card: '#ffffff',
+              background: '#f2f0f8', // app shell / sidebar 底色
+              card: '#fbf8ff',
               0: '#ffffff',
-              50: '{zinc.50}',
-              100: '{zinc.100}',
-              200: '{zinc.200}',
-              300: '{zinc.300}',
-              400: '{zinc.400}',
-              500: '{zinc.500}',
-              600: '{zinc.600}',
-              700: '{zinc.700}',
-              800: '{zinc.800}',
-              900: '{zinc.900}',
-              950: '{zinc.950}'
+              50: '#fbf8ff',
+              100: '#f2f0f8',
+              200: '#e8e6ee',
+              300: '#c6c5d0',
+              400: '#90909a',
+              500: '#767680',
+              600: '#5d5e67',
+              700: '#46464f',
+              800: '#303036',
+              900: '#1b1b21',
+              950: '#131318'
           },
         },
         dark: {
           primary: {
             color: '{primary.500}',
-            contrastColor: '#ffffff', // #316dca 上白字對比約 5:1
+            contrastColor: '#ffffff', // #3a72d8 上白字對比約 4.6:1
             hoverColor: '{primary.400}', // 300/200 太淺，白字讀不清
             activeColor: '{primary.600}'
           },

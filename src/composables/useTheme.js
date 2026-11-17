@@ -5,20 +5,20 @@ import customPreset from '@/themes/customPreset.js'
 /*
   外觀設定（放在 function 外層，整個 app 共用）
   - theme:       'light' | 'dark' | 'system'（system 跟隨系統偏好）
-  - darkVariant: 'dim' | 'standard'（深色的配色，色票見 src/assets/dark-variants.css）
+  - darkVariant: 'night' | 'standard' | 'dim'（深色的配色，色票見 src/assets/dark-variants.css）
   - accentColor: 主題強調色，對應 Tailwind 色盤名稱
 */
 const THEME_KEY = 'theme'
 const DARK_VARIANT_KEY = 'darkVariant'
 const ACCENT_KEY = 'accentColor'
 
-// 舊的 'default'（近黑）已移除；localStorage 存著它的使用者會由 readStored 退回預設 'standard'
-export const DARK_VARIANTS = ['standard', 'dim']
+// 舊的 'default'（近黑）已移除；localStorage 存著它的使用者會由 readStored 退回預設 'night'
+export const DARK_VARIANTS = ['night', 'standard', 'dim']
 
 // 可選的強調色（key 對應 i18n，palette 對應 PrimeVue/Tailwind 色盤，swatch 為預覽色）
 // palette 為 null 代表「跟隨 customPreset 的 primary 定義」，不做執行期覆寫
 export const ACCENT_OPTIONS = [
-  { key: 'blue', palette: null, swatch: '#316dca' },
+  { key: 'blue', palette: null, swatch: '#3a72d8' },
   { key: 'indigo', palette: 'indigo', swatch: '#6366f1' },
   { key: 'emerald', palette: 'emerald', swatch: '#10b981' },
   { key: 'rose', palette: 'rose', swatch: '#f43f5e' },
@@ -36,7 +36,7 @@ const readStored = (key, allowed, fallback) => {
 }
 
 const theme = ref(readStored(THEME_KEY, ['light', 'dark', 'system'], 'system'))
-const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'standard'))
+const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'night'))
 const accentColor = ref(readStored(ACCENT_KEY, ACCENT_OPTIONS.map((o) => o.key), 'blue'))
 
 const isDark = computed(() => theme.value === 'dark' || (theme.value === 'system' && systemDark.value))
@@ -83,8 +83,17 @@ const CHART_PALETTES = {
     tooltipBg: '#ffffff',
     tooltipFg: '#374151',
     tooltipFgStrong: '#0f172a',
-    border: '#ffffff',
+    border: '#fbf8ff',
     legend: '#374151',
+  },
+  night: {
+    axis: '#90909a',
+    grid: '#35343a',
+    tooltipBg: '#2a292f',
+    tooltipFg: '#e4e1e9',
+    tooltipFgStrong: '#f2eff7',
+    border: '#1f1f25',
+    legend: '#e4e1e9',
   },
   dim: {
     axis: '#9aa0a6',

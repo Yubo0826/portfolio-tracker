@@ -112,66 +112,34 @@ watch(() => route.path, () => {
   align-items: center;
   gap: 0.4rem;
   height: 2.25rem;
-  padding: 0 0.75rem;
+  padding: 0 0.875rem;
   border: none;
+  border-radius: 9999px;
   background: none;
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  color: var(--p-text-muted-color);
-  cursor: pointer;
-  transition: color 0.16s ease;
-}
-
-/* hover 底線：進場由左至右展開，離場由右至左收合並淡出 */
-.header-nav__trigger::after {
-  content: '';
-  position: absolute;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 0;
-  height: 2px;
-  border-radius: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  opacity: 0;
-  transition:
-    transform 0.22s cubic-bezier(0.4, 0, 1, 1),
-    opacity 0.22s ease-in;
-}
-
-.header-nav__trigger:hover::after,
-.header-nav__trigger:focus-visible::after {
-  transform: scaleX(1);
-  opacity: 1;
-  transition:
-    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.14s ease-out;
-}
-
-.header-nav__trigger:hover {
   color: var(--p-text-color);
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+/* Material 3 導覽項目：膠囊形，hover 疊 8% state layer；目前所在區塊填淡色容器並加粗 */
+.header-nav__trigger:hover {
+  background: color-mix(in srgb, var(--p-text-color) 8%, transparent);
+}
+
+.header-nav__trigger:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
 }
 
 .header-nav__trigger.is-active {
-  color: var(--p-primary-color);
+  background: var(--sb-container);
+  color: var(--sb-on-container);
   font-weight: 600;
-}
-
-.header-nav__trigger.is-active::after {
-  background: var(--p-primary-color);
-  transform: scaleX(1);
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .header-nav__trigger::after,
-  .header-nav__trigger:hover::after {
-    transition-duration: 0.01ms;
-  }
 }
 
 .header-nav__chevron {

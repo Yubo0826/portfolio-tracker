@@ -534,33 +534,40 @@ const menuItems = computed(() => {
   padding: 10px 16px 10px 0;
 }
 
+/* Material 3 搜尋列：48px 全圓膠囊、填色無框，hover 疊 8% 前景色 state layer */
 .app-shell__search {
   align-items: center;
   gap: 0.75rem;
-  width: min(24rem, 100%);
-  padding: 0.5rem 1rem;
+  width: min(28rem, 100%);
+  height: 3rem;
+  padding: 0 0.75rem 0 1.25rem;
+  border: 0;
   border-radius: 9999px;
-  /* 淺色頂欄底色就是 surface 灰，搜尋框改白底加框才分得出來（與投資組合 pill 同款） */
-  border: 1px solid var(--p-content-border-color);
-  background: var(--p-content-background);
+  background: var(--p-surface-200);
   color: var(--p-text-muted-color);
+  font-size: 0.875rem;
   text-align: left;
   transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .app-shell__search:hover {
-  background: var(--p-surface-50);
+  background: color-mix(in srgb, var(--p-text-color) 8%, var(--p-surface-200));
   color: var(--p-text-color);
   cursor: text;
 }
 
-/* 與搜尋 Dialog 同底色 */
+.app-shell__search:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+/* 深色：與搜尋 Dialog 同底色 */
 .dark .app-shell__search {
   background: var(--p-surface-800);
 }
 
 .dark .app-shell__search:hover {
-  background: var(--p-surface-700);
+  background: color-mix(in srgb, var(--p-text-color) 8%, var(--p-surface-800));
 }
 
 .app-shell__content {

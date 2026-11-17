@@ -210,6 +210,17 @@ const colorModeOptions = computed(() => [
 */
 const darkStyleOptions = computed(() => [
   {
+    value: 'night',
+    label: t('preferences.darkStyle.night'),
+    hint: t('preferences.darkStyle.nightHint'),
+    swatch: {
+      '--dv-canvas': '#131318',
+      '--dv-card': '#1f1f25',
+      '--dv-border': '#46464f',
+      '--dv-text': '#e4e1e9',
+    },
+  },
+  {
     value: 'standard',
     label: t('preferences.darkStyle.standard'),
     hint: t('preferences.darkStyle.standardHint'),

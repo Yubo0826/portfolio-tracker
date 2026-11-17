@@ -28,10 +28,10 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 
 - **theme**：`light` / `dark` / `system`。深色時掛 `.dark`——Tailwind 的 `dark:`
   （`main.css` 的 `@custom-variant`）與 PrimeVue 的 `darkModeSelector` 都認它。
-- **darkVariant**：`default`（Knowt 配色，畫布 `#0d0d0d`、卡片 `#1d1e1e`）、
-  `dim`（GitHub Dimmed）、`standard`（GitHub Dark）。只用
+- **darkVariant**：`night`（預設，Material 3 帶藍紫調的近黑，畫布 `#131318`、卡片 `#1f1f25`）、
+  `standard`（GitHub Dark）、`dim`（GCP 炭灰）。只用
   `.dark[data-dark-variant='…']` 覆寫 surface ramp，不重新產生 PrimeVue theme，切換不閃色。
-- **accentColor**：預設藍 `#316dca`（`customPreset.js` 的 primary），
+- **accentColor**：預設藍 `#3a72d8`（與 logo 主藍一致，`customPreset.js` 的 primary），
   其餘選項在執行期用 `updatePrimaryPalette` 換成 Tailwind 色盤。
 
 ## 主要按鈕不用主色
@@ -52,7 +52,13 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 
 ## 字體與數字
 
-字體是 `'Segoe UI', sans-serif`（`base.css` 的 `--font-family-base`），body 基準 12px。
+字體是 Roboto Flex（`index.html` 從 Google Fonts 載入），中文接系統字型（`base.css` 的 `--font-family-base`），body 基準 12px。
+
+## 淺色中性色、導覽與搜尋列（Material 3，取自 vocabulary-app）
+
+- 淺色的 surface 色階是帶藍紫調的 M3 中性色（`#fbf8ff` → `#131318`），不用 zinc 冷灰；app shell `#f2f0f8`、內容 `#fbf8ff`。
+- 導覽項目（側欄、頂欄）是膠囊形：hover 疊 8% 前景色，目前所在頁填 `--sb-container`（主色推出的淡色容器，`main.css`）並加粗。
+- 頂欄搜尋列：48px 全圓膠囊、填 `surface-200`（深色 `surface-800`）、無框。
 單一標的的價格、成本、市值、損益、股息以**原幣**顯示（台股 TWD、美股 USD），
 金額拆分用 `useCurrency` 的 `splitDisplayAmount`，代號推斷幣別用 `utils/symbol.js` 的 `currencyOfSymbol`，不要各頁另寫。
 

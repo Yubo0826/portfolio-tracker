@@ -51,9 +51,26 @@
   --p-text-muted-color: #9aa0a6;
 }
 
-/* 側欄選中項：GCP 用帶色的暗底而非中性灰，這裡跟隨使用者選的主題色 */
-.dark[data-dark-variant='dim'] .sidebar {
-  --sidebar-active-bg: color-mix(in srgb, var(--p-primary-color) 22%, var(--p-content-background));
+/* 深夜（預設）：Material 3 帶藍紫調的近黑（與 vocabulary-app 同一套），層次只靠明度：底色 → 卡片 → 對話框／搜尋列 */
+.dark[data-dark-variant='night'] {
+  --p-surface-500: #90909a;
+  --p-surface-600: #46464f;
+  --p-surface-700: #35343a;
+  --p-surface-800: #2a292f;
+  --p-surface-900: #131318; /* 與畫布同色：SelectButton 軌道用 900（見 main.css） */
+  --p-surface-950: #0e0e12;
+
+  --p-surface-background: #131318;
+  --p-surface-card: #1f1f25;
+
+  --p-content-background: #1f1f25;
+  --p-content-border-color: #46464f;
+  --p-content-hover-background: #2a292f;
+  --p-content-color: #e4e1e9;
+  --p-content-focus-color: #f2eff7;
+
+  --p-text-color: #e4e1e9;
+  --p-text-muted-color: #b4b3be;
 }
 
 .dark[data-dark-variant='standard'] {

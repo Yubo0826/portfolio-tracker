@@ -27,8 +27,8 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
-  /* --font-family-base: 'Montserrat', 'Trebuchet MS', sans-serif; */
-  --font-family-base: 'Segoe UI', sans-serif;
+  /* Roboto Flex（Material 預設字型）；沒有中文字，中文接到系統字型 */
+  --font-family-base: 'Roboto Flex', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
 
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);

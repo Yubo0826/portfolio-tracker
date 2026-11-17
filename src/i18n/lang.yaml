@@ -1291,8 +1291,14 @@ preferences:
       en: Standard
       zh: 標準
     standardHint:
-      en: Deep blue-black, stronger contrast (default)
-      zh: 藍黑底色，對比更強（預設）
+      en: Deep blue-black, stronger contrast
+      zh: 藍黑底色，對比更強
+    night:
+      en: Midnight
+      zh: 深夜
+    nightHint:
+      en: Blue-violet near-black, layered by lightness (default)
+      zh: 帶藍紫調的近黑，層次靠明度區分（預設）
   theme:
     label:
       en: Theme

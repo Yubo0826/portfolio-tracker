@@ -52,9 +52,9 @@
           class="app-shell__search hidden md:flex"
           @click="$emit('open-search')"
         >
-          <i class="pi pi-search text-xs"></i>
+          <i class="pi pi-search text-sm"></i>
           <span class="truncate">{{ t('searchPlaceholder') }}</span>
-          <span class="ml-auto inline-flex min-w-8 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-1 py-1 text-[11px] font-semibold text-[var(--p-text-muted-color)]">/</span>
+          <span class="ml-auto inline-flex min-w-7 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-1 py-0.5 text-[11px] font-semibold text-[var(--p-text-muted-color)]">/</span>
         </button>
 
         <button

@@ -24,6 +24,17 @@
   --p-togglebutton-content-checked-background: var(--p-surface-700);
 }
 
+/* 淡色容器（Material 3 secondary container）：導覽目前位置的膠囊底。由主色推出，跟著使用者選的強調色走 */
+:root {
+  --sb-container: color-mix(in srgb, var(--p-primary-color) 17%, var(--p-content-background));
+  --sb-on-container: color-mix(in srgb, var(--p-primary-color) 30%, var(--p-text-color));
+}
+
+:root.dark {
+  --sb-container: color-mix(in srgb, var(--p-primary-color) 28%, var(--p-content-background));
+  --sb-on-container: var(--p-text-color);
+}
+
 #app {
   /* max-width: 1280px; */
   /* max-width: 1680px; */
