@@ -10,6 +10,8 @@
           <div class="sidebar-top-row">
             <button v-show="!collapsed" type="button" class="back-btn" :title="t('dashboard')" @click="goDashboard">
               <i v-if="!persistent" class="pi pi-arrow-left"></i>
+              <img src="/stockbar-mark.svg" alt="" class="h-7 dark:hidden" />
+              <img src="/stockbar-mark-dark.svg" alt="" class="hidden h-7 dark:block" />
               <span class="sidebar-brand">
                 <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
               </span>

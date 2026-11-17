@@ -37,7 +37,8 @@ const features = [
   <div class="flex min-h-screen flex-col bg-surface-0 text-color dark:bg-surface-950">
     <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
       <div class="flex items-center gap-2 text-lg font-semibold">
-        <img src="/stockbar-icon.png" alt="" class="h-8 w-8" />
+        <img src="/stockbar-mark.svg" alt="" class="h-7 dark:hidden" />
+        <img src="/stockbar-mark-dark.svg" alt="" class="hidden h-7 dark:block" />
         StockBar
       </div>
       <Button
