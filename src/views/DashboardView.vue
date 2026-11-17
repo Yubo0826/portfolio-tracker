@@ -401,7 +401,7 @@ import ProgressBar from 'primevue/progressbar'
 import ToggleSwitch from 'primevue/toggleswitch'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
-import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, twrChange, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
+import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, twrChange, twrIndex, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
 import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 import { useAuthStore } from '@/stores/auth'
@@ -477,7 +477,17 @@ const chartPoints = computed(() => filterByPeriod(rawChartPoints.value, selected
 const periodChange = computed(() => twrChange(chartPoints.value))
 const growthRateNumber = computed(() => periodChange.value.pct)
 const change = computed(() => periodChange.value.amount)
-const stats = computed(() => periodStats(chartPoints.value))
+// 投入基準線：期初市值＋期間累計淨投入，與市值線的差距就是區間損益（加碼造成的跳升不會被看成獲利）
+const investedPoints = computed(() => {
+  let base = chartPoints.value[0]?.y ?? 0
+  return chartPoints.value.map((p, i) => [p.x.getTime(), i ? (base += p.flow ?? 0) : base])
+})
+// 最高／最低看帳戶金額；最大回撤、距高點看扣掉資金進出的報酬曲線，大筆買賣不會被當成漲跌
+const stats = computed(() => {
+  const base = periodStats(chartPoints.value)
+  const perf = periodStats(twrIndex(chartPoints.value))
+  return base && perf && { ...base, maxDrawdown: perf.maxDrawdown, fromHigh: perf.fromHigh }
+})
 
 // 小卡明細列＋區間統計的顯示開關，記在 localStorage；無痕或封鎖儲存時就當預設顯示
 const SHOW_DETAILS_KEY = 'dashboard-show-details'
@@ -817,7 +827,13 @@ const areaChartOptions = computed(() => {
     chart: { type: 'area', backgroundColor: 'transparent', animation: { duration: 300 } },
     title: { text: null },
     credits: { enabled: false },
-    legend: { enabled: false },
+    legend: {
+      enabled: true,
+      align: 'right',
+      verticalAlign: 'top',
+      itemStyle: { fontSize: '11px', fontWeight: '500', color: axisColor },
+      itemHoverStyle: { color: tooltipFg },
+    },
     xAxis: {
       type: 'datetime',
       labels: {
@@ -831,7 +847,7 @@ const areaChartOptions = computed(() => {
     },
     yAxis: {
       title: { text: null },
-      ...yAxisBounds(chartPoints.value.map(d => Number(d.y))),
+      ...yAxisBounds([...chartPoints.value.map(d => Number(d.y)), ...investedPoints.value.map(d => d[1])]),
       startOnTick: false,
       endOnTick: false,
       labels: {
@@ -867,6 +883,16 @@ const areaChartOptions = computed(() => {
       name: t('totalPrice'),
       data: chartPoints.value.map(d => [d.x.getTime(), d.y]),
       color: lineColor,
+    }, {
+      type: 'line',
+      name: t('investedBaseline'),
+      data: investedPoints.value,
+      step: 'center',
+      color: axisColor,
+      dashStyle: 'ShortDash',
+      lineWidth: 1.5,
+      marker: { enabled: false },
+      enableMouseTracking: true,
     }],
   }
 })

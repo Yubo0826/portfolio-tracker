@@ -5,6 +5,7 @@ import {
   portfolioXirr,
   percentChange,
   twrChange,
+  twrIndex,
   periodRange,
   filterByPeriod,
   yAxisBounds,
@@ -255,5 +256,14 @@ describe('twrChange', () => {
     expect(twrChange([{ y: 0 }, { y: 100, flow: 100 }]).pct).toBeNull()
     expect(twrChange([{ y: 100 }]).pct).toBeNull()
     expect(twrChange([{ y: 0 }, { y: 100, flow: 100 }, { y: 120 }]).pct).toBe(20)
+  })
+})
+
+describe('twrIndex', () => {
+  it('a large sell does not show up as a drawdown', () => {
+    // 100 → 賣出一半（市值 50、flow -50）→ 漲到 55：市值看似從 100 回撤 50%，實際報酬曲線 1 → 1 → 1.1
+    const idx = twrIndex([{ x: 1, y: 100 }, { x: 2, y: 50, flow: -50 }, { x: 3, y: 55 }])
+    expect(idx.map(p => p.y)).toEqual([1, 1, 1.1])
+    expect(periodStats(idx)?.maxDrawdown).toBe(0)
   })
 })

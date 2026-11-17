@@ -162,6 +162,16 @@ export function twrChange(points: { y: number; flow?: number }[]): { pct: number
   }
 }
 
+/** 扣掉資金進出的累積報酬曲線（起點為 1），算法同 twrChange；給最大回撤、距高點用，避免大筆賣出被當成虧損 */
+export function twrIndex<P extends { y: number; flow?: number }>(points: P[]): P[] {
+  let growth = 1
+  return points.map((p, i) => {
+    const prev = i > 0 ? points[i - 1].y : 0
+    if (prev > 0) growth *= (p.y - (p.flow ?? 0)) / prev
+    return { ...p, y: growth }
+  })
+}
+
 /** 本地時區的 YYYY-MM-DD（toISOString 是 UTC，台北早上 8 點前會變成昨天） */
 export function toIsoDate(date: Date): string {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]

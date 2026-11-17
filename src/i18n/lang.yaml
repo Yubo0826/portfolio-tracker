@@ -1357,6 +1357,9 @@ preferences:
 totalPrice:
   en: Portfolio Value
   zh: 投資組合總值
+investedBaseline:
+  en: Start + net invested
+  zh: 期初＋淨投入
 year:
   en: Year
   zh: 年份
