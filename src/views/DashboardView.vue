@@ -189,25 +189,22 @@
             <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
 
             <!-- 時間範圍選擇 -->
-            <SelectButton
-              v-if="holdingsStore.list.length"
-              v-model="selectedPeriod"
-              :options="timeRangeOptionsWithGrowth"
-              optionLabel="label"
-              optionValue="value"
-              :allowEmpty="false"
-              fluid
-              class="mt-4"
-            >
-              <template #option="{ option }">
-                <div class="flex flex-col items-center text-xs font-bold">
-                  <span>{{ option.label }}</span>
-                  <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
-                    {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                  </span>
-                </div>
-              </template>
-            </SelectButton>
+            <div v-if="holdingsStore.list.length" class="seg range-select mt-4" role="group">
+              <button
+                v-for="option in timeRangeOptionsWithGrowth"
+                :key="option.value"
+                type="button"
+                class="seg__btn flex flex-col items-center text-xs font-bold"
+                :class="{ 'is-active': selectedPeriod === option.value }"
+                :aria-pressed="selectedPeriod === option.value"
+                @click="selectedPeriod = option.value"
+              >
+                <span>{{ option.label }}</span>
+                <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
+                  {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
+                </span>
+              </button>
+            </div>
 
             <!-- 區間統計：跟著選取的時間區間變動 -->
             <dl v-if="stats" v-show="showDetails" class="dashboard-period-stats mt-4">

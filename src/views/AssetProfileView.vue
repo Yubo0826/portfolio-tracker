@@ -548,7 +548,7 @@ const toggleWatch = async (s = String(symbol.value).toUpperCase(), name = info.f
 }
 
 const chartType = ref('area')
-const currentRange = ref('3mo')
+const currentRange = ref('6mo')
 
 const MAX_COMPARE_SYMBOLS = 5
 const MAX_RECOMMENDATION_CARDS = 5
@@ -690,7 +690,6 @@ const rangeOptions = computed(() => ([
   { label: t('period1d'), value: '1d' },
   { label: t('period7d'), value: '7d' },
   { label: t('period1mo'), value: '1mo' },
-  { label: t('period3mo'), value: '3mo' },
   { label: t('period6mo'), value: '6mo' },
   { label: t('periodYTD'), value: 'ytd' },
   { label: t('period1y'), value: '1y' },
@@ -1718,17 +1717,6 @@ watch(compareSymbols, () => {
   margin-bottom: 1rem;
 }
 
-/* 8 個區間在窄螢幕擠不下，給最小寬度並改成橫向捲動 */
-.range-select {
-  overflow-x: auto;
-}
-
-.range-select .seg__btn {
-  flex: 1 0 auto;
-  min-width: 3.5rem;
-  padding: 0.5rem 0.25rem;
-}
-
 .compare-chip {
   display: inline-flex;
   align-items: center;
@@ -1820,35 +1808,6 @@ watch(compareSymbols, () => {
   height: 1.25rem;
   margin: 0 0.25rem;
   background: var(--p-content-border-color);
-}
-
-/* 分段切換（區間、K 線週期）：無軌道無邊框，選中的那顆用文字色疊一層半透明底，淺色／標準／柔和自動適配 */
-.seg {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.seg__btn {
-  border: 0;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--p-text-color);
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.seg__btn:hover {
-  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
-}
-
-.seg__btn.is-active {
-  background: color-mix(in srgb, var(--p-text-color) 12%, transparent);
-}
-
-.seg__btn:focus-visible {
-  outline: 2px solid var(--p-primary-color);
-  outline-offset: 1px;
 }
 
 /* K 線週期：緊湊 */

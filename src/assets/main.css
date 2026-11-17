@@ -209,3 +209,43 @@
 .card-table .p-datatable-paginator-bottom {
   border: 0;
 }
+
+/* 分段切換（區間、K 線週期）：無軌道無邊框，選中的那顆用文字色疊一層半透明底，淺色／標準／柔和自動適配 */
+.seg {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.seg__btn {
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--p-text-color);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.seg__btn:hover {
+  background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
+}
+
+.seg__btn.is-active {
+  background: color-mix(in srgb, var(--p-text-color) 12%, transparent);
+}
+
+.seg__btn:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 1px;
+}
+
+/* 區間選擇（資產頁、儀表板）：窄螢幕擠不下時給最小寬度並改成橫向捲動 */
+.range-select {
+  overflow-x: auto;
+}
+
+.range-select .seg__btn {
+  flex: 1 0 auto;
+  min-width: 3.5rem;
+  padding: 0.5rem 0.25rem;
+}
