@@ -7,6 +7,17 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+// 部署新版後，開著的舊分頁還在用舊的 index，點到沒載過的頁面時會去抓已被刪掉的舊 chunk（Failed to fetch dynamically imported module）。
+// 遇到就重新整理拿新版；10 秒內只重整一次，避免伺服器真的掛掉時無限重整。
+window.addEventListener('vite:preloadError', (event) => {
+  let last = 0
+  try { last = Number(sessionStorage.getItem('chunk-reload-at')) || 0 } catch {}
+  if (Date.now() - last < 10000) return
+  try { sessionStorage.setItem('chunk-reload-at', String(Date.now())) } catch {}
+  event.preventDefault()
+  window.location.reload()
+})
+
 // i18n Setup
 import { createI18n } from 'vue-i18n'
 import messages from './i18n/index.js'
