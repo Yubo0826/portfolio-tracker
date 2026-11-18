@@ -1047,9 +1047,8 @@ watch(displayCurrency, () => {
 }
 
 .dashboard-period-stats > div {
-  padding: 0.6rem 0.75rem;
-  border: 1px dashed var(--p-content-border-color);
-  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-left: 2px solid var(--p-content-border-color);
 }
 
 .dashboard-period-stats dt {

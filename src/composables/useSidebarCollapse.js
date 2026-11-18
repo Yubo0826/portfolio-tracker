@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 
 const STORAGE_KEY = 'sidebarCollapsed'
-const COLLAPSED_WIDTH = '76px'
-const EXPANDED_WIDTH = '260px'
+const COLLAPSED_WIDTH = '92px'
+const EXPANDED_WIDTH = '272px'
 
 const isCollapsed = ref(localStorage.getItem(STORAGE_KEY) === 'true')
 

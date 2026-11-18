@@ -57,7 +57,9 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 ## 淺色中性色、導覽與搜尋列（Material 3，取自 vocabulary-app）
 
 - 淺色的 surface 色階是帶藍紫調的 M3 中性色（`#fbf8ff` → `#131318`），不用 zinc 冷灰；app shell `#f2f0f8`、內容 `#fbf8ff`。
-- 導覽項目（側欄、頂欄）是膠囊形：hover 疊 8% 前景色，目前所在頁填 `--sb-container`（主色推出的淡色容器，`main.css`）並加粗。
+- 桌面側欄是浮動圓角卡片：四周內縮 12px、16px 圓角、填 content 底色加細框；收合鈕用側欄面板圖示（內嵌 SVG）。
+- 側欄導覽項目是 12px 圓角矩形：hover 疊 8% 前景色，目前所在頁填 12% 中性灰、字重 500，不帶主色；一般項目字重 400。
+- 頂欄導覽項目是膠囊形：hover 疊 8% 前景色，目前所在頁填 `--sb-container`（主色推出的淡色容器，`main.css`）並加粗。
 - 頂欄搜尋列：48px 全圓膠囊、填 `surface-200`（深色 `surface-800`）、無框。
 單一標的的價格、成本、市值、損益、股息以**原幣**顯示（台股 TWD、美股 USD），
 金額拆分用 `useCurrency` 的 `splitDisplayAmount`，代號推斷幣別用 `utils/symbol.js` 的 `currencyOfSymbol`，不要各頁另寫。

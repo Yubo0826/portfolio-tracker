@@ -22,9 +22,14 @@
               type="button"
               class="sidebar-collapse-btn"
               :aria-label="collapsed ? t('expandSidebar') : t('collapseSidebar')"
+              v-tooltip.right="{ value: collapsed ? t('expandSidebar') : t('collapseSidebar'), showDelay: 500 }"
               @click="toggleCollapsed"
             >
-              <i :class="collapsed ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></i>
+              <!-- ponytail: primeicons 沒有側欄面板圖示，內嵌 SVG（同 lucide panel-left） -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="4" />
+                <path d="M9 3v18" />
+              </svg>
             </button>
           </div>
 
@@ -180,8 +185,8 @@ const goDashboard = () => {
   --sidebar-border: var(--p-content-border-color);
   --sidebar-text: var(--p-text-color);
   --sidebar-text-muted: var(--p-text-muted-color);
-  --sidebar-active-bg: var(--sb-container);
-  --sidebar-active-text: var(--sb-on-container);
+  --sidebar-active-bg: color-mix(in srgb, var(--p-text-color) 12%, transparent);
+  --sidebar-active-text: var(--sidebar-text);
   --sidebar-input-bg: var(--p-content-background);
   --sidebar-avatar-bg: color-mix(in srgb, var(--p-text-muted-color) 35%, transparent);
   --sidebar-hover-bg: color-mix(in srgb, var(--p-text-color) 8%, transparent);
@@ -202,6 +207,17 @@ const goDashboard = () => {
 
 .dark .sidebar {
   --sidebar-bg: var(--p-content-background);
+}
+
+/* 桌面版側欄是浮動圓角卡片：四周內縮 12px，右側與主內容留 12px 間距 */
+.sidebar--persistent {
+  inset: 12px auto 16px 12px;
+  width: calc(var(--sidebar-width, 260px) - 24px);
+  padding: 0 12px 12px;
+  background-color: var(--p-content-background);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 /* 不用 Tailwind 的 hidden lg:flex：v4 utilities 在 @layer 裡，會被上面的 display: flex 蓋掉 */
@@ -249,10 +265,10 @@ const goDashboard = () => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: none;
   color: var(--sidebar-text-muted);
   font-size: 13px;
@@ -324,13 +340,13 @@ const goDashboard = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 3px 0;
-  padding: 8px 12px;
-  border-radius: 9999px;
+  margin: 1px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
   color: var(--sidebar-text);
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   transition: background-color 0.16s ease;
 }
 
@@ -356,7 +372,7 @@ const goDashboard = () => {
   flex-shrink: 0;
 }
 
-/* Material 3 導覽：hover 疊 8% state layer；目前所在頁填淡色容器並加粗 */
+/* 圓角矩形導覽：hover 疊 8% 前景色；目前所在頁填 12% 中性灰並略加粗，不帶主色 */
 .menu-item:hover {
   background-color: var(--sidebar-hover-bg);
 }
@@ -364,13 +380,13 @@ const goDashboard = () => {
 .menu-item.active {
   background-color: var(--sidebar-active-bg);
   color: var(--sidebar-active-text);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .menu-section-label {
-  padding: 4px 12px;
+  padding: 8px 12px 4px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--sidebar-text-muted);
 }
 
