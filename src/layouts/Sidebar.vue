@@ -8,10 +8,10 @@
       >
         <div class="sidebar-top">
           <div class="sidebar-top-row">
-            <button v-show="!collapsed" type="button" class="back-btn" :title="t('dashboard')" @click="goDashboard">
+            <button type="button" class="back-btn" :title="t('dashboard')" :tabindex="collapsed ? -1 : null" @click="goDashboard">
               <i v-if="!persistent" class="pi pi-arrow-left"></i>
-              <img src="/stockbar-mark.svg" alt="" class="h-7 dark:hidden" />
-              <img src="/stockbar-mark-dark.svg" alt="" class="hidden h-7 dark:block" />
+              <img src="/stockbar-mark.svg" alt="" class="h-6 dark:hidden" />
+              <img src="/stockbar-mark-dark.svg" alt="" class="hidden h-6 dark:block" />
               <span class="sidebar-brand">
                 <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
               </span>
@@ -34,28 +34,30 @@
           </div>
 
           <!-- 投資組合切換已移到 AppHeader（由 App.vue teleport 進去） -->
-          <div v-if="isDemoUser && !collapsed" class="sidebar-demo-notice">
-            <i class="pi pi-info-circle"></i>
-            <span>{{ $t('demoUserMessage') }}</span>
-          </div>
+          <Transition name="sidebar-fade">
+            <div v-if="isDemoUser && !collapsed" class="sidebar-demo-notice">
+              <i class="pi pi-info-circle"></i>
+              <span>{{ $t('demoUserMessage') }}</span>
+            </div>
+          </Transition>
 
           <template v-for="(section, index) in sidebarSections" :key="section.key">
-            <!-- 收合時標題放不下，改用分隔線區分區段 -->
-            <div v-if="collapsed && index > 0" class="menu-divider"></div>
-
             <div class="menu-group">
-              <div v-if="!collapsed" class="menu-section-label">{{ section.label }}</div>
+              <!-- 標題一律佔位，收合時只淡出文字（第二段起改顯示分隔線），項目才不會上下跳動 -->
+              <div class="menu-section-label" :class="{ 'menu-section-label--divider': index > 0 }">
+                <span class="menu-section-label__text">{{ section.label }}</span>
+              </div>
               <template v-for="item in section.items" :key="item.key">
                 <RouterLink
                   :to="item.to"
                   class="menu-item"
                   :class="{ active: isNavItemActive(item) }"
-                  :title="collapsed ? item.label : null"
+                  v-tooltip.right="{ value: item.label, showDelay: 500, disabled: !collapsed }"
                   @click="closeDrawer"
                 >
                   <span class="menu-item-left">
                     <i :class="[item.icon, 'menu-item-icon']" />
-                    <span v-show="!collapsed">{{ item.label }}</span>
+                    <span class="menu-item-label">{{ item.label }}</span>
                   </span>
                 </RouterLink>
               </template>
@@ -220,6 +222,37 @@ const goDashboard = () => {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
+/* 收合／展開時文字淡入淡出：收合先淡出、寬度再縮（見 .sidebar--collapsed 的 transition-delay），
+   展開等寬度撐到一半再淡入，避免文字在窄欄裡被擠壓 */
+.sidebar-fade-enter-active {
+  transition: opacity 0.16s ease 0.1s;
+}
+
+.sidebar-fade-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.sidebar-fade-enter-from,
+.sidebar-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-fade-enter-active,
+  .sidebar-fade-leave-active,
+  .sidebar .back-btn,
+  .sidebar .menu-item-label,
+  .sidebar .menu-section-label__text,
+  .sidebar .menu-section-label--divider::before {
+    transition: none;
+  }
+}
+
+.menu-item-label {
+  white-space: nowrap;
+}
+
 /* 不用 Tailwind 的 hidden lg:flex：v4 utilities 在 @layer 裡，會被上面的 display: flex 蓋掉 */
 @media (max-width: 1023px) {
   .sidebar--persistent {
@@ -243,6 +276,19 @@ const goDashboard = () => {
   overflow-y: auto;
 }
 
+/* 頂列版面在收合／展開時不變：logo 只淡出，收合鈕固定在右側 3px（收合後 38px 寬的列裡剛好置中） */
+.sidebar--persistent .sidebar-top-row {
+  position: relative;
+  padding-right: 36px;
+}
+
+.sidebar--persistent .sidebar-collapse-btn {
+  position: absolute;
+  top: 50%;
+  right: 3px;
+  transform: translateY(-50%);
+}
+
 .sidebar-top-row {
   display: flex;
   align-items: center;
@@ -251,13 +297,10 @@ const goDashboard = () => {
   min-height: 64px;
 }
 
+/* 收合時等文字淡出（0.1s）後才開始縮寬；展開則立刻變寬。
+   左右內距不變，icon 才會固定在同一個位置 */
 .sidebar--collapsed {
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.sidebar--collapsed .sidebar-top-row {
-  justify-content: center;
+  transition-delay: 0.1s;
 }
 
 .sidebar-collapse-btn {
@@ -282,6 +325,16 @@ const goDashboard = () => {
 }
 
 .back-btn {
+  transition: opacity 0.16s ease 0.1s, visibility 0s;
+}
+
+.sidebar--collapsed .back-btn {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s ease, visibility 0s linear 0.1s;
+}
+
+.back-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -301,7 +354,7 @@ const goDashboard = () => {
 }
 
 .sidebar-brand {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.04em;
   white-space: nowrap;
@@ -341,11 +394,12 @@ const goDashboard = () => {
   align-items: center;
   justify-content: space-between;
   margin: 1px 0;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
+  overflow: hidden;
   color: var(--sidebar-text);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   transition: background-color 0.16s ease;
 }
@@ -353,13 +407,14 @@ const goDashboard = () => {
 .menu-item-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
 /* icon 跟著同列文字的顏色與字重 */
 .menu-item i {
-  width: 16px;
+  width: 14px;
+  font-size: 14px;
   color: inherit;
   font-weight: inherit;
   text-align: center;
@@ -367,8 +422,8 @@ const goDashboard = () => {
 }
 
 .menu-item-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
@@ -384,23 +439,43 @@ const goDashboard = () => {
 }
 
 .menu-section-label {
+  position: relative;
   padding: 8px 12px 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
   color: var(--sidebar-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.menu-divider {
+/* 收合時第二段起的標題位置畫一條分隔線 */
+.menu-section-label--divider::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 60%;
   height: 1px;
   background-color: var(--sidebar-border);
-  margin: 12px 0;
+  opacity: 0;
+  transition: opacity 0.1s ease;
 }
 
-.sidebar--collapsed .menu-item,
-.sidebar--collapsed .user-profile {
-  justify-content: center;
-  padding-left: 8px;
-  padding-right: 8px;
+.sidebar--collapsed .menu-section-label--divider::before {
+  opacity: 1;
+  transition: opacity 0.16s ease 0.1s;
+}
+
+/* 文字淡入淡出（時間同 sidebar-fade）：元素一直在、只改透明度，icon 與列高都不變 */
+.menu-item-label,
+.menu-section-label__text {
+  transition: opacity 0.16s ease 0.1s;
+}
+
+.sidebar--collapsed .menu-item-label,
+.sidebar--collapsed .menu-section-label__text {
+  opacity: 0;
+  transition: opacity 0.1s ease;
 }
 
 .user-profile {

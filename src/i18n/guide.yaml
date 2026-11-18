@@ -34,6 +34,10 @@ groups:
       en: Manage
       zh: 管理
     pages: [portfolios, user-settings, preferences]
+  - label:
+      en: Reference
+      zh: 參考
+    pages: [calculations]
 
 pages:
   quick-start:
@@ -107,9 +111,6 @@ pages:
     intro:
       en: The dashboard summarizes the current portfolio's performance, value trend and allocation on one page.
       zh: 儀表板在同一頁彙整目前投資組合的績效、市值走勢與資產配置。
-    note:
-      en: Turn off Compact next to the title to see extra rows such as cost, dividends and period highs and lows.
-      zh: 關閉標題旁的「精簡模式」，可看到持倉成本、股息、區間高低點等更多資訊。
     sections:
       - title:
           en: Key metrics
@@ -121,12 +122,14 @@ pages:
             zh: 已實現損益：已賣出部位的損益（已扣手續費），以及累計領到的股息。
           - en: "IRR: annualized return that accounts for when you added money, so it reflects your actual performance."
             zh: IRR：考量每筆資金投入時間點的年化報酬率，較能反映實際投資績效。
+          - en: "Select holding tags above the cards to calculate these figures, the value chart, the allocation and the holdings table for selected symbols only."
+            zh: 小卡上方的持股標籤可只挑部分持股計算（可複選），上述指標、總價值走勢圖、資產配置與持有資產表都會跟著篩選。
       - title:
           en: Total value chart
           zh: 總價值走勢
         text:
-          en: Shows how the portfolio's value changed over time. Switch between 5D, 1M, 6M, YTD, 1Y and 5Y; each button shows the return for that period. With details on, you also see the period high, low and max drawdown.
-          zh: 顯示投資組合市值隨時間的變化。可切換 5D、1M、6M、YTD、1Y、5Y，每個按鈕都會標示該區間的漲跌幅；開啟明細時另顯示區間最高、最低與最大回撤。
+          en: Shows how the portfolio's value changed over time. Switch between 5D, 1M, 6M, YTD, 1Y and 5Y; each button shows the return for that period. Below the chart you also see the period high, low, max drawdown and distance from the high.
+          zh: 顯示投資組合市值隨時間的變化。可切換 5D、1M、6M、YTD、1Y、5Y，每個按鈕都會標示該區間的漲跌幅；圖表下方另顯示區間最高、最低、最大回撤與距高點。
       - title:
           en: Allocation and holdings
           zh: 資產配置與持有資產
@@ -413,3 +416,111 @@ pages:
             zh: 導覽版面：可收合的側邊欄，或內容區更寬的上方列。
           - en: "Language and display currency: Traditional Chinese or English; USD or TWD."
             zh: 語言與顯示幣別：繁體中文或英文；USD 或 TWD。
+
+  calculations:
+    title:
+      en: How numbers are calculated
+      zh: 數值計算方式
+    intro:
+      en: "Every figure in StockBar is derived from your trades, dividends and market prices. This page lists the formula behind each one."
+      zh: StockBar 的所有數字都由交易紀錄、配息與市價推算而來。本頁列出每個數值背後的公式。
+    note:
+      en: "Market values use today's exchange rate. Costs, realized P/L and IRR use the rate on each trade's date, so settled gains don't move with today's rate."
+      zh: 市值以今天的匯率換算；成本、已實現損益與 IRR 則以每筆交易當天的匯率換算，已結算的損益不會跟著今天的匯率變動。
+    sections:
+      - title:
+          en: Holdings and P/L
+          zh: 持股與損益
+        list:
+          - en: "Average cost: moving average. Each buy adds (price × shares + fee) to the cost; a sell removes cost at the current average, so selling doesn't change the average."
+            zh: 平均成本：移動平均法。每次買入把（價格 × 股數 ＋ 手續費）加進成本；賣出時依當下平均成本扣除，賣出不會改變平均成本。
+          - en: "Unrealized P/L = current market value − cost basis of the shares you still hold."
+            zh: 未實現損益 ＝ 目前市值 − 目前持股的成本。
+          - en: "Unrealized return = unrealized P/L ÷ cost basis. It only covers what you still hold; sold positions and dividends are not included."
+            zh: 未實現報酬率 ＝ 未實現損益 ÷ 持有成本。只看目前持股，不含已賣出部位與股息。
+          - en: "Realized P/L = (sell price × shares − fee) − average cost of the shares sold, summed over every sell."
+            zh: 已實現損益 ＝ 每筆賣出的（賣價 × 股數 − 手續費）− 賣出股數的平均成本，再全部加總。
+          - en: "Return with dividends = (unrealized P/L + dividends received for that symbol) ÷ cost basis."
+            zh: 含息報酬 ＝（未實現損益 ＋ 該標的累計股息）÷ 持有成本。
+          - en: "Weight = holding's market value ÷ total portfolio value."
+            zh: 比重 ＝ 該持股市值 ÷ 投資組合總市值。
+
+      - title:
+          en: Annualized return (IRR)
+          zh: 年化報酬率（IRR）
+        text:
+          en: "IRR is the XIRR of all cash flows: each buy is money out, each sell and dividend is money in, and today's market value counts as a final inflow today. It finds the yearly rate that makes these flows net to zero, so it accounts for when and how much you invested."
+          zh: IRR 是所有現金流的 XIRR：買入算流出，賣出與股息算流入，目前市值視為今天的最後一筆流入。它求出讓這些現金流淨值為零的年化利率，因此會考慮每筆資金投入的時間與金額。
+        list:
+          - en: "If the flows can't converge to a rate (for example, too little history), IRR shows --."
+            zh: 若現金流無法收斂出利率（例如資料太少），IRR 會顯示 --。
+
+      - title:
+          en: Total value chart
+          zh: 總價值走勢
+        list:
+          - en: "Period return is time-weighted (TWR): each day's return = (today's value − today's net deposit) ÷ yesterday's value − 1, chained across the period. Buying or selling doesn't count as a gain or loss."
+            zh: 區間漲跌是時間加權報酬（TWR）：每日報酬 ＝（當日市值 − 當日淨投入）÷ 前一日市值 − 1，整段區間逐日連乘。加碼或賣出不會被算成漲跌。
+          - en: "Period P/L = ending value − starting value − net deposits during the period."
+            zh: 區間損益 ＝ 期末市值 − 期初市值 − 期間淨投入。
+          - en: "Net deposit = buys (including fees) minus sells on that day."
+            zh: 淨投入 ＝ 當日買入金額（含手續費）− 賣出金額。
+          - en: "Start + net invested line: starting value plus cumulative net deposits. The gap between it and the value line is your P/L for the period."
+            zh: 期初＋淨投入線：期初市值加上累計淨投入。它與市值線的差距就是區間損益。
+          - en: "Period high and low: the highest and lowest account value in the period."
+            zh: 區間最高／最低：區間內帳戶市值的最高點與最低點。
+          - en: "Max drawdown: the largest fall from a peak to a later low on the time-weighted return curve, so a large sell isn't mistaken for a loss."
+            zh: 最大回撤：在時間加權報酬曲線上，從高點到之後低點的最大跌幅；大筆賣出不會被誤算成虧損。
+          - en: "From high: how far the latest point is below the period's peak on the same curve."
+            zh: 距高點：同一條曲線上，最新一點距區間最高點的跌幅。
+          - en: "Dividends are not in the daily value series, so period returns reflect price changes only."
+            zh: 股息不在每日市值序列中，所以區間漲跌只反映價格變化。
+
+      - title:
+          en: Rebalancing
+          zh: 再平衡
+        list:
+          - en: "Current % = holding's market value ÷ total portfolio value."
+            zh: 目前比例 ＝ 該持股市值 ÷ 投資組合總市值。
+          - en: "Drift = current % − target % (percentage points). It's highlighted when it exceeds the portfolio's drift threshold."
+            zh: 偏離 ＝ 目前比例 − 目標比例（百分點）。超過投資組合設定的偏離門檻時會標示顏色。
+
+      - title:
+          en: Backtesting
+          zh: 回測
+        text:
+          en: "The backtest buys your target weights with the starting capital on the first common trading day of all symbols, then follows daily closing prices and rebalances back to target on the schedule you choose."
+          zh: 回測在所有標的共同的第一個交易日，用初始資金依目標比例買入，之後依每日收盤價計算市值，並依你選的頻率再平衡回目標比例。
+        list:
+          - en: "Cumulative return = (ending value − starting value) ÷ starting value."
+            zh: 累積報酬率 ＝（期末市值 − 期初市值）÷ 期初市值。
+          - en: "Annualized return = (1 + cumulative return) ^ (365 ÷ days in the period) − 1."
+            zh: 年化報酬率 ＝（1 ＋ 累積報酬率）^（365 ÷ 回測天數）− 1。
+          - en: "Volatility = standard deviation of daily returns × √252."
+            zh: 波動率 ＝ 每日報酬的標準差 × √252。
+          - en: "Sharpe ratio = average daily return ÷ standard deviation of daily returns × √252 (risk-free rate taken as 0)."
+            zh: 夏普比率 ＝ 每日平均報酬 ÷ 每日報酬標準差 × √252（無風險利率以 0 計）。
+          - en: "Max drawdown = the largest fall from a peak to a later low in the simulated value."
+            zh: 最大回撤 ＝ 模擬市值從高點到之後低點的最大跌幅。
+          - en: "Win rate = share of days with a positive return."
+            zh: 勝率 ＝ 報酬為正的天數 ÷ 總天數。
+          - en: "Threshold rebalancing triggers when any symbol drifts more than 5 percentage points from its target."
+            zh: 閾值再平衡：任一標的偏離目標超過 5 個百分點時觸發。
+
+      - title:
+          en: FX exchanges
+          zh: 換匯紀錄
+        text:
+          en: "Rates are written as 1 unit of foreign currency = ? TWD."
+          zh: 匯率一律以「1 外幣 ＝ ? TWD」表示。
+        list:
+          - en: "Your rate = TWD amount ÷ foreign amount."
+            zh: 成交匯率 ＝ 台幣金額 ÷ 外幣金額。
+          - en: "Spread cost = (your rate − market rate) × foreign amount + fee when buying foreign currency; (market rate − your rate) × foreign amount + fee when converting back."
+            zh: 價差成本：買外幣時 ＝（成交匯率 − 當天市場匯率）× 外幣金額 ＋ 手續費；換回台幣時 ＝（市場匯率 − 成交匯率）× 外幣金額 ＋ 手續費。
+          - en: "Average cost rate: moving average. Total TWD paid (fees included) ÷ foreign currency held."
+            zh: 平均成本匯率：移動平均法，累計付出的台幣（含手續費）÷ 目前持有的外幣。
+          - en: "Unrealized FX gain = foreign currency held × today's rate − its TWD cost."
+            zh: 未實現匯兌損益 ＝ 持有外幣 × 今日匯率 − 這些外幣的台幣成本。
+          - en: "Realized FX gain = TWD received when converting back (after fee) − the average cost of the currency converted."
+            zh: 已實現匯兌損益 ＝ 換回台幣時收到的台幣（扣手續費）− 換出外幣的平均成本。

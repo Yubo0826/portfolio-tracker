@@ -186,7 +186,7 @@
   font-variant-numeric: tabular-nums;
 }
 /* 卡片式表格（資產明細、再平衡共用）：圓角對齊 Card（Aura card 用 border.radius.xl），
-   表頭與內容同底色，分隔線用頁面底色做出凹槽感 */
+   表頭底色見 App.vue 的 .p-datatable，分隔線用頁面底色做出凹槽感 */
 .card-table .p-datatable {
   border-radius: var(--p-border-radius-xl);
   overflow: hidden;

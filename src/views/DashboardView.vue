@@ -3,13 +3,7 @@
   <!--  max-w-screen-2xl -->
   <div class="w-full">
     <Teleport defer to="#page-title-aside">
-      <div class="flex items-center gap-3">
-        <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
-        <label class="inline-flex items-center gap-1.5 cursor-pointer">
-          <ToggleSwitch :model-value="!showDetails" @update:model-value="v => showDetails = !v" class="dashboard-details-switch" />
-          {{ t('compactMode') }}
-        </label>
-      </div>
+      <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
     </Teleport>
 
     <!-- Skeleton Loading State -->
@@ -64,12 +58,59 @@
     <!-- Main Content -->
     <div v-else class="space-y-6">
 
+      <!-- 持股篩選標籤：全部 + 市值前幾大，其餘收進向下箭頭的 Popover；可複選 -->
+      <div v-if="symbolOptions.length > 1" class="symbol-chips" role="group" :aria-label="t('filterHoldings')">
+        <button type="button" :class="chipClass(!isFiltered)" :aria-pressed="!isFiltered" @click="selectedSymbols = []">
+          {{ t('allHoldings') }}
+        </button>
+        <button
+          v-for="symbol in visibleSymbols"
+          :key="symbol"
+          type="button"
+          :class="chipClass(selectedSymbols.includes(symbol))"
+          :aria-pressed="selectedSymbols.includes(symbol)"
+          @click="toggleSymbol(symbol)"
+        >{{ symbol }}</button>
+        <button
+          v-if="hiddenSymbols.length"
+          type="button"
+          class="inline-flex items-center gap-1.5"
+          :class="chipClass(hiddenSelectedCount > 0)"
+          :aria-label="t('moreHoldings', { n: hiddenSymbols.length })"
+          :aria-expanded="moreOpen"
+          v-tooltip.bottom="{ value: t('moreHoldings', { n: hiddenSymbols.length }), showDelay: 500 }"
+          @click="morePopover?.toggle($event)"
+        >
+          <span v-if="hiddenSelectedCount">{{ hiddenSelectedCount }}</span>
+          <i class="pi pi-chevron-down" :class="{ 'rotate-180': moreOpen }" />
+        </button>
+        <Popover ref="morePopover" @show="moreOpen = true" @hide="moreOpen = false">
+          <div class="symbol-chips symbol-chips--popover">
+            <button
+              v-for="symbol in hiddenSymbols"
+              :key="symbol"
+              type="button"
+              :class="chipClass(selectedSymbols.includes(symbol))"
+              :aria-pressed="selectedSymbols.includes(symbol)"
+              @click="toggleSymbol(symbol)"
+            >{{ symbol }}</button>
+          </div>
+        </Popover>
+      </div>
+
       <!-- 損益資訊小卡 -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card class="app-panel dashboard-metric-card h-full">
           <template #content>
-            <div class="flex items-start justify-between gap-2">
-              <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
+            <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
+            <!-- 損益金額與未實現報酬率同一列，報酬率靠右 -->
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <div v-if="totalProfit" class="inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
+                <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
+                <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+              </div>
+              <div v-else class="text-2xl font-bold tracking-tight">--</div>
               <span
                 v-if="holdingsStore.list.length"
                 class="asset-growth-pill asset-growth-pill--sm"
@@ -77,12 +118,6 @@
                 v-tooltip.top="$t('unrealizedReturn')"
               >{{ formatSignedNumber(totalReturn) }}%</span>
             </div>
-            <div v-if="totalProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
-              <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
-              <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-              <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
-            </div>
-            <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
 
             <!-- 獲利／虧損檔數比例條 -->
             <div v-if="holdingsStore.list.length" class="dashboard-winloss mt-3" :aria-label="$t('winLossValue', winLoss)">
@@ -90,7 +125,7 @@
               <span v-if="winLoss.down" class="dashboard-winloss__down" :style="{ flexGrow: winLoss.down }" />
             </div>
 
-            <dl v-show="showDetails" class="dashboard-metric-rows">
+            <dl class="dashboard-metric-rows">
               <div v-for="row in unrealizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
             </dl>
           </template>
@@ -109,7 +144,7 @@
             </div>
             <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
 
-            <dl v-show="showDetails" class="dashboard-metric-rows">
+            <dl class="dashboard-metric-rows">
               <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
             </dl>
           </template>
@@ -127,7 +162,7 @@
             </div>
             <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
 
-            <dl v-show="showDetails" class="dashboard-metric-rows">
+            <dl class="dashboard-metric-rows">
               <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
             </dl>
           </template>
@@ -207,7 +242,7 @@
             </div>
 
             <!-- 區間統計：跟著選取的時間區間變動 -->
-            <dl v-if="stats" v-show="showDetails" class="dashboard-period-stats mt-4">
+            <dl v-if="stats" class="dashboard-period-stats mt-4">
               <div>
                 <dt>{{ $t('periodHigh') }}</dt>
                 <dd>{{ formatAmountWithCode(stats.high.y, { currency: displayCurrency }) }}</dd>
@@ -311,7 +346,7 @@
       <template #content>
         <h2 class="mb-4 text-base font-semibold">{{ $t('holdings') }}</h2>
 
-        <DataTable :value="holdingsStore.list" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
+        <DataTable :value="holdings" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }"
@@ -398,7 +433,7 @@
 import { ref, watch, computed } from 'vue'
 import Skeleton from 'primevue/skeleton'
 import ProgressBar from 'primevue/progressbar'
-import ToggleSwitch from 'primevue/toggleswitch'
+import Popover from 'primevue/popover'
 import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
 import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, twrChange, twrIndex, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
@@ -444,11 +479,43 @@ const importDialogVisible = ref(false)
 const allocation = ref([])
 const dividends = ref([])
 
+// 只看部分持股：空陣列 = 全部。小卡、配置、持股表與走勢圖（後端 holdings-chart 的 symbols 參數）都跟著篩選
+const selectedSymbols = ref([])
+// 依市值由大到小，前 VISIBLE_CHIPS 檔直接顯示成標籤，其餘收進「更多」
+const symbolOptions = computed(() => [...holdingsStore.list].sort((a, b) => b.currentValue - a.currentValue).map(h => h.symbol))
+const VISIBLE_CHIPS = 8
+const visibleSymbols = computed(() => symbolOptions.value.slice(0, VISIBLE_CHIPS))
+const hiddenSymbols = computed(() => symbolOptions.value.slice(VISIBLE_CHIPS))
+const hiddenSelectedCount = computed(() => hiddenSymbols.value.filter(s => selectedSymbols.value.includes(s)).length)
+const morePopover = ref()
+const moreOpen = ref(false)
+// 與 SearchBox 的「全部／持有」標籤同樣式：選中以文字色當底，深淺色模式自動反轉
+const chipClass = active => ['rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--p-primary-color)]', active
+  ? 'bg-[var(--p-text-color)] text-[var(--p-content-background)]'
+  : 'bg-emphasis text-color hover:bg-[var(--p-content-hover-background)]']
+const toggleSymbol = symbol => {
+  selectedSymbols.value = selectedSymbols.value.includes(symbol)
+    ? selectedSymbols.value.filter(s => s !== symbol)
+    : [...selectedSymbols.value, symbol]
+}
+const isFiltered = computed(() => selectedSymbols.value.length > 0)
+const pickSelected = list => (isFiltered.value ? list.filter(x => selectedSymbols.value.includes(x.symbol)) : list)
+const holdings = computed(() => pickSelected(holdingsStore.list))
+const trades = computed(() => pickSelected(transactionsStore.list))
+const shownDividends = computed(() => pickSelected(dividends.value))
+// 換投資組合或持股賣光時，拿掉已不存在的代號
+watch(symbolOptions, opts => {
+  const kept = selectedSymbols.value.filter(s => opts.includes(s))
+  if (kept.length !== selectedSymbols.value.length) selectedSymbols.value = kept
+})
+
+// 目標配置是對整個投資組合設定的，金額用全部持股市值換算
+const portfolioValue = computed(() => holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0))
 const totalValue = computed(() => {
-  return holdingsStore.list.reduce((sum, h) => sum + h.currentValue, 0)
+  return holdings.value.reduce((sum, h) => sum + h.currentValue, 0)
 })
 const totalProfit = computed(() => {
-  return holdingsStore.list.reduce((sum, h) => sum + (h.currentValue - h.totalCost), 0)
+  return holdings.value.reduce((sum, h) => sum + (h.currentValue - h.totalCost), 0)
 })
 const selectedPieType = ref('actual')
 const pieChartType = computed(() => ([
@@ -489,10 +556,6 @@ const stats = computed(() => {
   return base && perf && { ...base, maxDrawdown: perf.maxDrawdown, fromHigh: perf.fromHigh }
 })
 
-// 小卡明細列＋區間統計的顯示開關，記在 localStorage；無痕或封鎖儲存時就當預設顯示
-const SHOW_DETAILS_KEY = 'dashboard-show-details'
-const showDetails = ref((() => { try { return localStorage.getItem(SHOW_DETAILS_KEY) !== '0' } catch { return true } })())
-watch(showDetails, v => { try { localStorage.setItem(SHOW_DETAILS_KEY, v ? '1' : '0') } catch { /* 存不了就只在本次有效 */ } })
 const formatShortDate = d => d.toLocaleDateString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US')
 
 /* =========================
@@ -641,7 +704,7 @@ async function loadData() {
 const actualAllocationBreakdown = computed(() => {
   const total = totalValue.value || 0
 
-  return buildAllocationBreakdown(holdingsStore.list, holding => {
+  return buildAllocationBreakdown(holdings.value, holding => {
     const amount = Number(holding.currentValue)
     const percentage = total > 0 ? (amount / total) * 100 : 0
     const profit = amount - Number(holding.totalCost)
@@ -658,7 +721,7 @@ const actualAllocationBreakdown = computed(() => {
 })
 
 const targetAllocationBreakdown = computed(() => {
-  const total = totalValue.value || 0
+  const total = portfolioValue.value || 0
 
   return buildAllocationBreakdown(allocation.value || [], item => {
     const percentage = getAllocationTargetValue(item)
@@ -683,7 +746,7 @@ const selectedAllocationBreakdown = computed(() => {
 
 const allocationItemCount = computed(() => {
   return selectedPieType.value === 'actual'
-    ? holdingsStore.list.length
+    ? holdings.value.length
     : (allocation.value || []).length
 })
 
@@ -767,26 +830,26 @@ const selectedAllocationChart = computed(() => ({
   }],
 }))
 
-const totalReturn = computed(() => totalReturnPct(holdingsStore.list))
+const totalReturn = computed(() => totalReturnPct(holdings.value))
 // 已實現損益與 XIRR 都是歷史現金流，用成交當時的匯率換算；
 // 用今日匯率會讓早就結算完的損益每天跟著匯率變動
-const realizedProfit = computed(() => calcRealizedProfit(transactionsStore.list, convertAmountToUsdAt))
+const realizedProfit = computed(() => calcRealizedProfit(trades.value, convertAmountToUsdAt))
 const irr = computed(() => holdingsStore.list.length
-  ? portfolioXirr(transactionsStore.list, dividends.value, totalValue.value, convertAmountToUsdAt)
+  ? portfolioXirr(trades.value, shownDividends.value, totalValue.value, convertAmountToUsdAt)
   : null)
 
 /* 損益小卡的明細列 */
 const profitColor = v => (v >= 0 ? 'text-up' : 'text-down')
 const winLoss = computed(() => {
-  const up = holdingsStore.list.filter(h => h.currentValue >= h.totalCost).length
-  return { up, down: holdingsStore.list.length - up }
+  const up = holdings.value.filter(h => h.currentValue >= h.totalCost).length
+  return { up, down: holdings.value.length - up }
 })
 // 股息表沒有幣別欄位，與 portfolioXirr 相同以該 symbol 交易的幣別換算；資料層一律用 USD，顯示時 formatAmount* 才轉幣別
 const totalDividends = computed(() => {
   const currencyBySymbol = new Map(transactionsStore.list.map(tx => [tx.symbol, tx.currency]))
-  return dividends.value.reduce((s, d) => s + convertAmountToUsd(d.amount, currencyBySymbol.get(d.symbol) ?? 'USD'), 0)
+  return shownDividends.value.reduce((s, d) => s + convertAmountToUsd(d.amount, currencyBySymbol.get(d.symbol) ?? 'USD'), 0)
 })
-const firstTradeDate = computed(() => transactionsStore.list.reduce(
+const firstTradeDate = computed(() => trades.value.reduce(
   (min, tx) => (!min || new Date(tx.date) < min ? new Date(tx.date) : min), null))
 
 const unrealizedRows = computed(() => [
@@ -802,7 +865,7 @@ const irrRows = computed(() => {
   const years = first ? (Date.now() - first.getTime()) / (365.25 * 864e5) : null
   return [
     { label: t('investingSince'), value: first ? `${first.toLocaleDateString(locale.value.startsWith('zh') ? 'zh-TW' : 'en-US')} · ${t('yearsShort', { n: years.toFixed(1) })}` : '--' },
-    { label: t('totalInvested'), value: formatAmountWithCode(transactionsStore.list
+    { label: t('totalInvested'), value: formatAmountWithCode(trades.value
       .filter(tx => tx.transactionType === 'buy')
       .reduce((s, tx) => s + convertAmountToUsdAt(tx.price * tx.shares + tx.fee, tx.currency, tx.fxRate), 0)) },
   ]
@@ -898,14 +961,19 @@ const areaChartOptions = computed(() => {
   }
 })
 
+// 連續切換篩選時，只採用最後一次請求的結果，避免較慢的舊回應蓋掉新的
+let chartRequestId = 0
 async function fetchChartData() {
+  const requestId = ++chartRequestId
   if (!auth.user?.uid || !portfolioStore.currentPortfolio?.id || holdingsStore.list.length === 0) {
     rawChartPoints.value = []
     return
   }
 
   try {
-    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&currency=${displayCurrency.value}`)
+    const symbols = isFiltered.value ? `&symbols=${encodeURIComponent(selectedSymbols.value.join(','))}` : ''
+    const data = await api.get(`/api/yahoo/holdings-chart?uid=${auth.user?.uid}&portfolio_id=${portfolioStore.currentPortfolio?.id}&currency=${displayCurrency.value}${symbols}`)
+    if (requestId !== chartRequestId) return
     rawChartPoints.value = data
       .map(item => ({ x: new Date(item.date), y: item.close, flow: item.flow ?? 0 }))
       .sort((a, b) => a.x - b.x)
@@ -953,13 +1021,30 @@ watch(() => holdingsStore.list.length, (n, o) => {
   if (n && !o && !isLoadingData) fetchChartData()
 })
 
-// 走勢圖由後端用歷史匯率換算，切換顯示幣別要重抓
-watch(displayCurrency, () => {
+// 走勢圖由後端用歷史匯率換算，切換顯示幣別或持股篩選要重抓
+watch([displayCurrency, selectedSymbols], () => {
   if (!isLoadingData) fetchChartData()
 })
 </script>
 
 <style scoped>
+/* 持股篩選標籤列（標籤本身的樣式見 chipClass） */
+.symbol-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.symbol-chips--popover {
+  max-width: 22rem;
+}
+
+.symbol-chips i {
+  font-size: 0.7rem;
+  transition: transform 0.15s ease;
+}
+
 .dashboard-panel--hero {
   overflow: hidden;
 }
@@ -1027,12 +1112,6 @@ watch(displayCurrency, () => {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
-}
-
-.dashboard-details-switch {
-  --p-toggleswitch-width: 2rem;
-  --p-toggleswitch-height: 1.125rem;
-  --p-toggleswitch-handle-size: 0.75rem;
 }
 
 .dashboard-period-stats {

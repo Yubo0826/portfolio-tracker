@@ -87,7 +87,7 @@ Base URL：本機開發 `http://localhost:3000`；正式環境使用 `VITE_API_U
 | GET | `/api/yahoo/symbol` | 股票代號搜尋（自動完成） | query: `query` |
 | GET | `/api/yahoo/quote` | 即時報價 | query: `symbol` |
 | GET | `/api/yahoo/chart` | 歷史 K 線資料 | query: `symbol, period1, period2, interval` |
-| GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2, currency`（見 `services/fx.js` 的 `SUPPORTED_CURRENCIES`，每個用到的幣別各抓一條 `XXX=X` 歷史匯率逐日換算） |
+| GET | `/api/yahoo/holdings-chart` | 依交易紀錄與歷史價格計算每日投組總市值時序（Dashboard 成長圖） | query: `uid, portfolio_id, interval, period1, period2, currency, symbols`（`symbols` 選填、逗號分隔、上限 100，只計算這些標的，儀表板持股篩選用；`currency` 見 `services/fx.js` 的 `SUPPORTED_CURRENCIES`，每個用到的幣別各抓一條 `XXX=X` 歷史匯率逐日換算） |
 | GET | `/api/yahoo/allocation-chart` | 回傳目標配置中各標的歷史收盤價 | query: `uid, portfolio_id, period1, period2, interval` |
 | GET | `/api/yahoo/summary` | Yahoo quoteSummary（公司概況/財務資料等） | query: `symbol` |
 | GET | `/api/yahoo/fund-holdings` | ETF/基金產業配置與前十大持股，回傳 `{ sectorWeightings: [{sector, weight}], holdings: [{symbol, name, weight}] }` | query: `symbol` |

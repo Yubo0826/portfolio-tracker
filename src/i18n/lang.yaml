@@ -554,9 +554,6 @@ addToComparison:
 removeFromComparison:
   en: Remove from Compare
   zh: 移除對比
-compactMode:
-  en: Compact
-  zh: 精簡模式
 marketOpenAsOf:
   en: "As of {time}. Market Open."
   zh: "截至 {time}，開盤中"
@@ -957,6 +954,15 @@ runBacktest:
 resultTitle:
   en: Backtest Results
   zh: 回測結果
+allHoldings:
+  en: All holdings
+  zh: 全部持股
+moreHoldings:
+  en: "{n} more holdings"
+  zh: "其他 {n} 檔持股"
+filterHoldings:
+  en: Choose holdings to include
+  zh: 選擇要計算的持股
 unrealizedReturn:
   en: Unrealized Return
   zh: 未實現報酬率

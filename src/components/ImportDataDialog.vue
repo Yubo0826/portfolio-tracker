@@ -577,10 +577,14 @@ function onPage(event) {
 .import-preview-table :deep(.p-datatable),
 .import-preview-table :deep(.p-datatable-table-container),
 .import-preview-table :deep(.p-datatable-table),
-.import-preview-table :deep(.p-datatable-thead > tr > th),
 .import-preview-table :deep(.p-datatable-tbody > tr),
 .import-preview-table :deep(.p-datatable-tbody > tr > td) {
   background: transparent !important;
+  user-select: none;
+}
+
+/* 表頭保留全站共用的淡底色，只取消選取 */
+.import-preview-table :deep(.p-datatable-thead > tr > th) {
   user-select: none;
 }
 </style>
