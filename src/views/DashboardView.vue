@@ -74,7 +74,7 @@
                 v-if="holdingsStore.list.length"
                 class="asset-growth-pill asset-growth-pill--sm"
                 :class="totalReturn >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
-                v-tooltip.top="$t('cumulativeReturn')"
+                v-tooltip.top="$t('unrealizedReturn')"
               >{{ formatSignedNumber(totalReturn) }}%</span>
             </div>
             <div v-if="totalProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">

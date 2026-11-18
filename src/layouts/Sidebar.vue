@@ -63,7 +63,8 @@
           </template>
         </div>
 
-        <div class="sidebar-user">
+        <!-- 桌面固定側欄的使用者選單移到 AppHeader 右上角，這裡只給手機 Drawer 用 -->
+        <div v-if="!persistent" class="sidebar-user">
           <button
             type="button"
             class="user-profile"
@@ -215,7 +216,6 @@ const goDashboard = () => {
   width: calc(var(--sidebar-width, 260px) - 24px);
   padding: 0 12px 12px;
   background-color: var(--p-content-background);
-  border: 1px solid var(--sidebar-border);
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }

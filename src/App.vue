@@ -534,13 +534,13 @@ const menuItems = computed(() => {
   padding: 10px 16px 10px 0;
 }
 
-/* Material 3 搜尋列：48px 全圓膠囊、填色無框，hover 疊 8% 前景色 state layer */
+/* 搜尋列：與投資組合選單同高（2.25rem）的全圓膠囊、填色無框，hover 疊 8% 前景色 state layer */
 .app-shell__search {
   align-items: center;
   gap: 0.75rem;
   width: min(28rem, 100%);
-  height: 3rem;
-  padding: 0 0.75rem 0 1.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem 0 1rem;
   border: 0;
   border-radius: 9999px;
   background: var(--p-surface-200);

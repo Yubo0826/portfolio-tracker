@@ -957,6 +957,9 @@ runBacktest:
 resultTitle:
   en: Backtest Results
   zh: 回測結果
+unrealizedReturn:
+  en: Unrealized Return
+  zh: 未實現報酬率
 cumulativeReturn:
   en: Cumulative Return
   zh: 累積報酬率

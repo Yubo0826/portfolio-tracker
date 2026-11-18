@@ -89,13 +89,13 @@
             </template>
           </Column>
           <Column field="date" sortable :header="$t('date')" />
-          <Column v-if="!auth.isDemo" field="" :header="$t('action')">
+          <Column v-if="!auth.isDemo" field="" headerStyle="width: 4rem" bodyClass="row-actions">
             <template #body="slotProps">
               <Button
                 icon="pi pi-pencil"
                 :aria-label="$t('editTransaction')"
-                class="p-button-rounded p-button-text"
-                severity="info"
+                v-tooltip.top="{ value: $t('editTransaction'), showDelay: 500 }"
+                text rounded severity="secondary" size="small"
                 @click="openEdit(slotProps.data.id)"
               />
             </template>

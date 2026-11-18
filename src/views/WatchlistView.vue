@@ -128,7 +128,7 @@
           </div>
         </template>
       </Column>
-      <Column headerStyle="width: 6rem">
+      <Column headerStyle="width: 6rem" bodyClass="row-actions">
         <template #body="{ data }">
           <Button
             icon="pi pi-pencil"

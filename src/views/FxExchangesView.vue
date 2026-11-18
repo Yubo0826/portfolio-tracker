@@ -81,7 +81,7 @@
         <Column field="note" :header="$t('fxNote')">
           <template #body="{ data }"><span class="text-sm text-muted-color">{{ data.note }}</span></template>
         </Column>
-        <Column headerStyle="width: 6rem">
+        <Column headerStyle="width: 6rem" bodyClass="row-actions">
           <template #body="{ data }">
             <Button icon="pi pi-pencil" text rounded severity="secondary" size="small" :disabled="isReadOnly"
               :aria-label="$t('edit')" v-tooltip.top="{ value: $t('edit'), showDelay: 500 }" @click="openForm(data)" />

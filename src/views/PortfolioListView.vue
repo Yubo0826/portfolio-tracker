@@ -51,7 +51,7 @@
               {{ slotProps.data.enable_email_alert ? $t('enabled') : $t('disabled') }}
             </template>
           </Column>
-          <Column v-if="!auth.isDemo" field="" :header="$t('action')">
+          <Column v-if="!auth.isDemo" field="" bodyClass="row-actions">
               <template #body="slotProps">
                   <Button icon="pi pi-pencil" :aria-label="$t('updatePortfolio')" v-tooltip.bottom="{ value: $t('updatePortfolio'), showDelay: 500 }" class="p-button-rounded p-button-text" severity="secondary" @click="updateSelectedPortfolios(slotProps.data.id)" />
                   <Button icon="pi pi-copy" :aria-label="$t('duplicatePortfolio')" v-tooltip.bottom="{ value: $t('duplicatePortfolio'), showDelay: 500 }" class="p-button-rounded p-button-text" severity="secondary" @click="duplicatePortfolio(slotProps.data.id)" />
@@ -271,3 +271,4 @@ onUnmounted(() => {
 });
 
 </script>
+

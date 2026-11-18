@@ -100,34 +100,11 @@
           @click="$emit('login')"
         />
 
-        <!-- header 導覽模式的使用者選單（側邊欄模式時在 Sidebar 底部） -->
-        <template v-if="isHeaderNav">
-          <button
-            type="button"
-            class="topbar-avatar hidden lg:inline-flex"
-            :class="{ 'is-open': userMenuVisible }"
-            :aria-label="t('openUserMenu')"
-            :aria-expanded="userMenuVisible"
-            @click="userMenu?.toggle($event)"
-          >
-            <img v-if="userPhotoUrl" :src="userPhotoUrl" :alt="userDisplayName" referrerpolicy="no-referrer" />
-            <span v-else>{{ userInitial }}</span>
-          </button>
-
-          <TieredMenu
-            ref="userMenu"
-            :model="menuItems"
-            :popup="true"
-            @show="userMenuVisible = true"
-            @hide="userMenuVisible = false"
-          />
-        </template>
-
         <!-- 手機頂欄放不下，改由側欄使用者選單的「偏好設定」開啟同一個視窗。
              hidden 要放在外層：PrimeVue Button 自帶的 display 會蓋過 Tailwind 的 hidden -->
         <span class="hidden sm:inline-flex">
           <Button
-            icon="pi pi-sliders-h"
+            icon="pi pi-cog"
             text
             rounded
             severity="secondary"
@@ -136,6 +113,28 @@
             @click="$emit('open-preferences')"
           />
         </span>
+
+        <!-- 桌面版使用者選單一律放右上角；窄屏（< lg）在 Drawer 底部 -->
+        <button
+          type="button"
+          class="topbar-avatar hidden lg:inline-flex"
+          :class="{ 'is-open': userMenuVisible }"
+          :aria-label="t('openUserMenu')"
+          v-tooltip.bottom="{ value: userDisplayName || t('openUserMenu'), showDelay: 500 }"
+          :aria-expanded="userMenuVisible"
+          @click="userMenu?.toggle($event)"
+        >
+          <img v-if="userPhotoUrl" :src="userPhotoUrl" :alt="userDisplayName" referrerpolicy="no-referrer" />
+          <span v-else>{{ userInitial }}</span>
+        </button>
+
+        <TieredMenu
+          ref="userMenu"
+          :model="menuItems"
+          :popup="true"
+          @show="userMenuVisible = true"
+          @hide="userMenuVisible = false"
+        />
       </div>
     </div>
   </header>

@@ -185,17 +185,6 @@
   color: var(--p-text-color);
   font-variant-numeric: tabular-nums;
 }
-/* Sticky footer actions */
-.set-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 0.75rem 0;
-}
-
 /* 卡片式表格（資產明細、再平衡共用）：圓角對齊 Card（Aura card 用 border.radius.xl），
    表頭與內容同底色，分隔線用頁面底色做出凹槽感 */
 .card-table .p-datatable {
@@ -259,4 +248,21 @@
   flex: 1 0 auto;
   min-width: 3.5rem;
   padding: 0.5rem 0.25rem;
+}
+
+/* 表格列操作按鈕（DataTable Column 加 bodyClass="row-actions"）：平時隱藏，滑過該列或鍵盤 focus 進來才出現；觸控裝置沒有 hover，一律顯示 */
+.row-actions > * {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+tr:hover .row-actions > *,
+.row-actions:focus-within > * {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .row-actions > * {
+    opacity: 1;
+  }
 }

@@ -130,21 +130,25 @@
       </div>
     </section>
 
-    <!-- ============ Sticky actions ============ -->
-    <div v-if="!auth.isDemo" class="set-footer">
-      <Button
-        :label="$t('save')"
-        :disabled="saveButtonDisabled"
-        @click="saveAllocation"
-      />
-      <Button
-        :label="$t('cancel')"
-        severity="secondary"
-        outlined
-        :disabled="saveButtonDisabled"
-        @click="resetAllocation"
-      />
-    </div>
+    <!-- 儲存／取消放在頁面標題列右側（App.vue 的 #page-title-aside） -->
+    <Teleport v-if="!auth.isDemo" defer to="#page-title-aside">
+      <div class="flex items-center gap-2">
+        <Button
+          :label="$t('cancel')"
+          severity="secondary"
+          outlined
+          size="small"
+          :disabled="saveButtonDisabled"
+          @click="resetAllocation"
+        />
+        <Button
+          :label="$t('save')"
+          size="small"
+          :disabled="saveButtonDisabled"
+          @click="saveAllocation"
+        />
+      </div>
+    </Teleport>
   </div>
 </template>
 
