@@ -83,7 +83,7 @@ const CHART_PALETTES = {
     tooltipBg: '#ffffff',
     tooltipFg: '#374151',
     tooltipFgStrong: '#0f172a',
-    border: '#fbf8ff',
+    border: '#ffffff', // 圓餅切片間隔線，與卡片同色
     legend: '#374151',
   },
   night: {

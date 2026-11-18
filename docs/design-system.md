@@ -56,17 +56,17 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 
 ## 淺色中性色、導覽與搜尋列（Material 3，取自 vocabulary-app）
 
-- 淺色的 surface 色階是帶藍紫調的 M3 中性色（`#fbf8ff` → `#131318`），不用 zinc 冷灰；app shell `#f2f0f8`、內容 `#fbf8ff`。
+- 淺色的 surface 色階是帶藍紫調的 M3 中性色（`#fbf8ff` → `#131318`），不用 zinc 冷灰；淺色採 GCP 風格分層：app shell 淡藍灰 `#f0f4f9` → 主內容區與側欄是白色面板 → 面板內的卡片（`.app-panel`、`.set-group`、`.card-table`）白底＋ `#dadce0` 細框、無陰影；設定頁群組淺色下是整張白卡、標題列用細線分隔。深色維持「主內容與底色同色、卡片亮一階」與灰框包內卡。
 - 桌面側欄是浮動圓角卡片：四周內縮 12px、16px 圓角、填 content 底色、不加外框；收合鈕用側欄面板圖示（內嵌 SVG）。
 - 側欄導覽項目是 12px 圓角矩形：hover 疊 8% 前景色，目前所在頁填 12% 中性灰、字重 500，不帶主色；一般項目字重 400。
 - 頂欄導覽項目是膠囊形：hover 疊 8% 前景色，目前所在頁填 `--sb-container`（主色推出的淡色容器，`main.css`）並加粗。
-- 頂欄搜尋列：與投資組合選單同高（2.25rem）的全圓膠囊、填 `surface-200`（深色 `surface-800`）、無框。
+- 頂欄搜尋列：與投資組合選單同高（2.25rem）的全圓膠囊、淺色填白（content 底色，與卡片相同）、深色填 `surface-800`、無框。
 單一標的的價格、成本、市值、損益、股息以**原幣**顯示（台股 TWD、美股 USD），
 金額拆分用 `useCurrency` 的 `splitDisplayAmount`，代號推斷幣別用 `utils/symbol.js` 的 `currencyOfSymbol`，不要各頁另寫。
 
 ## 版面慣例
 
-- **卡片**：Dashboard 與資產頁用 `.app-panel`，無外框、靠漸層底和陰影浮起。
+- **卡片**：Dashboard 與資產頁用 `.app-panel`。深色無外框、靠漸層底和陰影浮起；淺色白底＋細框、無陰影（見上方淺色分層）。
 - **表格**：資產明細、再平衡用 `.card-table`——表頭與內容同底，分隔線用頁面底色做出凹槽感。
   已排序的表頭不變色，只靠排序圖示（自訂的 `pi-chevron-down`）表示狀態。
 - **設定頁**：`.set-page` / `.set-group` / `.set-row`，GitLab 風格的灰底標題列＋內嵌白卡＋sticky 底部操作列。

@@ -543,7 +543,8 @@ const menuItems = computed(() => {
   padding: 0 0.5rem 0 1rem;
   border: 0;
   border-radius: 9999px;
-  background: var(--p-surface-200);
+  /* 淺色：與卡片同為白底，浮在 #f0f4f9 底色上 */
+  background: var(--p-content-background);
   color: var(--p-text-muted-color);
   font-size: 0.875rem;
   text-align: left;
@@ -551,7 +552,7 @@ const menuItems = computed(() => {
 }
 
 .app-shell__search:hover {
-  background: color-mix(in srgb, var(--p-text-color) 8%, var(--p-surface-200));
+  background: color-mix(in srgb, var(--p-text-color) 6%, var(--p-content-background));
   color: var(--p-text-color);
   cursor: text;
 }
@@ -570,15 +571,14 @@ const menuItems = computed(() => {
   background: color-mix(in srgb, var(--p-text-color) 8%, var(--p-surface-800));
 }
 
+/* 淺色（GCP 風格）：主內容區是白色大面板，浮在淡藍灰底色上，裡面的卡片靠細框區隔（main.css）
+   深色：主內容區與底色一致，卡片比底色亮一階浮在上面 */
 .app-shell__content {
   background-color: var(--p-content-background);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
-/* 深色：主內容區與底色一致，卡片（content-background）浮在底色（surface-background）上 */
 .dark .app-shell__content {
   background-color: var(--p-surface-background);
-  box-shadow: none;
 }
 
 @media (min-width: 1024px) {

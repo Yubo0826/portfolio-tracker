@@ -130,6 +130,33 @@
 .set-row:first-child {
   border-top: none;
 }
+/* 淺色（GCP 風格）：卡片都在白色主內容面板上，白底＋淺灰細框、無陰影；
+   設定頁群組改成整張白卡，標題列與內容用細線分隔。深色維持原本的底色分層與灰框包內卡 */
+html:not(.dark) {
+  --sb-card-border: #dadce0;
+}
+html:not(.dark) .app-panel,
+html:not(.dark) .set-group,
+html:not(.dark) .card-table .p-datatable {
+  background: var(--p-content-background);
+  border: 1px solid var(--sb-card-border);
+  box-shadow: none;
+}
+/* 群組裡的表格已經有群組外框，不再重複 */
+html:not(.dark) .set-group .card-table .p-datatable {
+  border: 0;
+}
+html:not(.dark) .set-group {
+  padding: 0;
+  overflow: hidden;
+}
+html:not(.dark) .set-group__head {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--sb-card-border);
+}
+html:not(.dark) .set-group__body {
+  border-radius: 0;
+}
 .set-label {
   display: block;
   margin-bottom: 0.5rem;

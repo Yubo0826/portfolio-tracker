@@ -32,7 +32,7 @@ export default definePreset(Aura, {
           content: {
             // background: '{zinc.50}',
             // 淺色中性色取自 Material 3 帶藍紫調的色階（與 vocabulary-app 同一套），不用冷灰
-            background: '#fbf8ff',
+            background: '#ffffff', // 卡片、側欄、對話框：純白浮在 #f0f4f9 底色上
             focusBackground: '{surface.700}',
             color: '{surface.900}',
             focusColor: '{surface.900}',
@@ -41,7 +41,7 @@ export default definePreset(Aura, {
           text: {
             color: '{surface.900}',
             hoverColor: '{surface.950}',
-            // 次要文字 #5d5e67 在 #fbf8ff 上約 6.4:1
+            // 次要文字 #5d5e67 在 #ffffff 上約 6.6:1
             mutedColor: '{surface.600}',
             hoverMutedColor: '{surface.700}'
           },
@@ -49,8 +49,8 @@ export default definePreset(Aura, {
               // background: '#ffffff',
               // background: '#f4f6fe',
               // background: '#f1f5f9',
-              background: '#f2f0f8', // app shell / sidebar 底色
-              card: '#fbf8ff',
+              background: '#f0f4f9', // app shell 底色（GCP 風格淡藍灰）；主內容區、側欄、卡片都是白色浮在上面
+              card: '#ffffff',
               0: '#ffffff',
               50: '#fbf8ff',
               100: '#f2f0f8',

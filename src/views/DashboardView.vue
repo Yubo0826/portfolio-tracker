@@ -8,28 +8,31 @@
 
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card v-for="idx in 3" :key="`skeleton-metric-${idx}`" class="app-panel dashboard-metric-card h-full">
+      <!-- 大螢幕：走勢圖在左、三張損益小卡疊在右欄；小螢幕維持小卡在上 -->
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_19rem] gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 lg:auto-rows-fr lg:order-2 gap-4">
+          <Card v-for="idx in 3" :key="`skeleton-metric-${idx}`" class="app-panel dashboard-metric-card h-full">
+            <template #content>
+              <div class="space-y-3">
+                <Skeleton width="6rem" height="0.85rem" />
+                <Skeleton width="10rem" height="2rem" />
+                <Skeleton width="100%" height="0.5rem" borderRadius="999px" />
+              </div>
+            </template>
+          </Card>
+        </div>
+
+        <Card class="app-panel dashboard-panel--hero lg:order-1">
           <template #content>
             <div class="space-y-3">
               <Skeleton width="6rem" height="0.85rem" />
-              <Skeleton width="10rem" height="2rem" />
-              <Skeleton width="100%" height="0.5rem" borderRadius="999px" />
+              <Skeleton width="16rem" height="2.5rem" />
+              <Skeleton width="100%" height="320px" borderRadius="0.75rem" />
+              <Skeleton width="18rem" height="1.75rem" borderRadius="999px" />
             </div>
           </template>
         </Card>
       </div>
-
-      <Card class="app-panel dashboard-panel--hero">
-        <template #content>
-          <div class="space-y-3">
-            <Skeleton width="6rem" height="0.85rem" />
-            <Skeleton width="16rem" height="2.5rem" />
-            <Skeleton width="100%" height="320px" borderRadius="0.75rem" />
-            <Skeleton width="18rem" height="1.75rem" borderRadius="999px" />
-          </div>
-        </template>
-      </Card>
 
       <Card class="app-panel dashboard-allocation-card">
         <template #content>
@@ -98,173 +101,185 @@
         </Popover>
       </div>
 
-      <!-- 損益資訊小卡 -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card class="app-panel dashboard-metric-card h-full">
-          <template #content>
-            <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
-            <!-- 損益金額與未實現報酬率同一列，報酬率靠右 -->
-            <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
-              <div v-if="totalProfit" class="inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
-                <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
-                <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+      <!-- 大螢幕：走勢圖在左、三張損益小卡疊在右欄；小螢幕維持小卡在上 -->
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_19rem] gap-4">
+        <!-- 損益資訊小卡 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 lg:auto-rows-fr lg:order-2 gap-4">
+          <Card class="app-panel dashboard-metric-card h-full">
+            <template #content>
+              <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
+              <!-- 損益金額與未實現報酬率同一列，報酬率靠右 -->
+              <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <div v-if="totalProfit" class="inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
+                  <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
+                  <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
+                  <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+                </div>
+                <div v-else class="text-2xl font-bold tracking-tight">--</div>
+                <span
+                  v-if="holdingsStore.list.length"
+                  class="asset-growth-pill asset-growth-pill--sm"
+                  :class="totalReturn >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
+                  v-tooltip.top="$t('unrealizedReturn')"
+                >{{ formatSignedNumber(totalReturn) }}%</span>
               </div>
-              <div v-else class="text-2xl font-bold tracking-tight">--</div>
-              <span
-                v-if="holdingsStore.list.length"
-                class="asset-growth-pill asset-growth-pill--sm"
-                :class="totalReturn >= 0 ? 'asset-growth-pill--up' : 'asset-growth-pill--down'"
-                v-tooltip.top="$t('unrealizedReturn')"
-              >{{ formatSignedNumber(totalReturn) }}%</span>
-            </div>
 
-            <!-- 獲利／虧損檔數比例條 -->
-            <div v-if="holdingsStore.list.length" class="dashboard-winloss mt-3" :aria-label="$t('winLossValue', winLoss)">
-              <span v-if="winLoss.up" class="dashboard-winloss__up" :style="{ flexGrow: winLoss.up }" />
-              <span v-if="winLoss.down" class="dashboard-winloss__down" :style="{ flexGrow: winLoss.down }" />
-            </div>
+              <!-- 獲利／虧損檔數比例條 -->
+              <div v-if="holdingsStore.list.length" class="dashboard-winloss mt-3" :aria-label="$t('winLossValue', winLoss)">
+                <span v-if="winLoss.up" class="dashboard-winloss__up" :style="{ flexGrow: winLoss.up }" />
+                <span v-if="winLoss.down" class="dashboard-winloss__down" :style="{ flexGrow: winLoss.down }" />
+              </div>
 
-            <dl class="dashboard-metric-rows">
-              <div v-for="row in unrealizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-            </dl>
-          </template>
-        </Card>
+              <dl class="dashboard-metric-rows">
+                <div v-for="row in unrealizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
+            </template>
+          </Card>
 
-        <Card class="app-panel dashboard-metric-card h-full">
-          <template #content>
-            <p class="dashboard-kicker flex items-center gap-1.5">
-              {{ $t('realizedProfit') }}
-              <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
-            </p>
-            <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
-              <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
-              <span>{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
-              <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
-            </div>
-            <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
+          <Card class="app-panel dashboard-metric-card h-full">
+            <template #content>
+              <p class="dashboard-kicker flex items-center gap-1.5">
+                {{ $t('realizedProfit') }}
+                <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
+              </p>
+              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
+                <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
+                <span>{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
+                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
+              </div>
+              <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
 
-            <dl class="dashboard-metric-rows">
-              <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-            </dl>
-          </template>
-        </Card>
+              <dl class="dashboard-metric-rows">
+                <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
+            </template>
+          </Card>
 
-        <Card class="app-panel dashboard-metric-card h-full">
-          <template #content>
-            <p class="dashboard-kicker flex items-center gap-1.5">
-              {{ $t('irr') }}
-              <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
-            </p>
-            <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
-              <span class="text-2xl font-bold tracking-tight">{{ irr.toFixed(2) }}%</span>
-              <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
-            </div>
-            <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
+          <Card class="app-panel dashboard-metric-card h-full">
+            <template #content>
+              <p class="dashboard-kicker flex items-center gap-1.5">
+                {{ $t('irr') }}
+                <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
+              </p>
+              <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
+                <span class="text-2xl font-bold tracking-tight">{{ irr.toFixed(2) }}%</span>
+                <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
+              </div>
+              <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
 
-            <dl class="dashboard-metric-rows">
-              <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
-            </dl>
-          </template>
-        </Card>
-      </div>
+              <dl class="dashboard-metric-rows">
+                <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+              </dl>
+            </template>
+          </Card>
+        </div>
 
-      <!-- 總資產走勢圖 -->
-      <Card class="app-panel dashboard-panel--hero">
-        <template #content>
-          <div>
-            <div class="flex items-center justify-between">
-              <div class="flex flex-col mb-2">
-                <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
+        <!-- 走勢圖＋區間統計（另一張卡片）放在左欄 -->
+        <div class="flex min-w-0 flex-col gap-4 lg:order-1">
+          <!-- 總資產走勢圖 -->
+          <Card class="app-panel dashboard-panel--hero">
+            <template #content>
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="flex flex-col mb-2">
+                    <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
 
-                <div class="mt-1 flex flex-wrap items-end gap-2">
-                  <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
-                    <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
-                    <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                    <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                    <div class="mt-1 flex flex-wrap items-end gap-2">
+                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
+                        <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
+                        <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
+                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                      </div>
+                      <div v-else class="text-4xl font-bold">--</div>
+
+                      <div
+                        v-if="growthRateNumber !== null"
+                        class="inline-flex items-center gap-2 pb-1"
+                      >
+                        <span class="asset-growth-change" :class="growthRateNumber >= 0 ? 'text-up' : 'text-down'">
+                          {{ formatSignedNumber(growthRateNumber) }}%
+                          ({{ change >= 0 ? '+' : '-' }}{{ Math.abs(change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }})
+                        </span>
+                      </div>
+
+                      <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
+                        <span>--</span>
+                        <span>(--)</span>
+                      </div>
+                    </div>
                   </div>
-                  <div v-else class="text-4xl font-bold">--</div>
+                </div>
 
-                  <div
-                    v-if="growthRateNumber !== null"
-                    class="inline-flex items-center gap-2 pb-1"
+                <!-- 面積圖 -->
+                <div v-if="holdingsStore.list.length" class="mt-2">
+                  <StockChart :options="areaChartOptions" :height="320" />
+                </div>
+
+                <!-- 沒有交易時：引導新增 -->
+                <div v-else class="dashboard-chart-empty mt-2">
+                  <div class="dashboard-chart-empty__body">
+                    <span class="dashboard-chart-empty__icon"><i class="pi pi-chart-line" /></span>
+                    <h3 class="text-base font-semibold">{{ $t('dashboardChartEmptyTitle') }}</h3>
+                    <p class="text-xs sm:text-sm text-muted-color max-w-sm">{{ $t('dashboardChartEmptyDesc') }}</p>
+                    <div class="mt-2 flex flex-wrap justify-center gap-2">
+                      <Button :label="$t('addInvestment')" icon="pi pi-plus" size="small" @click="transactionDialogVisible = true" />
+                      <Button :label="$t('importTransactions')" icon="pi pi-upload" size="small" severity="secondary" outlined @click="importDialogVisible = true" />
+                    </div>
+                  </div>
+                </div>
+                <TransactionDialog v-model="transactionDialogVisible" />
+                <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
+
+                <!-- 時間範圍選擇 -->
+                <div v-if="holdingsStore.list.length" class="seg range-select mt-4" role="group">
+                  <button
+                    v-for="option in timeRangeOptionsWithGrowth"
+                    :key="option.value"
+                    type="button"
+                    class="seg__btn flex flex-col items-center text-xs font-bold"
+                    :class="{ 'is-active': selectedPeriod === option.value }"
+                    :aria-pressed="selectedPeriod === option.value"
+                    @click="selectedPeriod = option.value"
                   >
-                    <span class="asset-growth-change" :class="growthRateNumber >= 0 ? 'text-up' : 'text-down'">
-                      {{ formatSignedNumber(growthRateNumber) }}%
-                      ({{ change >= 0 ? '+' : '-' }}{{ Math.abs(change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }})
+                    <span>{{ option.label }}</span>
+                    <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
+                      {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
                     </span>
-                  </div>
-
-                  <div v-else class="inline-flex items-center gap-2 pb-1 text-lg text-muted-color">
-                    <span>--</span>
-                    <span>(--)</span>
-                  </div>
+                  </button>
                 </div>
+
+                <!-- 區間統計：跟著選取的時間區間變動 -->
               </div>
-            </div>
+            </template>
+          </Card>
 
-            <!-- 面積圖 -->
-            <div v-if="holdingsStore.list.length" class="mt-2">
-              <StockChart :options="areaChartOptions" :height="320" />
-            </div>
-
-            <!-- 沒有交易時：引導新增 -->
-            <div v-else class="dashboard-chart-empty mt-2">
-              <div class="dashboard-chart-empty__body">
-                <span class="dashboard-chart-empty__icon"><i class="pi pi-chart-line" /></span>
-                <h3 class="text-base font-semibold">{{ $t('dashboardChartEmptyTitle') }}</h3>
-                <p class="text-xs sm:text-sm text-muted-color max-w-sm">{{ $t('dashboardChartEmptyDesc') }}</p>
-                <div class="mt-2 flex flex-wrap justify-center gap-2">
-                  <Button :label="$t('addInvestment')" icon="pi pi-plus" size="small" @click="transactionDialogVisible = true" />
-                  <Button :label="$t('importTransactions')" icon="pi pi-upload" size="small" severity="secondary" outlined @click="importDialogVisible = true" />
+          <!-- 區間統計：最高、最低、最大回撤、距高點 -->
+          <Card v-if="stats" class="app-panel">
+            <template #content>
+              <dl class="dashboard-period-stats">
+                <div>
+                  <dt>{{ $t('periodHigh') }}</dt>
+                  <dd>{{ formatAmountWithCode(stats.high.y, { currency: displayCurrency }) }}</dd>
+                  <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.high.x) }}</dd>
                 </div>
-              </div>
-            </div>
-            <TransactionDialog v-model="transactionDialogVisible" />
-            <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
-
-            <!-- 時間範圍選擇 -->
-            <div v-if="holdingsStore.list.length" class="seg range-select mt-4" role="group">
-              <button
-                v-for="option in timeRangeOptionsWithGrowth"
-                :key="option.value"
-                type="button"
-                class="seg__btn flex flex-col items-center text-xs font-bold"
-                :class="{ 'is-active': selectedPeriod === option.value }"
-                :aria-pressed="selectedPeriod === option.value"
-                @click="selectedPeriod = option.value"
-              >
-                <span>{{ option.label }}</span>
-                <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
-                  {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                </span>
-              </button>
-            </div>
-
-            <!-- 區間統計：跟著選取的時間區間變動 -->
-            <dl v-if="stats" class="dashboard-period-stats mt-4">
-              <div>
-                <dt>{{ $t('periodHigh') }}</dt>
-                <dd>{{ formatAmountWithCode(stats.high.y, { currency: displayCurrency }) }}</dd>
-                <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.high.x) }}</dd>
-              </div>
-              <div>
-                <dt>{{ $t('periodLow') }}</dt>
-                <dd>{{ formatAmountWithCode(stats.low.y, { currency: displayCurrency }) }}</dd>
-                <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.low.x) }}</dd>
-              </div>
-              <div>
-                <dt>{{ $t('maxDrawdown') }}</dt>
-                <dd :class="{ 'text-down': stats.maxDrawdown > 0 }">{{ formatSignedNumber(-stats.maxDrawdown) }}%</dd>
-              </div>
-              <div>
-                <dt>{{ $t('fromPeriodHigh') }}</dt>
-                <dd :class="stats.fromHigh < 0 ? 'text-down' : 'text-up'">{{ stats.fromHigh < 0 ? `${formatSignedNumber(stats.fromHigh)}%` : $t('atPeriodHigh') }}</dd>
-              </div>
-            </dl>
-          </div>
-        </template>
-      </Card>
+                <div>
+                  <dt>{{ $t('periodLow') }}</dt>
+                  <dd>{{ formatAmountWithCode(stats.low.y, { currency: displayCurrency }) }}</dd>
+                  <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.low.x) }}</dd>
+                </div>
+                <div>
+                  <dt>{{ $t('maxDrawdown') }}</dt>
+                  <dd :class="{ 'text-down': stats.maxDrawdown > 0 }">{{ formatSignedNumber(-stats.maxDrawdown) }}%</dd>
+                </div>
+                <div>
+                  <dt>{{ $t('fromPeriodHigh') }}</dt>
+                  <dd :class="stats.fromHigh < 0 ? 'text-down' : 'text-up'">{{ stats.fromHigh < 0 ? `${formatSignedNumber(stats.fromHigh)}%` : $t('atPeriodHigh') }}</dd>
+                </div>
+              </dl>
+            </template>
+          </Card>
+        </div>
+      </div>
 
       <!-- 資產配置 -->
       <div>
