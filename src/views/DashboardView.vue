@@ -210,12 +210,12 @@
             <dl v-if="stats" v-show="showDetails" class="dashboard-period-stats mt-4">
               <div>
                 <dt>{{ $t('periodHigh') }}</dt>
-                <dd>{{ formatAmountWithCode(stats.high.y) }}</dd>
+                <dd>{{ formatAmountWithCode(stats.high.y, { currency: displayCurrency }) }}</dd>
                 <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.high.x) }}</dd>
               </div>
               <div>
                 <dt>{{ $t('periodLow') }}</dt>
-                <dd>{{ formatAmountWithCode(stats.low.y) }}</dd>
+                <dd>{{ formatAmountWithCode(stats.low.y, { currency: displayCurrency }) }}</dd>
                 <dd class="dashboard-period-stats__sub">{{ formatShortDate(stats.low.x) }}</dd>
               </div>
               <div>
