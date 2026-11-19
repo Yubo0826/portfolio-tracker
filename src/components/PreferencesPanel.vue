@@ -214,10 +214,10 @@ const darkStyleOptions = computed(() => [
     label: t('preferences.darkStyle.night'),
     hint: t('preferences.darkStyle.nightHint'),
     swatch: {
-      '--dv-canvas': '#131318',
-      '--dv-card': '#1f1f25',
-      '--dv-border': '#46464f',
-      '--dv-text': '#e4e1e9',
+      '--dv-canvas': '#121212',
+      '--dv-card': '#1e1e1e',
+      '--dv-border': '#474747',
+      '--dv-text': '#e6e6e6',
     },
   },
   {

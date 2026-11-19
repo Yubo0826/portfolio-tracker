@@ -966,6 +966,9 @@ filterHoldings:
 unrealizedReturn:
   en: Unrealized Return
   zh: 未實現報酬率
+timeRange:
+  en: Time range
+  zh: 時間範圍
 cumulativeReturn:
   en: Cumulative Return
   zh: 累積報酬率
@@ -1306,8 +1309,8 @@ preferences:
       en: Midnight
       zh: 深夜
     nightHint:
-      en: Blue-violet near-black, layered by lightness (default)
-      zh: 帶藍紫調的近黑，層次靠明度區分（預設）
+      en: Neutral near-black, layered by lightness (default)
+      zh: 不帶色調的中性近黑，層次靠明度區分（預設）
   theme:
     label:
       en: Theme

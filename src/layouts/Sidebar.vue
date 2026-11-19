@@ -10,8 +10,7 @@
           <div class="sidebar-top-row">
             <button type="button" class="back-btn" :title="t('dashboard')" :tabindex="collapsed ? -1 : null" @click="goDashboard">
               <i v-if="!persistent" class="pi pi-arrow-left"></i>
-              <img src="/stockbar-mark.svg" alt="" class="h-6 dark:hidden" />
-              <img src="/stockbar-mark-dark.svg" alt="" class="hidden h-6 dark:block" />
+              <img src="/stockbar-logo.svg" alt="" class="h-6" />
               <span class="sidebar-brand">
                 <span class="sidebar-brand__stock">Stock</span><span class="sidebar-brand__bar">Bar</span>
               </span>
@@ -25,8 +24,8 @@
               v-tooltip.right="{ value: collapsed ? t('expandSidebar') : t('collapseSidebar'), showDelay: 500 }"
               @click="toggleCollapsed"
             >
-              <!-- ponytail: primeicons 沒有側欄面板圖示，內嵌 SVG（同 lucide panel-left） -->
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <!-- ponytail: 側欄面板圖示內嵌 SVG（lucide panel-left），線寬與 lucide-icons.css 一致 -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="4" />
                 <path d="M9 3v18" />
               </svg>
@@ -366,7 +365,7 @@ const goDashboard = () => {
 }
 
 .sidebar-brand__bar {
-  color: var(--p-primary-color);
+  color: #ffb800; /* 與 logo 同色 */
 }
 
 .sidebar-demo-notice {
@@ -411,14 +410,20 @@ const goDashboard = () => {
   min-width: 0;
 }
 
-/* icon 跟著同列文字的顏色與字重 */
+/* icon 平時用次要色壓暗，hover 與目前頁才亮成主文字色（次要色對比仍 ≥ 3:1，收合時只剩 icon 也認得出） */
 .menu-item i {
   width: 14px;
   font-size: 14px;
-  color: inherit;
+  color: var(--sidebar-text-muted);
   font-weight: inherit;
   text-align: center;
   flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.menu-item:hover i,
+.menu-item.active i {
+  color: var(--sidebar-active-text);
 }
 
 .menu-item-icon {

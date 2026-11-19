@@ -28,7 +28,6 @@
               <Skeleton width="6rem" height="0.85rem" />
               <Skeleton width="16rem" height="2.5rem" />
               <Skeleton width="100%" height="320px" borderRadius="0.75rem" />
-              <Skeleton width="18rem" height="1.75rem" borderRadius="999px" />
             </div>
           </template>
         </Card>
@@ -110,12 +109,12 @@
               <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
               <!-- 損益金額與未實現報酬率同一列，報酬率靠右 -->
               <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <div v-if="totalProfit" class="inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(totalProfit)">
+                <div v-if="totalProfit" class="inline-flex items-end text-2xl font-medium tracking-tight" :class="profitColor(totalProfit)">
                   <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
                   <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                  <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+                  <span class="ml-1 pb-1 text-[10px] font-normal text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
                 </div>
-                <div v-else class="text-2xl font-bold tracking-tight">--</div>
+                <div v-else class="text-2xl font-medium tracking-tight">--</div>
                 <span
                   v-if="holdingsStore.list.length"
                   class="asset-growth-pill asset-growth-pill--sm"
@@ -142,12 +141,12 @@
                 {{ $t('realizedProfit') }}
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
               </p>
-              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-bold tracking-tight" :class="profitColor(realizedProfit)">
+              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-medium tracking-tight" :class="profitColor(realizedProfit)">
                 <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
                 <span>{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
-                <span class="ml-1 pb-1 text-[10px] font-semibold text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
+                <span class="ml-1 pb-1 text-[10px] font-normal text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
               </div>
-              <div v-else class="mt-2 text-2xl font-bold tracking-tight">--</div>
+              <div v-else class="mt-2 text-2xl font-medium tracking-tight">--</div>
 
               <dl class="dashboard-metric-rows">
                 <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
@@ -162,10 +161,10 @@
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
               </p>
               <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
-                <span class="text-2xl font-bold tracking-tight">{{ irr.toFixed(2) }}%</span>
+                <span class="text-2xl font-medium tracking-tight">{{ irr.toFixed(2) }}%</span>
                 <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
               </div>
-              <div v-else class="mt-2 text-2xl font-bold tracking-tight text-muted-color">--</div>
+              <div v-else class="mt-2 text-2xl font-medium tracking-tight text-muted-color">--</div>
 
               <dl class="dashboard-metric-rows">
                 <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
@@ -180,17 +179,17 @@
           <Card class="app-panel dashboard-panel--hero">
             <template #content>
               <div>
-                <div class="flex items-center justify-between">
+                <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
                   <div class="flex flex-col mb-2">
                     <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
 
                     <div class="mt-1 flex flex-wrap items-end gap-2">
-                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-bold inline-flex items-end">
+                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-medium inline-flex items-end">
                         <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
                         <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                        <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                        <span class="ml-1 text-[10px] leading-none pb-1 font-normal text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
                       </div>
-                      <div v-else class="text-4xl font-bold">--</div>
+                      <div v-else class="text-4xl font-medium">--</div>
 
                       <div
                         v-if="growthRateNumber !== null"
@@ -207,6 +206,22 @@
                         <span>(--)</span>
                       </div>
                     </div>
+                  </div>
+
+                  <!-- 時間範圍：圖表右上角的小字分頁；各區間漲跌放 tooltip，選中區間的漲跌已顯示在總價值旁 -->
+                  <div v-if="holdingsStore.list.length" class="range-tabs ml-auto" role="group" :aria-label="$t('timeRange')">
+                    <button
+                      v-for="option in timeRangeOptionsWithGrowth"
+                      :key="option.value"
+                      type="button"
+                      class="range-tabs__btn"
+                      :class="{ 'is-active': selectedPeriod === option.value }"
+                      :aria-pressed="selectedPeriod === option.value"
+                      v-tooltip.top="{ value: option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%`, showDelay: 300 }"
+                      @click="selectedPeriod = option.value"
+                    >
+                      {{ option.label }}
+                    </button>
                   </div>
                 </div>
 
@@ -229,24 +244,6 @@
                 </div>
                 <TransactionDialog v-model="transactionDialogVisible" />
                 <ImportDataDialog v-model="importDialogVisible" mode="transactions" />
-
-                <!-- 時間範圍選擇 -->
-                <div v-if="holdingsStore.list.length" class="seg range-select mt-4" role="group">
-                  <button
-                    v-for="option in timeRangeOptionsWithGrowth"
-                    :key="option.value"
-                    type="button"
-                    class="seg__btn flex flex-col items-center text-xs font-bold"
-                    :class="{ 'is-active': selectedPeriod === option.value }"
-                    :aria-pressed="selectedPeriod === option.value"
-                    @click="selectedPeriod = option.value"
-                  >
-                    <span>{{ option.label }}</span>
-                    <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
-                      {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                    </span>
-                  </button>
-                </div>
 
                 <!-- 區間統計：跟著選取的時間區間變動 -->
               </div>
@@ -291,26 +288,13 @@
                 <Button @click="$router.push('allocation')" v-tooltip.top="{ value: $t('setTargets'), showDelay: 500 }" :aria-label="$t('setTargets')" icon="pi pi-sliders-h" text rounded severity="secondary" size="small" class="cursor-pointer" />
               </div>
 
-              <SelectButton
-                v-model="selectedPieType"
-                :options="pieChartType"
-                optionLabel="label"
-                optionValue="value"
-                :allowEmpty="false"
-                size="small"
-                class="self-start"
-              />
             </div>
           </template>
 
           <template #content>
             <div v-if="holdingsStore.list.length > 0" class="dashboard-allocation-content py-2">
-              <div v-if="selectedPieType === 'target' && !hasTargetAllocation" class="flex flex-col items-center text-center gap-3 py-8">
-                <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
-              </div>
-
-              <div v-else class="dashboard-allocation-layout">
-                <div class="dashboard-allocation-figure">
+              <div class="dashboard-allocation-layout" :class="{ 'dashboard-allocation-layout--empty': noTargetSet }">
+                <div v-if="!noTargetSet" class="dashboard-allocation-figure">
                   <!-- before the chart so the chart's tooltip paints over it -->
                   <div class="dashboard-allocation-total">
                     <span class="dashboard-allocation-total-value">{{ allocationItemCount }}</span>
@@ -323,7 +307,25 @@
                   />
                 </div>
 
-                <DataTable :value="selectedAllocationBreakdown" dataKey="key" size="small" class="min-w-0 text-[0.8rem] font-semibold">
+                <!-- 表格上方：資產／目標配置切換，樣式同走勢圖的時間範圍分頁 -->
+                <div class="min-w-0">
+                <div class="range-tabs mb-2 justify-end" role="group" :aria-label="$t('allocation')">
+                  <button
+                    v-for="option in pieChartType"
+                    :key="option.value"
+                    type="button"
+                    class="range-tabs__btn"
+                    :class="{ 'is-active': selectedPieType === option.value }"
+                    :aria-pressed="selectedPieType === option.value"
+                    @click="selectedPieType = option.value"
+                  >{{ option.label }}</button>
+                </div>
+
+                <div v-if="noTargetSet" class="flex flex-col items-center text-center gap-3 py-8">
+                  <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
+                </div>
+
+                <DataTable v-else :value="selectedAllocationBreakdown" dataKey="key" size="small" class="min-w-0 text-[0.8rem]">
                   <Column :header="$t('currentAsset')">
                     <template #body="{ data: item }">
                       <div class="flex min-w-0 items-center gap-2.5">
@@ -345,6 +347,7 @@
                     </template>
                   </Column>
                 </DataTable>
+                </div>
               </div>
             </div>
 
@@ -380,7 +383,7 @@
               <div class="font-medium mr-4 inline-flex items-end">
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -398,7 +401,7 @@
               >
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -408,14 +411,14 @@
               <div class="font-medium mr-4 inline-flex items-end">
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
+                <span class="ml-1 text-[10px] pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
 
           <Column field="profitPercentage" :header="$t('comparisonReturnRate')" sortable>
             <template #body="{ data }">
-              <span class="font-bold" :class="{ 'text-up': data.profitPercentage >= 0, 'text-down': data.profitPercentage < 0 }">
+              <span class="font-medium" :class="{ 'text-up': data.profitPercentage >= 0, 'text-down': data.profitPercentage < 0 }">
                 {{ formatSignedNumber(data.profitPercentage) }}%
               </span>
             </template>
@@ -425,7 +428,7 @@
             <template #body="{ data }">
               <div class="flex min-w-27 items-center gap-3">
                 <ProgressBar :value="getHoldingWeightPercentage(data)" :showValue="false" class="!h-1.5 w-20 shrink-0" />
-                <span class="min-w-11 text-right text-xs font-bold text-muted-color">{{ formatAllocationPercentage(getHoldingWeightPercentage(data)) }}</span>
+                <span class="min-w-11 text-right text-xs text-muted-color">{{ formatAllocationPercentage(getHoldingWeightPercentage(data)) }}</span>
               </div>
             </template>
           </Column>
@@ -533,6 +536,7 @@ const totalProfit = computed(() => {
   return holdings.value.reduce((sum, h) => sum + (h.currentValue - h.totalCost), 0)
 })
 const selectedPieType = ref('actual')
+const noTargetSet = computed(() => selectedPieType.value === 'target' && !hasTargetAllocation.value)
 const pieChartType = computed(() => ([
   { label: t('currentAsset'), value: 'actual' },
   { label: t('targetAllocation'), value: 'target' }
@@ -891,7 +895,6 @@ const irrRows = computed(() => {
  * =======================*/
 const areaChartOptions = computed(() => {
   const lineColor = 'var(--p-primary-color)'
-  const fillFrom = 'color-mix(in srgb, var(--p-primary-color) 35%, transparent)'
   const { axis: axisColor, grid: gridColor, tooltipBg, tooltipFg } = chartPalette.value
   const chartLocale = locale.value.startsWith('zh') ? 'zh-TW' : 'en-US'
   const chartDateFormatter = new Intl.DateTimeFormat(
@@ -920,8 +923,8 @@ const areaChartOptions = computed(() => {
         },
         style: { fontSize: '11px', color: axisColor }
       },
-      lineColor: gridColor,
-      tickColor: gridColor,
+      lineWidth: 0,
+      tickLength: 0,
     },
     yAxis: {
       title: { text: null },
@@ -933,7 +936,6 @@ const areaChartOptions = computed(() => {
         formatter: function () { return `${currencySymbol.value}${Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 }).format(this.value)}` },
         style: { fontSize: '11px', color: axisColor },
       },
-      gridLineDashStyle: 'Dash',
       gridLineColor: gridColor,
     },
     tooltip: {
@@ -945,15 +947,15 @@ const areaChartOptions = computed(() => {
       style: { color: tooltipFg },
     },
     plotOptions: {
+      // 細線＋淡漸層（仿 Google 財經）：線下 18% 主色，往下淡到透明
       area: {
         threshold: null,
         softThreshold: false,
         fillColor: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-          stops: [[0, fillFrom], [1, 'rgba(255,255,255,0)']],
+          stops: [[0, 'color-mix(in srgb, var(--p-primary-color) 18%, transparent)'], [1, 'color-mix(in srgb, var(--p-primary-color) 0%, transparent)']],
         },
-        lineColor,
-        lineWidth: 2,
+        lineWidth: 1.5,
         marker: { enabled: false },
       },
     },
@@ -969,7 +971,7 @@ const areaChartOptions = computed(() => {
       step: 'center',
       color: axisColor,
       dashStyle: 'ShortDash',
-      lineWidth: 1.5,
+      lineWidth: 1,
       marker: { enabled: false },
       enableMouseTracking: true,
     }],
@@ -1064,11 +1066,10 @@ watch([displayCurrency, selectedSymbols], () => {
   overflow: hidden;
 }
 
+/* 小標：一般字重、不轉大寫不加字距，讓數字成為唯一重點 */
 .dashboard-kicker {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 400;
   color: var(--p-text-muted-color);
 }
 
@@ -1115,8 +1116,7 @@ watch([displayCurrency, selectedSymbols], () => {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.35rem 0;
-  border-top: 1px dashed var(--p-content-border-color);
+  padding: 0.3rem 0; /* 不畫分隔線，靠行距區分 */
 }
 
 .dashboard-metric-rows dt {
@@ -1124,7 +1124,7 @@ watch([displayCurrency, selectedSymbols], () => {
 }
 
 .dashboard-metric-rows dd {
-  font-weight: 600;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -1141,8 +1141,7 @@ watch([displayCurrency, selectedSymbols], () => {
 }
 
 .dashboard-period-stats > div {
-  padding: 0.25rem 0.75rem;
-  border-left: 2px solid var(--p-content-border-color);
+  padding: 0.25rem 0;
 }
 
 .dashboard-period-stats dt {
@@ -1152,7 +1151,7 @@ watch([displayCurrency, selectedSymbols], () => {
 .dashboard-period-stats dd {
   margin-top: 0.15rem;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1166,7 +1165,7 @@ watch([displayCurrency, selectedSymbols], () => {
 .dashboard-winloss {
   display: flex;
   gap: 2px;
-  height: 6px;
+  height: 4px;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -1213,7 +1212,7 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .dashboard-allocation-title {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--p-text-muted-color);
 }
 
@@ -1240,6 +1239,11 @@ watch([displayCurrency, selectedSymbols], () => {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+/* 目標配置未設定：沒有圓環，切換分頁與提示占滿整列 */
+.dashboard-allocation-layout.dashboard-allocation-layout--empty {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .dashboard-allocation-layout {
@@ -1314,7 +1318,7 @@ watch([displayCurrency, selectedSymbols], () => {
 .dashboard-allocation-total-label {
   margin-top: 0.2rem;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--p-text-muted-color);
 }
 

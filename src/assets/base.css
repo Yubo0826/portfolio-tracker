@@ -94,10 +94,11 @@ select,
 }
 
 /* 卡片外框（Dashboard、Asset 頁共用） */
+/* 卡片：平底、無陰影，只用一圈半透明細框（淺色模式在 main.css 改用 #dadce0） */
 .app-panel {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--p-content-background) 94%, transparent), color-mix(in srgb, var(--p-content-background) 86%, transparent));
-  box-shadow: 0 18px 36px rgba(10, 14, 24, 0.08);
+  background: var(--p-content-background);
+  border: 1px solid color-mix(in srgb, var(--p-text-color) 8%, transparent);
+  box-shadow: none;
 }
 
 /* 總資產／現價旁的漲跌（Dashboard、Asset 頁共用）：只用漲跌色文字，不加箭頭 */

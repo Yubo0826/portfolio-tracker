@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "icons": "node scripts/build-lucide-icons.mjs",
     "dev": "vite",
     "dev:api": "npm --prefix ../portfolio-backend start",
     "dev:all": "concurrently -k -n web,api -c cyan,yellow \"npm run dev\" \"npm run dev:api\"",
@@ -42,6 +43,7 @@
     "@vue/test-utils": "^2.4.6",
     "concurrently": "^10.0.3",
     "jsdom": "^26.0.0",
+    "lucide-static": "1.68.0",
     "typescript": "^5.9.3",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",

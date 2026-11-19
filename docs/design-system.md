@@ -66,7 +66,8 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 
 ## 版面慣例
 
-- **卡片**：Dashboard 與資產頁用 `.app-panel`。深色無外框、靠漸層底和陰影浮起；淺色白底＋細框、無陰影（見上方淺色分層）。
+- **卡片**：Dashboard 與資產頁用 `.app-panel`。平底、無陰影、無漸層：深色用 8% 文字色的半透明細框，淺色用 `#dadce0` 細框（見上方淺色分層）。卡片內不畫分隔線，靠行距區分；小標用一般字重、不轉大寫，數字用 500 字重。走勢圖用 1.5px 細線加淡漸層（18% 主色往下淡到透明，仿 Google 財經）、實線淡格線、無軸線刻度。
+- **Icon**：寫法照舊用 PrimeIcons 的 `pi pi-xxx` class，但圖形換成 Lucide（線寬 1.75）：`scripts/build-lucide-icons.mjs` 產生 `src/assets/lucide-icons.css`，以 CSS mask 畫在 `.pi::before`。新增 icon 要在 MAP 加對應再跑 `npm run icons`，原始碼出現未對應的 class 時腳本會報錯。Lucide 沒有的品牌 icon（`pi-google`）維持 PrimeIcons 字型。
 - **表格**：資產明細、再平衡用 `.card-table`——表頭與內容同底，分隔線用頁面底色做出凹槽感。
   已排序的表頭不變色，只靠排序圖示（自訂的 `pi-chevron-down`）表示狀態。
 - **設定頁**：`.set-page` / `.set-group` / `.set-row`，GitLab 風格的灰底標題列＋內嵌白卡＋sticky 底部操作列。

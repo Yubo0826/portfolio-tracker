@@ -20,8 +20,7 @@
       <!-- header 導覽模式：沒有側邊欄，品牌與主導覽改放這裡（投資組合切換在 App.vue 頁面標題上方） -->
       <template v-if="isHeaderNav">
         <button type="button" class="topbar-brand" :title="t('dashboard')" @click="router.push('/dashboard')">
-          <img src="/stockbar-mark.svg" alt="" class="h-6 dark:hidden" />
-          <img src="/stockbar-mark-dark.svg" alt="" class="hidden h-6 dark:block" />
+          <img src="/stockbar-logo.svg" alt="" class="h-6" />
           <span class="topbar-brand__text">
             <span class="topbar-brand__stock">Stock</span><span class="topbar-brand__accent">Bar</span>
           </span>
@@ -227,7 +226,7 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
 }
 
 .topbar-brand__accent {
-  color: var(--p-primary-color);
+  color: #ffb800; /* 與 logo 同色 */
 }
 
 .topbar-divider {

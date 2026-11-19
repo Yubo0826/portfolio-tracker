@@ -128,8 +128,8 @@ pages:
           en: Total value chart
           zh: 總價值走勢
         text:
-          en: Shows how the portfolio's value changed over time. Switch between 5D, 1M, 6M, YTD, 1Y and 5Y; each button shows the return for that period. Below the chart you also see the period high, low, max drawdown and distance from the high.
-          zh: 顯示投資組合市值隨時間的變化。可切換 5D、1M、6M、YTD、1Y、5Y，每個按鈕都會標示該區間的漲跌幅；圖表下方另顯示區間最高、最低、最大回撤與距高點。
+          en: Shows how the portfolio's value changed over time. Switch between 5D, 1M, 6M, YTD, 1Y and 5Y at the top right of the chart; hover a range to see its return. Below the chart you also see the period high, low, max drawdown and distance from the high.
+          zh: 顯示投資組合市值隨時間的變化。可在圖表右上角切換 5D、1M、6M、YTD、1Y、5Y，滑過各區間可看到該區間的漲跌幅；圖表下方另顯示區間最高、最低、最大回撤與距高點。
       - title:
           en: Allocation and holdings
           zh: 資產配置與持有資產

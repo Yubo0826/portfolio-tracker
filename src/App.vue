@@ -56,9 +56,11 @@
             </button>
           </template>
           </Teleport>
-          <div v-if="route.name !== 'not-found' && route.name !== 'user-guide'" class="flex items-center justify-between gap-4" :class="{ 'mb-6': route.name !== 'asset' }">
+          <!-- 資產明細頁不顯示標題：分頁（持有資產／交易…）本身就是標題；h1 留給螢幕閱讀器 -->
+          <h1 v-if="route.name === 'portfolio'" class="sr-only">{{ currentPageLabel }}</h1>
+          <div v-if="!['not-found', 'user-guide', 'portfolio'].includes(route.name)" class="flex items-center justify-between gap-4" :class="{ 'mb-6': route.name !== 'asset' }">
             <div class="flex items-center gap-1">
-              <h1 class="text-2xl font-bold">{{ currentPageLabel }}</h1>
+              <h1 class="text-[1.75rem] font-light leading-tight tracking-tight">{{ currentPageLabel }}</h1>
               <div id="page-title-actions" class="flex items-center"></div>
             </div>
             <div id="page-title-aside" class="text-xs text-muted-color"></div>
@@ -137,6 +139,7 @@ import { usePortfolioStore } from '@/stores/portfolio'
 const portfolioStore = usePortfolioStore()
 import { useAuthStore } from '@/stores/auth'
 import 'primeicons/primeicons.css'
+import '@/assets/lucide-icons.css' // 把 pi-xxx 換成 Lucide 圖形（npm run icons 產生）
 import SearchBox from './components/SearchBox.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import PortfolioFormDialog from './components/PortfolioFormDialog.vue'
@@ -654,11 +657,12 @@ html[data-nav-layout='header'] .app-shell__main {
 
 /* 2. 基本樣式：讓 sort 的 span 有空間顯示新 icon */
 .p-datatable th [data-pc-section="sort"]::before {
+  content: '';
   display: inline-block;
-  font-family: 'primeicons';
   font-size: 0.75rem;
   width: 1em;
-  text-align: center;
+  height: 1em;
+  vertical-align: -0.125em;
   transition: transform 0.2s ease;
 }
 
@@ -668,10 +672,12 @@ html[data-nav-layout='header'] .app-shell__main {
   content: '';
 }
 
-/* 4. 升降冪共用 pi-chevron-down，升冪旋轉 180° 讓切換時有翻轉動畫（content 本身無法 transition） */
+/* 4. 升降冪共用 Lucide chevron-down（lucide-icons.css 的變數），升冪旋轉 180° 讓切換時有翻轉動畫 */
 .p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before,
 .p-datatable th[aria-sort="descending"] [data-pc-section="sort"]::before {
-  content: '\e902';
+  background-color: currentColor;
+  -webkit-mask: var(--lucide-chevron-down) center / contain no-repeat;
+  mask: var(--lucide-chevron-down) center / contain no-repeat;
 }
 
 .p-datatable th[aria-sort="ascending"] [data-pc-section="sort"]::before {

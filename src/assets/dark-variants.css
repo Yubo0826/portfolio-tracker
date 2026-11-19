@@ -51,26 +51,27 @@
   --p-text-muted-color: #9aa0a6;
 }
 
-/* 深夜（預設）：Material 3 帶藍紫調的近黑（與 vocabulary-app 同一套），層次只靠明度：底色 → 卡片 → 對話框／搜尋列 */
+/* 深夜（預設）：純中性灰黑、不帶色調，顏色只留給漲跌與選中狀態；層次只靠明度：底色 → 卡片 → 對話框／搜尋列 */
 .dark[data-dark-variant='night'] {
-  --p-surface-500: #90909a;
-  --p-surface-600: #46464f;
-  --p-surface-700: #35343a;
-  --p-surface-800: #2a292f;
-  --p-surface-900: #131318; /* 與畫布同色：SelectButton 軌道用 900（見 main.css） */
-  --p-surface-950: #0e0e12;
+  --p-surface-500: #8f8f8f;
+  --p-surface-600: #474747;
+  --p-surface-700: #363636;
+  --p-surface-800: #2a2a2a;
+  --p-surface-900: #121212; /* 與畫布同色：SelectButton 軌道用 900（見 main.css） */
+  --p-surface-950: #0b0b0b;
 
-  --p-surface-background: #131318;
-  --p-surface-card: #1f1f25;
+  --p-surface-background: #121212;
+  --p-surface-card: #1e1e1e;
 
-  --p-content-background: #1f1f25;
-  --p-content-border-color: #46464f;
-  --p-content-hover-background: #2a292f;
-  --p-content-color: #e4e1e9;
-  --p-content-focus-color: #f2eff7;
+  --p-content-background: #1e1e1e;
+  --p-content-border-color: #474747;
+  --p-content-hover-background: #2a2a2a;
+  --p-content-color: #e6e6e6;
+  --p-content-focus-color: #f2f2f2;
 
-  --p-text-color: #e4e1e9;
-  --p-text-muted-color: #b4b3be;
+  /* 次要文字 #b0b0b0 在卡片 #1e1e1e 上約 8:1 */
+  --p-text-color: #e6e6e6;
+  --p-text-muted-color: #b0b0b0;
 }
 
 .dark[data-dark-variant='standard'] {

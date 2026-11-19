@@ -37,7 +37,7 @@ web
 ## Brand Commitments
 
 - 名稱：StockBar。
-- Logo：水彩階梯圖形（三根重疊的藍色圓角長條），主藍 `#3A72D8`（深色模式文字 `#5B8DEF`）、中藍 `#8FB0EC`、淺藍 `#C7D7F5`；檔案在 `public/stockbar-mark(-dark).svg`、`public/favicon.svg`。藍色系是品牌依據。
+- Logo：黃色圓角方塊、鏤空上升折線，色 `#FFB800`，深淺模式共用；檔案在 `public/stockbar-logo.svg`（另有 `-32.png`、`-180.png`）。品牌字「Bar」同為 `#FFB800`。舊的藍色階梯 logo（`stockbar-mark(-dark).svg`）暫留未刪。
 - 漲跌色：**綠漲紅跌**，不可改。
 - 介面必須同時支援繁體中文與英文。
 - 使用者可在偏好設定切換淺／深色、深色風格與強調色，這個彈性必須保留。
