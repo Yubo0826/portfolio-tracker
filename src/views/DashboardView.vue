@@ -109,12 +109,12 @@
               <p class="dashboard-kicker">{{ $t('unrealizedProfit') }}</p>
               <!-- 損益金額與未實現報酬率同一列，報酬率靠右 -->
               <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <div v-if="totalProfit" class="inline-flex items-end text-2xl font-medium tracking-tight" :class="profitColor(totalProfit)">
+                <div v-if="totalProfit" class="inline-flex items-baseline text-[1.75rem] font-normal tracking-tight tabular-nums" :class="profitColor(totalProfit)">
                   <span>{{ totalProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(totalProfit).main }}</span>
                   <span>{{ splitAmountForEmphasis(totalProfit).fraction }}</span>
-                  <span class="ml-1 pb-1 text-[10px] font-normal text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
+                  <span class="ml-1.5 text-[0.4em] font-normal tracking-normal text-muted-color">{{ splitAmountForEmphasis(totalProfit).code }}</span>
                 </div>
-                <div v-else class="text-2xl font-medium tracking-tight">--</div>
+                <div v-else class="text-[1.75rem] font-normal tracking-tight tabular-nums">--</div>
                 <span
                   v-if="holdingsStore.list.length"
                   class="asset-growth-pill asset-growth-pill--sm"
@@ -141,12 +141,12 @@
                 {{ $t('realizedProfit') }}
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('realizedProfitHint')" />
               </p>
-              <div v-if="realizedProfit" class="mt-2 inline-flex items-end text-2xl font-medium tracking-tight" :class="profitColor(realizedProfit)">
+              <div v-if="realizedProfit" class="mt-2 inline-flex items-baseline text-[1.75rem] font-normal tracking-tight tabular-nums" :class="profitColor(realizedProfit)">
                 <span>{{ realizedProfit > 0 ? '+' : '' }}{{ splitAmountForEmphasis(realizedProfit).main }}</span>
                 <span>{{ splitAmountForEmphasis(realizedProfit).fraction }}</span>
-                <span class="ml-1 pb-1 text-[10px] font-normal text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
+                <span class="ml-1.5 text-[0.4em] font-normal tracking-normal text-muted-color">{{ splitAmountForEmphasis(realizedProfit).code }}</span>
               </div>
-              <div v-else class="mt-2 text-2xl font-medium tracking-tight">--</div>
+              <div v-else class="mt-2 text-[1.75rem] font-normal tracking-tight tabular-nums">--</div>
 
               <dl class="dashboard-metric-rows">
                 <div v-for="row in realizedRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
@@ -161,10 +161,10 @@
                 <i class="pi pi-info-circle text-[0.7rem] normal-case tracking-normal" v-tooltip.bottom="$t('xirrHint')" />
               </p>
               <div v-if="irr !== null" class="mt-2 flex items-baseline gap-2">
-                <span class="text-2xl font-medium tracking-tight">{{ irr.toFixed(2) }}%</span>
+                <span class="text-[1.75rem] font-normal tracking-tight tabular-nums">{{ irr.toFixed(2) }}%</span>
                 <span class="dashboard-footnote">{{ $t('annualizedReturn') }}</span>
               </div>
-              <div v-else class="mt-2 text-2xl font-medium tracking-tight text-muted-color">--</div>
+              <div v-else class="mt-2 text-[1.75rem] font-normal tracking-tight tabular-nums text-muted-color">--</div>
 
               <dl class="dashboard-metric-rows">
                 <div v-for="row in irrRows" :key="row.label"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
@@ -176,20 +176,22 @@
         <!-- 走勢圖＋區間統計（另一張卡片）放在左欄 -->
         <div class="flex min-w-0 flex-col gap-4 lg:order-1">
           <!-- 總資產走勢圖 -->
+          <!-- 走勢圖卡片撐滿左欄剩餘高度，與右欄三張小卡底部對齊；圖表跟著長高 -->
           <Card class="app-panel dashboard-panel--hero">
             <template #content>
-              <div>
+              <div class="flex flex-1 flex-col">
                 <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
                   <div class="flex flex-col mb-2">
                     <p class="dashboard-kicker">{{ $t('totalValue') }}</p>
 
                     <div class="mt-1 flex flex-wrap items-end gap-2">
-                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-medium inline-flex items-end">
+                      <!-- 大數字用細字，靠字級撐場面；單位與數字基線對齊、約 0.4 倍字級 -->
+                      <div v-if="totalValue" class="max-w-full truncate text-4xl font-light tracking-tight tabular-nums inline-flex items-baseline">
                         <span>{{ splitAmountForEmphasis(totalValue).main }}</span>
                         <span>{{ splitAmountForEmphasis(totalValue).fraction }}</span>
-                        <span class="ml-1 text-[10px] leading-none pb-1 font-normal text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
+                        <span class="ml-1.5 text-[0.4em] font-normal tracking-normal text-muted-color">{{ splitAmountForEmphasis(totalValue).code }}</span>
                       </div>
-                      <div v-else class="text-4xl font-medium">--</div>
+                      <div v-else class="text-4xl font-light">--</div>
 
                       <div
                         v-if="growthRateNumber !== null"
@@ -208,8 +210,12 @@
                     </div>
                   </div>
 
-                  <!-- 時間範圍：圖表右上角的小字分頁；各區間漲跌放 tooltip，選中區間的漲跌已顯示在總價值旁 -->
-                  <div v-if="holdingsStore.list.length" class="range-tabs ml-auto" role="group" :aria-label="$t('timeRange')">
+                </div>
+
+                <!-- 面積圖：圖例（Highcharts 左上）與時間範圍分頁同一列；手機寬度放不下，分頁改疊在圖上方 -->
+                <div v-if="holdingsStore.list.length" class="relative mt-4 flex flex-1 flex-col">
+                  <!-- 時間範圍：各區間漲跌放 tooltip，選中區間的漲跌已顯示在總價值旁 -->
+                  <div class="range-tabs justify-end sm:absolute sm:right-0 sm:top-0 sm:z-10" role="group" :aria-label="$t('timeRange')">
                     <button
                       v-for="option in timeRangeOptionsWithGrowth"
                       :key="option.value"
@@ -223,18 +229,17 @@
                       {{ option.label }}
                     </button>
                   </div>
-                </div>
-
-                <!-- 面積圖 -->
-                <div v-if="holdingsStore.list.length" class="mt-2">
-                  <StockChart :options="areaChartOptions" :height="320" />
+                  <!-- 圖表絕對定位，不把自己的高度回饋給版面（否則欄高會被圖表撐住）；Highcharts 以 ResizeObserver 跟著容器重繪 -->
+                  <div class="relative min-h-[320px] flex-1">
+                    <highcharts :options="areaChartOptions" class="absolute inset-0" />
+                  </div>
                 </div>
 
                 <!-- 沒有交易時：引導新增 -->
                 <div v-else class="dashboard-chart-empty mt-2">
                   <div class="dashboard-chart-empty__body">
                     <span class="dashboard-chart-empty__icon"><i class="pi pi-chart-line" /></span>
-                    <h3 class="text-base font-semibold">{{ $t('dashboardChartEmptyTitle') }}</h3>
+                    <h3 class="text-base font-medium">{{ $t('dashboardChartEmptyTitle') }}</h3>
                     <p class="text-xs sm:text-sm text-muted-color max-w-sm">{{ $t('dashboardChartEmptyDesc') }}</p>
                     <div class="mt-2 flex flex-wrap justify-center gap-2">
                       <Button :label="$t('addInvestment')" icon="pi pi-plus" size="small" @click="transactionDialogVisible = true" />
@@ -293,8 +298,8 @@
 
           <template #content>
             <div v-if="holdingsStore.list.length > 0" class="dashboard-allocation-content py-2">
-              <div class="dashboard-allocation-layout" :class="{ 'dashboard-allocation-layout--empty': noTargetSet }">
-                <div v-if="!noTargetSet" class="dashboard-allocation-figure">
+              <div class="dashboard-allocation-layout">
+                <div class="dashboard-allocation-figure">
                   <!-- before the chart so the chart's tooltip paints over it -->
                   <div class="dashboard-allocation-total">
                     <span class="dashboard-allocation-total-value">{{ allocationItemCount }}</span>
@@ -310,28 +315,30 @@
                 <!-- 表格上方：資產／目標配置切換，樣式同走勢圖的時間範圍分頁 -->
                 <div class="min-w-0">
                 <div class="range-tabs mb-2 justify-end" role="group" :aria-label="$t('allocation')">
-                  <button
+                  <!-- disabled 的按鈕收不到滑鼠事件，tooltip 掛在外層 span -->
+                  <span
                     v-for="option in pieChartType"
                     :key="option.value"
-                    type="button"
-                    class="range-tabs__btn"
-                    :class="{ 'is-active': selectedPieType === option.value }"
-                    :aria-pressed="selectedPieType === option.value"
-                    @click="selectedPieType = option.value"
-                  >{{ option.label }}</button>
+                    v-tooltip.top="{ value: $t('noTargetAllocation'), disabled: !option.disabled }"
+                  >
+                    <button
+                      type="button"
+                      class="range-tabs__btn"
+                      :class="{ 'is-active': selectedPieType === option.value }"
+                      :aria-pressed="selectedPieType === option.value"
+                      :disabled="option.disabled"
+                      @click="selectedPieType = option.value"
+                    >{{ option.label }}</button>
+                  </span>
                 </div>
 
-                <div v-if="noTargetSet" class="flex flex-col items-center text-center gap-3 py-8">
-                  <h2 class="text-base font-semibold">{{ $t('allocationNoSettings') }}</h2>
-                </div>
-
-                <DataTable v-else :value="selectedAllocationBreakdown" dataKey="key" size="small" class="min-w-0 text-[0.8rem]">
+                <DataTable :value="selectedAllocationBreakdown" dataKey="key" size="small" class="min-w-0 text-[0.8125rem]">
                   <Column :header="$t('currentAsset')">
                     <template #body="{ data: item }">
                       <div class="flex min-w-0 items-center gap-2.5">
                         <span class="size-2 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
                         <span v-if="item.key === 'others'" class="truncate">{{ item.name }}</span>
-                        <RouterLink v-else :to="{ name: 'asset', params: { symbol: item.key } }" class="truncate hover:text-[var(--p-primary-color)]">{{ item.name }}</RouterLink>
+                        <RouterLink v-else :to="{ name: 'asset', params: { symbol: item.key } }" class="truncate underline-offset-4 hover:underline">{{ item.name }}</RouterLink>
                       </div>
                     </template>
                   </Column>
@@ -352,7 +359,7 @@
             </div>
 
             <div v-else class="flex flex-col items-center text-center gap-3 py-8">
-              <h2 class="text-base sm:text-lg font-semibold">{{ $t('portfolioNoHoldingsTitle') }}</h2>
+              <h2 class="text-base sm:text-lg font-medium">{{ $t('portfolioNoHoldingsTitle') }}</h2>
               <p class="text-xs sm:text-sm text-muted-color">{{ $t('portfolioNoHoldingsDesc') }}</p>
             </div>
           </template>
@@ -362,16 +369,16 @@
       <!-- Holdings Table -->
       <Card class="app-panel dashboard-table-panel mb-8 p-4">
       <template #content>
-        <h2 class="mb-4 text-base font-semibold">{{ $t('holdings') }}</h2>
+        <h2 class="mb-4 text-lg font-normal">{{ $t('holdings') }}</h2>
 
         <DataTable :value="holdings" sortField="currentValue" :sortOrder="-1" dataKey="id" tableStyle="min-width: 50rem" rowHover>
           <Column field="name" :header="$t('currentAsset')">
             <template #body="{ data }">
               <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }"
-                  class="flex items-center cursor-pointer p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
+                  class="group flex items-center cursor-pointer p-2 rounded-md truncate"
                   :style="{ width: '300px', minWidth: '250px' }">
                 <div class="truncate">
-                  <div class="truncate font-medium">{{ data.symbol }}</div>
+                  <div class="truncate font-medium underline-offset-4 group-hover:underline">{{ data.symbol }}</div>
                   <div class="text-xs text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
               </RouterLink>
@@ -383,7 +390,7 @@
               <div class="font-medium mr-4 inline-flex items-end">
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
+                <span class="ml-1 text-xs pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -401,7 +408,7 @@
               >
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
+                <span class="ml-1 text-xs pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -411,7 +418,7 @@
               <div class="font-medium mr-4 inline-flex items-end">
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
+                <span class="ml-1 text-xs pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -452,7 +459,6 @@ import { ref, watch, computed } from 'vue'
 import Skeleton from 'primevue/skeleton'
 import ProgressBar from 'primevue/progressbar'
 import Popover from 'primevue/popover'
-import StockChart from '@/components/StockChart.vue'
 import api from '@/utils/api'
 import { totalReturnPct, realizedProfit as calcRealizedProfit, portfolioXirr, twrChange, twrIndex, filterByPeriod, yAxisBounds, periodStats } from '@/utils/portfolioMetrics'
 import { useI18n } from 'vue-i18n'
@@ -536,10 +542,9 @@ const totalProfit = computed(() => {
   return holdings.value.reduce((sum, h) => sum + (h.currentValue - h.totalCost), 0)
 })
 const selectedPieType = ref('actual')
-const noTargetSet = computed(() => selectedPieType.value === 'target' && !hasTargetAllocation.value)
 const pieChartType = computed(() => ([
   { label: t('currentAsset'), value: 'actual' },
-  { label: t('targetAllocation'), value: 'target' }
+  { label: t('targetAllocation'), value: 'target', disabled: !hasTargetAllocation.value }
 ]))
 
 // 配置比例色票
@@ -756,6 +761,8 @@ const targetAllocationBreakdown = computed(() => {
 })
 
 const hasTargetAllocation = computed(() => targetAllocationBreakdown.value.length > 0)
+// 切到沒設目標配置的投資組合時退回資產分頁
+watch(hasTargetAllocation, has => { if (!has) selectedPieType.value = 'actual' })
 
 const selectedAllocationBreakdown = computed(() => {
   return selectedPieType.value === 'actual'
@@ -795,9 +802,9 @@ const selectedAllocationChart = computed(() => ({
       const secondaryLabel = selectedPieType.value === 'actual' ? t('chartValue') : t('totalValue')
 
       return `
-        <div style="min-width: 120px; font-size: 11px; line-height: 1.5;">
-          <div style="font-weight: 700; margin-bottom: 2px;">${this.point.name}</div>
-          <div style="font-weight: 600;">${formatAllocationPercentage(percentage)}</div>
+        <div style="min-width: 120px; font-size: 12px; line-height: 1.5;">
+          <div style="font-weight: 500; margin-bottom: 2px;">${this.point.name}</div>
+          <div>${formatAllocationPercentage(percentage)}</div>
           <div style="opacity: 0.75;">${secondaryLabel}: ${formatCompactAmount(amount)}</div>
         </div>
       `
@@ -822,7 +829,7 @@ const selectedAllocationChart = computed(() => ({
         filter: { property: 'percentage', operator: '>', value: 3 },
         style: {
           color: isDark.value ? '#cbd5e1' : '#475569',
-          fontWeight: '600',
+          fontWeight: '500',
           fontSize: '12px',
           textOutline: 'none',
         },
@@ -910,9 +917,10 @@ const areaChartOptions = computed(() => {
     credits: { enabled: false },
     legend: {
       enabled: true,
-      align: 'right',
+      align: 'left',
       verticalAlign: 'top',
-      itemStyle: { fontSize: '11px', fontWeight: '500', color: axisColor },
+      x: -8, // 抵掉 Highcharts 圖例的內距，與上方「總價值」左緣對齊
+      itemStyle: { fontSize: '12px', fontWeight: '400', color: axisColor },
       itemHoverStyle: { color: tooltipFg },
     },
     xAxis: {
@@ -921,10 +929,12 @@ const areaChartOptions = computed(() => {
         formatter: function () {
           return chartDateFormatter.format(new Date(this.value))
         },
-        style: { fontSize: '11px', color: axisColor }
+        style: { fontSize: '12px', color: axisColor }
       },
       lineWidth: 0,
       tickLength: 0,
+      // Highcharts 預設 day 只有 [1, 2]，1M 區間會直接跳到每週一個刻度（只剩 4 個）；補 3、4 天讓 1M 約 8 個刻度
+      units: [['day', [1, 2, 3, 4]], ['week', [1, 2]], ['month', [1, 2, 3, 4, 6]], ['year', null]],
     },
     yAxis: {
       title: { text: null },
@@ -934,7 +944,7 @@ const areaChartOptions = computed(() => {
       labels: {
         // 縮寫成 1.4M；小數兩位，避免 1.35M、1.4M 這種相鄰刻度四捨五入成同一個字
         formatter: function () { return `${currencySymbol.value}${Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 }).format(this.value)}` },
-        style: { fontSize: '11px', color: axisColor },
+        style: { fontSize: '12px', color: axisColor },
       },
       gridLineColor: gridColor,
     },
@@ -1064,17 +1074,25 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .dashboard-panel--hero {
   overflow: hidden;
+  flex: 1;
+}
+
+.dashboard-panel--hero :deep(.p-card-body),
+.dashboard-panel--hero :deep(.p-card-content) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 小標：一般字重、不轉大寫不加字距，讓數字成為唯一重點 */
 .dashboard-kicker {
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   font-weight: 400;
   color: var(--p-text-muted-color);
 }
 
 .dashboard-footnote {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--p-text-muted-color);
 }
 
@@ -1095,7 +1113,7 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .asset-growth-pill--sm {
   padding: 0.2rem 0.5rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 /* 小卡內容撐滿高度，明細列貼底，避免卡片下半部空白 */
@@ -1109,7 +1127,7 @@ watch([displayCurrency, selectedSymbols], () => {
 .dashboard-metric-rows {
   margin-top: auto;
   padding-top: 0.9rem;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
 }
 
 .dashboard-metric-rows > div {
@@ -1133,7 +1151,7 @@ watch([displayCurrency, selectedSymbols], () => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
 }
 
 @media (min-width: 640px) {
@@ -1150,14 +1168,14 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .dashboard-period-stats dd {
   margin-top: 0.15rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .dashboard-period-stats .dashboard-period-stats__sub {
   margin-top: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 400;
   color: var(--p-text-muted-color);
 }
@@ -1210,10 +1228,11 @@ watch([displayCurrency, selectedSymbols], () => {
   gap: 0.75rem;
 }
 
+/* 卡片標題：18px 一般字重、主文字色，層次靠字級與顏色而非粗細 */
 .dashboard-allocation-title {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--p-text-muted-color);
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--p-text-color);
 }
 
 .dashboard-allocation-content {
@@ -1239,11 +1258,6 @@ watch([displayCurrency, selectedSymbols], () => {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-}
-
-/* 目標配置未設定：沒有圓環，切換分頁與提示占滿整列 */
-.dashboard-allocation-layout.dashboard-allocation-layout--empty {
-  grid-template-columns: minmax(0, 1fr);
 }
 
 .dashboard-allocation-layout {
@@ -1309,7 +1323,7 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .dashboard-allocation-total-value {
   font-size: 1.75rem;
-  font-weight: 800;
+  font-weight: 300;
   line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--p-text-color);
@@ -1317,7 +1331,7 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .dashboard-allocation-total-label {
   margin-top: 0.2rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 400;
   color: var(--p-text-muted-color);
 }
@@ -1339,7 +1353,7 @@ watch([displayCurrency, selectedSymbols], () => {
 
 .dashboard-table-panel :deep(.p-datatable-header-cell) {
   white-space: nowrap;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
 }
 
 .dashboard-table-panel :deep(.p-datatable-tbody > tr > td) {

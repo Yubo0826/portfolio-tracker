@@ -38,7 +38,7 @@
       />
 
       <div class="app-shell__scroll app-shell__content flex flex-1 flex-col overflow-y-auto">
-        <main class="mx-auto w-full max-w-[1100px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
+        <main class="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
           <!-- 投資組合切換：側邊欄模式送進 AppHeader 左側（#header-portfolio）；header 導覽模式頂欄放不下，留在頁面標題上方 -->
           <!-- key：Teleport 只在掛載時解析 target，切換導覽版面後 #header-portfolio 是新節點（或原本不存在），要重新掛載才找得到 -->
           <Teleport :key="isHeaderNav" defer to="#header-portfolio" :disabled="isHeaderNav">
@@ -69,7 +69,7 @@
           <RouterView />
         </main>
 
-        <div class="mx-auto w-full max-w-[1100px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
+        <div class="mx-auto w-full max-w-[1280px] px-4 pb-6 sm:px-6 lg:px-8 xl:px-10">
           <Footer />
         </div>
       </div>
@@ -418,7 +418,7 @@ const menuItems = computed(() => {
   width: 100%;
   /* text-transform: uppercase; */
   /* letter-spacing: 3px; */
-  font-weight: 600;
+  font-weight: 500;
   /* font-size: .8em; */
   opacity: 0;
   transform: translate(-100%,0);
@@ -430,7 +430,7 @@ const menuItems = computed(() => {
 .start-btn div{
   /* text-transform: uppercase; */
   /* letter-spacing: 3px; */
-  font-weight: 600;
+  font-weight: 500;
   /* font-size: .8em; */
   transition: all .3s ease-in-out;
 }
@@ -450,7 +450,7 @@ const menuItems = computed(() => {
   background: var(--p-content-background);
   font-family: inherit;
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--p-text-color);
   cursor: pointer;
   transition: border-color 0.16s ease;
@@ -641,6 +641,13 @@ html[data-nav-layout='header'] .app-shell__main {
   --p-datatable-header-cell-hover-background: color-mix(in srgb, var(--p-text-color) 8%, var(--p-content-background));
   --p-datatable-header-cell-selected-background: var(--p-datatable-header-cell-background);
   --p-datatable-header-cell-selected-color: var(--p-datatable-header-cell-color);
+  /* 表頭不用粗體（PrimeVue 預設 600），靠淡底色區分 */
+  --p-datatable-column-title-font-weight: 500;
+}
+
+/* 表格內的數字等寬，上下列位數對齊 */
+.p-datatable-tbody > tr > td {
+  font-variant-numeric: tabular-nums;
 }
 
 /* PrimeVue 只對未排序的可排序欄 hover 變色，已排序欄也補上，讓所有可排序欄 hover 一致 */

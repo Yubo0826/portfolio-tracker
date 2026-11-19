@@ -36,7 +36,7 @@ const features = [
 <template>
   <div class="flex min-h-screen flex-col bg-surface-0 text-color dark:bg-surface-950">
     <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-      <div class="flex items-center gap-2 text-lg font-semibold">
+      <div class="flex items-center gap-2 text-lg font-medium">
         <img src="/stockbar-logo.svg" alt="" class="h-7" />
         StockBar
       </div>
@@ -51,7 +51,7 @@ const features = [
 
     <main v-if="auth.authReady" class="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6">
       <section class="py-16 text-center sm:py-24">
-        <h1 class="mx-auto max-w-3xl text-3xl font-bold leading-tight sm:text-5xl">
+        <h1 class="mx-auto max-w-3xl text-3xl font-normal leading-tight sm:text-5xl">
           {{ t('landing.heroTitle') }}
         </h1>
         <p class="mx-auto mt-4 max-w-2xl text-lg text-muted-color">
@@ -77,7 +77,7 @@ const features = [
           class="rounded-2xl border border-surface-200 p-6 dark:border-surface-700"
         >
           <i :class="f.icon" class="text-2xl text-primary" aria-hidden="true"></i>
-          <h2 class="mt-4 text-lg font-semibold">{{ t(`landing.${f.key}Title`) }}</h2>
+          <h2 class="mt-4 text-lg font-medium">{{ t(`landing.${f.key}Title`) }}</h2>
           <p class="mt-2 text-sm text-muted-color">{{ t(`landing.${f.key}Desc`) }}</p>
         </div>
       </section>

@@ -62,7 +62,7 @@
       <!-- 偏離 = 目前 − 目標（百分點），超過組合的偏離閾值才上色 -->
       <Column field="drift" :header="$t('drift')">
         <template #body="{ data }">
-          <span :class="{ 'text-orange-500 font-semibold': Math.abs(data.drift) > band }">
+          <span :class="{ 'text-orange-500 font-medium': Math.abs(data.drift) > band }">
             {{ data.drift > 0 ? '+' : '' }}{{ data.drift.toFixed(2) }}
             <i
               v-if="Math.abs(data.drift) > band"

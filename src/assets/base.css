@@ -27,8 +27,8 @@
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
-  /* Roboto Flex（Material 預設字型）；沒有中文字，中文接到系統字型 */
-  --font-family-base: 'Roboto Flex', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  /* Manrope：幾何感、字面寬，且有 tnum 等寬數字（表格對齊需要）；沒有中文字，中文接 Noto Sans TC */
+  --font-family-base: 'Manrope', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
 
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
@@ -103,7 +103,8 @@ select,
 
 /* 總資產／現價旁的漲跌（Dashboard、Asset 頁共用）：只用漲跌色文字，不加箭頭 */
 .asset-growth-change {
-  font-size: 1.25rem;
-  font-weight: 500;
+  font-size: 1.125rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }

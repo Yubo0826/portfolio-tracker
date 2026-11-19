@@ -127,7 +127,7 @@ watch(pageKey, () => {
   border: none;
   border-radius: 0.375rem;
   background: none;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   color: var(--p-text-color);
   text-align: left;
   cursor: pointer;
@@ -150,7 +150,7 @@ watch(pageKey, () => {
   position: relative;
   padding: 0.55rem 0.75rem;
   border-radius: 0.375rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--p-text-color);
   text-decoration: none;
 }
@@ -194,7 +194,7 @@ watch(pageKey, () => {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   color: var(--p-text-muted-color);
 }
 
@@ -204,14 +204,14 @@ watch(pageKey, () => {
 }
 
 .doc-crumbs li[aria-current] {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 
 .doc-title {
   margin-bottom: 1.5rem;
   font-size: 2.25rem;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.2;
 }
 
@@ -223,7 +223,7 @@ watch(pageKey, () => {
   padding: 0.75rem 1rem;
   border: 1px solid var(--p-content-border-color);
   border-radius: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .doc-a {
@@ -252,8 +252,8 @@ watch(pageKey, () => {
 
 .doc-h2 {
   margin: 2rem 0 0.75rem;
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 .doc-list {
@@ -300,7 +300,7 @@ watch(pageKey, () => {
 }
 
 .doc-pager__hint {
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   color: var(--p-text-muted-color);
 }
 

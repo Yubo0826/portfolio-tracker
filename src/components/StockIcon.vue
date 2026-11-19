@@ -10,7 +10,7 @@
 
   <div
     v-else
-    class="w-8 h-8 mr-2 rounded-full bg-emphasis text-muted-color flex items-center justify-center text-sm font-semibold leading-none"
+    class="w-8 h-8 mr-2 rounded-full bg-emphasis text-muted-color flex items-center justify-center text-sm font-medium leading-none"
     :title="symbolText"
   >
     <span v-if="resolved">{{ fallbackText }}</span>

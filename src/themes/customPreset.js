@@ -3,19 +3,19 @@ import Aura from '@primeuix/themes/aura';
 
 export default definePreset(Aura, {
     semantic: {
-      // 主題色 #3a72d8（500，與 logo 主藍一致），其餘色階由它與白/黑混色產生
+      // 主題色 #ffb800（500，與 logo 同色），其餘色階由它與白/黑混色產生
       primary: {
-        50:  '#f0f4fc',
-        100: '#dce6f8',
-        200: '#b0c7ef',
-        300: '#89aae8',
-        400: '#618ee0',
-        500: '#3a72d8',
-        600: '#305db1',
-        700: '#264b8f',
-        800: '#1e3a6e',
-        900: '#152a50',
-        950: '#0e1c35'
+        50:  '#fff9eb',
+        100: '#fff2d1',
+        200: '#ffe49e',
+        300: '#ffd66b',
+        400: '#ffc633',
+        500: '#ffb800',
+        600: '#d19700',
+        700: '#a37600',
+        800: '#7a5800',
+        900: '#523b00',
+        950: '#332500'
       },
       /*
           定義明暗模式用的顏色，顏色值可以參考這裡：
@@ -24,10 +24,11 @@ export default definePreset(Aura, {
       colorScheme: {
         light: {
           primary: {
-            color: '{primary.500}',
-            contrastColor: '#ffffff', // #3a72d8 上白字對比約 4.6:1
-            hoverColor: '{primary.600}',
-            activeColor: '{primary.700}'
+            // logo 黃 #ffb800 在白底只有 1.7:1，當文字／連結讀不清；淺色改用深一階的金 #a37600（白底 4.1:1）
+            color: '{primary.700}',
+            contrastColor: '#ffffff',
+            hoverColor: '{primary.800}',
+            activeColor: '{primary.800}'
           },
           content: {
             // background: '{zinc.50}',
@@ -67,9 +68,9 @@ export default definePreset(Aura, {
         },
         dark: {
           primary: {
-            color: '{primary.500}',
-            contrastColor: '#ffffff', // #3a72d8 上白字對比約 4.6:1
-            hoverColor: '{primary.400}', // 300/200 太淺，白字讀不清
+            color: '{primary.500}', // 深色底直接用 logo 黃（#1d1e1e 上 9.6:1）
+            contrastColor: '#1b1b21', // 黃底配深色字，白字只有 1.7:1
+            hoverColor: '{primary.400}',
             activeColor: '{primary.600}'
           },
           formField: {

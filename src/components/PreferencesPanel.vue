@@ -101,44 +101,7 @@
 
     <div class="pref-divider"></div>
 
-    <!-- 3. Theme (accent color) -->
-    <section class="pref-section">
-      <div class="pref-section__head">
-        <h2 class="pref-section__title">{{ t('preferences.theme.label') }}</h2>
-        <p class="pref-section__desc">{{ t('preferences.theme.desc') }}</p>
-      </div>
-
-      <div class="accent-grid">
-        <button
-          v-for="option in accentOptions"
-          :key="option.key"
-          type="button"
-          class="accent-card"
-          :class="{ 'is-selected': accentColor === option.key }"
-          :style="{ '--accent': option.swatch }"
-          @click="setAccentColor(option.key)"
-        >
-          <span class="accent-card__preview">
-            <span class="accent-card__window">
-              <span class="accent-card__sidebar">
-                <span class="accent-card__dot"></span>
-                <span class="accent-card__line"></span>
-                <span class="accent-card__line accent-card__line--short"></span>
-              </span>
-              <span class="accent-card__body"></span>
-            </span>
-          </span>
-          <span class="accent-card__label">
-            <span class="accent-card__radio" :class="{ 'is-checked': accentColor === option.key }"></span>
-            {{ t(`preferences.accent.${option.key}`) }}
-          </span>
-        </button>
-      </div>
-    </section>
-
-    <div class="pref-divider"></div>
-
-    <!-- 4. Navigation layout -->
+    <!-- 3. Navigation layout -->
     <section class="pref-section">
       <div class="pref-section__head">
         <h2 class="pref-section__title">{{ t('preferences.navLayout.label') }}</h2>
@@ -183,20 +146,18 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import SelectButton from 'primevue/selectbutton'
-import { useTheme, ACCENT_OPTIONS } from '@/composables/useTheme.js'
+import { useTheme } from '@/composables/useTheme.js'
 import { useNavLayout, buildNavLayoutOptions } from '@/composables/useNavLayout.js'
 import { useLocale } from '@/composables/useLocale.js'
 import { useSettingsStore, CURRENCY_OPTIONS } from '@/stores/settings'
 
 const { t } = useI18n()
-const { theme, darkVariant, accentColor, setTheme, setDarkVariant, setAccentColor } = useTheme()
+const { theme, darkVariant, setTheme, setDarkVariant } = useTheme()
 const { navLayout, setNavLayout } = useNavLayout()
 const { locale, localeOptions, setLocale } = useLocale()
 
 const settingsStore = useSettingsStore()
 const { displayCurrency } = storeToRefs(settingsStore)
-
-const accentOptions = ACCENT_OPTIONS
 
 const colorModeOptions = computed(() => [
   { label: t('preferences.colorMode.light'), value: 'light', icon: 'pi pi-sun' },
@@ -270,7 +231,7 @@ const onCurrencyChange = (value) => {
 
 .preferences__intro {
   margin-bottom: 2rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--p-text-muted-color);
 }
 
@@ -282,14 +243,14 @@ const onCurrencyChange = (value) => {
 }
 
 .pref-section__title {
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 
 .pref-section__desc {
   margin-top: 0.25rem;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   color: var(--p-text-muted-color);
 }
 
@@ -297,108 +258,6 @@ const onCurrencyChange = (value) => {
   height: 1px;
   background: var(--p-content-border-color);
   margin: 1.5rem 0;
-}
-
-/* Accent color cards */
-.accent-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  gap: 1rem;
-}
-
-.accent-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  text-align: left;
-}
-
-.accent-card__preview {
-  display: block;
-  padding: 0.4rem;
-  border-radius: 0.75rem;
-  border: 2px solid var(--p-content-border-color);
-  background: var(--p-surface-card);
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
-}
-
-.accent-card:hover .accent-card__preview {
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--p-content-border-color));
-}
-
-.accent-card.is-selected .accent-card__preview {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.accent-card__window {
-  display: flex;
-  height: 4.5rem;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--accent) 14%, var(--p-surface-background));
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.accent-card__sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  width: 34%;
-  padding: 0.5rem;
-  background: color-mix(in srgb, var(--accent) 22%, var(--p-surface-background));
-}
-
-.accent-card__dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
-.accent-card__line {
-  height: 0.35rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
-}
-
-.accent-card__line--short {
-  width: 65%;
-}
-
-.accent-card__body {
-  flex: 1;
-  margin: 0.5rem;
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--p-surface-background) 82%, var(--accent));
-}
-
-.accent-card__label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--p-text-color);
-}
-
-.accent-card__radio {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  border: 2px solid var(--p-text-muted-color);
-  flex-shrink: 0;
-  transition: border-color 0.16s ease;
-}
-
-.accent-card__radio.is-checked {
-  border-color: var(--accent);
-  background:
-    radial-gradient(circle, var(--accent) 0 45%, transparent 46%);
 }
 
 /* Navigation layout cards */
@@ -505,7 +364,7 @@ const onCurrencyChange = (value) => {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   color: var(--p-text-color);
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
     <section :aria-label="t('portfolioSectorTitle')">
-      <h3 class="flex min-h-10 items-center text-sm font-semibold">{{ t('portfolioSectorTitle') }}</h3>
+      <h3 class="flex min-h-10 items-center text-sm font-medium">{{ t('portfolioSectorTitle') }}</h3>
       <Skeleton v-if="sectorsLoading" height="300px" class="mt-3" />
       <p v-else-if="sectorsError" class="mt-3 text-xs text-red-600 dark:text-red-300">{{ t('sectorWeightingsLoadFailed') }}</p>
       <template v-else-if="sectorRows.length">
@@ -10,7 +10,7 @@
           <li v-for="row in sectorRows" :key="row.sector" class="flex items-center gap-2 border-b border-surface py-1.5">
             <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" :style="{ background: row.color }" aria-hidden="true"></span>
             <span>{{ row.name }}</span>
-            <span class="ml-auto font-semibold tabular-nums">{{ row.percent.toFixed(1) }}%</span>
+            <span class="ml-auto font-medium tabular-nums">{{ row.percent.toFixed(1) }}%</span>
           </li>
         </ul>
       </template>
@@ -19,7 +19,7 @@
 
     <section :aria-label="t('holdingsGrowthTitle')">
       <div class="flex min-h-10 flex-wrap items-center justify-between gap-2">
-        <h3 class="text-sm font-semibold">{{ t('holdingsGrowthTitle') }}</h3>
+        <h3 class="text-sm font-medium">{{ t('holdingsGrowthTitle') }}</h3>
         <SelectButton
           v-model="period"
           :options="periodOptions"
@@ -176,7 +176,7 @@ const growthChartOptions = computed(() => {
     chart: { type: 'line', backgroundColor: 'transparent', animation: { duration: 400 }, zooming: { type: 'x' } },
     title: { text: null },
     credits: { enabled: false },
-    legend: { enabled: true, itemStyle: { color: legend, fontWeight: '600' } },
+    legend: { enabled: true, itemStyle: { color: legend, fontWeight: '500' } },
     xAxis: {
       type: 'datetime',
       labels: { style: { fontSize: '12px', color: axis } },

@@ -46,13 +46,13 @@
         <Column field="foreign_amount" sortable :header="$t('fxForeignAmount')">
           <template #body="{ data }">
             <span class="font-medium">{{ fmt(data.foreign_amount) }}</span>
-            <span class="ml-1 text-[10px] font-semibold text-muted-color">{{ data.currency }}</span>
+            <span class="ml-1 text-xs font-normal text-muted-color">{{ data.currency }}</span>
           </template>
         </Column>
         <Column field="twd_amount" sortable :header="$t('fxTwdAmount')">
           <template #body="{ data }">
             <span class="font-medium">{{ fmt(data.twd_amount, 0) }}</span>
-            <span class="ml-1 text-[10px] font-semibold text-muted-color">TWD</span>
+            <span class="ml-1 text-xs font-normal text-muted-color">TWD</span>
           </template>
         </Column>
         <Column :header="$t('fxRate')">
@@ -73,7 +73,7 @@
           </template>
           <template #body="{ data }">
             <template v-if="exchangeCost(data).costTwd != null">
-              <span class="font-medium">{{ fmt(exchangeCost(data).costTwd, 0) }}</span> <span class="text-[10px] font-semibold text-muted-color">TWD</span>
+              <span class="font-medium">{{ fmt(exchangeCost(data).costTwd, 0) }}</span> <span class="text-xs font-normal text-muted-color">TWD</span>
             </template>
             <span v-else class="text-muted-color">--</span>
           </template>

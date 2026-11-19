@@ -113,7 +113,7 @@ const sendEmail = async () => {
 
 .preferences__intro {
   margin-bottom: 2rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--p-text-muted-color);
 }
 
@@ -125,14 +125,14 @@ const sendEmail = async () => {
 }
 
 .pref-section__title {
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.125rem;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 
 .pref-section__desc {
   margin-top: 0.25rem;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   color: var(--p-text-muted-color);
 }
 

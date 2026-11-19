@@ -446,7 +446,7 @@ const goDashboard = () => {
 .menu-section-label {
   position: relative;
   padding: 8px 12px 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--sidebar-text-muted);
   white-space: nowrap;
@@ -514,7 +514,7 @@ const goDashboard = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 14px;
   flex-shrink: 0;
 }
@@ -541,7 +541,7 @@ const goDashboard = () => {
 }
 
 .user-plan {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--sidebar-text-muted);
   text-align: left;
   overflow: hidden;

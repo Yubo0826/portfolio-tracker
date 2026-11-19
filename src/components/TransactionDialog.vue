@@ -3,9 +3,9 @@
     <template #header>
       <div class="inline-flex items-center justify-center gap-2">
         <!-- 標題 -->
-        <span v-if="editingId" class="font-bold whitespace-nowrap">{{ $t('editTransaction') }}</span>
+        <span v-if="editingId" class="font-medium whitespace-nowrap">{{ $t('editTransaction') }}</span>
         <!-- 選擇投資組合 -->
-        <span class="font-bold" v-else>
+        <span class="font-medium" v-else>
           {{ $t('addTransactionTo') }}
           <Select
             v-model="selectedPortfolioId"
@@ -142,7 +142,7 @@
         <div class="flex justify-between items-center">
           <label class="text-sm font-medium text-muted-color">{{ $t('total') }}</label>
           <div>
-            <span class="text-lg font-bold text-color">{{ totalPrice.toLocaleString() }}</span>
+            <span class="text-lg font-medium text-color">{{ totalPrice.toLocaleString() }}</span>
             <span class="ml-2 text-sm font-medium text-muted-color">{{ form.currency || 'USD' }}</span>
           </div>
         </div>

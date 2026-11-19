@@ -51,13 +51,13 @@
           ></i>
           <div class="min-w-0 flex-1">
             <div class="truncate">
-              <span class="font-semibold">{{ item.symbol }}</span>
+              <span class="font-medium">{{ item.symbol }}</span>
               <span v-if="item.exchDisp" class="text-muted-color"> : {{ item.exchDisp }}</span>
             </div>
             <div class="truncate text-sm text-muted-color">{{ item.longname || item.shortname }}</div>
           </div>
           <div v-if="item.regularMarketPrice != null" class="shrink-0 text-right">
-            <div class="font-semibold">{{ formatNumber(item.regularMarketPrice) }}</div>
+            <div class="font-medium">{{ formatNumber(item.regularMarketPrice) }}</div>
             <div v-if="item.regularMarketChangePercent != null" :class="changeClass(item.regularMarketChangePercent)" class="text-sm">
               {{ formatSigned(item.regularMarketChangePercent) }}%
             </div>
@@ -84,7 +84,7 @@
       <Column field="regularMarketPrice" sortable :header="$t('currentPrice')">
         <template #body="{ data }">
           <span class="font-medium">{{ formatNumber(data.regularMarketPrice) }}</span>
-          <span v-if="data.currency" class="ml-1 text-[10px] font-semibold text-muted-color">{{ data.currency }}</span>
+          <span v-if="data.currency" class="ml-1 text-xs font-normal text-muted-color">{{ data.currency }}</span>
         </template>
       </Column>
       <Column field="regularMarketChange" sortable :header="$t('dailyChange')">
@@ -124,7 +124,7 @@
               <span class="w-3 text-muted-color">{{ data.target_price == null ? '' : (data.alert_above ? '≥' : '≤') }}</span>
               <span class="font-medium">{{ formatNumber(data.target_price) }}</span>
             </template>
-            <span v-if="data.currency && (data.target_price != null || editing === data.symbol)" class="text-[10px] font-semibold text-muted-color">{{ data.currency }}</span>
+            <span v-if="data.currency && (data.target_price != null || editing === data.symbol)" class="text-xs font-normal text-muted-color">{{ data.currency }}</span>
           </div>
         </template>
       </Column>

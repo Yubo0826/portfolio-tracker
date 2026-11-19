@@ -139,7 +139,7 @@ watch(() => route.path, () => {
 .header-nav__trigger.is-active {
   background: var(--sb-container);
   color: var(--sb-on-container);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .header-nav__chevron {
@@ -181,7 +181,7 @@ watch(() => route.path, () => {
   border-radius: 0.6rem;
   background: none;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   text-align: left;
   color: var(--p-text-color);
   cursor: pointer;

@@ -357,7 +357,7 @@ const highBarOptions = computed(() => {
     xAxis: {
       categories: annualReturnsData.value.map(r => r.year.toString()),
       title: { text: t('year'), style: { color: axisColor } },
-      labels: { style: { fontWeight: '600', color: legendColor } },
+      labels: { style: { fontWeight: '500', color: legendColor } },
     },
     yAxis: {
       labels: {

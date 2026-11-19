@@ -51,11 +51,11 @@
             @click="select(item)"
           >
             <div class="min-w-0 flex-1">
-              <div class="truncate text-base font-semibold">{{ item.symbol }}</div>
+              <div class="truncate text-base font-medium">{{ item.symbol }}</div>
               <div class="truncate text-xs text-muted-color">{{ [item.longname || item.shortname, item.exchDisp].filter(Boolean).join(' · ') }}</div>
             </div>
             <div class="shrink-0 text-right">
-              <div v-if="item.regularMarketPrice != null" class="text-base font-semibold">{{ formatNumber(item.regularMarketPrice) }}</div>
+              <div v-if="item.regularMarketPrice != null" class="text-base font-medium">{{ formatNumber(item.regularMarketPrice) }}</div>
               <div v-if="item.regularMarketChangePercent != null" :class="item.regularMarketChangePercent >= 0 ? 'text-up' : 'text-down'" class="text-xs">
                 {{ item.regularMarketChangePercent >= 0 ? '+' : '' }}{{ formatNumber(item.regularMarketChangePercent) }}%
               </div>

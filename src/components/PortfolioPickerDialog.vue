@@ -42,7 +42,7 @@
             @click="select(p)"
           >
             <div class="min-w-0 flex-1">
-              <div class="truncate text-base font-semibold">{{ p.name }}</div>
+              <div class="truncate text-base font-medium">{{ p.name }}</div>
               <div v-if="p.description" class="truncate text-xs text-muted-color">{{ p.description }}</div>
             </div>
             <span v-if="p.holdings" class="shrink-0 text-xs text-muted-color">{{ t('holdingsCount') }} {{ p.holdings.length }}</span>

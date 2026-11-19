@@ -29,10 +29,10 @@
                   <div class="flex flex-wrap items-start justify-between gap-2">
                     <div class="flex flex-col">
                       <div class="flex flex-wrap items-end gap-2">
-                        <div class="text-4xl font-bold inline-flex items-end">
+                        <div class="text-4xl font-light tracking-tight tabular-nums inline-flex items-baseline">
                           <span>{{ splitPriceForEmphasis(info.regularMarketPrice).main }}</span>
                           <span>{{ splitPriceForEmphasis(info.regularMarketPrice).fraction }}</span>
-                          <span class="ml-1 text-[10px] leading-none pb-1 font-semibold text-muted-color">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
+                          <span class="ml-1.5 text-[0.4em] font-normal tracking-normal text-muted-color">{{ splitPriceForEmphasis(info.regularMarketPrice).code }}</span>
                         </div>
 
                         <div
@@ -63,7 +63,7 @@
                         @click="chartTypeMenu.toggle($event)"
                       >
                         <i :class="activeChartType.icon" aria-hidden="true"></i>
-                        <span class="font-semibold">{{ activeChartType.label }}</span>
+                        <span class="font-medium">{{ activeChartType.label }}</span>
                         <i class="pi text-xs" :class="chartTypeMenuOpen ? 'pi-chevron-up' : 'pi-chevron-down'" aria-hidden="true"></i>
                       </Button>
                       <Menu
@@ -109,7 +109,7 @@
                           <template #value>
                             <span class="inline-flex items-center gap-2">
                               <i class="pi pi-wave-pulse" aria-hidden="true"></i>
-                              <span class="font-semibold">{{ t('indicators') }}</span>
+                              <span class="font-medium">{{ t('indicators') }}</span>
                               <span v-if="selectedIndicators.length" class="indicator-count">{{ selectedIndicators.length }}</span>
                             </span>
                           </template>
@@ -129,7 +129,7 @@
                         @click="showTrades = !showTrades"
                       >
                         <i class="pi pi-flag" aria-hidden="true"></i>
-                        <span class="font-semibold">{{ t('myTrades') }}</span>
+                        <span class="font-medium">{{ t('myTrades') }}</span>
                       </Button>
 
                       <Button
@@ -142,7 +142,7 @@
                         @click="comparePopover.toggle($event)"
                       >
                         <i class="pi pi-chart-line" aria-hidden="true"></i>
-                        <span class="font-semibold">{{ t('compareAssets') }}</span>
+                        <span class="font-medium">{{ t('compareAssets') }}</span>
                         <i class="pi text-xs" :class="comparePopoverOpen ? 'pi-chevron-up' : 'pi-chevron-down'" aria-hidden="true"></i>
                       </Button>
                       <Popover
@@ -197,12 +197,12 @@
                             <template #option="{ option }">
                               <div class="flex w-full min-w-0 items-center justify-between gap-3">
                                 <div class="min-w-0">
-                                  <div class="font-semibold">{{ option.symbol }}</div>
+                                  <div class="font-medium">{{ option.symbol }}</div>
                                   <div class="truncate text-xs text-muted-color">{{ option.name }}</div>
                                 </div>
                                 <div v-if="Number.isFinite(option.regularMarketPrice)" class="shrink-0 text-right">
-                                  <div class="font-semibold">{{ Number(option.regularMarketPrice).toFixed(2) }}</div>
-                                  <div class="text-xs font-semibold" :class="recommendationGrowthClass(option.regularMarketChangePercent)">
+                                  <div class="font-medium">{{ Number(option.regularMarketPrice).toFixed(2) }}</div>
+                                  <div class="text-xs font-medium" :class="recommendationGrowthClass(option.regularMarketChangePercent)">
                                     {{ formatSignedNumber(option.regularMarketChangePercent) }}%
                                   </div>
                                 </div>
@@ -235,7 +235,7 @@
                   <div v-if="compareSymbols.length && !isComparisonDisabled" class="mt-3 flex flex-wrap gap-2">
                     <span class="compare-chip compare-chip--static">
                       <span class="compare-chip-dot" :style="{ background: getSeriesColor(0) }"></span>
-                      <span class="font-semibold">{{ String(symbol || '').toUpperCase() }}</span>
+                      <span class="font-medium">{{ String(symbol || '').toUpperCase() }}</span>
                     </span>
                     <button
                       v-for="(item, index) in compareSymbols"
@@ -246,7 +246,7 @@
                       @click="removeComparisonSymbol(item)"
                     >
                       <span class="compare-chip-dot" :style="{ background: getSeriesColor(index + 1) }"></span>
-                      <span class="font-semibold">{{ item }}</span>
+                      <span class="font-medium">{{ item }}</span>
                       <span
                         v-if="compareNameMap[item] && compareNameMap[item] !== item"
                         class="ml-1 max-w-28 truncate text-xs text-muted-color"
@@ -282,7 +282,7 @@
                       v-for="option in rangeOptionsWithGrowth"
                       :key="option.value"
                       type="button"
-                      class="seg__btn flex flex-col items-center text-xs font-bold"
+                      class="seg__btn flex flex-col items-center text-xs font-medium"
                       :class="{ 'is-active': currentRange === option.value }"
                       :aria-pressed="currentRange === option.value"
                       @click="currentRange = option.value"
@@ -297,7 +297,7 @@
                   <dl class="mt-5 grid grid-cols-1 gap-x-8 text-xs sm:grid-cols-2">
                     <div v-for="row in quoteStatsRows" :key="row.label" class="flex items-baseline justify-between gap-4 border-b border-surface py-2">
                       <dt class="whitespace-nowrap text-muted-color">{{ t(row.label) }}</dt>
-                      <dd class="whitespace-nowrap font-semibold text-right">{{ row.value }}</dd>
+                      <dd class="whitespace-nowrap font-medium text-right">{{ row.value }}</dd>
                     </div>
                   </dl>
                 </div>
@@ -308,7 +308,7 @@
               <template #content>
                 <div>
                   <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-sm font-semibold">{{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsTitle' : 'topHoldingsTitle') }}</span>
+                    <span class="text-sm font-medium">{{ t(fundHoldingsTab === 'sector' ? 'sectorWeightingsTitle' : 'topHoldingsTitle') }}</span>
 
                     <div class="seg candle-period" role="group">
                       <button
@@ -364,7 +364,7 @@
             <Card class="app-panel w-full">
               <template #content>
                 <div>
-                  <span class="text-sm font-semibold">{{ t('relatedStocks') }}</span>
+                  <span class="text-sm font-medium">{{ t('relatedStocks') }}</span>
 
                   <div v-if="recommendLoading" class="trending-list mt-2">
                     <div v-for="n in 5" :key="n" class="trending-row cursor-default">
@@ -392,7 +392,7 @@
                       @keydown.enter.self="openAssetProfile(item.symbol)"
                     >
                       <div class="min-w-0">
-                        <div class="font-semibold">{{ item.symbol }}</div>
+                        <div class="font-medium">{{ item.symbol }}</div>
                         <div class="truncate text-xs text-muted-color">{{ item.name }}</div>
                       </div>
 
@@ -410,8 +410,8 @@
                       <span v-else></span>
 
                       <div class="text-right">
-                        <div class="font-semibold">{{ Number(item.regularMarketPrice).toFixed(2) }}</div>
-                        <div class="whitespace-nowrap text-xs font-semibold" :class="recommendationGrowthClass(item.regularMarketChange)">
+                        <div class="font-medium">{{ Number(item.regularMarketPrice).toFixed(2) }}</div>
+                        <div class="whitespace-nowrap text-xs font-medium" :class="recommendationGrowthClass(item.regularMarketChange)">
                           {{ formatSignedNumber(item.regularMarketChange) }} ({{ formatSignedNumber(item.regularMarketChangePercent) }}%)
                         </div>
                       </div>
@@ -444,7 +444,7 @@
                   </p>
 
                   <div>
-                    <p class="text-sm font-semibold pb-3">{{ t('companyKeyStats') }}</p>
+                    <p class="text-sm font-medium pb-3">{{ t('companyKeyStats') }}</p>
 
                     <div
                       v-for="(row, index) in companyKeyStatsRows"
@@ -453,7 +453,7 @@
                       :class="index === companyKeyStatsRows.length - 1 ? '' : 'border-b border-surface'"
                     >
                       <span>{{ t(row.label) }}</span>
-                      <span class="font-semibold text-right">{{ row.value }}</span>
+                      <span class="font-medium text-right">{{ row.value }}</span>
                     </div>
 
                     <p
@@ -469,7 +469,7 @@
                     v-if="companyInfo.longBusinessSummary"
                     class="pt-3"
                   >
-                    <p class="text-xs font-semibold text-muted-color">{{ t('companySummary') }}</p>
+                    <p class="text-xs font-medium text-muted-color">{{ t('companySummary') }}</p>
                     <p class="company-summary mt-2 text-xs">{{ companyInfo.longBusinessSummary }}</p>
                   </div>
 
@@ -1440,7 +1440,7 @@ const sectorTreemapOptions = computed(() => {
           color: labelColor,
           textOutline: '1px rgba(0,0,0,0.45)',
           fontSize: '12px',
-          fontWeight: '600',
+          fontWeight: '500',
         },
         formatter: function () {
           return `${this.point.name}<br/>${this.point.value.toFixed(1)}%`
@@ -1512,7 +1512,7 @@ const topHoldingsTreemapOptions = computed(() => {
           color: labelColor,
           textOutline: '1px rgba(0,0,0,0.45)',
           fontSize: '12px',
-          fontWeight: '600',
+          fontWeight: '500',
         },
         formatter: function () {
           return `${this.point.symbol}<br/>${this.point.value.toFixed(1)}%`
@@ -1753,7 +1753,7 @@ watch(compareSymbols, () => {
   gap: 0.5rem;
   padding: 0.6rem 0.75rem 0.25rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--p-text-muted-color);
 }
 
@@ -1814,7 +1814,7 @@ watch(compareSymbols, () => {
 .candle-period .seg__btn {
   padding: 0.3rem 0.75rem;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* 指標選單做成文字按鈕外觀 */
@@ -1848,8 +1848,8 @@ watch(compareSymbols, () => {
   border-radius: 999px;
   background: var(--p-primary-color);
   color: var(--p-primary-contrast-color);
-  font-size: 0.6875rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
   line-height: 1.125rem;
   text-align: center;
 }
@@ -1865,7 +1865,7 @@ watch(compareSymbols, () => {
 
 :global(.chart-type-item--active .p-menu-item-content) {
   color: var(--p-primary-color);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .trending-list {

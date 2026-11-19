@@ -1,30 +1,16 @@
 import { ref, computed, watchEffect } from 'vue'
-import { updatePrimaryPalette } from '@primeuix/themes'
-import customPreset from '@/themes/customPreset.js'
 
 /*
   外觀設定（放在 function 外層，整個 app 共用）
   - theme:       'light' | 'dark' | 'system'（system 跟隨系統偏好）
   - darkVariant: 'night' | 'standard' | 'dim'（深色的配色，色票見 src/assets/dark-variants.css）
-  - accentColor: 主題強調色，對應 Tailwind 色盤名稱
+  主題色固定為 logo 黃（customPreset.js），不再提供切換
 */
 const THEME_KEY = 'theme'
 const DARK_VARIANT_KEY = 'darkVariant'
-const ACCENT_KEY = 'accentColor'
 
 // 舊的 'default'（近黑）已移除；localStorage 存著它的使用者會由 readStored 退回預設 'night'
 export const DARK_VARIANTS = ['night', 'standard', 'dim']
-
-// 可選的強調色（key 對應 i18n，palette 對應 PrimeVue/Tailwind 色盤，swatch 為預覽色）
-// palette 為 null 代表「跟隨 customPreset 的 primary 定義」，不做執行期覆寫
-export const ACCENT_OPTIONS = [
-  { key: 'blue', palette: null, swatch: '#3a72d8' },
-  { key: 'indigo', palette: 'indigo', swatch: '#6366f1' },
-  { key: 'emerald', palette: 'emerald', swatch: '#10b981' },
-  { key: 'rose', palette: 'rose', swatch: '#f43f5e' },
-  { key: 'stone', palette: 'stone', swatch: '#78716c' },
-  { key: 'slate', palette: 'slate', swatch: '#64748b' },
-]
 
 const media = window.matchMedia('(prefers-color-scheme: dark)')
 const systemDark = ref(media.matches)
@@ -37,7 +23,7 @@ const readStored = (key, allowed, fallback) => {
 
 const theme = ref(readStored(THEME_KEY, ['light', 'dark', 'system'], 'system'))
 const darkVariant = ref(readStored(DARK_VARIANT_KEY, DARK_VARIANTS, 'night'))
-const accentColor = ref(readStored(ACCENT_KEY, ACCENT_OPTIONS.map((o) => o.key), 'blue'))
+localStorage.removeItem('accentColor') // 主題色設定已移除，清掉舊值
 
 const isDark = computed(() => theme.value === 'dark' || (theme.value === 'system' && systemDark.value))
 
@@ -45,30 +31,6 @@ watchEffect(() => {
   document.documentElement.classList.toggle('dark', isDark.value)
   document.documentElement.dataset.darkVariant = darkVariant.value
 })
-
-const buildRamp = (palette) =>
-  [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].reduce((ramp, shade) => {
-    ramp[shade] = `{${palette}.${shade}}`
-    return ramp
-  }, {})
-
-// 記錄是否曾覆寫過 primary，切回預設時才需要還原，避免初次載入多注入一份 CSS 造成閃色
-let accentOverridden = false
-
-const applyAccent = () => {
-  const option = ACCENT_OPTIONS.find((o) => o.key === accentColor.value) || ACCENT_OPTIONS[0]
-
-  if (!option.palette) {
-    if (accentOverridden) {
-      updatePrimaryPalette(customPreset.semantic.primary)
-      accentOverridden = false
-    }
-    return
-  }
-
-  updatePrimaryPalette(buildRamp(option.palette))
-  accentOverridden = true
-}
 
 /*
   圖表配色。Highcharts 吃的是字串不是 CSS 變數，所以色票得留在 JS 這側，
@@ -119,15 +81,7 @@ export const chartPalette = computed(() =>
   isDark.value ? CHART_PALETTES[darkVariant.value] : CHART_PALETTES.light
 )
 
-// updatePrimaryPalette 要等 PrimeVue 安裝後才能呼叫，所以延到第一次 useTheme()（元件 setup 期間）才套用
-let accentInitialized = false
-
 export function useTheme() {
-  if (!accentInitialized) {
-    accentInitialized = true
-    applyAccent()
-  }
-
   const setTheme = (value) => {
     theme.value = value
     localStorage.setItem(THEME_KEY, value)
@@ -139,20 +93,12 @@ export function useTheme() {
     localStorage.setItem(DARK_VARIANT_KEY, value)
   }
 
-  const setAccentColor = (key) => {
-    accentColor.value = key
-    localStorage.setItem(ACCENT_KEY, key)
-    applyAccent()
-  }
-
   return {
     theme,
     isDark,
     darkVariant,
-    accentColor,
     chartPalette,
     setTheme,
     setDarkVariant,
-    setAccentColor,
   }
 }

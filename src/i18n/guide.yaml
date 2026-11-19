@@ -410,8 +410,6 @@ pages:
             zh: 顯示模式：淺色、深色或跟隨系統。
           - en: "Dark style: default, soft or standard dark colors."
             zh: 深色風格：預設、柔和或標準三種深色配色。
-          - en: "Theme color: the accent color used for buttons and highlights."
-            zh: 主題色：按鈕與重點標示使用的強調色。
           - en: "Navigation layout: a collapsible sidebar or a top bar with a wider content area."
             zh: 導覽版面：可收合的側邊欄，或內容區更寬的上方列。
           - en: "Language and display currency: Traditional Chinese or English; USD or TWD."

@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen bg-emphasis px-4">
     <div class="text-center max-w-md">
-      <p class="text-8xl font-extrabold text-primary mb-4">404</p>
-      <h1 class="text-2xl font-bold text-color mb-2">
+      <p class="text-8xl font-light text-primary mb-4">404</p>
+      <h1 class="text-2xl font-normal text-color mb-2">
         {{ $t('notFound.title') }}
       </h1>
       <p class="text-muted-color mb-8">

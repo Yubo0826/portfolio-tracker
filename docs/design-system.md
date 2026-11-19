@@ -31,14 +31,15 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 - **darkVariant**：`night`（預設，Material 3 帶藍紫調的近黑，畫布 `#131318`、卡片 `#1f1f25`）、
   `standard`（GitHub Dark）、`dim`（GCP 炭灰）。只用
   `.dark[data-dark-variant='…']` 覆寫 surface ramp，不重新產生 PrimeVue theme，切換不閃色。
-- **accentColor**：預設藍 `#3a72d8`（與 logo 主藍一致，`customPreset.js` 的 primary），
-  其餘選項在執行期用 `updatePrimaryPalette` 換成 Tailwind 色盤。
+- **主題色固定為 logo 黃**（`customPreset.js` 的 primary，500 = `#ffb800`），不提供切換。
+  深色模式 `primary.color` 直接用 500，填色上的字用深色 `#1b1b21`（白字只有 1.7:1）；
+  淺色模式黃色在白底讀不清，`primary.color` 改用 700 `#a37600`（白底 4.1:1）。
 
 ## 主要按鈕不用主色
 
 實心 primary 按鈕被覆寫成 **contrast 配色**：淺色黑底白字、深色白底黑字
 （`customPreset.js` 的 `components.button`）。主色留給連結、焦點、選取狀態等次要互動，
-這樣不論使用者選哪個強調色，主要動作按鈕都長一樣，Header 的「新增交易」也和頁內按鈕一致。
+黃色不適合大面積填色，主要動作按鈕維持黑白，Header 的「新增交易」也和頁內按鈕一致。
 
 ## 漲跌色
 
@@ -52,21 +53,51 @@ App 的外觀建立在 **PrimeVue 4（Aura preset）+ Tailwind v4** 上，沒有
 
 ## 字體與數字
 
-字體是 Roboto Flex（`index.html` 從 Google Fonts 載入），中文接系統字型（`base.css` 的 `--font-family-base`），body 基準 12px。
+字體是 Manrope＋Noto Sans TC（`index.html` 從 Google Fonts 載入，`base.css` 的 `--font-family-base`），body 基準 12px。
+Noto Sans TC 一定要從 Google Fonts 載入，否則 Windows 會落到微軟正黑體（只有兩級粗細、筆畫偏硬）；DevTools 的 Rendered Fonts 顯示 `Noto Sans TC Thin` 是可變字型的檔名，後綴（Regular / Medium）才是實際字重。
+
+**層次靠字級與文字色，不靠粗體。**
+
+| 用途 | 字重 | 字級 |
+|---|---|---|
+| 大數字（總價值、現價、圓環中央、404） | 300 `font-light` | 28–36px，`tracking-tight` |
+| 頁面標題、landing／文件大標 | 400 `font-normal` | 24–36px（文件小節標題 24px） |
+| 卡片標題 | 400 | 18px |
+| 內文、標籤、說明 | 400 | 12–14px，標籤用 muted 色 |
+| 重點數值、代號、區塊標題、表頭、目前所在項目 | 500 `font-medium` | 13–16px |
+
+- **不使用 600 以上**（`font-semibold` / `font-bold`，Highcharts 的 `fontWeight` 也一樣）。唯一例外是品牌字 StockBar（`.topbar-brand__text`、`.sidebar-brand`，800）。
+- **字級只用這 8 級**，不要再出現 10、11px 或 0.78rem、0.85rem 這類中間值：
+
+  | px | rem | Tailwind |
+  |---|---|---|
+  | 12 | 0.75rem | `text-xs` |
+  | 13 | 0.8125rem | `text-[0.8125rem]` |
+  | 14 | 0.875rem | `text-sm` |
+  | 16 | 1rem | `text-base` |
+  | 18 | 1.125rem | `text-lg`（不用 `text-xl`） |
+  | 24 | 1.5rem | `text-2xl` |
+  | 28 | 1.75rem | `text-[1.75rem]` |
+  | 36 | 2.25rem | `text-4xl` |
+
+  例外：icon（`.pi` 的 font-size 是圖示大小，不是文字）、品牌字、landing 與 404 的展示大字（`text-3xl`～`text-8xl`）、K 線買賣標記圓點內的單字（10px，見 `useCandleChart.js`）。
+- 金額單位（TWD、USD）用 400、muted 色、12px（`text-xs`）；跟在大數字旁時改用 `text-[0.4em]` 並與數字 baseline 對齊。
+- 會被縱向比較的數字加 `tabular-nums`（表格內容已全域套用）。
+- 表格與列表裡的代號：代號在上（500）、名稱在下（12px、subtitle 色），整塊是連結，hover 只在代號加底線，不變色。
 
 ## 淺色中性色、導覽與搜尋列（Material 3，取自 vocabulary-app）
 
 - 淺色的 surface 色階是帶藍紫調的 M3 中性色（`#fbf8ff` → `#131318`），不用 zinc 冷灰；淺色採 GCP 風格分層：app shell 淡藍灰 `#f0f4f9` → 主內容區與側欄是白色面板 → 面板內的卡片（`.app-panel`、`.set-group`、`.card-table`）白底＋ `#dadce0` 細框、無陰影；設定頁群組淺色下是整張白卡、標題列用細線分隔。深色維持「主內容與底色同色、卡片亮一階」與灰框包內卡。
 - 桌面側欄是浮動圓角卡片：四周內縮 12px、16px 圓角、填 content 底色、不加外框；收合鈕用側欄面板圖示（內嵌 SVG）。
 - 側欄導覽項目是 12px 圓角矩形：hover 疊 8% 前景色，目前所在頁填 12% 中性灰、字重 500，不帶主色；一般項目字重 400。
-- 頂欄導覽項目是膠囊形：hover 疊 8% 前景色，目前所在頁填 `--sb-container`（主色推出的淡色容器，`main.css`）並加粗。
+- 頂欄導覽項目是膠囊形：hover 疊 8% 前景色，目前所在頁填 `--sb-container`（主色推出的淡色容器，`main.css`）、字重 500。
 - 頂欄搜尋列：與投資組合選單同高（2.25rem）的全圓膠囊、淺色填白（content 底色，與卡片相同）、深色填 `surface-800`、無框。
 單一標的的價格、成本、市值、損益、股息以**原幣**顯示（台股 TWD、美股 USD），
 金額拆分用 `useCurrency` 的 `splitDisplayAmount`，代號推斷幣別用 `utils/symbol.js` 的 `currencyOfSymbol`，不要各頁另寫。
 
 ## 版面慣例
 
-- **卡片**：Dashboard 與資產頁用 `.app-panel`。平底、無陰影、無漸層：深色用 8% 文字色的半透明細框，淺色用 `#dadce0` 細框（見上方淺色分層）。卡片內不畫分隔線，靠行距區分；小標用一般字重、不轉大寫，數字用 500 字重。走勢圖用 1.5px 細線加淡漸層（18% 主色往下淡到透明，仿 Google 財經）、實線淡格線、無軸線刻度。
+- **卡片**：Dashboard 與資產頁用 `.app-panel`。平底、無陰影、無漸層：深色用 8% 文字色的半透明細框，淺色用 `#dadce0` 細框（見上方淺色分層）。卡片內不畫分隔線，靠行距區分；小標用一般字重、不轉大寫，數字用 400（大數字 300）。走勢圖用 1.5px 細線加淡漸層（18% 主色往下淡到透明，仿 Google 財經）、實線淡格線、無軸線刻度。
 - **Icon**：寫法照舊用 PrimeIcons 的 `pi pi-xxx` class，但圖形換成 Lucide（線寬 1.75）：`scripts/build-lucide-icons.mjs` 產生 `src/assets/lucide-icons.css`，以 CSS mask 畫在 `.pi::before`。新增 icon 要在 MAP 加對應再跑 `npm run icons`，原始碼出現未對應的 class 時腳本會報錯。Lucide 沒有的品牌 icon（`pi-google`）維持 PrimeIcons 字型。
 - **表格**：資產明細、再平衡用 `.card-table`——表頭與內容同底，分隔線用頁面底色做出凹槽感。
   已排序的表頭不變色，只靠排序圖示（自訂的 `pi-chevron-down`）表示狀態。

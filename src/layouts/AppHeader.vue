@@ -53,7 +53,7 @@
         >
           <i class="pi pi-search text-sm"></i>
           <span class="truncate">{{ t('searchPlaceholder') }}</span>
-          <span class="ml-auto inline-flex min-w-7 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-1 py-0.5 text-[11px] font-semibold text-[var(--p-text-muted-color)]">/</span>
+          <span class="ml-auto inline-flex min-w-7 items-center justify-center rounded-md border border-[var(--p-content-border-color)] px-1 py-0.5 text-xs font-medium text-[var(--p-text-muted-color)]">/</span>
         </button>
 
         <button
@@ -247,8 +247,8 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
   overflow: hidden;
   background: var(--p-primary-color);
   color: var(--p-primary-contrast-color);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color 0.16s ease;

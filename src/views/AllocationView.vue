@@ -74,13 +74,14 @@
           <div class="set-label">{{ $t('quickPick') }}</div>
           <div v-if="candidates.length" class="flex flex-wrap gap-2">
             <button
-              v-for="c in candidates"
+              v-for="(c, i) in candidates"
               :key="c.symbol"
               type="button"
               class="alloc-chip"
               @click="addFromHolding(c)"
             >
-              <span class="alloc-chip-mono" :style="monoColors(c.symbol)">{{ c.symbol.slice(0, 2) }}</span>
+              <!-- 圓點色＝加入後會拿到的色條色（接在現有標的後面），點下去顏色不會變 -->
+              <span class="alloc-chip-dot" :style="{ background: colorFor(assets.length + i) }" aria-hidden="true" />
               <span class="alloc-chip-symbol">{{ c.symbol }}</span>
               <i class="pi pi-plus" style="font-size: 0.62rem; color: var(--p-text-muted-color)" />
             </button>
@@ -305,12 +306,6 @@ const donutLegend = computed(() =>
   donutSource.value.map((s) => ({ color: s.color, name: s.name, pct: `${s.value}%` }))
 );
 
-// 依代號產生穩定的字母標記配色
-const monoColors = (sym) => {
-  let h = 0;
-  for (let i = 0; i < sym.length; i++) h = (h * 31 + sym.charCodeAt(i)) % 360;
-  return { background: `hsl(${h} 42% 92%)`, color: `hsl(${h} 55% 34%)` };
-};
 </script>
 
 <style scoped>
@@ -327,7 +322,7 @@ const monoColors = (sym) => {
 .alloc-badge {
   font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 500;
 }
 .alloc-badge--ok { color: var(--p-green-600, #16a34a); }
 .alloc-badge--err { color: var(--p-red-600, #dc2626); }
@@ -359,13 +354,13 @@ const monoColors = (sym) => {
   border-radius: 3px;
 }
 .alloc-symbol {
-  font-weight: 700;
+  font-weight: 500;
   color: var(--p-text-color);
   font-size: 0.875rem;
 }
 .alloc-custom-tag {
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--p-primary-color);
@@ -393,7 +388,7 @@ const monoColors = (sym) => {
   align-items: center;
   gap: 8px;
   height: 36px;
-  padding: 0 12px 0 6px;
+  padding: 0 12px;
   border: 1px solid var(--p-content-border-color);
   border-radius: 999px;
   background: var(--p-content-background);
@@ -404,19 +399,15 @@ const monoColors = (sym) => {
   border-color: var(--p-primary-color);
   background: color-mix(in srgb, var(--p-primary-color) 8%, transparent);
 }
-.alloc-chip-mono {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
+.alloc-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 .alloc-chip-symbol {
   font-size: 0.8125rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 
@@ -440,8 +431,8 @@ const monoColors = (sym) => {
   color: var(--p-text-muted-color);
 }
 .alloc-donut-total {
-  font-size: 1.625rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 300;
   color: var(--p-text-color);
   font-variant-numeric: tabular-nums;
 }
@@ -467,7 +458,7 @@ const monoColors = (sym) => {
   flex: 0 0 auto;
 }
 .alloc-legend-name {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 .alloc-legend-pct {

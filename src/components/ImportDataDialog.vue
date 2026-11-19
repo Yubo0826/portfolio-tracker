@@ -2,10 +2,10 @@
   <Dialog v-model:visible="localVisible" modal :style="{ width: 'min(52rem, 92vw)' }">
     <template #header>
       <div class="inline-flex items-center gap-2">
-        <span class="font-bold">{{ isPortfolioMode ? $t('importPortfolioDialogTitle') : $t('importTransactionDataTo') }}</span>
+        <span class="font-medium">{{ isPortfolioMode ? $t('importPortfolioDialogTitle') : $t('importTransactionDataTo') }}</span>
 
         <!-- 選擇投資組合 -->
-        <span v-if="!isPortfolioMode" class="font-bold">
+        <span v-if="!isPortfolioMode" class="font-medium">
           <Select
             v-model="selectedPortfolioId"
             size="small"
@@ -72,7 +72,7 @@
       @keydown.space.self.prevent="triggerFileInput"
     >
       <i class="pi pi-cloud-upload text-5xl mb-4" :style="{ color: 'var(--p-primary-500)' }"></i>
-      <p class="text-xl font-semibold" :style="{ color: 'var(--p-primary-600)' }">{{ $t('uploadTransactions') }}</p>
+      <p class="text-lg font-medium" :style="{ color: 'var(--p-primary-600)' }">{{ $t('uploadTransactions') }}</p>
       <p class="text-muted-color">{{ $t('dropOrClickToUpload') }}</p>
       <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" accept=".csv,.xlsx,.xls" />
     </div>
@@ -81,7 +81,7 @@
     <!-- 預覽區 -->
     <div v-if="previewData.length" class="mt-6">
       <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 class="font-semibold">{{ $t('previewData') }}：</h3>
+        <h3 class="font-medium">{{ $t('previewData') }}：</h3>
 
         <Paginator
           :rows="rowsPerPage"

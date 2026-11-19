@@ -1311,32 +1311,6 @@ preferences:
     nightHint:
       en: Neutral near-black, layered by lightness (default)
       zh: 不帶色調的中性近黑，層次靠明度區分（預設）
-  theme:
-    label:
-      en: Theme
-      zh: 主題色
-    desc:
-      en: Select the accent color for the application interface.
-      zh: 選擇應用程式介面的強調色。
-  accent:
-    stone:
-      en: Stone
-      zh: 暖灰色
-    indigo:
-      en: Indigo
-      zh: 靛藍
-    blue:
-      en: Blue
-      zh: 藍色
-    emerald:
-      en: Green
-      zh: 綠色
-    rose:
-      en: Red
-      zh: 紅色
-    slate:
-      en: Gray
-      zh: 灰色
   language:
     label:
       en: Language
@@ -1439,6 +1413,9 @@ vwapCumulative:
   en: VWAP (from range start)
   zh: VWAP（區間起點累計）
 
+noTargetAllocation:
+  en: No target allocation set for this portfolio
+  zh: 此投資組合尚未設定目標配置
 allocationNoSettings:
   en: No allocation settings found. Please set your target allocation first.
   zh: 找不到資產配置設定。請先設定您的目標配置。

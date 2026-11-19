@@ -91,6 +91,7 @@ export const tradeFlagSeries = (points, { onSeries, candle, names }) => ['buy', 
     color,
     fillColor: color,
     lineColor: color,
+    // ponytail: 買賣標記圓點內的單字，圓點尺寸固定，維持 10px 粗體才讀得到；字級規範的例外
     style: { color: '#fff', fontSize: '10px', fontWeight: '700' },
     states: { hover: { fillColor: color, lineColor: color } },
     // 標題用 text 裡的實際交易日，不顯示吸附到的 K 線日期
@@ -107,7 +108,7 @@ export const avgCostPlotLine = (value, label) => ({
   width: 1,
   dashStyle: 'Dash',
   zIndex: 4,
-  label: { text: label, align: 'right', x: -4, y: -5, style: { color: BUY_COLOR, fontSize: '11px', fontWeight: '600' } },
+  label: { text: label, align: 'right', x: -4, y: -5, style: { color: BUY_COLOR, fontSize: '12px', fontWeight: '500' } },
 })
 
 const MIN_BARS = 10 // 最多放大到畫面剩 10 根 K 線
@@ -174,7 +175,7 @@ export function useCandleChart(source) {
     // stockChart 的 y 軸預設在右側且不顯示最上面的刻度，改回與面積圖一致
     const axisBase = { title: { text: null }, gridLineColor: grid, labels: { style: { color: axis } }, opposite: false, showLastLabel: true }
     // 副圖名稱放在該區左上角
-    const paneTitle = (text) => ({ text, align: 'high', rotation: 0, offset: 0, x: 4, y: 12, textAlign: 'left', style: { color: axis, fontSize: '11px', fontWeight: '600' } })
+    const paneTitle = (text) => ({ text, align: 'high', rotation: 0, offset: 0, x: 4, y: 12, textAlign: 'left', style: { color: axis, fontSize: '12px', fontWeight: '500' } })
 
     let cursor = 0
     const pane = (h, extra = {}) => {
@@ -271,7 +272,7 @@ export function useCandleChart(source) {
       title: { text: null },
       credits: { enabled: false },
       // 只列出疊加在主圖的指標，讓使用者對得上線的顏色
-      legend: { enabled: hasOverlay, align: 'left', verticalAlign: 'top', floating: true, x: 0, y: -22, margin: 0, padding: 2, symbolWidth: 12, itemDistance: 12, itemStyle: { color: axis, fontSize: '11px', fontWeight: '500' }, itemHoverStyle: { color: tooltipFg } },
+      legend: { enabled: hasOverlay, align: 'left', verticalAlign: 'top', floating: true, x: 0, y: -22, margin: 0, padding: 2, symbolWidth: 12, itemDistance: 12, itemStyle: { color: axis, fontSize: '12px', fontWeight: '500' }, itemHoverStyle: { color: tooltipFg } },
       xAxis: {
         type: 'datetime',
         min: xMin,

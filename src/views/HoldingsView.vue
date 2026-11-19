@@ -37,12 +37,11 @@
           <Column v-if="!auth.isDemo" selectionMode="multiple" headerStyle="width: 3rem" />
           <Column field="symbol" sortable :header="$t('symbol')">
             <template #body="{ data }">
-              <div class="flex items-center gap-2">
-                <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }">
-                  <Tag :value="data.symbol" severity="info" class="cursor-pointer hover:opacity-80" />
-                </RouterLink>
-                <span class="text-sm text-muted-color">{{ data.name }}</span>
-              </div>
+              <!-- 與儀表板持股表格同款：代號在上、名稱在下，hover 只加底線 -->
+              <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }" class="group block min-w-0">
+                <div class="truncate font-medium underline-offset-4 group-hover:underline">{{ data.symbol }}</div>
+                <div class="mt-1 text-xs text-[var(--p-card-subtitle-color)]">{{ data.name }}</div>
+              </RouterLink>
             </template>
           </Column>
           <!-- <Column field="name" sortable :header="$t('name')" /> -->
@@ -52,7 +51,7 @@
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5 font-semibold text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
+                <span class="ml-1 text-xs pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -61,7 +60,7 @@
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
+                <span class="ml-1 text-xs pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
               </div>
             </template>
           </Column>
@@ -70,7 +69,7 @@
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).fraction }}</span>
-                <span class="ml-1 text-[10px] pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
+                <span class="ml-1 text-xs pb-0.5  text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
               </div>
             </template>
           </Column>

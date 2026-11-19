@@ -115,8 +115,8 @@
   gap: 0.5rem;
   min-height: 2.75rem;
   padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 .set-group__body {
@@ -161,7 +161,7 @@ html:not(.dark) .set-group__body {
   display: block;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 .set-help {
@@ -207,8 +207,8 @@ html:not(.dark) .set-group__body {
   cursor: help;
 }
 .bt-metric__value {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 500;
   color: var(--p-text-color);
   font-variant-numeric: tabular-nums;
 }
@@ -225,7 +225,7 @@ html:not(.dark) .set-group__body {
 }
 .card-table .p-datatable-header-cell {
   padding: 1.25rem 1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--p-text-color);
 }
 .card-table .p-datatable-tbody > tr > td {
@@ -290,7 +290,7 @@ html:not(.dark) .set-group__body {
   background: transparent;
   color: var(--p-text-muted-color);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   text-decoration: none;
   cursor: pointer;
   transition: color 0.15s ease, background-color 0.15s ease;
@@ -301,9 +301,16 @@ html:not(.dark) .set-group__body {
   background: color-mix(in srgb, var(--p-text-color) 6%, transparent);
 }
 
+.range-tabs__btn:disabled {
+  opacity: 0.4;
+  background: transparent;
+  color: var(--p-text-muted-color);
+  cursor: not-allowed;
+}
+
 .range-tabs__btn.is-active {
   color: var(--p-text-color);
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 0.35em;
   text-decoration-thickness: 2px;

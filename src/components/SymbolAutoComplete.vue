@@ -15,7 +15,7 @@
         >
         <template #option="slotProps">
             <div class="flex flex-col">
-                <span class="text-base font-semibold">{{ slotProps.option.symbol }}</span>
+                <span class="text-base font-medium">{{ slotProps.option.symbol }}</span>
                 <span class="text-sm text-muted-color">
                 {{ slotProps.option.name }}
                 <template v-if="slotProps.option.assetType">
