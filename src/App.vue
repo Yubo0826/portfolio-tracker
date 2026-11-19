@@ -39,14 +39,13 @@
 
       <div class="app-shell__scroll app-shell__content flex flex-1 flex-col overflow-y-auto">
         <main class="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
-          <!-- 投資組合切換：側邊欄模式送進 AppHeader 左側（#header-portfolio）；header 導覽模式頂欄放不下，留在頁面標題上方 -->
-          <!-- key：Teleport 只在掛載時解析 target，切換導覽版面後 #header-portfolio 是新節點（或原本不存在），要重新掛載才找得到 -->
-          <Teleport :key="isHeaderNav" defer to="#header-portfolio" :disabled="isHeaderNav">
-          <template v-if="!isHeaderNav || PORTFOLIO_SCOPED_ROUTES.has(route.name)">
+          <!-- 投資組合切換：送進 AppHeader（#header-portfolio）。側邊欄模式在頂欄左側，header 導覽模式在主導覽右邊 -->
+          <!-- key：Teleport 只在掛載時解析 target，切換導覽版面後 #header-portfolio 是新節點，要重新掛載才找得到 -->
+          <Teleport :key="isHeaderNav" defer to="#header-portfolio">
             <button
               type="button"
-              class="page-portfolio"
-              :class="[isHeaderNav ? '-mt-3 mb-6' : 'page-portfolio--header', { 'is-open': portfolioPickerVisible }]"
+              class="page-portfolio page-portfolio--header"
+              :class="{ 'is-open': portfolioPickerVisible }"
               :aria-label="t('openPortfolioMenu')"
               aria-haspopup="dialog"
               @click="portfolioPickerVisible = true"
@@ -55,7 +54,6 @@
               <span class="page-portfolio__name">{{ currentPortfolioName }}</span>
               <i class="pi pi-chevron-down page-portfolio__chevron"></i>
             </button>
-          </template>
           </Teleport>
           <!-- 資產明細頁不顯示標題：分頁（持有資產／交易…）本身就是標題；h1 留給螢幕閱讀器 -->
           <h1 v-if="route.name === 'portfolio'" class="sr-only">{{ currentPageLabel }}</h1>
@@ -236,8 +234,6 @@ const resetEditPortfolio = () => {
   editPortfolio.value = createEmptyPortfolio()
 }
 
-// 只有依當前投資組合取資料的頁面才顯示切換鈕（關注清單、資產頁、設定類頁面與組合無關）
-const PORTFOLIO_SCOPED_ROUTES = new Set(['dashboard', 'portfolio', 'allocation', 'rebalancing', 'backtesting'])
 const currentPortfolioName = computed(() => portfolioStore.currentPortfolio?.name || t('portfolio'))
 const displayUserName = computed(() => auth.user.displayName || auth.user.email || 'StockBar')
 

@@ -17,7 +17,7 @@
         />
       </div>
 
-      <!-- header 導覽模式：沒有側邊欄，品牌與主導覽改放這裡（投資組合切換在 App.vue 頁面標題上方） -->
+      <!-- header 導覽模式：沒有側邊欄，品牌、主導覽與投資組合切換改放這裡 -->
       <template v-if="isHeaderNav">
         <button type="button" class="topbar-brand" :title="t('dashboard')" @click="router.push('/dashboard')">
           <img src="/stockbar-logo.svg" alt="" class="h-6" />
@@ -29,6 +29,9 @@
         <div class="topbar-divider hidden lg:block"></div>
 
         <HeaderNav class="hidden lg:flex" />
+
+        <!-- 投資組合切換由 App.vue teleport 進來，接在主導覽右邊 -->
+        <div id="header-portfolio" class="flex min-w-0 shrink items-center"></div>
 
         <button
           :aria-label="t('searchPlaceholder')"

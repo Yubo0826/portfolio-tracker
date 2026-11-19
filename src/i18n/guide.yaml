@@ -130,6 +130,15 @@ pages:
         text:
           en: Shows how the portfolio's value changed over time. Switch between 5D, 1M, 6M, YTD, 1Y and 5Y at the top right of the chart; hover a range to see its return. Below the chart you also see the period high, low, max drawdown and distance from the high.
           zh: 顯示投資組合市值隨時間的變化。可在圖表右上角切換 5D、1M、6M、YTD、1Y、5Y，滑過各區間可看到該區間的漲跌幅；圖表下方另顯示區間最高、最低、最大回撤與距高點。
+        list:
+          - en: "The dashed \"Start + net invested\" line is what the account would be worth if it had neither gained nor lost: the starting value, plus every buy and minus every sell. It only moves when money goes in or out, so it looks like steps."
+            zh: 虛線「期初＋淨投入」代表「如果沒賺也沒賠，帳戶現在應該值多少」：從區間第一天的市值開始，每次買進往上加、賣出往下扣，只在資金進出時變動，所以是階梯狀。
+          - en: "Value line above the dashed line: you made money in this period, and the gap is the amount. Below it: you lost money, and the gap is the loss."
+            zh: 實線在虛線上方代表這段期間賺錢，兩線距離就是賺的金額；實線在虛線下方代表賠錢，距離就是虧損。
+          - en: "When both lines jump up together, you added money that day. The value went up because of your deposit, not because prices rose."
+            zh: 兩條線同時往上跳，代表那天加碼了，市值變高是因為投入新資金，不是因為漲。
+          - en: "So don't read the value line's rise alone as profit — subtract what you put in. The return next to the total value already excludes deposits, which is why it can be negative while the value line rises."
+            zh: 因此不能只看實線上升就以為賺錢，要扣掉自己投入的錢。總價值旁的漲跌幅已經扣除資金進出，所以實線上升時它仍可能是負的。
       - title:
           en: Allocation and holdings
           zh: 資產配置與持有資產
