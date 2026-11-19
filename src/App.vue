@@ -40,7 +40,8 @@
       <div class="app-shell__scroll app-shell__content flex flex-1 flex-col overflow-y-auto">
         <main class="mx-auto w-full max-w-[1100px] flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8 xl:px-10">
           <!-- 投資組合切換：側邊欄模式送進 AppHeader 左側（#header-portfolio）；header 導覽模式頂欄放不下，留在頁面標題上方 -->
-          <Teleport defer to="#header-portfolio" :disabled="isHeaderNav">
+          <!-- key：Teleport 只在掛載時解析 target，切換導覽版面後 #header-portfolio 是新節點（或原本不存在），要重新掛載才找得到 -->
+          <Teleport :key="isHeaderNav" defer to="#header-portfolio" :disabled="isHeaderNav">
           <template v-if="!isHeaderNav || PORTFOLIO_SCOPED_ROUTES.has(route.name)">
             <button
               type="button"
