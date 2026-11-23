@@ -212,6 +212,12 @@ html:not(.dark) .set-group__body {
   color: var(--p-text-color);
   font-variant-numeric: tabular-nums;
 }
+/* 全站表格字級 14px（原本只在資產明細加 text-sm）；放 base layer，個別表格仍可用 text-* utility 覆寫（如儀表板配置表） */
+@layer base {
+  .p-datatable {
+    font-size: 0.875rem;
+  }
+}
 /* 卡片式表格（資產明細、再平衡共用）：圓角對齊 Card（Aura card 用 border.radius.xl），
    表頭底色見 App.vue 的 .p-datatable，分隔線用頁面底色做出凹槽感 */
 .card-table .p-datatable {
@@ -230,7 +236,6 @@ html:not(.dark) .set-group__body {
 }
 .card-table .p-datatable-tbody > tr > td {
   padding: 1rem;
-  font-size: 1rem;
   font-weight: 500;
 }
 .card-table .p-datatable-paginator-bottom {

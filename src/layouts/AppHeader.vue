@@ -82,7 +82,7 @@
           <!-- severity="contrast" -->
           <SplitButton
             v-else
-            class="trade-actions-split hidden sm:inline-flex"
+            class="trade-actions-split hidden sm:inline-flex whitespace-nowrap shrink-0"
             size="small"
             :label="t('addInvestment')"
             severity="contrast"

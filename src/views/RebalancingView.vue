@@ -22,7 +22,6 @@
               {{ $t('buyOnly') }}
             </label>
           </div>
-          <p class="set-help">{{ $t('rebalanceModeHelp', { band }) }}</p>
         </div>
       </div>
     </section>
@@ -36,15 +35,15 @@
     <section class="set-group">
       <div class="set-group__head">{{ $t('rebalanceTable') }}</div>
       <div class="card-table">
-    <DataTable :value="rows" :loading="isLoading" dataKey="symbol" tableStyle="min-width: 50rem" rowHover>
+    <DataTable :value="rows" :loading="isLoading" dataKey="symbol" tableStyle="min-width: 50rem" tableClass="whitespace-nowrap" rowHover>
       <Column field="symbol" :header="$t('symbol')">
-        <!-- 與資產明細相同：代號 Tag 連到資產頁，名稱放旁邊 -->
+        <!-- 與資產明細同款代號（hover 只加底線），全名省略讓表格不擠 -->
         <template #body="{ data }">
           <div class="flex items-center gap-2">
-            <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }">
-              <Tag :value="data.symbol" severity="info" class="cursor-pointer hover:opacity-80" />
+            <!-- main.css 的 a { text-decoration: none } 會蓋掉 a 上的 hover:underline，底線加在內層 -->
+            <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }" class="group">
+              <span class="font-medium underline-offset-4 group-hover:underline">{{ data.symbol }}</span>
             </RouterLink>
-            <span class="text-sm text-muted-color">{{ data.name }}</span>
             <i v-if="executed.has(data.symbol)" class="pi pi-check text-green-600"></i>
           </div>
         </template>

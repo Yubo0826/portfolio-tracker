@@ -876,9 +876,6 @@ rebalanceModeExact:
 rebalanceModeBand:
   en: "Drift > {band}% only"
   zh: "偏離 > {band}% 才賣"
-rebalanceModeHelp:
-  en: "Exact sells any overweight asset; the threshold option only sells assets drifting more than {band} percentage points (the portfolio's drift threshold). Buy only never sells when depositing."
-  zh: 精確：超標就賣；門檻：偏離超過 {band} 個百分點（組合的偏離閾值）才賣。只買不賣：存入時不賣任何資產。
 buyOnly:
   en: Buy only
   zh: 只買不賣
