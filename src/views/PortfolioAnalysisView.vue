@@ -17,17 +17,22 @@
       <NoData v-else />
     </section>
 
+    <div class="flex min-w-0 flex-col gap-8">
     <section :aria-label="t('holdingsGrowthTitle')">
       <div class="flex min-h-10 flex-wrap items-center justify-between gap-2">
         <h3 class="text-sm font-medium">{{ t('holdingsGrowthTitle') }}</h3>
-        <SelectButton
-          v-model="period"
-          :options="periodOptions"
-          optionLabel="label"
-          optionValue="value"
-          :allowEmpty="false"
-          size="small"
-        />
+        <!-- 樣式同儀表板的時間範圍分頁 -->
+        <div class="range-tabs" role="group" :aria-label="t('timeRange')">
+          <button
+            v-for="o in periodOptions"
+            :key="o.value"
+            type="button"
+            class="range-tabs__btn"
+            :class="{ 'is-active': period === o.value }"
+            :aria-pressed="period === o.value"
+            @click="period = o.value"
+          >{{ o.label }}</button>
+        </div>
       </div>
       <Skeleton v-if="growthLoading" height="360px" class="mt-3" />
       <p v-else-if="growthError" class="mt-3 text-xs text-red-600 dark:text-red-300">{{ t('holdingsGrowthLoadFailed') }}</p>
@@ -37,6 +42,35 @@
       </template>
       <NoData v-else />
     </section>
+
+    <!-- 公司持有排行：ETF 穿透前十大＋個股本身，占組合總市值 % -->
+    <section :aria-label="t('companyExposureTitle')">
+      <h3 class="flex min-h-10 items-center text-sm font-medium">{{ t('companyExposureTitle') }}</h3>
+      <Skeleton v-if="sectorsLoading" height="300px" class="mt-3" />
+      <p v-else-if="sectorsError" class="mt-3 text-xs text-red-600 dark:text-red-300">{{ t('sectorWeightingsLoadFailed') }}</p>
+      <template v-else-if="companyRows.length">
+        <ol class="text-sm">
+          <li
+            v-for="row in companyRows"
+            :key="row.symbol"
+            v-tooltip.top="{ value: row.sourcesText, showDelay: 300 }"
+            class="flex items-center gap-3 border-b border-surface py-1.5"
+          >
+            <RouterLink :to="{ name: 'asset', params: { symbol: row.symbol } }" class="group flex min-w-0 flex-1 items-baseline">
+              <span class="font-medium underline-offset-4 group-hover:underline">{{ row.symbol }}</span>
+              <span class="ml-2 truncate text-xs text-muted-color">{{ row.name }}</span>
+            </RouterLink>
+            <span class="hidden h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--p-text-color)_8%,transparent)] sm:block" aria-hidden="true">
+              <span class="block h-full rounded-full bg-[var(--p-primary-color)]" :style="{ width: `${row.bar}%` }"></span>
+            </span>
+            <span class="w-14 shrink-0 text-right font-medium tabular-nums">{{ row.percent.toFixed(1) }}%</span>
+          </li>
+        </ol>
+        <p class="mt-2 text-xs text-muted-color">{{ t('companyExposureHint', { covered: companyCoverage }) }}</p>
+      </template>
+      <NoData v-else />
+    </section>
+    </div>
   </div>
 </template>
 
@@ -46,7 +80,7 @@ import { useI18n } from 'vue-i18n'
 import Skeleton from 'primevue/skeleton'
 import NoData from '@/components/NoData.vue'
 import api from '@/utils/api'
-import { SECTOR_META, sectorBreakdown } from '@/utils/sectors'
+import { SECTOR_META, sectorBreakdown, companyBreakdown } from '@/utils/sectors'
 import { periodRange } from '@/utils/portfolioMetrics'
 import { useTheme } from '@/composables/useTheme.js'
 import { useHoldingsStore } from '@/stores/holdings'
@@ -64,8 +98,8 @@ watch(() => portfolioStore.currentPortfolio?.id, () => store.fetchHoldings(), { 
 const holdingsByValue = computed(() => [...store.list].sort((a, b) => b.currentValue - a.currentValue))
 const symbolsKey = computed(() => store.list.map(h => h.symbol).sort().join(','))
 
-/* ── 產業分布 ── */
-const sectorWeights = ref({})
+/* ── 產業分布、公司持有（同一支 API：{ AAPL: { sectors, companies } }） ── */
+const lookThrough = ref({})
 const sectorsLoading = ref(false)
 const sectorsError = ref(false)
 let sectorRequestId = 0
@@ -73,11 +107,11 @@ let sectorRequestId = 0
 watch(symbolsKey, async (symbols) => {
   const id = ++sectorRequestId
   sectorsError.value = false
-  if (!symbols) return (sectorWeights.value = {})
+  if (!symbols) return (lookThrough.value = {})
   sectorsLoading.value = true
   try {
     const data = await api.get(`/api/yahoo/sectors?symbols=${encodeURIComponent(symbols)}`)
-    if (id === sectorRequestId) sectorWeights.value = data
+    if (id === sectorRequestId) lookThrough.value = data
   } catch {
     if (id === sectorRequestId) sectorsError.value = true
   } finally {
@@ -86,12 +120,36 @@ watch(symbolsKey, async (symbols) => {
 }, { immediate: true })
 
 const sectorRows = computed(() => {
-  const rows = sectorBreakdown(store.list, sectorWeights.value)
+  const weights = Object.fromEntries(Object.entries(lookThrough.value).map(([s, d]) => [s, d.sectors || []]))
+  const rows = sectorBreakdown(store.list, weights)
   const total = rows.reduce((sum, r) => sum + r.value, 0)
   return rows.map(({ sector, value }) => {
     const meta = SECTOR_META[sector]
     return { sector, name: t(meta.labelKey), percent: total ? (value / total) * 100 : 0, color: isDark.value ? meta.dark : meta.light }
   })
+})
+
+const COMPANY_ROWS = 15
+const companyResult = computed(() => {
+  const companies = Object.fromEntries(Object.entries(lookThrough.value).map(([s, d]) => [s, d.companies || []]))
+  return companyBreakdown(store.list, companies)
+})
+const companyCoverage = computed(() => {
+  const { covered, total } = companyResult.value
+  return total ? ((covered / total) * 100).toFixed(0) : 0
+})
+const companyRows = computed(() => {
+  const { rows, total } = companyResult.value
+  const top = rows.slice(0, COMPANY_ROWS)
+  const pct = v => (total ? (v / total) * 100 : 0)
+  return top.map(r => ({
+    symbol: r.symbol,
+    name: r.name,
+    percent: pct(r.value),
+    bar: (r.value / top[0].value) * 100,
+    // tooltip：這家公司的曝險來自哪幾檔
+    sourcesText: r.sources.map(s => `${s.symbol === r.symbol ? t('directHolding') : s.symbol} ${pct(s.value).toFixed(1)}%`).join('、'),
+  }))
 })
 
 const sectorChartOptions = computed(() => ({

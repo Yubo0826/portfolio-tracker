@@ -271,17 +271,6 @@ html:not(.dark) .set-group__body {
   outline-offset: 1px;
 }
 
-/* 區間選擇（資產頁、儀表板）：窄螢幕擠不下時給最小寬度並改成橫向捲動 */
-.range-select {
-  overflow-x: auto;
-}
-
-.range-select .seg__btn {
-  flex: 1 0 auto;
-  min-width: 3.5rem;
-  padding: 0.5rem 0.25rem;
-}
-
 /* 小字分頁（儀表板時間範圍、資產配置切換、資產明細分頁）：選中的那個加底線、文字色加深 */
 .range-tabs {
   display: flex;

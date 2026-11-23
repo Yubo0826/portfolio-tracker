@@ -720,6 +720,15 @@ holdingsGrowthHint:
 holdingsGrowthLoadFailed:
   en: Failed to load price history.
   zh: 歷史價格載入失敗。
+companyExposureTitle:
+  en: Top Company Exposure
+  zh: 公司持有排行
+companyExposureHint:
+  en: "Estimated from each ETF's top 10 holdings, covering {covered}% of the portfolio. The same company under different tickers (e.g. 2330.TW and TSM) is counted separately."
+  zh: 依各 ETF 前十大持股估算，涵蓋組合 {covered}%。同一公司的不同代號（如 2330.TW 與 TSM）分開計算。
+directHolding:
+  en: Direct
+  zh: 直接持有
 
 # 圓餅圖/配置
 actualAllocation:

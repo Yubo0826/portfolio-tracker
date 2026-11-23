@@ -71,6 +71,8 @@ import 'highcharts/indicators/stochastic'
 import 'highcharts/indicators/slow-stochastic'
 
 Highcharts.setOptions({
+  // Highcharts 預設 Helvetica/Arial，改繼承頁面字體（Manrope + Noto Sans TC）
+  chart: { style: { fontFamily: 'inherit' } },
   lang: {
     locale: 'en-US',
     thousandsSep: ',',

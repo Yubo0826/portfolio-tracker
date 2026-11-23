@@ -277,20 +277,19 @@
                     </div>
                   </div>
 
-                  <div class="seg range-select mt-4" role="group">
+                  <!-- 樣式同儀表板的時間範圍分頁，各區間漲跌放 tooltip -->
+                  <div class="range-tabs mt-4 justify-end" role="group" :aria-label="t('timeRange')">
                     <button
                       v-for="option in rangeOptionsWithGrowth"
                       :key="option.value"
                       type="button"
-                      class="seg__btn flex flex-col items-center text-xs font-medium"
+                      class="range-tabs__btn"
                       :class="{ 'is-active': currentRange === option.value }"
                       :aria-pressed="currentRange === option.value"
+                      v-tooltip.top="{ value: option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%`, showDelay: 300 }"
                       @click="currentRange = option.value"
                     >
-                      <span>{{ option.label }}</span>
-                      <span :class="option.growth === null ? 'text-muted-color' : option.growth >= 0 ? 'text-up' : 'text-down'">
-                        {{ option.growth === null ? '--' : `${formatSignedNumber(option.growth)}%` }}
-                      </span>
+                      {{ option.label }}
                     </button>
                   </div>
 

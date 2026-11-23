@@ -37,3 +37,28 @@ export function sectorBreakdown(holdings, weightsBySymbol) {
     .map(([sector, value]) => ({ sector, value }))
     .sort((a, b) => b.value - a.value)
 }
+
+/**
+ * 依持股市值把各標的的公司持有（ETF 穿透前十大、個股為自己）加總成整個組合的公司曝險，由大到小排序。
+ * holdings: [{ symbol, name, currentValue }]（同一幣別）；companiesBySymbol: { QQQ: [{ symbol, name, weight }] }（/api/yahoo/sectors 的 companies）
+ * 回傳 { rows: [{ symbol, name, value, sources: [{ symbol, value }] }], covered, total }；covered 是能穿透到公司的市值（ETF 只算前十大那部分）。
+ * ponytail: Yahoo 只給 ETF 前十大，排行會低估分散在多檔 ETF 尾端的公司；畫面要標示涵蓋比例
+ */
+export function companyBreakdown(holdings, companiesBySymbol) {
+  const rows = {}
+  let covered = 0
+  let total = 0
+  for (const { symbol, name, currentValue } of holdings) {
+    total += currentValue
+    for (const c of companiesBySymbol[symbol] || []) {
+      const value = currentValue * c.weight
+      if (!(value > 0)) continue
+      covered += value
+      // 個股的 name 由後端留空，用持股自己的名稱
+      const row = rows[c.symbol] ||= { symbol: c.symbol, name: c.name || (c.symbol === symbol ? name : ''), value: 0, sources: [] }
+      row.value += value
+      row.sources.push({ symbol, value })
+    }
+  }
+  return { rows: Object.values(rows).sort((a, b) => b.value - a.value), covered, total }
+}
