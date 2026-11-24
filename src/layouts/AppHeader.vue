@@ -307,11 +307,27 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
   border-bottom: 1px solid var(--p-content-border-color);
 }
 
+/* 頭像樣式寫齊在這裡，側欄（Sidebar.vue）的使用者選單共用同一套 */
 .user-menu .user-menu__head .user-menu__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 3.5rem;
   height: 3.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--p-primary-color);
+  color: var(--p-primary-contrast-color);
   font-size: 1.5rem;
+  font-weight: 500;
   cursor: default;
+  flex-shrink: 0;
+}
+
+.user-menu .user-menu__head .user-menu__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-menu .p-tieredmenu-item-content {

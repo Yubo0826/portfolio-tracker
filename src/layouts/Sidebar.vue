@@ -88,13 +88,28 @@
             <i v-show="!collapsed" class="pi pi-chevron-up user-profile__chevron"></i>
           </button>
 
+          <!-- 樣式同頂欄使用者選單（.user-menu 規則在 AppHeader.vue 的非 scoped 區塊） -->
           <TieredMenu
             ref="userMenu"
             :model="menuItems"
             :popup="true"
+            class="user-menu"
             @show="userMenuVisible = true"
             @hide="userMenuVisible = false"
-          />
+          >
+            <template #start>
+              <div class="user-menu__head">
+                <span class="user-menu__avatar">
+                  <img v-if="userPhotoUrl" :src="userPhotoUrl" alt="" referrerpolicy="no-referrer" />
+                  <span v-else>{{ userInitial }}</span>
+                </span>
+                <div class="min-w-0 max-w-full">
+                  <div class="truncate text-base font-semibold">{{ userDisplayName }}</div>
+                  <div v-if="userEmail && userEmail !== userDisplayName" class="truncate text-xs text-muted-color">{{ userEmail }}</div>
+                </div>
+              </div>
+            </template>
+          </TieredMenu>
         </div>
       </aside>
     </template>
