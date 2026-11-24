@@ -97,7 +97,7 @@
           :label="t('login')"
           icon="pi pi-sign-in"
           size="small"
-          class="hidden sm:inline-flex"
+          class="hidden sm:inline-flex whitespace-nowrap shrink-0"
           @click="$emit('login')"
         />
 

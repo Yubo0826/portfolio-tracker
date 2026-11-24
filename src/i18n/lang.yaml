@@ -1477,42 +1477,169 @@ saveFailed:
   en: Save failed
   zh: 儲存失敗
 landing:
-  heroTitle:
-    en: Know where your portfolio stands, at a glance
-    zh: 一眼掌握你的投資組合
+  nav:
+    product:
+      en: Product
+      zh: 產品畫面
+    features:
+      en: Features
+      zh: 功能
+    guide:
+      en: Guide
+      zh: 使用說明
+  login:
+    en: Log in
+    zh: 登入
+  heroLine1:
+    en: Every account, every currency
+    zh: 每個帳戶、每種幣別
+  heroLine2:
+    en: in one portfolio
+    zh: 合併成一個投資組合
   heroSubtitle:
-    en: Track holdings, set target allocations, rebalance and backtest, all in one place.
-    zh: 追蹤持股、設定目標配置、再平衡與回測，一站完成。
+    en: Taiwan and US stocks across brokers, in one view, with the trades that bring you back to your target allocation.
+    zh: 台股、美股、不同券商的持股集中在一處，並依目標配置算出下一步該買賣什麼。
   signIn:
     en: Sign in with Google
     zh: 使用 Google 登入
   tryDemo:
     en: Try the demo
     zh: 試用展示版
-  holdingsTitle:
-    en: Holdings & dividends
-    zh: 持股與股息
-  holdingsDesc:
-    en: Record trades and see returns and dividends across portfolios.
-    zh: 記錄交易，跨投資組合查看報酬與股息。
-  allocationTitle:
-    en: Allocation & rebalancing
-    zh: 資產配置與再平衡
-  allocationDesc:
-    en: Set target weights and get the trades needed to get back on target.
-    zh: 設定目標權重，算出回到目標所需的買賣。
-  backtestTitle:
-    en: Backtesting
-    zh: 回測
-  backtestDesc:
-    en: See how an allocation would have performed historically.
-    zh: 看看一個配置在過去的表現如何。
-  alertTitle:
-    en: Drift email alerts
-    zh: 偏離 Email 提醒
-  alertDesc:
-    en: Get an email when your portfolio drifts past your threshold.
-    zh: 投資組合偏離超過門檻時寄信通知你。
+  product:
+    title1:
+      en: "One screen, "
+      zh: 一個畫面，
+    title2:
+      en: the whole portfolio
+      zh: 看懂整個投資組合
+    subtitle:
+      en: From total value to the next trade, every step of long-term allocation in one place.
+      zh: 從總資產到下一筆交易，長期配置需要的每一步都在這裡。
+    demoNote:
+      en: Screens show the demo account.
+      zh: 畫面為展示帳號資料。
+    tabs:
+      overview:
+        label:
+          en: Overview
+          zh: 總覽
+        title:
+          en: Total value and returns at a glance
+          zh: 總資產與報酬一眼看完
+        p1:
+          en: Every account converted to one currency, with total value and its trend.
+          zh: 所有帳戶換算成同一幣別，顯示總價值與走勢。
+        p2:
+          en: Unrealized gains, realized gains and dividends counted separately.
+          zh: 未實現、已實現損益與股息分開計算。
+        p3:
+          en: Annualized return as IRR, based on your money in and out.
+          zh: 依資金進出計算 IRR 年化報酬。
+      rebalance:
+        label:
+          en: Rebalancing
+          zh: 再平衡
+        title:
+          en: Shares to buy or sell, from your targets
+          zh: 照目標配置算出買賣股數
+        p1:
+          en: Set a target weight for each holding.
+          zh: 為每檔標的設定目標比例。
+        p2:
+          en: Include a deposit or withdrawal in the same calculation.
+          zh: 存入或提取的金額一起算進去。
+        p3:
+          en: Get an email when drift passes your threshold.
+          zh: 偏離超過門檻時寄 Email 提醒。
+      dividends:
+        label:
+          en: Dividends
+          zh: 配息
+        title:
+          en: Every payout on record
+          zh: 每筆配息都有紀錄
+        p1:
+          en: Dividend records synced from your holdings.
+          zh: 依持股同步配息紀錄。
+        p2:
+          en: Filter by symbol and date.
+          zh: 可依代號與日期篩選。
+        p3:
+          en: Dividends count toward your total return.
+          zh: 股息計入總報酬。
+      backtest:
+        label:
+          en: Backtesting
+          zh: 回測
+        title:
+          en: How an allocation would have done
+          zh: 看一組配置過去的表現
+        p1:
+          en: Choose the period, starting capital and rebalancing frequency.
+          zh: 設定期間、初始資金與再平衡頻率。
+        p2:
+          en: Annualized return, max drawdown, Sharpe ratio and more.
+          zh: 計算年化報酬、最大回撤、Sharpe Ratio 等指標。
+        p3:
+          en: Value over time and returns by year.
+          zh: 以走勢圖與年度報酬呈現。
+  features:
+    title1:
+      en: "And the rest "
+      zh: 還有這些
+    title2:
+      en: you need
+      zh: 實用功能
+    items:
+      currency:
+        title:
+          en: Multi-currency
+          zh: 多幣別合併
+        desc:
+          en: TWD and USD holdings combined in one view, exchange costs included.
+          zh: 台幣、美元持股合併成單一視角，含換匯成本。
+      alert:
+        title:
+          en: Drift alerts
+          zh: 偏離提醒
+        desc:
+          en: An email when your allocation drifts past the threshold.
+          zh: 配置偏離超過門檻時寄 Email 通知。
+      import:
+        title:
+          en: Import trades
+          zh: 匯入交易
+        desc:
+          en: Bring in your history from CSV or Excel at once.
+          zh: 用 CSV 或 Excel 一次匯入歷史紀錄。
+      watchlist:
+        title:
+          en: Watchlist
+          zh: 關注清單
+        desc:
+          en: Track what you want to buy and get an email at your target price.
+          zh: 追蹤想買的標的，到達目標價寄信通知。
+      fx:
+        title:
+          en: Exchange log
+          zh: 換匯紀錄
+        desc:
+          en: Record each currency exchange and see what it really cost.
+          zh: 記錄每次換匯，算出實際換匯成本。
+      analysis:
+        title:
+          en: Portfolio analysis
+          zh: 組合分析
+        desc:
+          en: Sector breakdown, holdings performance and top company exposure.
+          zh: 產業分布、持股走勢比較與公司持有排行。
+  cta:
+    title:
+      en: Put every account in one place
+      zh: 把每個帳戶整理在一起
+    subtitle:
+      en: Sign in with Google to start, or look around the demo first.
+      zh: 用 Google 登入就能開始，也可以先逛逛展示版。
 notifications:
   intro:
     en: Choose where alerts go and when each portfolio should notify you.
