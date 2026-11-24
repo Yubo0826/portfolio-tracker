@@ -110,7 +110,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useToast } from 'primevue/usetoast';
+import * as toast from '@/composables/toast';
 import { useI18n } from 'vue-i18n';
 import Papa from 'papaparse';
 const { t } = useI18n();
@@ -126,7 +126,6 @@ import NoData from '@/components/NoData.vue';
 
 const store = useTransactionsStore();
 const auth = useAuthStore();
-const toast = useToast();
 const { splitDisplayAmount } = useCurrency();
 
 // 交易的價格／手續費以交易幣別儲存（台股為 TWD），直接以原幣顯示
@@ -195,9 +194,9 @@ const onDelete = async () => {
   try {
     await store.deleteTransactions(ids);
     selectedAssets.value = [];
-    toast.add({ severity: 'success', summary: t('success'), detail: t('transactionsDeleteSuccess'), life: 3000 });
+    toast.success(t('transactionsDeleteSuccess'));
   } catch (e) {
-    toast.add({ severity: 'error', summary: t('error'), detail: e?.message || t('deleteFailed'), life: 3000 });
+    toast.error(t('deleteFailed'), e?.message);
   }
 };
 
@@ -208,7 +207,7 @@ const onSaved = () => {
 /** 匯出 CSV 功能 **/
 const exportCsv = () => {
   if (!store.list.length) {
-    toast.add({ severity: 'info', summary: t('info'), detail: t('noDataToExport'), life: 3000 });
+    toast.info(t('noDataToExport'));
     return;
   }
 

@@ -1,9 +1,9 @@
 <!-- 投資組合下拉選單（頂欄投資組合按鈕）：Popover 掛在按鈕下方，標題＋搜尋框＋清單，上下鍵移動；外部用 ref.toggle(event) 開關 -->
 <template>
-  <Popover ref="popover" :pt="{ content: { class: '!p-0' } }" @show="onShow" @hide="emit('hide')">
+  <Popover ref="popover" :pt="{ root: { class: '!rounded-xl' }, content: { class: '!p-0' } }" @show="onShow" @hide="emit('hide')">
     <div class="w-80 max-w-[calc(100vw-2rem)]" @keydown.down.prevent="moveFocus(1)" @keydown.up.prevent="moveFocus(-1)">
-      <div class="px-3 pt-3 pb-2">
-        <div class="mb-2 text-sm font-medium">{{ t('switchPortfolio') }}</div>
+      <div class="px-4 pt-4 pb-2.5">
+        <div class="mb-2.5 text-base font-semibold">{{ t('switchPortfolio') }}</div>
         <IconField>
           <InputIcon class="pi pi-search" />
           <InputText
@@ -18,30 +18,30 @@
         </IconField>
       </div>
 
-      <div ref="listEl" class="max-h-[60vh] overflow-y-auto px-1.5 pb-1.5">
+      <div ref="listEl" class="max-h-[60vh] overflow-y-auto px-2 pb-2">
         <div v-if="!items.length" class="px-3 py-4 text-center text-sm text-muted-color">{{ t('noResults') }}</div>
         <button
           v-for="p in items"
           :key="p.id"
           type="button"
           data-option
-          class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-normal text-[color-mix(in_srgb,var(--p-text-color)_82%,transparent)] cursor-pointer outline-none hover:bg-emphasis hover:text-color focus-visible:bg-emphasis"
+          class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[0.9375rem] font-normal text-[color-mix(in_srgb,var(--p-text-color)_82%,transparent)] cursor-pointer outline-none hover:bg-emphasis hover:text-color focus-visible:bg-emphasis"
           :class="{ 'bg-emphasis': p.id === currentId }"
           :aria-current="p.id === currentId || undefined"
           @click="select(p)"
         >
-          <i class="pi pi-check w-4 shrink-0 text-xs" :class="{ invisible: p.id !== currentId }" aria-hidden="true"></i>
-          <i class="pi pi-briefcase shrink-0 text-xs text-muted-color" aria-hidden="true"></i>
+          <i class="pi pi-check w-4 shrink-0 text-sm" :class="{ invisible: p.id !== currentId }" aria-hidden="true"></i>
+          <i class="pi pi-briefcase shrink-0 text-sm text-muted-color" aria-hidden="true"></i>
           <span class="min-w-0 flex-1 truncate">{{ p.name }}</span>
-          <span v-if="p.holdings" class="shrink-0 text-xs text-muted-color">{{ p.holdings.length }}</span>
+          <span v-if="p.holdings" class="shrink-0 text-sm text-muted-color">{{ p.holdings.length }}</span>
         </button>
       </div>
 
-      <div v-if="!auth.isDemo" class="flex flex-col border-t border-surface p-1.5">
+      <div v-if="!auth.isDemo" class="mx-3 flex flex-col border-t border-surface py-2"><!-- 分隔線左右內縮，同使用者選單 -->
         <button v-for="a in actions" :key="a.label" type="button"
-          class="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-normal text-muted-color cursor-pointer outline-none hover:bg-emphasis hover:text-color focus-visible:bg-emphasis"
+          class="flex items-center gap-2.5 -mx-1 rounded-lg px-3 py-2.5 text-left text-[0.9375rem] font-normal text-muted-color cursor-pointer outline-none hover:bg-emphasis hover:text-color focus-visible:bg-emphasis"
           @click="close(a.run)">
-          <i :class="a.icon" class="w-4 shrink-0 text-xs" aria-hidden="true"></i>{{ a.label }}
+          <i :class="a.icon" class="w-4 shrink-0 text-sm" aria-hidden="true"></i>{{ a.label }}
         </button>
       </div>
     </div>

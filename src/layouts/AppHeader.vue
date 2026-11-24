@@ -140,12 +140,12 @@
         >
           <template #start>
             <div class="user-menu__head">
-              <span class="topbar-avatar inline-flex !border-0">
+              <span class="topbar-avatar user-menu__avatar inline-flex !border-0">
                 <img v-if="userPhotoUrl" :src="userPhotoUrl" alt="" referrerpolicy="no-referrer" />
                 <span v-else>{{ userInitial }}</span>
               </span>
-              <div class="min-w-0">
-                <div class="truncate text-sm font-medium">{{ userDisplayName }}</div>
+              <div class="min-w-0 max-w-full">
+                <div class="truncate text-base font-semibold">{{ userDisplayName }}</div>
                 <div v-if="userEmail && userEmail !== userDisplayName" class="truncate text-xs text-muted-color">{{ userEmail }}</div>
               </div>
             </div>
@@ -289,28 +289,50 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
 </style>
 
 <style>
-/* 使用者選單（GitHub 風格）：popup 經 Portal 掛到 body，scoped 屬性帶不上去，所以放在非 scoped 區塊 */
+/* 使用者選單：頂部置中大頭像＋名稱，第一層項目不放 icon、行高放大；popup 經 Portal 掛到 body，scoped 屬性帶不上去，所以放在非 scoped 區塊 */
 .user-menu {
-  min-width: 15rem;
-  padding: 0.375rem;
+  min-width: 17rem;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
 }
 
 .user-menu__head {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.375rem 0.5rem 0.625rem;
-  margin-bottom: 0.25rem;
+  gap: 0.5rem;
+  padding: 1rem 0.75rem 1rem;
+  margin-bottom: 0.375rem;
+  text-align: center;
   border-bottom: 1px solid var(--p-content-border-color);
 }
 
+.user-menu .user-menu__head .user-menu__avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.5rem;
+  cursor: default;
+}
+
 .user-menu .p-tieredmenu-item-content {
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
 }
 
 .user-menu .p-tieredmenu-item-link {
   padding: 0.375rem 0.5rem;
   gap: 0.625rem;
+}
+
+.user-menu .p-tieredmenu-root-list > .p-tieredmenu-item > .p-tieredmenu-item-content > .p-tieredmenu-item-link {
+  padding: 0.625rem 0.75rem;
+}
+
+.user-menu .p-tieredmenu-root-list > .p-tieredmenu-item > .p-tieredmenu-item-content .p-tieredmenu-item-icon {
+  display: none;
+}
+
+.user-menu .p-tieredmenu-root-list > .p-tieredmenu-item > .p-tieredmenu-item-content .p-tieredmenu-item-label {
+  font-size: 0.9375rem;
 }
 
 .user-menu .p-tieredmenu-item-label {
@@ -328,6 +350,6 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
 }
 
 .user-menu .p-tieredmenu-separator {
-  margin: 0.25rem 0;
+  margin: 0.375rem 0.75rem;
 }
 </style>

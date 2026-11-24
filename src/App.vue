@@ -1,5 +1,5 @@
 <template>
-  <Toast position="bottom-center" group="standard" />
+  <Toast position="bottom-center" group="standard" success-icon="pi pi-check-circle" info-icon="pi pi-info-circle" warn-icon="pi pi-exclamation-circle" error-icon="pi pi-times-circle" />
   <!-- ponytail: PrimeVue 浮層 z-index 會往上疊（選單 1001 → Dialog 2102），固定值給到 9999 壓過；若真疊超過再改用 ZIndex.set -->
   <div v-if="globalLoadingVisible" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
     <ProgressSpinner />

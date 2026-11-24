@@ -343,3 +343,45 @@ tr:hover .row-actions > *,
     opacity: 1;
   }
 }
+
+/* Toast：參考 snackbar，中性面板＋依狀態上色的圓形圖示，一行訊息為主，有詳情才顯示淡色第二行；
+   選擇器多一層 .p-toast 才蓋得過 Aura 各狀態的底色、框色與文字色 */
+.p-toast .p-toast-message {
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 0.625rem;
+  background: var(--p-content-background);
+  color: var(--p-text-color);
+  box-shadow: 0 10px 28px -8px rgb(0 0 0 / 0.22), 0 2px 6px rgb(0 0 0 / 0.08);
+  backdrop-filter: none;
+}
+.p-toast .p-toast-message .p-toast-message-content {
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 0.625rem 0.75rem 1rem;
+}
+.p-toast .p-toast-message .p-toast-message-icon {
+  margin-top: 0.1875rem;
+  font-size: 1rem;
+}
+.p-toast .p-toast-message-success .p-toast-message-icon { color: var(--p-green-500); }
+.p-toast .p-toast-message-error .p-toast-message-icon { color: var(--p-red-500); }
+.p-toast .p-toast-message-warn .p-toast-message-icon { color: var(--p-amber-500); }
+.p-toast .p-toast-message-info .p-toast-message-icon { color: var(--p-sky-500); }
+.p-toast .p-toast-message .p-toast-summary {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+.p-toast .p-toast-message .p-toast-detail {
+  margin-top: 0.25rem;
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.p-toast .p-toast-message .p-toast-close-button {
+  color: var(--p-text-muted-color);
+}
+.p-toast .p-toast-message .p-toast-close-button:hover {
+  background: var(--p-content-hover-background);
+  color: var(--p-text-color);
+}
