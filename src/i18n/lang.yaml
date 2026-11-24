@@ -254,6 +254,9 @@ navSectionMain:
 selectPortfolio:
   en: Select Portfolio
   zh: 選擇投資組合
+switchPortfolio:
+  en: Switch portfolio
+  zh: 切換投資組合
 searchPortfolio:
   en: Search portfolios
   zh: 搜尋投資組合

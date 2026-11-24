@@ -105,11 +105,11 @@
       >
         <Column field="date" :header="$t('date')"></Column>
         <Column field="symbol" :header="$t('symbol')"></Column>
-        <Column field="shares" :header="$t('shares')"></Column>
-        <Column field="price" :header="$t('price')"></Column>
+        <Column headerClass="num-col" bodyClass="num-col" field="shares" :header="$t('shares')"></Column>
+        <Column headerClass="num-col" bodyClass="num-col" field="price" :header="$t('price')"></Column>
         <Column field="currency" :header="$t('currency')"></Column>
-        <Column field="fee" :header="$t('fee')"></Column>
-        <Column field="totalCost" :header="$t('totalCost')"></Column>
+        <Column headerClass="num-col" bodyClass="num-col" field="fee" :header="$t('fee')"></Column>
+        <Column headerClass="num-col" bodyClass="num-col" field="totalCost" :header="$t('totalCost')"></Column>
         <Column field="transactionType" :header="$t('type')"></Column>
       </DataTable>
     </div>

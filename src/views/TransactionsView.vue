@@ -50,8 +50,8 @@
               </RouterLink>
             </template>
           </Column>
-          <Column field="shares" sortable :header="$t('shares')" />
-          <Column field="price" sortable :header="$t('unitPrice')">
+          <Column headerClass="num-col" bodyClass="num-col" field="shares" sortable :header="$t('shares')" />
+          <Column headerClass="num-col" bodyClass="num-col" field="price" sortable :header="$t('unitPrice')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ displayAmount(data, 'price', 'price').main }}</span>
@@ -60,7 +60,7 @@
               </div>
             </template>
           </Column>
-          <Column :field="tradeValue" sortable :header="$t('tradeValue')">
+          <Column headerClass="num-col" bodyClass="num-col" :field="tradeValue" sortable :header="$t('tradeValue')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ displayAmount(data, tradeValue).main }}</span>
@@ -69,7 +69,7 @@
               </div>
             </template>
           </Column>
-          <Column field="fee" sortable :header="$t('fee')">
+          <Column headerClass="num-col" bodyClass="num-col" field="fee" sortable :header="$t('fee')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ displayAmount(data, 'fee').main }}</span>

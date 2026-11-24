@@ -24,8 +24,8 @@
               </RouterLink>
             </template>
           </Column>
-          <Column field="shares" sortable :header="$t('shares')" />
-          <Column field="amount" sortable :header="$t('dividendPerShare')">
+          <Column headerClass="num-col" bodyClass="num-col" field="shares" sortable :header="$t('shares')" />
+          <Column headerClass="num-col" bodyClass="num-col" field="amount" sortable :header="$t('dividendPerShare')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.amount, 'price', currencyOf(data.symbol)).main }}</span>
@@ -34,7 +34,7 @@
               </div>
             </template>
           </Column>
-          <Column field="totalAmount" sortable :header="$t('dividendTotal')">
+          <Column headerClass="num-col" bodyClass="num-col" field="totalAmount" sortable :header="$t('dividendTotal')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.totalAmount, 'amount', currencyOf(data.symbol)).main }}</span>

@@ -48,18 +48,18 @@
           </div>
         </template>
       </Column>
-      <Column field="shares" :header="$t('shares')"></Column>
-      <Column field="currentValue" :header="$t('currentValue')">
+      <Column headerClass="num-col" bodyClass="num-col" field="shares" :header="$t('shares')"></Column>
+      <Column headerClass="num-col" bodyClass="num-col" field="currentValue" :header="$t('currentValue')">
         <template #body="{ data }">{{ formatAmount(data.currentValue) }}</template>
       </Column>
-      <Column field="currentPct" :header="$t('currentPct')">
+      <Column headerClass="num-col" bodyClass="num-col" field="currentPct" :header="$t('currentPct')">
         <template #body="{ data }">{{ data.currentPct.toFixed(2) }}%</template>
       </Column>
-      <Column field="target" :header="$t('targetPct')">
+      <Column headerClass="num-col" bodyClass="num-col" field="target" :header="$t('targetPct')">
         <template #body="{ data }">{{ data.target.toFixed(2) }}%</template>
       </Column>
       <!-- 偏離 = 目前 − 目標（百分點），超過組合的偏離閾值才上色 -->
-      <Column field="drift" :header="$t('drift')">
+      <Column headerClass="num-col" bodyClass="num-col" field="drift" :header="$t('drift')">
         <template #body="{ data }">
           <span :class="{ 'text-orange-500 font-medium': Math.abs(data.drift) > band }">
             {{ data.drift > 0 ? '+' : '' }}{{ data.drift.toFixed(2) }}
@@ -72,7 +72,7 @@
           </span>
         </template>
       </Column>
-      <Column v-if="result" field="actualPctAfter" :header="$t('afterPct')">
+      <Column headerClass="num-col" bodyClass="num-col" v-if="result" field="actualPctAfter" :header="$t('afterPct')">
         <template #body="{ data }">{{ (data.actualPctAfter * 100).toFixed(2) }}%</template>
       </Column>
 

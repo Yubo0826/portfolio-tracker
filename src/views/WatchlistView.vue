@@ -81,23 +81,23 @@
           </RouterLink>
         </template>
       </Column>
-      <Column field="regularMarketPrice" sortable :header="$t('currentPrice')">
+      <Column headerClass="num-col" bodyClass="num-col" field="regularMarketPrice" sortable :header="$t('currentPrice')">
         <template #body="{ data }">
           <span class="font-medium">{{ formatNumber(data.regularMarketPrice) }}</span>
           <span v-if="data.currency" class="ml-1 text-xs font-normal text-muted-color">{{ data.currency }}</span>
         </template>
       </Column>
-      <Column field="regularMarketChange" sortable :header="$t('dailyChange')">
+      <Column headerClass="num-col" bodyClass="num-col" field="regularMarketChange" sortable :header="$t('dailyChange')">
         <template #body="{ data }">
           <span :class="changeClass(data.regularMarketChange)">{{ formatSigned(data.regularMarketChange) }}</span>
         </template>
       </Column>
-      <Column field="regularMarketChangePercent" sortable :header="$t('dailyChangePercent')">
+      <Column headerClass="num-col" bodyClass="num-col" field="regularMarketChangePercent" sortable :header="$t('dailyChangePercent')">
         <template #body="{ data }">
           <span :class="changeClass(data.regularMarketChangePercent)">{{ formatSigned(data.regularMarketChangePercent) }}%</span>
         </template>
       </Column>
-      <Column field="target_price">
+      <Column headerClass="num-col" bodyClass="num-col" field="target_price">
         <template #header>
           <span class="inline-flex items-center gap-1">
             {{ $t('targetPrice') }}
@@ -105,7 +105,7 @@
           </span>
         </template>
         <template #body="{ data }">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center justify-end gap-2">
             <InputNumber
               v-if="editing === data.symbol"
               v-model="draft"

@@ -75,7 +75,7 @@
             size="small"
             :label="t('addPortfolio')"
             severity="contrast"
-            class="hidden sm:inline-flex"
+            class="hidden sm:inline-flex whitespace-nowrap shrink-0"
             @click="$emit('create-portfolio')"
           />
           <!-- icon="pi pi-plus" -->
@@ -130,13 +130,28 @@
           <span v-else>{{ userInitial }}</span>
         </button>
 
+        <!-- 樣式參考 GitHub 使用者選單：頂部頭像＋名稱＋email，項目一般字重、文字略暗 -->
         <TieredMenu
           ref="userMenu"
           :model="menuItems"
           :popup="true"
+          class="user-menu"
           @show="userMenuVisible = true"
           @hide="userMenuVisible = false"
-        />
+        >
+          <template #start>
+            <div class="user-menu__head">
+              <span class="topbar-avatar inline-flex !border-0">
+                <img v-if="userPhotoUrl" :src="userPhotoUrl" alt="" referrerpolicy="no-referrer" />
+                <span v-else>{{ userInitial }}</span>
+              </span>
+              <div class="min-w-0">
+                <div class="truncate text-sm font-medium">{{ userDisplayName }}</div>
+                <div v-if="userEmail && userEmail !== userDisplayName" class="truncate text-xs text-muted-color">{{ userEmail }}</div>
+              </div>
+            </div>
+          </template>
+        </TieredMenu>
       </div>
     </div>
   </header>
@@ -189,6 +204,10 @@ const props = defineProps({
     default: '',
   },
   userPhotoUrl: {
+    type: String,
+    default: '',
+  },
+  userEmail: {
     type: String,
     default: '',
   },
@@ -266,5 +285,50 @@ const userInitial = computed(() => (props.userDisplayName || '?').charAt(0).toUp
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+</style>
+
+<style>
+/* 使用者選單（GitHub 風格）：popup 經 Portal 掛到 body，scoped 屬性帶不上去，所以放在非 scoped 區塊 */
+.user-menu {
+  min-width: 15rem;
+  padding: 0.375rem;
+}
+
+.user-menu__head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.5rem 0.625rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+
+.user-menu .p-tieredmenu-item-content {
+  border-radius: 0.375rem;
+}
+
+.user-menu .p-tieredmenu-item-link {
+  padding: 0.375rem 0.5rem;
+  gap: 0.625rem;
+}
+
+.user-menu .p-tieredmenu-item-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--p-text-color) 82%, transparent);
+}
+
+.user-menu .p-tieredmenu-item-icon {
+  color: var(--p-text-muted-color);
+}
+
+.user-menu .p-tieredmenu-item:not(.p-disabled) > .p-tieredmenu-item-content:hover .p-tieredmenu-item-label {
+  color: var(--p-text-color);
+}
+
+.user-menu .p-tieredmenu-separator {
+  margin: 0.25rem 0;
 }
 </style>

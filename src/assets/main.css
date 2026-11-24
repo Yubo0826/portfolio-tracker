@@ -242,6 +242,15 @@ html:not(.dark) .set-group__body {
   border: 0;
 }
 
+/* 數字欄（Column 加 headerClass="num-col" bodyClass="num-col"）：表頭與內容靠右、等寬數字，位數才對得齊 */
+.p-datatable .num-col {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.p-datatable .num-col .p-datatable-column-header-content {
+  justify-content: flex-end;
+}
+
 /* 分段切換（區間、K 線週期）：無軌道無邊框，選中的那顆用文字色疊一層半透明底，淺色／標準／柔和自動適配 */
 .seg {
   display: flex;

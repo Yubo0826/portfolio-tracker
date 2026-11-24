@@ -5,6 +5,15 @@
       <div class="flex justify-end mb-8 mt-4">
           <Button
             v-if="!auth.isDemo"
+            :label="$t('importPortfolio')"
+            @click="importDialogVisible = true"
+            class="mr-2"
+            icon="pi pi-upload"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            v-if="!auth.isDemo"
             :label="$t('addPortfolio')"
             @click="dialogVisible = true"
             class="mr-2"
@@ -14,7 +23,9 @@
           />
       </div>
 
-      <PortfolioFormDialog 
+      <ImportDataDialog v-model="importDialogVisible" mode="portfolio" />
+
+      <PortfolioFormDialog
           :visible="dialogVisible"
           :editPortfolio="editPortfolio"
           @update:loading="isLoading = $event"
@@ -26,8 +37,8 @@
       <DataTable :value="rows" :loading="isLoading" dataKey="id" tableStyle="min-width: 60rem" rowHover>
           <Column field="name" :header="$t('name')"></Column>
           <Column field="description" :header="$t('description')"></Column>
-          <Column field="holdingsCount" sortable :header="$t('holdingsCount')"></Column>
-          <Column field="marketValueSort" sortable :header="$t('currentValue')">
+          <Column headerClass="num-col" bodyClass="num-col" field="holdingsCount" sortable :header="$t('holdingsCount')"></Column>
+          <Column headerClass="num-col" bodyClass="num-col" field="marketValueSort" sortable :header="$t('currentValue')">
             <template #body="{ data }">
               <span
                 v-if="data.marketValue === null"
@@ -37,7 +48,7 @@
               <span v-else>{{ formatAmountWithCode(data.marketValue) }}</span>
             </template>
           </Column>
-          <Column field="drift_threshold" :header="$t('driftThreshold') + ' (%)'">
+          <Column headerClass="num-col" bodyClass="num-col" field="drift_threshold" :header="$t('driftThreshold') + ' (%)'">
             <template #body="slotProps">
               {{ (slotProps.data.drift_threshold) }}
             </template>
@@ -81,6 +92,7 @@ import { usePortfolioStore } from '@/stores/portfolio'
 import { useAuthStore } from '@/stores/auth'
 
 import PortfolioFormDialog from '@/components/PortfolioFormDialog.vue'
+import ImportDataDialog from '@/components/ImportDataDialog.vue'
 
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
@@ -120,6 +132,7 @@ const rows = computed(() =>
 )
 const isLoading = ref(false)
 const dialogVisible = ref(false)
+const importDialogVisible = ref(false)
 
 const editPortfolio = ref({
     id: null,

@@ -43,19 +43,19 @@
             <Tag :value="$t(data.side === 'buy' ? 'fxBuy' : 'fxSell', { currency: data.currency })" :severity="data.side === 'buy' ? 'info' : 'secondary'" />
           </template>
         </Column>
-        <Column field="foreign_amount" sortable :header="$t('fxForeignAmount')">
+        <Column headerClass="num-col" bodyClass="num-col" field="foreign_amount" sortable :header="$t('fxForeignAmount')">
           <template #body="{ data }">
             <span class="font-medium">{{ fmt(data.foreign_amount) }}</span>
             <span class="ml-1 text-xs font-normal text-muted-color">{{ data.currency }}</span>
           </template>
         </Column>
-        <Column field="twd_amount" sortable :header="$t('fxTwdAmount')">
+        <Column headerClass="num-col" bodyClass="num-col" field="twd_amount" sortable :header="$t('fxTwdAmount')">
           <template #body="{ data }">
             <span class="font-medium">{{ fmt(data.twd_amount, 0) }}</span>
             <span class="ml-1 text-xs font-normal text-muted-color">TWD</span>
           </template>
         </Column>
-        <Column :header="$t('fxRate')">
+        <Column headerClass="num-col" bodyClass="num-col" :header="$t('fxRate')">
           <template #body="{ data }">
             <span class="inline-flex items-center gap-1.5">
               <span class="font-medium">{{ fmt(exchangeCost(data).rate, 4) }}</span>
@@ -64,7 +64,7 @@
             </span>
           </template>
         </Column>
-        <Column>
+        <Column headerClass="num-col" bodyClass="num-col">
           <template #header>
             <span class="inline-flex items-center gap-1">
               {{ $t('fxCost') }}

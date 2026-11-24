@@ -29,6 +29,7 @@
         :menuItems="menuItems"
         :userDisplayName="displayUserName"
         :userPhotoUrl="auth.user?.photoURL || ''"
+        :userEmail="auth.user?.email || ''"
         @open-sidebar="sidebarVisible = true"
         @open-search="openSearchBox"
         @create-portfolio="dialogVisible = true"
@@ -47,8 +48,9 @@
               class="page-portfolio page-portfolio--header"
               :class="{ 'is-open': portfolioPickerVisible }"
               :aria-label="t('openPortfolioMenu')"
-              aria-haspopup="dialog"
-              @click="portfolioPickerVisible = true"
+              aria-haspopup="true"
+              :aria-expanded="portfolioPickerVisible"
+              @click="portfolioPicker.toggle($event)"
             >
               <i class="pi pi-briefcase page-portfolio__icon"></i>
               <span class="page-portfolio__name">{{ currentPortfolioName }}</span>
@@ -83,7 +85,7 @@
     position="top"
     :showHeader="false"
     :draggable="false"
-    class="w-[min(44rem,calc(100vw-2rem))] !rounded-3xl !border-0 shadow-2xl dark:!bg-surface-800"
+    class="w-[min(44rem,calc(100vw-2rem))] !rounded-3xl shadow-2xl dark:!bg-surface-800"
     :pt="{ content: { class: '!p-0' }, transition: { name: 'search-fade' } }"
   >
     <SearchBox @close="searchBoxVisible = false" />
@@ -103,9 +105,11 @@
 
   <ImportDataDialog v-model="importDialogVisible" :mode="importDialogMode" />
 
-  <PortfolioPickerDialog
-    v-model:visible="portfolioPickerVisible"
+  <PortfolioPicker
+    ref="portfolioPicker"
     :recentIds="recentPortfolioIds"
+    @show="portfolioPickerVisible = true"
+    @hide="portfolioPickerVisible = false"
     @create="openCreatePortfolioDialog"
     @import="openImportPortfolioDialog"
   />
@@ -147,7 +151,7 @@ import Sidebar from './layouts/Sidebar.vue'
 import Footer from './layouts/Footer.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 import ImportDataDialog from './components/ImportDataDialog.vue'
-import PortfolioPickerDialog from './components/PortfolioPickerDialog.vue'
+import PortfolioPicker from './components/PortfolioPicker.vue'
 import PreferencesPanel from './components/PreferencesPanel.vue'
 import { useI18n } from 'vue-i18n'
 import { useHoldingsStore } from '@/stores/holdings'
@@ -281,6 +285,7 @@ const openImportPortfolioDialog = () => {
   importDialogVisible.value = true
 }
 
+const portfolioPicker = ref(null)
 const portfolioPickerVisible = ref(false)
 const preferencesVisible = ref(false)
 
@@ -382,7 +387,7 @@ const menuItems = computed(() => {
   if (auth.user.uid !== 'demo-user') {
     list.unshift({ label: t('userSettings'), icon: 'pi pi-cog', command: () => router.push('/user-settings') })
     list.push({ separator: true })
-    list.push({ label: t('logout'), icon: 'pi pi-sign-out', class: 'menu-item-danger', command: async () => {
+    list.push({ label: t('logout'), icon: 'pi pi-sign-out', command: async () => {
       await auth.logout()
       if (route.meta.requiresAuth) router.replace({ name: 'home' })
     } })

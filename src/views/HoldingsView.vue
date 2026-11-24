@@ -45,8 +45,8 @@
             </template>
           </Column>
           <!-- <Column field="name" sortable :header="$t('name')" /> -->
-          <Column field="shares" sortable :header="$t('shares')" />
-          <Column field="totalCost" sortable :header="$t('totalCost')">
+          <Column headerClass="num-col" bodyClass="num-col" field="shares" sortable :header="$t('shares')" />
+          <Column headerClass="num-col" bodyClass="num-col" field="totalCost" sortable :header="$t('totalCost')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
@@ -55,7 +55,7 @@
               </div>
             </template>
           </Column>
-          <Column field="currentPrice" sortable :header="$t('currentPrice')">
+          <Column headerClass="num-col" bodyClass="num-col" field="currentPrice" sortable :header="$t('currentPrice')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
@@ -64,7 +64,7 @@
               </div>
             </template>
           </Column>
-          <Column field="currentValue" sortable :header="$t('currentValue')">
+          <Column headerClass="num-col" bodyClass="num-col" field="currentValue" sortable :header="$t('currentValue')">
             <template #body="{ data }">
               <div class="inline-flex items-end font-medium">
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
@@ -73,11 +73,11 @@
               </div>
             </template>
           </Column>
-          <Column field="totalProfit" sortable :header="$t('totalProfit')">
+          <Column headerClass="num-col" bodyClass="num-col" field="totalProfit" sortable :header="$t('totalProfit')">
             <template #body="{ data }">
                 <span
                   v-tooltip.top="formatSignedAmountWithCode(data.nativeTotalProfit, data.currency)"
-                  class="mr-4 cursor-help whitespace-nowrap"
+                  class="cursor-help whitespace-nowrap"
                   :class="{
                   'text-up': data.totalProfit >= 0,
                   'text-down': data.totalProfit < 0,
@@ -93,7 +93,7 @@
                 </span>
             </template>
           </Column>
-          <Column field="profitWithDividends" sortable :header="$t('returnWithDividends')">
+          <Column headerClass="num-col" bodyClass="num-col" field="profitWithDividends" sortable :header="$t('returnWithDividends')">
             <template #body="{ data }">
               <span
                 v-tooltip.top="formatSignedAmountWithCode(data.nativeProfitWithDividends, data.currency)"

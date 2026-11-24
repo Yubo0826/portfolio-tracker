@@ -342,13 +342,13 @@
                       </div>
                     </template>
                   </Column>
-                  <Column :header="selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount')">
+                  <Column headerClass="num-col" bodyClass="num-col" :header="selectedPieType === 'actual' ? $t('holdingValue') : $t('targetAmount')">
                     <template #body="{ data: item }">{{ formatAmountWithCode(item.amount) }}</template>
                   </Column>
-                  <Column :header="$t('distribution')">
+                  <Column headerClass="num-col" bodyClass="num-col" :header="$t('distribution')">
                     <template #body="{ data: item }">{{ formatPreciseAllocationPercentage(item.percentage) }}</template>
                   </Column>
-                  <Column v-if="selectedPieType === 'actual'" :header="$t('unrealizedProfit')">
+                  <Column headerClass="num-col" bodyClass="num-col" v-if="selectedPieType === 'actual'" :header="$t('unrealizedProfit')">
                     <template #body="{ data: item }">
                       <span :class="item.profit >= 0 ? 'text-up' : 'text-down'">{{ formatAmountWithCode(item.profit) }}</span>
                     </template>
@@ -385,9 +385,9 @@
             </template>
           </Column>
 
-          <Column field="currentPrice" :header="$t('currentPrice')" sortable>
+          <Column headerClass="num-col" bodyClass="num-col" field="currentPrice" :header="$t('currentPrice')" sortable>
             <template #body="{ data }">
-              <div class="font-medium mr-4 inline-flex items-end">
+              <div class="font-medium inline-flex items-end">
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).fraction }}</span>
                 <span class="ml-1 text-xs pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentPrice, 'price', data.currency).code }}</span>
@@ -395,16 +395,16 @@
             </template>
           </Column>
 
-          <Column field="shares" :header="$t('shares')" sortable>
+          <Column headerClass="num-col" bodyClass="num-col" field="shares" :header="$t('shares')" sortable>
             <template #body="{ data }">
-              <span class="font-medium mr-4">{{ data.shares }}</span>
+              <span class="font-medium">{{ data.shares }}</span>
             </template>
           </Column>
-          <Column field="totalCost" :header="$t('totalCost')" sortable>
+          <Column headerClass="num-col" bodyClass="num-col" field="totalCost" :header="$t('totalCost')" sortable>
             <template #body="{ data }">
               <div
                 v-tooltip.top="formatAvgCostTooltip(data.nativeAvgCost, data.currency)"
-                class="font-medium mr-4 inline-flex items-end cursor-help"
+                class="font-medium inline-flex items-end cursor-help"
               >
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeTotalCost, 'amount', data.currency).fraction }}</span>
@@ -413,9 +413,9 @@
             </template>
           </Column>
 
-          <Column field="currentValue" :header="$t('totalValue')" sortable>
+          <Column headerClass="num-col" bodyClass="num-col" field="currentValue" :header="$t('totalValue')" sortable>
             <template #body="{ data }">
-              <div class="font-medium mr-4 inline-flex items-end">
+              <div class="font-medium inline-flex items-end">
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).main }}</span>
                 <span>{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).fraction }}</span>
                 <span class="ml-1 text-xs pb-0.5 font-normal text-[var(--p-text-muted-color)]">{{ splitDisplayAmount(data.nativeCurrentValue, 'amount', data.currency).code }}</span>
@@ -423,7 +423,7 @@
             </template>
           </Column>
 
-          <Column field="profitPercentage" :header="$t('comparisonReturnRate')" sortable>
+          <Column headerClass="num-col" bodyClass="num-col" field="profitPercentage" :header="$t('comparisonReturnRate')" sortable>
             <template #body="{ data }">
               <span class="font-medium" :class="{ 'text-up': data.profitPercentage >= 0, 'text-down': data.profitPercentage < 0 }">
                 {{ formatSignedNumber(data.profitPercentage) }}%

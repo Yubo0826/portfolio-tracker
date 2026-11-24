@@ -559,11 +559,4 @@ const goDashboard = () => {
 .user-profile.is-open .user-profile__chevron {
   transform: rotate(180deg);
 }
-
-.p-menu-item.menu-item-danger .p-menu-item-label,
-.p-menu-item.menu-item-danger .p-menu-item-icon,
-.p-tieredmenu-item.menu-item-danger .p-tieredmenu-item-label,
-.p-tieredmenu-item.menu-item-danger .p-tieredmenu-item-icon {
-  color: var(--p-red-500);
-}
 </style>
