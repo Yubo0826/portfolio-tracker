@@ -72,11 +72,11 @@
         <template #body="{ data }">
           <RouterLink
             :to="{ name: 'asset', params: { symbol: data.symbol } }"
-            class="flex items-center gap-3 p-2 rounded-md truncate hover:text-[var(--p-primary-color)]"
+            class="group flex items-center gap-3 p-2 rounded-md truncate"
           >
             <div class="truncate">
-              <span class="font-medium">{{ data.symbol }}</span>
-              <div class="text-xs text-muted-color mt-1">{{ data.name }}</div>
+              <span class="font-medium underline-offset-4 group-hover:underline group-hover:text-primary">{{ data.symbol }}</span>
+              <div class="mt-1 max-w-48 truncate text-xs text-muted-color" v-tooltip.top="{ value: data.name, showDelay: 500 }">{{ data.name }}</div>
             </div>
           </RouterLink>
         </template>

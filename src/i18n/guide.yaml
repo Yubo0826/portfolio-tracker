@@ -364,8 +364,8 @@ pages:
           en: Create and edit
           zh: 建立與編輯
         text:
-          en: Select Create portfolio and enter a name and optional description. Turn on Apply after creating to switch to it right away. Use the pencil icon to edit an existing portfolio.
-          zh: 點「建立投資組合」並輸入名稱與描述（選填）；開啟「新增後立即套用」會直接切換到新組合。編輯現有組合請點鉛筆圖示。
+          en: Select Create portfolio and enter a name and optional description. Turn on Switch to this portfolio after creating to switch to it right away. Use the pencil icon to edit an existing portfolio.
+          zh: 點「建立投資組合」並輸入名稱與描述（選填）；開啟「建立後切換到此投資組合」會直接切換到新組合。編輯現有組合請點鉛筆圖示。
         list:
           - en: "Drift threshold: how far (in percentage points) an asset may drift from its target before it counts as off target. Default 5%."
             zh: 偏離閾值：標的與目標比例相差多少百分點視為偏離，預設 5%。

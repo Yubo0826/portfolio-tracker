@@ -1,13 +1,13 @@
 <template>
-  <div class="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-    <section :aria-label="t('portfolioSectorTitle')">
+  <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <section :aria-label="t('portfolioSectorTitle')" class="app-panel min-w-0 rounded-[var(--p-border-radius-xl)] p-5">
       <h3 class="flex min-h-10 items-center text-sm font-medium">{{ t('portfolioSectorTitle') }}</h3>
       <Skeleton v-if="sectorsLoading" height="300px" class="mt-3" />
       <p v-else-if="sectorsError" class="mt-3 text-xs text-red-600 dark:text-red-300">{{ t('sectorWeightingsLoadFailed') }}</p>
       <template v-else-if="sectorRows.length">
         <highcharts :options="sectorChartOptions" style="width: 100%; height: 300px;" />
         <ul class="mt-2 text-sm">
-          <li v-for="row in sectorRows" :key="row.sector" class="flex items-center gap-2 border-b border-surface py-1.5">
+          <li v-for="row in sectorRows" :key="row.sector" class="flex items-center gap-2 border-b border-surface py-1.5 last:border-b-0">
             <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" :style="{ background: row.color }" aria-hidden="true"></span>
             <span>{{ row.name }}</span>
             <span class="ml-auto font-medium tabular-nums">{{ row.percent.toFixed(1) }}%</span>
@@ -17,8 +17,8 @@
       <NoData v-else />
     </section>
 
-    <div class="flex min-w-0 flex-col gap-8">
-    <section :aria-label="t('holdingsGrowthTitle')">
+    <div class="flex min-w-0 flex-col gap-6">
+    <section :aria-label="t('holdingsGrowthTitle')" class="app-panel min-w-0 rounded-[var(--p-border-radius-xl)] p-5">
       <div class="flex min-h-10 flex-wrap items-center justify-between gap-2">
         <h3 class="text-sm font-medium">{{ t('holdingsGrowthTitle') }}</h3>
         <!-- 樣式同儀表板的時間範圍分頁 -->
@@ -44,7 +44,7 @@
     </section>
 
     <!-- 公司持有排行：ETF 穿透前十大＋個股本身，占組合總市值 % -->
-    <section :aria-label="t('companyExposureTitle')">
+    <section :aria-label="t('companyExposureTitle')" class="app-panel min-w-0 rounded-[var(--p-border-radius-xl)] p-5">
       <h3 class="flex min-h-10 items-center text-sm font-medium">{{ t('companyExposureTitle') }}</h3>
       <Skeleton v-if="sectorsLoading" height="300px" class="mt-3" />
       <p v-else-if="sectorsError" class="mt-3 text-xs text-red-600 dark:text-red-300">{{ t('sectorWeightingsLoadFailed') }}</p>
@@ -54,10 +54,10 @@
             v-for="row in companyRows"
             :key="row.symbol"
             v-tooltip.top="{ value: row.sourcesText, showDelay: 300 }"
-            class="flex items-center gap-3 border-b border-surface py-1.5"
+            class="flex items-center gap-3 border-b border-surface py-1.5 last:border-b-0"
           >
             <RouterLink :to="{ name: 'asset', params: { symbol: row.symbol } }" class="group flex min-w-0 flex-1 items-baseline">
-              <span class="font-medium underline-offset-4 group-hover:underline">{{ row.symbol }}</span>
+              <span class="font-medium underline-offset-4 group-hover:underline group-hover:text-primary">{{ row.symbol }}</span>
               <span class="ml-2 truncate text-xs text-muted-color">{{ row.name }}</span>
             </RouterLink>
             <span class="hidden h-1.5 w-24 shrink-0 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--p-text-color)_8%,transparent)] sm:block" aria-hidden="true">

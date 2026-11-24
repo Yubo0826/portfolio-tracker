@@ -39,8 +39,8 @@
             <template #body="{ data }">
               <!-- 與儀表板持股表格同款：代號在上、名稱在下，hover 只加底線 -->
               <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }" class="group block min-w-0">
-                <div class="truncate font-medium underline-offset-4 group-hover:underline">{{ data.symbol }}</div>
-                <div class="mt-1 text-xs text-[var(--p-card-subtitle-color)]">{{ data.name }}</div>
+                <div class="truncate font-medium underline-offset-4 group-hover:underline group-hover:text-primary">{{ data.symbol }}</div>
+                <div class="mt-1 max-w-48 truncate text-xs text-[var(--p-card-subtitle-color)]" v-tooltip.top="{ value: data.name, showDelay: 500 }">{{ data.name }}</div>
               </RouterLink>
             </template>
           </Column>

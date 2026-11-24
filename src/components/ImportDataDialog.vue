@@ -16,12 +16,6 @@
             checkmark
             :highlightOnSelect="false"
             class="m-2 font-normal"
-            :pt="{
-              root: {
-                style: { border: '1px solid transparent', boxShadow: 'none' },
-                class: 'custom-select-root'
-              }
-            }"
           >
             <template #dropdownicon>
               <i class="pi pi-pencil" style="font-size: .75rem"></i>

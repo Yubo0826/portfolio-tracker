@@ -338,7 +338,7 @@
                       <div class="flex min-w-0 items-center gap-2.5">
                         <span class="size-2 shrink-0 rounded-full" :style="{ backgroundColor: item.color }"></span>
                         <span v-if="item.key === 'others'" class="truncate">{{ item.name }}</span>
-                        <RouterLink v-else :to="{ name: 'asset', params: { symbol: item.key } }" class="truncate underline-offset-4 hover:underline">{{ item.name }}</RouterLink>
+                        <RouterLink v-else :to="{ name: 'asset', params: { symbol: item.key } }" class="truncate underline-offset-4 hover:underline hover:text-primary">{{ item.name }}</RouterLink>
                       </div>
                     </template>
                   </Column>
@@ -378,7 +378,7 @@
                   class="group flex items-center cursor-pointer p-2 rounded-md truncate"
                   :style="{ width: '300px', minWidth: '250px' }">
                 <div class="truncate">
-                  <div class="truncate font-medium underline-offset-4 group-hover:underline">{{ data.symbol }}</div>
+                  <div class="truncate font-medium underline-offset-4 group-hover:underline group-hover:text-primary">{{ data.symbol }}</div>
                   <div class="text-xs text-[var(--p-card-subtitle-color)] mt-1">{{ data.name }}</div>
                 </div>
               </RouterLink>

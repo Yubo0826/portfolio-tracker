@@ -42,7 +42,7 @@
           <div class="flex items-center gap-2">
             <!-- main.css 的 a { text-decoration: none } 會蓋掉 a 上的 hover:underline，底線加在內層 -->
             <RouterLink :to="{ name: 'asset', params: { symbol: data.symbol } }" class="group">
-              <span class="font-medium underline-offset-4 group-hover:underline">{{ data.symbol }}</span>
+              <span class="font-medium underline-offset-4 group-hover:underline group-hover:text-primary">{{ data.symbol }}</span>
             </RouterLink>
             <i v-if="executed.has(data.symbol)" class="pi pi-check text-green-600"></i>
           </div>

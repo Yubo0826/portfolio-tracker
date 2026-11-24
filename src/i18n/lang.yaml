@@ -398,8 +398,8 @@ xirrHintAccount:
   en: 'Internal Rate of Return (IRR) - Annualized return based on your recorded deposits and withdrawals, against holdings value plus uninvested cash. Buys, sells and dividends are internal transfers and are not counted as new money.'
   zh: '內部報酬率 (IRR) - 依你記錄的存入／提出資金，對比持股市值加上未投入現金計算的年化報酬率。買入、賣出、股利屬帳戶內部搬移，不計為新資金。'
 applyNewPortfolioImmediately:
-  en: Apply new portfolio immediately
-  zh: 新增後立即套用
+  en: Switch to this portfolio after creating
+  zh: 建立後切換到此投資組合
 driftThreshold:
   en: Drift Threshold
   zh: 偏離閾值

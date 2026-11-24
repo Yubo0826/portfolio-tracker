@@ -621,10 +621,6 @@ html[data-nav-layout='header'] .app-shell__main {
   }
 }
 
-.custom-select-root:hover {
-  border: 1px solid var(--p-form-field-hover-border-color) !important;
-}
-
 .trade-actions-split {
   position: relative;
 }

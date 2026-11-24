@@ -229,13 +229,16 @@ html:not(.dark) .set-group__body {
   border-color: var(--p-surface-background);
   border-bottom-width: 2px;
 }
+/* 字級 13px，同儀表板持有資產表格（DashboardView 的 .dashboard-table-panel） */
 .card-table .p-datatable-header-cell {
   padding: 1.25rem 1rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--p-text-color);
 }
 .card-table .p-datatable-tbody > tr > td {
   padding: 1rem;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 .card-table .p-datatable-paginator-bottom {

@@ -94,9 +94,8 @@
 
         <Button
           v-else-if="isDemoUser"
-          label="Get Started"
-          icon="pi pi-arrow-right"
-          iconPos="right"
+          :label="t('login')"
+          icon="pi pi-sign-in"
           size="small"
           class="hidden sm:inline-flex"
           @click="$emit('login')"
