@@ -1802,3 +1802,12 @@ fxSaved:
 fxAuto:
   en: "auto"
   zh: "自動計算"
+marketIndices:
+  en: Market indices
+  zh: 大盤指數
+previousPage:
+  en: Previous
+  zh: 上一頁
+nextPage:
+  en: Next
+  zh: 下一頁

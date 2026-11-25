@@ -499,6 +499,7 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import debounce from 'lodash/debounce'
 import api from '@/utils/api'
+import { toSparkPath } from '@/utils/sparkline'
 import { SECTOR_META } from '@/utils/sectors'
 import { percentChange, periodRange, filterByPeriod, toIsoDate, yAxisBounds } from '@/utils/portfolioMetrics'
 import { useRoute, useRouter } from 'vue-router'
@@ -674,15 +675,6 @@ const chartTypeMenuItems = computed(() => chartTypeOptions.value.map(option => (
   command: () => { chartType.value = option.value },
 })))
 
-// 收盤價陣列 → 72x28 viewBox 內的折線路徑
-function toSparkPath(closes) {
-  if (!Array.isArray(closes) || closes.length < 2) return ''
-  const min = Math.min(...closes)
-  const span = Math.max(...closes) - min || 1
-  return closes
-    .map((close, index) => `${index ? 'L' : 'M'}${(index / (closes.length - 1) * 72).toFixed(2)},${(26 - (close - min) / span * 24).toFixed(2)}`)
-    .join(' ')
-}
 
 
 const rangeOptions = computed(() => ([

@@ -6,6 +6,9 @@
       <span v-if="pricesUpdatedAt">{{ t('lastUpdated', { time: formatUpdatedAt(pricesUpdatedAt) }) }}</span>
     </Teleport>
 
+    <!-- 大盤指數行情：與投資組合資料無關，載入中也先顯示 -->
+    <MarketStrip class="mb-6" />
+
     <!-- Skeleton Loading State -->
     <div v-if="isLoading" class="space-y-6">
       <!-- 大螢幕：走勢圖在左、三張損益小卡疊在右欄；小螢幕維持小卡在上 -->
@@ -468,6 +471,7 @@ import { usePortfolioStore } from '@/stores/portfolio'
 import { useTransactionsStore } from '@/stores/transactions';
 import { useHoldingsStore } from '@/stores/holdings'
 import NoData from '@/components/NoData.vue'
+import MarketStrip from '@/components/MarketStrip.vue'
 import TransactionDialog from '@/components/TransactionDialog.vue'
 import ImportDataDialog from '@/components/ImportDataDialog.vue'
 
