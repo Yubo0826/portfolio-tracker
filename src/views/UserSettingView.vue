@@ -57,12 +57,51 @@
         <Button :label="t('save')" :disabled="!dirty.length" :loading="saving" @click="save" />
       </div>
     </section>
+
+    <div class="pref-divider"></div>
+
+    <!-- 3. 刪除帳號：要輸入自己的 email 才能按，後端也會再比對一次 -->
+    <section class="pref-section">
+      <div class="pref-section__head">
+        <h2 class="pref-section__title">{{ t('deleteAccount.title') }}</h2>
+        <p class="pref-section__desc">
+          {{ t('deleteAccount.desc') }}
+          <RouterLink to="/privacy" class="underline underline-offset-2 hover:text-primary">{{ t('privacyPolicy') }}</RouterLink>
+        </p>
+      </div>
+      <div>
+        <Button :label="t('deleteAccount.button')" severity="danger" variant="outlined" @click="openDelete" />
+      </div>
+    </section>
+
+    <Dialog v-model:visible="deleteVisible" modal :header="t('deleteAccount.title')" :style="{ width: '28rem' }" :breakpoints="{ '640px': '92vw' }">
+      <div class="flex flex-col gap-3">
+        <p class="text-sm">{{ t('deleteAccount.warning') }}</p>
+        <label for="delete-confirm-email" class="text-sm text-muted-color">
+          {{ t('deleteAccount.confirmLabel', { email: auth.user?.email }) }}
+        </label>
+        <InputText
+          id="delete-confirm-email"
+          v-model="confirmEmail"
+          type="email"
+          autocomplete="off"
+          fluid
+          :placeholder="auth.user?.email"
+          @keydown.enter="emailMatches && removeAccount()"
+        />
+      </div>
+      <template #footer>
+        <Button :label="t('cancel')" severity="secondary" text @click="deleteVisible = false" />
+        <Button :label="t('deleteAccount.confirm')" severity="danger" :disabled="!emailMatches" :loading="deleting" @click="removeAccount" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import ToggleSwitch from 'primevue/toggleswitch'
 import api from '@/utils/api.js'
 import * as toast from '@/composables/toast'
@@ -70,6 +109,7 @@ import { useAuthStore } from '@/stores/auth'
 import { usePortfolioStore } from '@/stores/portfolio'
 
 const { t } = useI18n()
+const router = useRouter()
 const auth = useAuthStore()
 const portfolioStore = usePortfolioStore()
 
@@ -102,6 +142,28 @@ const sendEmail = async () => {
     toast.error(t('notifications.email.error'))
   } finally {
     sending.value = false
+  }
+}
+
+const deleteVisible = ref(false)
+const confirmEmail = ref('')
+const deleting = ref(false)
+const emailMatches = computed(() => confirmEmail.value.trim().toLowerCase() === (auth.user?.email || '').toLowerCase() && !!auth.user?.email)
+const openDelete = () => {
+  confirmEmail.value = ''
+  deleteVisible.value = true
+}
+const removeAccount = async () => {
+  deleting.value = true
+  try {
+    await auth.deleteAccount(confirmEmail.value)
+    deleteVisible.value = false
+    toast.success(t('deleteAccount.done'))
+    router.replace({ name: 'home' })
+  } catch (e) {
+    toast.error(t('deleteAccount.failed'), e?.message)
+  } finally {
+    deleting.value = false
   }
 }
 </script>

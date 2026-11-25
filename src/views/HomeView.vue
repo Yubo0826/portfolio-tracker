@@ -208,7 +208,10 @@ const features = [
     </main>
     <div v-else class="min-h-screen"></div>
 
-    <footer class="lp-wrap lp-footer">&copy; {{ year }} StockBar</footer>
+    <footer class="lp-wrap lp-footer">
+      &copy; {{ year }} StockBar ·
+      <RouterLink to="/privacy" class="lp-footer__link">{{ t('privacyPolicy') }}</RouterLink>
+    </footer>
   </div>
 </template>
 
@@ -711,5 +714,13 @@ const features = [
   text-align: center;
   font-size: 0.75rem;
   color: var(--lp-muted);
+}
+.lp-footer__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lp-footer__link:hover {
+  color: var(--lp-text);
 }
 </style>

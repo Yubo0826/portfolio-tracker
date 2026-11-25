@@ -249,6 +249,7 @@ const currentPageLabel = computed(() => {
   if (route.name === 'asset') return String(route.params.symbol || t('currentAsset'))
   if (route.name === 'user-settings') return t('userSettings')
   if (route.name === 'user-guide') return t('userGuide')
+  if (route.name === 'privacy') return t('privacyPolicy')
 
   const activeItem = sidebarSections.value
     .flatMap((section) => section.items)

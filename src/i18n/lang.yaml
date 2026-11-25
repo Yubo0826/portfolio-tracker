@@ -1811,3 +1811,31 @@ previousPage:
 nextPage:
   en: Next
   zh: 下一頁
+privacyPolicy:
+  en: Privacy policy
+  zh: 隱私權政策
+deleteAccount:
+  title:
+    en: Delete account
+    zh: 刪除帳號
+  desc:
+    en: Permanently delete your account and all portfolios, transactions, holdings, dividends, cash accounts, exchanges and watchlist. This cannot be undone.
+    zh: 永久刪除帳號，以及所有投資組合、交易、持股、配息、現金帳戶、換匯與關注清單。刪除後無法復原。
+  button:
+    en: Delete account
+    zh: 刪除帳號
+  warning:
+    en: All of your data will be deleted immediately and cannot be recovered. Export anything you want to keep first.
+    zh: 你的所有資料會立即刪除且無法復原；需要保留的資料請先匯出。
+  confirmLabel:
+    en: "Type your email ({email}) to confirm:"
+    zh: 請輸入你的 email（{email}）確認：
+  confirm:
+    en: Delete permanently
+    zh: 永久刪除
+  done:
+    en: Your account has been deleted
+    zh: 帳號已刪除
+  failed:
+    en: Could not delete account
+    zh: 刪除帳號失敗

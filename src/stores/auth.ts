@@ -4,6 +4,8 @@ import { auth, provider } from '@/firebase'
 import {
   signInWithPopup,
   signOut,
+  deleteUser,
+  reauthenticateWithPopup,
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
@@ -61,6 +63,30 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // 刪除帳號：先刪後端資料（email 要對得上，錯了後端回 400、什麼都不刪），再刪 Firebase 登入紀錄、登出。
+  // Firebase 刪帳號要求近期登入過，過期就跳 Google 視窗重新驗證；使用者取消也照樣登出（後端資料已刪，再登入會是全新帳號）
+  const deleteAccount = async (email: string): Promise<void> => {
+    await api.delete('/api/user', { email })
+    const current = auth.currentUser
+    if (current) {
+      try {
+        await deleteUser(current)
+      } catch (err: any) {
+        if (err?.code === 'auth/requires-recent-login') {
+          try {
+            await reauthenticateWithPopup(current, provider)
+            await deleteUser(current)
+          } catch (reauthErr) {
+            console.error('Firebase 帳號刪除失敗', reauthErr)
+          }
+        } else {
+          console.error('Firebase 帳號刪除失敗', err)
+        }
+      }
+    }
+    await logout()
+  }
+
   const saveUserData = (): void => {
     if (user.value) {
       const userData: UserData = {
@@ -104,5 +130,5 @@ export const useAuthStore = defineStore('auth', () => {
   // demo 資料所有訪客共用，後端只允許讀取
   const isDemo = computed(() => user.value.uid === 'demo-user')
 
-  return { user, authReady, whenReady, login, logout, isDemo }
+  return { user, authReady, whenReady, login, logout, deleteAccount, isDemo }
 })
